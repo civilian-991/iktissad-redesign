@@ -232,7 +232,10 @@ export default function SectorNews() {
                   />
                   {/* Solid navy background - guaranteed contrast */}
                   <div className="absolute bottom-0 left-0 right-0 bg-[#132742] p-4">
-                    <h4 className="font-[family-name:var(--font-display)] font-bold text-gold text-sm leading-snug line-clamp-2">
+                    <h4
+                      className="font-[family-name:var(--font-display)] font-bold text-sm leading-snug line-clamp-2"
+                      style={{ color: '#c9a227' }}
+                    >
                       {article.title}
                     </h4>
                     <span className="text-xs text-white mt-2 flex items-center gap-1">

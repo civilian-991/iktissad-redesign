@@ -228,7 +228,10 @@ export default function CountryNews() {
                     {activeCountry.name}
                   </span>
                 </div>
-                <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold text-gold leading-tight mb-4">
+                <h3
+                  className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold leading-tight mb-4"
+                  style={{ color: '#c9a227' }}
+                >
                   {activeCountry.articles[0].title}
                 </h3>
                 <span className="text-white text-sm flex items-center gap-2">
