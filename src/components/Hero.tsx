@@ -178,39 +178,18 @@ export default function Hero() {
               </div>
 
               {/* Slide Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
                 {featuredNews.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
+                    className={`h-3 rounded-full transition-all duration-300 ${
                       index === currentSlide
-                        ? 'w-10 bg-gold'
-                        : 'w-2 bg-white/60 hover:bg-white'
+                        ? 'w-12 bg-gold'
+                        : 'w-3 bg-white/60 hover:bg-white'
                     }`}
                     aria-label={`الانتقال إلى الخبر ${index + 1}`}
                   />
-                ))}
-              </div>
-
-              {/* Thumbnail Strip */}
-              <div className="absolute bottom-36 lg:bottom-44 left-0 right-0 hidden lg:flex gap-2 px-6 z-10">
-                {featuredNews.map((news, index) => (
-                  <button
-                    key={news.id}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`flex-1 h-16 rounded-lg overflow-hidden transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'ring-2 ring-gold'
-                        : 'opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img
-                      src={news.image}
-                      alt={news.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
                 ))}
               </div>
             </div>
