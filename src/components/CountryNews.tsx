@@ -220,18 +220,18 @@ export default function CountryNews() {
                 alt={activeCountry.articles[0].title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              {/* Solid dark background bar for text - professional news pattern */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/95 p-6 lg:p-8">
+              {/* Solid navy background - guaranteed contrast */}
+              <div className="absolute bottom-0 left-0 right-0 bg-[#132742] p-6 lg:p-8 rounded-b-2xl">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">{activeCountry.flag}</span>
-                  <span className="text-gold font-[family-name:var(--font-display)] font-semibold text-sm">
+                  <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
                     {activeCountry.name}
                   </span>
                 </div>
-                <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold text-white leading-tight mb-4 group-hover:text-gold transition-colors duration-300">
+                <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold text-gold leading-tight mb-4">
                   {activeCountry.articles[0].title}
                 </h3>
-                <span className="text-white/80 text-sm flex items-center gap-2">
+                <span className="text-white text-sm flex items-center gap-2">
                   <Clock size={14} />
                   {activeCountry.articles[0].date}
                 </span>

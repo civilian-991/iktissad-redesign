@@ -110,10 +110,10 @@ export default function Hero() {
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url(${featuredNews[currentSlide].image})` }}
                   />
-                  {/* Content with solid background bar */}
+                  {/* Content with solid navy background */}
                   <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end">
-                    {/* Solid dark background for guaranteed readability */}
-                    <div className="bg-black/95 p-8 lg:p-12">
+                    {/* Solid navy background - guaranteed contrast */}
+                    <div className="bg-[#132742] p-8 lg:p-12">
                       <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -124,18 +124,18 @@ export default function Hero() {
                           {featuredNews[currentSlide].category}
                         </span>
 
-                        {/* Title */}
-                        <h1 className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight">
+                        {/* Title - Gold for maximum visibility */}
+                        <h1 className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black text-gold mb-4 leading-tight">
                           {featuredNews[currentSlide].title}
                         </h1>
 
                         {/* Excerpt */}
-                        <p className="text-base lg:text-lg text-white/90 mb-6 max-w-2xl leading-relaxed">
+                        <p className="text-base lg:text-lg text-white mb-6 max-w-2xl leading-relaxed">
                           {featuredNews[currentSlide].excerpt}
                         </p>
 
                         {/* Meta */}
-                        <div className="flex items-center gap-6 text-white/70 text-sm">
+                        <div className="flex items-center gap-6 text-white text-sm">
                           <span className="flex items-center gap-2">
                             <Clock size={16} />
                             {featuredNews[currentSlide].date}

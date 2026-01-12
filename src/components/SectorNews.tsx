@@ -230,12 +230,12 @@ export default function SectorNews() {
                     alt={article.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  {/* Solid dark background bar for text - professional news pattern */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/90 p-4">
-                    <h4 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-snug line-clamp-2">
+                  {/* Solid navy background - guaranteed contrast */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-[#132742] p-4">
+                    <h4 className="font-[family-name:var(--font-display)] font-bold text-gold text-sm leading-snug line-clamp-2">
                       {article.title}
                     </h4>
-                    <span className="text-xs text-white/80 mt-2 flex items-center gap-1">
+                    <span className="text-xs text-white mt-2 flex items-center gap-1">
                       <Clock size={12} />
                       {article.date}
                     </span>
