@@ -110,46 +110,45 @@ export default function Hero() {
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url(${featuredNews[currentSlide].image})` }}
                   />
-                  {/* Content with solid navy background */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end">
-                    {/* Solid navy background - guaranteed contrast */}
-                    <div className="bg-[#132742] p-8 lg:p-12">
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+                  {/* Content */}
+                  <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                    >
+                      {/* Category Badge */}
+                      <span className="news-tag mb-3">
+                        {featuredNews[currentSlide].category}
+                      </span>
+
+                      {/* Title */}
+                      <h1
+                        className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black mb-3 leading-tight text-white"
                       >
-                        {/* Category Badge */}
-                        <span className="news-tag mb-4">
-                          {featuredNews[currentSlide].category}
+                        {featuredNews[currentSlide].title}
+                      </h1>
+
+                      {/* Excerpt */}
+                      <p className="text-sm lg:text-base text-white/90 mb-4 max-w-2xl leading-relaxed">
+                        {featuredNews[currentSlide].excerpt}
+                      </p>
+
+                      {/* Meta */}
+                      <div className="flex items-center gap-6 text-white/80 text-sm">
+                        <span className="flex items-center gap-2">
+                          <Clock size={16} />
+                          {featuredNews[currentSlide].date}
                         </span>
-
-                        {/* Title - Gold for maximum visibility */}
-                        <h1
-                          className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black mb-4 leading-tight"
-                          style={{ color: '#c9a227' }}
-                        >
-                          {featuredNews[currentSlide].title}
-                        </h1>
-
-                        {/* Excerpt */}
-                        <p className="text-base lg:text-lg text-white mb-6 max-w-2xl leading-relaxed">
-                          {featuredNews[currentSlide].excerpt}
-                        </p>
-
-                        {/* Meta */}
-                        <div className="flex items-center gap-6 text-white text-sm">
-                          <span className="flex items-center gap-2">
-                            <Clock size={16} />
-                            {featuredNews[currentSlide].date}
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <Eye size={16} />
-                            {featuredNews[currentSlide].views} مشاهدة
-                          </span>
-                        </div>
-                      </motion.div>
-                    </div>
+                        <span className="flex items-center gap-2">
+                          <Eye size={16} />
+                          {featuredNews[currentSlide].views} مشاهدة
+                        </span>
+                      </div>
+                    </motion.div>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -178,8 +177,8 @@ export default function Hero() {
                 </motion.button>
               </div>
 
-              {/* Slide Indicators - moved up above content bar */}
-              <div className="absolute bottom-48 lg:bottom-56 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
                 {featuredNews.map((_, index) => (
                   <button
                     key={index}
@@ -194,16 +193,16 @@ export default function Hero() {
                 ))}
               </div>
 
-              {/* Thumbnail Strip - positioned above content bar */}
-              <div className="absolute bottom-48 lg:bottom-56 left-0 right-0 hidden lg:flex gap-2 px-4 z-10">
+              {/* Thumbnail Strip */}
+              <div className="absolute bottom-36 lg:bottom-44 left-0 right-0 hidden lg:flex gap-2 px-6 z-10">
                 {featuredNews.map((news, index) => (
                   <button
                     key={news.id}
                     onClick={() => setCurrentSlide(index)}
-                    className={`flex-1 h-20 rounded-lg overflow-hidden transition-all duration-300 ${
+                    className={`flex-1 h-16 rounded-lg overflow-hidden transition-all duration-300 ${
                       index === currentSlide
-                        ? 'ring-3 ring-gold scale-105'
-                        : 'opacity-50 hover:opacity-90'
+                        ? 'ring-2 ring-gold'
+                        : 'opacity-60 hover:opacity-100'
                     }`}
                   >
                     <img
