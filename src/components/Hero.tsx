@@ -127,7 +127,8 @@ export default function Hero() {
 
                       {/* Title */}
                       <h1
-                        className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black mb-3 leading-tight text-white"
+                        className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black mb-3 leading-tight"
+                        style={{ color: '#c9a227' }}
                       >
                         {featuredNews[currentSlide].title}
                       </h1>
