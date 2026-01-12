@@ -110,43 +110,43 @@ export default function Hero() {
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url(${featuredNews[currentSlide].image})` }}
                   />
-                  {/* Gradient Overlay - stronger for better text contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/40" />
-
-                  {/* Content */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-12">
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3, duration: 0.5 }}
-                    >
-                      {/* Category Badge */}
-                      <span className="news-tag mb-4">
-                        {featuredNews[currentSlide].category}
-                      </span>
-
-                      {/* Title */}
-                      <h1 className="text-3xl lg:text-4xl xl:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight [text-shadow:_0_2px_10px_rgb(0_0_0_/_100%),_0_4px_20px_rgb(0_0_0_/_80%)]">
-                        {featuredNews[currentSlide].title}
-                      </h1>
-
-                      {/* Excerpt */}
-                      <p className="text-lg text-white mb-6 max-w-2xl leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
-                        {featuredNews[currentSlide].excerpt}
-                      </p>
-
-                      {/* Meta */}
-                      <div className="flex items-center gap-6 text-white/60 text-sm">
-                        <span className="flex items-center gap-2">
-                          <Clock size={16} />
-                          {featuredNews[currentSlide].date}
+                  {/* Content with solid background bar */}
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end">
+                    {/* Solid dark background for guaranteed readability */}
+                    <div className="bg-black/95 p-8 lg:p-12">
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                      >
+                        {/* Category Badge */}
+                        <span className="news-tag mb-4">
+                          {featuredNews[currentSlide].category}
                         </span>
-                        <span className="flex items-center gap-2">
-                          <Eye size={16} />
-                          {featuredNews[currentSlide].views} مشاهدة
-                        </span>
-                      </div>
-                    </motion.div>
+
+                        {/* Title */}
+                        <h1 className="text-2xl lg:text-3xl xl:text-4xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight">
+                          {featuredNews[currentSlide].title}
+                        </h1>
+
+                        {/* Excerpt */}
+                        <p className="text-base lg:text-lg text-white/90 mb-6 max-w-2xl leading-relaxed">
+                          {featuredNews[currentSlide].excerpt}
+                        </p>
+
+                        {/* Meta */}
+                        <div className="flex items-center gap-6 text-white/70 text-sm">
+                          <span className="flex items-center gap-2">
+                            <Clock size={16} />
+                            {featuredNews[currentSlide].date}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <Eye size={16} />
+                            {featuredNews[currentSlide].views} مشاهدة
+                          </span>
+                        </div>
+                      </motion.div>
+                    </div>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -175,32 +175,32 @@ export default function Hero() {
                 </motion.button>
               </div>
 
-              {/* Slide Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {/* Slide Indicators - moved up above content bar */}
+              <div className="absolute bottom-48 lg:bottom-56 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
                 {featuredNews.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                    className={`h-2 rounded-full transition-all duration-300 ${
                       index === currentSlide
-                        ? 'w-8 bg-gold'
-                        : 'w-1.5 bg-white/50 hover:bg-white/80'
+                        ? 'w-10 bg-gold'
+                        : 'w-2 bg-white/60 hover:bg-white'
                     }`}
                     aria-label={`الانتقال إلى الخبر ${index + 1}`}
                   />
                 ))}
               </div>
 
-              {/* Thumbnail Strip */}
-              <div className="absolute bottom-0 left-0 right-0 hidden lg:flex gap-1 p-2 bg-gradient-to-t from-black/80 to-transparent">
+              {/* Thumbnail Strip - positioned above content bar */}
+              <div className="absolute bottom-48 lg:bottom-56 left-0 right-0 hidden lg:flex gap-2 px-4 z-10">
                 {featuredNews.map((news, index) => (
                   <button
                     key={news.id}
                     onClick={() => setCurrentSlide(index)}
-                    className={`flex-1 h-16 rounded overflow-hidden transition-all duration-300 ${
+                    className={`flex-1 h-20 rounded-lg overflow-hidden transition-all duration-300 ${
                       index === currentSlide
-                        ? 'ring-2 ring-gold ring-offset-2 ring-offset-midnight'
-                        : 'opacity-60 hover:opacity-100'
+                        ? 'ring-3 ring-gold scale-105'
+                        : 'opacity-50 hover:opacity-90'
                     }`}
                   >
                     <img

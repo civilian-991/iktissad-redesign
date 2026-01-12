@@ -213,25 +213,25 @@ export default function CountryNews() {
             {/* Featured Article */}
             <a
               href={`/news/${activeCountry.articles[0].id}`}
-              className="relative h-96 lg:h-auto rounded-2xl overflow-hidden group"
+              className="relative h-96 lg:h-auto min-h-[400px] rounded-2xl overflow-hidden group"
             >
               <img
                 src={activeCountry.articles[0].image}
                 alt={activeCountry.articles[0].title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/50" />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
+              {/* Solid dark background bar for text - professional news pattern */}
+              <div className="absolute bottom-0 left-0 right-0 bg-black/95 p-6 lg:p-8">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">{activeCountry.flag}</span>
-                  <span className="text-gold font-[family-name:var(--font-display)] font-semibold text-sm [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
+                  <span className="text-2xl">{activeCountry.flag}</span>
+                  <span className="text-gold font-[family-name:var(--font-display)] font-semibold text-sm">
                     {activeCountry.name}
                   </span>
                 </div>
-                <h3 className="text-2xl lg:text-3xl font-[family-name:var(--font-display)] font-bold text-white leading-tight mb-4 group-hover:text-gold transition-colors duration-300 [text-shadow:_0_2px_10px_rgb(0_0_0_/_100%),_0_4px_20px_rgb(0_0_0_/_80%)]">
+                <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold text-white leading-tight mb-4 group-hover:text-gold transition-colors duration-300">
                   {activeCountry.articles[0].title}
                 </h3>
-                <span className="text-white text-sm flex items-center gap-2 [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
+                <span className="text-white/80 text-sm flex items-center gap-2">
                   <Clock size={14} />
                   {activeCountry.articles[0].date}
                 </span>
