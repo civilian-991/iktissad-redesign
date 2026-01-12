@@ -59,10 +59,10 @@ export default function FeaturedMagazine() {
               <BookOpen className="text-gold" size={28} />
             </div>
             <div>
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-white">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-white [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]">
                 مجلة الإقتصاد والأعمال
               </h2>
-              <p className="text-white/60">أكثر من 65 عاماً من التميز في الصحافة الاقتصادية</p>
+              <p className="text-white/80 [text-shadow:_0_1px_4px_rgb(0_0_0_/_50%)]">أكثر من 65 عاماً من التميز في الصحافة الاقتصادية</p>
             </div>
           </div>
           <a
@@ -143,7 +143,7 @@ export default function FeaturedMagazine() {
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.1 }}
-                          className="flex items-center gap-3 text-white/70"
+                          className="flex items-center gap-3 text-white/90"
                         >
                           <div className="w-1.5 h-1.5 rounded-full bg-gold" />
                           {highlight}
@@ -179,7 +179,7 @@ export default function FeaturedMagazine() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h4 className="text-white/60 font-[family-name:var(--font-display)] font-semibold mb-4">
+            <h4 className="text-white/90 font-[family-name:var(--font-display)] font-semibold mb-4">
               أعداد سابقة
             </h4>
 

@@ -162,10 +162,10 @@ export default function CountryNews() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
+          <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider [text-shadow:_0_1px_4px_rgb(0_0_0_/_50%)]">
             تغطية إقليمية
           </span>
-          <h2 className="text-4xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4">
+          <h2 className="text-4xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]">
             أخبار البلدان
           </h2>
           <div className="flex items-center justify-center gap-3 text-gold/50">
@@ -220,18 +220,18 @@ export default function CountryNews() {
                 alt={activeCountry.articles[0].title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/50" />
               <div className="absolute bottom-0 left-0 right-0 p-8">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{activeCountry.flag}</span>
-                  <span className="text-gold font-[family-name:var(--font-display)] font-semibold text-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                  <span className="text-2xl [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">{activeCountry.flag}</span>
+                  <span className="text-gold font-[family-name:var(--font-display)] font-semibold text-sm [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
                     {activeCountry.name}
                   </span>
                 </div>
-                <h3 className="text-2xl lg:text-3xl font-[family-name:var(--font-display)] font-bold text-white leading-tight mb-4 group-hover:text-gold transition-colors duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                <h3 className="text-2xl lg:text-3xl font-[family-name:var(--font-display)] font-bold text-white leading-tight mb-4 group-hover:text-gold transition-colors duration-300 [text-shadow:_0_2px_10px_rgb(0_0_0_/_100%),_0_4px_20px_rgb(0_0_0_/_80%)]">
                   {activeCountry.articles[0].title}
                 </h3>
-                <span className="text-white text-sm flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="text-white text-sm flex items-center gap-2 [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
                   <Clock size={14} />
                   {activeCountry.articles[0].date}
                 </span>

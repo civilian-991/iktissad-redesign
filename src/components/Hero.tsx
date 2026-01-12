@@ -126,12 +126,12 @@ export default function Hero() {
                       </span>
 
                       {/* Title */}
-                      <h1 className="text-3xl lg:text-4xl xl:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                      <h1 className="text-3xl lg:text-4xl xl:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight [text-shadow:_0_2px_10px_rgb(0_0_0_/_100%),_0_4px_20px_rgb(0_0_0_/_80%)]">
                         {featuredNews[currentSlide].title}
                       </h1>
 
                       {/* Excerpt */}
-                      <p className="text-lg text-white mb-6 max-w-2xl leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                      <p className="text-lg text-white mb-6 max-w-2xl leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_100%)]">
                         {featuredNews[currentSlide].excerpt}
                       </p>
 
