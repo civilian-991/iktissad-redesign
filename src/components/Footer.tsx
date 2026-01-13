@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'motion/react';
 import {
   Facebook,
@@ -12,13 +11,7 @@ import {
   Phone,
   MapPin,
   ChevronUp,
-  ExternalLink,
-  Send,
-  Award,
-  Users,
-  Newspaper,
-  Globe,
-  Sparkles
+  ExternalLink
 } from 'lucide-react';
 
 const footerLinks = {
@@ -60,156 +53,13 @@ const socialLinks = [
   { icon: Youtube, href: 'https://youtube.com/iktissad', label: 'YouTube', color: 'hover:bg-red-600' },
 ];
 
-const stats = [
-  { icon: Award, value: '1956', label: 'منذ عام', suffix: '' },
-  { icon: Users, value: '2.5', label: 'مليون قارئ شهرياً', suffix: 'M+' },
-  { icon: Newspaper, value: '540', label: 'عدد منشور', suffix: '+' },
-  { icon: Globe, value: '22', label: 'دولة عربية', suffix: '' },
-];
-
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setEmail('');
-      setTimeout(() => setIsSubscribed(false), 3000);
-    }
-  };
-
   return (
     <footer className="relative overflow-hidden">
-      {/* Newsletter Section */}
-      <div className="bg-gradient-to-br from-gold via-gold-dark to-amber-700 relative">
-        {/* Decorative Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }} />
-        </div>
-
-        {/* Floating Elements */}
-        <div className="absolute top-10 right-20 w-20 h-20 border-2 border-white/20 rounded-full animate-pulse" />
-        <div className="absolute bottom-10 left-20 w-32 h-32 border border-white/10 rounded-full" />
-
-        <div className="container-luxury relative py-20">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Newsletter Content */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                  <Sparkles className="text-white" size={28} />
-                </div>
-                <span className="text-white/90 font-[family-name:var(--font-display)] font-semibold text-lg">
-                  النشرة الإخبارية
-                </span>
-              </div>
-              <h3
-                className="text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black mb-6 leading-tight"
-                style={{ color: 'rgb(201, 162, 39)' }}
-              >
-                ابقَ على اطلاع بآخر
-                <br />
-                <span className="text-navy">الأخبار الاقتصادية</span>
-              </h3>
-              <p className="text-white/90 text-xl leading-relaxed max-w-lg">
-                اشترك في نشرتنا الإخبارية واحصل على أهم الأخبار والتحليلات الاقتصادية مباشرة في بريدك الإلكتروني.
-              </p>
-            </motion.div>
-
-            {/* Newsletter Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <form onSubmit={handleSubscribe} className="relative">
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="أدخل بريدك الإلكتروني"
-                      className="flex-1 bg-white rounded-xl px-6 py-5 text-navy placeholder:text-slate/60 font-[family-name:var(--font-display)] text-lg focus:outline-none focus:ring-2 focus:ring-navy/20"
-                      dir="ltr"
-                    />
-                    <motion.button
-                      type="submit"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="bg-navy hover:bg-navy-light text-white px-10 py-5 rounded-xl font-[family-name:var(--font-display)] font-bold text-lg flex items-center justify-center gap-3 transition-colors"
-                    >
-                      <span>اشترك الآن</span>
-                      <Send size={20} className="rotate-180" />
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Success Message */}
-                {isSubscribed && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute -bottom-14 right-0 left-0 text-center"
-                  >
-                    <span className="inline-flex items-center gap-2 bg-white text-navy px-5 py-3 rounded-lg font-[family-name:var(--font-display)] font-semibold">
-                      <Sparkles size={18} />
-                      تم الاشتراك بنجاح!
-                    </span>
-                  </motion.div>
-                )}
-              </form>
-
-              <p className="text-white/70 text-base mt-6 text-center sm:text-right">
-                نحترم خصوصيتك. يمكنك إلغاء الاشتراك في أي وقت.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="bg-navy relative">
-        <div className="absolute inset-0 star-pattern opacity-10" />
-        <div className="container-luxury relative py-16">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center group"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gold/20 rounded-2xl mb-5 group-hover:bg-gold/30 transition-colors">
-                  <stat.icon className="text-gold" size={32} />
-                </div>
-                <div className="font-[family-name:var(--font-display)] font-black text-5xl text-white mb-2">
-                  {stat.value}
-                  <span className="text-gold">{stat.suffix}</span>
-                </div>
-                <div className="text-white/60 text-base font-[family-name:var(--font-display)]">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer */}
       <div className="bg-midnight text-white relative overflow-hidden">
         <div className="absolute inset-0 star-pattern opacity-20" />
