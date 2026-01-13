@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import MarketTicker from '@/components/MarketTicker';
 import Hero from '@/components/Hero';
 import SectorNews from '@/components/SectorNews';
+import VideoSection from '@/components/VideoSection';
 import CountryNews from '@/components/CountryNews';
 import FeaturedMagazine from '@/components/FeaturedMagazine';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
@@ -16,6 +17,7 @@ export default function Home() {
       <main>
         <Hero />
         <SectorNews />
+        <VideoSection />
         <FeaturedMagazine />
         <CountryNews />
         <FeaturedProfiles />
