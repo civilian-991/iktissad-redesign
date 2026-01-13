@@ -82,12 +82,12 @@ export default function Hero() {
   }, [isAutoPlaying, nextSlide]);
 
   return (
-    <section className="relative bg-obsidian overflow-hidden">
+    <section className="relative bg-midnight overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 pattern-arabesque opacity-30" />
+      <div className="absolute inset-0 pattern-arabesque opacity-10" />
 
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-br from-obsidian via-transparent to-navy/50" />
+      {/* Gradient Overlays - Lighter for better visibility */}
+      <div className="absolute inset-0 bg-gradient-to-br from-midnight/60 via-transparent to-navy/30" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-paper to-transparent" />
 
       <div className="container-editorial relative">
@@ -115,9 +115,9 @@ export default function Hero() {
                     alt=""
                     className="w-full h-full object-cover"
                   />
-                  {/* Vignette Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-obsidian/20" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-obsidian/80 via-transparent to-transparent" />
+                  {/* Lighter Vignette Effect - Shows more of the image */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-midnight/60 via-transparent to-transparent" />
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -218,7 +218,7 @@ export default function Hero() {
           </div>
 
           {/* Side Panel - Takes 4 columns */}
-          <div className="lg:col-span-4 bg-obsidian/90 border-r border-gold/10 flex flex-col">
+          <div className="lg:col-span-4 bg-midnight/80 backdrop-blur-sm border-r border-gold/10 flex flex-col">
             {/* Section Header */}
             <div className="p-6 border-b border-gold/10">
               <div className="flex items-center justify-between">
