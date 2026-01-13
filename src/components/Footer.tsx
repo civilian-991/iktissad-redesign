@@ -29,9 +29,11 @@ const footerLinks = {
     { name: 'صناعة', href: '/sectors/industry' },
     { name: 'زراعة', href: '/sectors/agriculture' },
     { name: 'تجارة', href: '/sectors/trade' },
-    { name: 'سياحة', href: '/sectors/tourism' },
-    { name: 'عقار', href: '/sectors/real-estate' },
     { name: 'مال ومصارف', href: '/sectors/finance' },
+    { name: 'استثمار', href: '/sectors/investment' },
+    { name: 'عقار', href: '/sectors/real-estate' },
+    { name: 'سياحة وترفيه', href: '/sectors/tourism-entertainment' },
+    { name: 'طاقة وبيئة', href: '/sectors/energy-environment' },
   ],
   group: [
     { name: 'مجلة الإقتصاد والأعمال', href: '#', external: true },
