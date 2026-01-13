@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ChevronLeft, Clock, TrendingUp, ArrowUpLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Clock, TrendingUp, ArrowUpLeft, Flame } from 'lucide-react';
 
 const featuredNews = [
   {
@@ -82,89 +82,72 @@ export default function Hero() {
   }, [isAutoPlaying, nextSlide]);
 
   return (
-    <section className="relative bg-midnight overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 pattern-arabesque opacity-10" />
+    <section className="bg-paper py-8">
+      <div className="container-editorial">
+        {/* Main Grid Layout */}
+        <div className="grid lg:grid-cols-12 gap-6">
 
-      {/* Gradient Overlays - Lighter for better visibility */}
-      <div className="absolute inset-0 bg-gradient-to-br from-midnight/60 via-transparent to-navy/30" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-paper to-transparent" />
-
-      <div className="container-editorial relative">
-        <div className="grid lg:grid-cols-12 gap-0 min-h-[85vh]">
-
-          {/* Main Featured Article - Takes 8 columns */}
+          {/* Main Featured Article - Image with overlay text */}
           <div
-            className="lg:col-span-8 relative"
+            className="lg:col-span-8 relative group"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0"
-              >
-                {/* Background Image */}
-                <div className="absolute inset-0">
-                  <img
-                    src={featuredNews[currentSlide].image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Lighter Vignette Effect - Shows more of the image */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/30 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-midnight/60 via-transparent to-transparent" />
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Content Overlay */}
-            <div className="relative h-full flex flex-col justify-end p-8 lg:p-16 pb-20 lg:pb-24">
+            <div className="relative aspect-[16/10] lg:aspect-[16/9] overflow-hidden bg-charcoal">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="max-w-2xl"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0"
                 >
-                  {/* Tags */}
-                  <div className="flex items-center gap-3 mb-6">
-                    {featuredNews[currentSlide].tag && (
-                      <span className="tag-exclusive">
-                        {featuredNews[currentSlide].tag}
+                  <img
+                    src={featuredNews[currentSlide].image}
+                    alt={featuredNews[currentSlide].title}
+                    className="w-full h-full object-cover"
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Bottom gradient for text readability */}
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+
+              {/* Content positioned at bottom */}
+              <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlide}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    {/* Tags */}
+                    <div className="flex items-center gap-3 mb-4">
+                      {featuredNews[currentSlide].tag && (
+                        <span className="bg-gold text-obsidian px-3 py-1 text-xs font-bold font-[family-name:var(--font-display)]">
+                          {featuredNews[currentSlide].tag}
+                        </span>
+                      )}
+                      <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 text-xs font-semibold font-[family-name:var(--font-display)]">
+                        {featuredNews[currentSlide].category}
                       </span>
-                    )}
-                    <span className="tag-category">
-                      {featuredNews[currentSlide].category}
-                    </span>
-                  </div>
+                    </div>
 
-                  {/* Title */}
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black text-white leading-[1.2] mb-6">
-                    {featuredNews[currentSlide].title}
-                  </h1>
+                    {/* Title - white text on dark gradient */}
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-[family-name:var(--font-display)] font-black text-white leading-tight mb-4">
+                      {featuredNews[currentSlide].title}
+                    </h1>
 
-                  {/* Excerpt */}
-                  <p className="text-lg text-white/70 leading-relaxed mb-8 max-w-xl font-[family-name:var(--font-body)]">
-                    {featuredNews[currentSlide].excerpt}
-                  </p>
+                    {/* Excerpt */}
+                    <p className="text-white/80 text-base leading-relaxed mb-6 max-w-2xl font-[family-name:var(--font-body)] hidden md:block">
+                      {featuredNews[currentSlide].excerpt}
+                    </p>
 
-                  {/* Meta & CTA */}
-                  <div className="flex flex-wrap items-center gap-6">
-                    <a
-                      href={`/news/${featuredNews[currentSlide].id}`}
-                      className="btn-gold inline-flex items-center gap-2"
-                    >
-                      <span>اقرأ المزيد</span>
-                      <ArrowUpLeft size={18} />
-                    </a>
-                    <div className="flex items-center gap-4 text-white/50 text-sm">
+                    {/* Meta */}
+                    <div className="flex items-center gap-4 text-white/60 text-sm">
                       <span className="flex items-center gap-2">
                         <Clock size={14} />
                         {featuredNews[currentSlide].date}
@@ -172,107 +155,114 @@ export default function Hero() {
                       <span className="w-1 h-1 rounded-full bg-gold" />
                       <span>{featuredNews[currentSlide].readTime}</span>
                     </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
-              {/* Navigation */}
-              <div className="absolute bottom-8 left-8 lg:left-16 flex items-center gap-4">
+              {/* Navigation Controls */}
+              <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between pointer-events-none">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={prevSlide}
-                  className="w-12 h-12 border border-white/20 text-white flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
+                  className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
                   aria-label="السابق"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={24} />
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={nextSlide}
-                  className="w-12 h-12 border border-white/20 text-white flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
+                  className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
                   aria-label="التالي"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={24} />
                 </motion.button>
+              </div>
 
-                {/* Progress Indicators */}
-                <div className="flex items-center gap-2 mr-4">
-                  {featuredNews.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className="group relative h-1 transition-all duration-500"
-                      style={{ width: index === currentSlide ? '48px' : '16px' }}
-                      aria-label={`الخبر ${index + 1}`}
-                    >
-                      <span className={`absolute inset-0 transition-colors duration-300 ${
-                        index === currentSlide ? 'bg-gold' : 'bg-white/30 group-hover:bg-white/50'
-                      }`} />
-                    </button>
-                  ))}
-                </div>
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                {featuredNews.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'w-8 bg-gold'
+                        : 'w-3 bg-white/40 hover:bg-white/60'
+                    }`}
+                    aria-label={`الخبر ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Gold corner accent */}
+              <div className="absolute top-0 right-0 w-20 h-20">
+                <div className="absolute top-0 right-0 w-full h-1 bg-gold" />
+                <div className="absolute top-0 right-0 w-1 h-full bg-gold" />
               </div>
             </div>
           </div>
 
-          {/* Side Panel - Takes 4 columns */}
-          <div className="lg:col-span-4 bg-midnight/80 backdrop-blur-sm border-r border-gold/10 flex flex-col">
-            {/* Section Header */}
-            <div className="p-6 border-b border-gold/10">
+          {/* Side Panel - Light background with dark text */}
+          <div className="lg:col-span-4">
+            {/* Header */}
+            <div className="bg-obsidian text-white p-4 mb-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-6 bg-gold" />
-                  <h2 className="font-[family-name:var(--font-display)] font-bold text-white text-lg">
+                  <Flame size={18} className="text-gold" />
+                  <h2 className="font-[family-name:var(--font-display)] font-bold text-lg">
                     الأكثر قراءة
                   </h2>
                 </div>
-                <a href="/trending" className="text-gold text-sm font-[family-name:var(--font-display)] hover:text-gold-light transition-colors flex items-center gap-1">
+                <a href="/trending" className="text-gold text-sm font-[family-name:var(--font-display)] hover:underline flex items-center gap-1">
                   المزيد
                   <ArrowUpLeft size={14} />
                 </a>
               </div>
             </div>
 
-            {/* News List */}
-            <div className="flex-1 divide-y divide-gold/10">
+            {/* News List - cream/light background */}
+            <div className="bg-cream border border-charcoal/10">
               {sideNews.map((news, index) => (
                 <motion.a
                   key={news.id}
                   href={`/news/${news.id}`}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="block p-6 hover:bg-white/5 transition-colors group"
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  className={`block p-4 hover:bg-gold/10 transition-colors group ${
+                    index !== sideNews.length - 1 ? 'border-b border-charcoal/10' : ''
+                  }`}
                 >
                   <div className="flex gap-4">
                     {/* Number */}
-                    <span className="font-[family-name:var(--font-accent)] text-4xl font-bold text-gold/20 group-hover:text-gold/40 transition-colors leading-none">
+                    <span className="font-[family-name:var(--font-accent)] text-3xl font-bold text-gold/60 group-hover:text-gold transition-colors leading-none">
                       {String(index + 1).padStart(2, '0')}
                     </span>
 
                     <div className="flex-1 min-w-0">
                       {/* Category & Trending */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-gold text-xs font-[family-name:var(--font-display)] font-bold">
                           {news.category}
                         </span>
                         {news.trending && (
-                          <span className="flex items-center gap-1 text-profit text-xs">
+                          <span className="flex items-center gap-1 text-profit text-xs font-semibold">
                             <TrendingUp size={12} />
                             رائج
                           </span>
                         )}
                       </div>
 
-                      {/* Title */}
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
+                      {/* Title - Dark text on light background */}
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-charcoal text-sm leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
                         {news.title}
                       </h3>
 
                       {/* Date */}
-                      <span className="text-white/40 text-xs mt-2 block">
+                      <span className="text-charcoal/50 text-xs mt-1 block">
                         {news.date}
                       </span>
                     </div>
@@ -281,15 +271,15 @@ export default function Hero() {
               ))}
             </div>
 
-            {/* Breaking News Ticker */}
-            <div className="p-4 bg-loss/10 border-t border-loss/20">
+            {/* Breaking News - Red accent */}
+            <div className="bg-loss text-white p-4 mt-1">
               <div className="flex items-center gap-3">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-loss opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-loss" />
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
                 </span>
-                <span className="text-loss text-xs font-[family-name:var(--font-display)] font-bold">عاجل</span>
-                <p className="text-white/80 text-xs truncate flex-1 font-[family-name:var(--font-body)]">
+                <span className="text-sm font-[family-name:var(--font-display)] font-bold">عاجل</span>
+                <p className="text-white/90 text-sm truncate flex-1 font-[family-name:var(--font-body)]">
                   مؤشر تاسي يسجل ارتفاعاً بنسبة 1.2% في تداولات اليوم
                 </p>
               </div>
@@ -297,10 +287,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      {/* Decorative Corner Elements */}
-      <div className="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-gold/20" />
-      <div className="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-gold/20" />
     </section>
   );
 }
