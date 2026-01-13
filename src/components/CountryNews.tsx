@@ -8,7 +8,7 @@ const countries = [
   {
     id: 'saudi',
     name: 'السعودية',
-    flag: '🇸🇦',
+    flag: 'https://flagcdn.com/w40/sa.png',
     articles: [
       {
         id: 1,
@@ -31,7 +31,7 @@ const countries = [
   {
     id: 'uae',
     name: 'الإمارات',
-    flag: '🇦🇪',
+    flag: 'https://flagcdn.com/w40/ae.png',
     articles: [
       {
         id: 4,
@@ -54,7 +54,7 @@ const countries = [
   {
     id: 'egypt',
     name: 'مصر',
-    flag: '🇪🇬',
+    flag: 'https://flagcdn.com/w40/eg.png',
     articles: [
       {
         id: 7,
@@ -77,7 +77,7 @@ const countries = [
   {
     id: 'lebanon',
     name: 'لبنان',
-    flag: '🇱🇧',
+    flag: 'https://flagcdn.com/w40/lb.png',
     articles: [
       {
         id: 10,
@@ -100,7 +100,7 @@ const countries = [
   {
     id: 'qatar',
     name: 'قطر',
-    flag: '🇶🇦',
+    flag: 'https://flagcdn.com/w40/qa.png',
     articles: [
       {
         id: 13,
@@ -123,7 +123,7 @@ const countries = [
   {
     id: 'kuwait',
     name: 'الكويت',
-    flag: '🇰🇼',
+    flag: 'https://flagcdn.com/w40/kw.png',
     articles: [
       {
         id: 16,
@@ -197,7 +197,7 @@ export default function CountryNews() {
                   : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
               }`}
             >
-              <span className="text-xl">{country.flag}</span>
+              <img src={country.flag} alt={country.name} className="w-6 h-4 object-cover rounded-sm" />
               {country.name}
             </motion.button>
           ))}
@@ -226,7 +226,7 @@ export default function CountryNews() {
               {/* Solid navy background - guaranteed contrast */}
               <div className="absolute bottom-0 left-0 right-0 bg-[#132742] p-6 lg:p-8 rounded-b-2xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">{activeCountry.flag}</span>
+                  <img src={activeCountry.flag} alt={activeCountry.name} className="w-8 h-5 object-cover rounded-sm" />
                   <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
                     {activeCountry.name}
                   </span>
