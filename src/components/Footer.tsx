@@ -59,7 +59,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden">
+    <footer className="relative overflow-hidden mt-16">
       {/* Main Footer */}
       <div className="bg-midnight text-white relative overflow-hidden pt-16">
         <div className="absolute inset-0 star-pattern opacity-20" />
