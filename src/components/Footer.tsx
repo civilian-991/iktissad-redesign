@@ -67,7 +67,7 @@ export default function Footer() {
         {/* Decorative Gold Line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent" />
 
-        <div className="container-luxury relative py-20">
+        <div className="container-luxury relative pt-28 pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
             {/* Brand Column */}
             <div className="lg:col-span-4">
