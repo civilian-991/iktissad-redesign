@@ -165,7 +165,10 @@ export default function CountryNews() {
           <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider [text-shadow:_0_1px_4px_rgb(0_0_0_/_50%)]">
             تغطية إقليمية
           </span>
-          <h2 className="text-4xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]">
+          <h2
+            className="text-4xl font-[family-name:var(--font-display)] font-black mt-2 mb-4 [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]"
+            style={{ color: 'rgb(201, 162, 39)' }}
+          >
             أخبار البلدان
           </h2>
           <div className="flex items-center justify-center gap-3 text-gold/50">

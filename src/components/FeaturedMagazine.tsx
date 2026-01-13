@@ -59,7 +59,10 @@ export default function FeaturedMagazine() {
               <BookOpen className="text-gold" size={28} />
             </div>
             <div>
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-white [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]">
+              <h2
+                className="text-3xl font-[family-name:var(--font-display)] font-bold [text-shadow:_0_2px_8px_rgb(0_0_0_/_50%)]"
+                style={{ color: 'rgb(201, 162, 39)' }}
+              >
                 مجلة الإقتصاد والأعمال
               </h2>
               <p className="text-white/80 [text-shadow:_0_1px_4px_rgb(0_0_0_/_50%)]">أكثر من 65 عاماً من التميز في الصحافة الاقتصادية</p>

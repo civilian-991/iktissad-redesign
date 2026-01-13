@@ -116,7 +116,10 @@ export default function Footer() {
                   النشرة الإخبارية
                 </span>
               </div>
-              <h3 className="text-3xl lg:text-4xl font-[family-name:var(--font-display)] font-black text-white mb-4 leading-tight">
+              <h3
+                className="text-3xl lg:text-4xl font-[family-name:var(--font-display)] font-black mb-4 leading-tight"
+                style={{ color: 'rgb(201, 162, 39)' }}
+              >
                 ابقَ على اطلاع بآخر
                 <br />
                 <span className="text-navy">الأخبار الاقتصادية</span>
