@@ -26,58 +26,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+// Sectors ordered by importance for business news
 const sectors = [
-  {
-    id: 'industry',
-    name: 'صناعة',
-    icon: Factory,
-    gradient: 'from-amber-600 to-amber-800',
-    articles: [
-      {
-        id: 1,
-        title: 'السعودية تطلق استراتيجية صناعية جديدة بقيمة 100 مليار ريال',
-        image: 'https://images.unsplash.com/photo-1565043666747-69f6646db940?w=800&h=500&fit=crop',
-        date: '8 يناير 2026',
-        featured: true
-      },
-      { id: 2, title: 'نمو قطاع التصنيع في الخليج بنسبة 4.5%', date: '5 يناير 2026' },
-      { id: 3, title: 'مصر توقع اتفاقيات لإنشاء 3 مصانع جديدة', date: '3 يناير 2026' },
-    ]
-  },
-  {
-    id: 'agriculture',
-    name: 'زراعة',
-    icon: Wheat,
-    gradient: 'from-green-600 to-green-800',
-    articles: [
-      {
-        id: 4,
-        title: 'الإمارات تستثمر 5 مليارات درهم في الزراعة المستدامة',
-        image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=500&fit=crop',
-        date: '10 يناير 2026',
-        featured: true
-      },
-      { id: 5, title: 'السعودية تعلن عن مشروع ضخم للأمن الغذائي', date: '8 يناير 2026' },
-      { id: 6, title: 'مصر تصدر منتجات زراعية بقيمة 3 مليارات دولار', date: '6 يناير 2026' },
-    ]
-  },
-  {
-    id: 'trade',
-    name: 'تجارة',
-    icon: ShoppingBag,
-    gradient: 'from-orange-600 to-orange-800',
-    articles: [
-      {
-        id: 7,
-        title: 'التجارة الإلكترونية في الخليج تتجاوز 50 مليار دولار',
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop',
-        date: '11 يناير 2026',
-        featured: true
-      },
-      { id: 8, title: 'دبي تحتفظ بمركزها كأهم مركز تجاري إقليمي', date: '9 يناير 2026' },
-      { id: 9, title: 'اتفاقية تجارة حرة جديدة بين مصر والهند', date: '7 يناير 2026' },
-    ]
-  },
+  // Page 1 - Core Business Sectors
   {
     id: 'finance',
     name: 'مال ومصارف',
@@ -113,122 +64,20 @@ const sectors = [
     ]
   },
   {
-    id: 'insurance',
-    name: 'تأمين',
-    icon: Shield,
-    gradient: 'from-cyan-600 to-cyan-800',
+    id: 'trade',
+    name: 'تجارة',
+    icon: ShoppingBag,
+    gradient: 'from-orange-600 to-orange-800',
     articles: [
       {
-        id: 16,
-        title: 'نمو قطاع التأمين في السعودية بنسبة 15% خلال 2025',
-        image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=500&fit=crop',
-        date: '9 يناير 2026',
-        featured: true
-      },
-      { id: 17, title: 'شركات التأمين الخليجية تحقق أرباحاً قياسية', date: '7 يناير 2026' },
-      { id: 18, title: 'إطلاق منتجات تأمين رقمية جديدة في الإمارات', date: '5 يناير 2026' },
-    ]
-  },
-  {
-    id: 'real-estate',
-    name: 'عقار',
-    icon: Home,
-    gradient: 'from-stone-600 to-stone-800',
-    articles: [
-      {
-        id: 19,
-        title: 'دبي تسجل مبيعات عقارية بقيمة 100 مليار درهم',
-        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=500&fit=crop',
-        date: '12 يناير 2026',
-        featured: true
-      },
-      { id: 20, title: 'السعودية تطلق مشاريع سكنية ضخمة في الرياض', date: '10 يناير 2026' },
-      { id: 21, title: 'مصر تستقطب استثمارات عقارية خليجية', date: '8 يناير 2026' },
-    ]
-  },
-  {
-    id: 'transport',
-    name: 'نقل',
-    icon: Truck,
-    gradient: 'from-slate-600 to-slate-800',
-    articles: [
-      {
-        id: 22,
-        title: 'السعودية تعلن عن شبكة قطارات فائقة السرعة',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=500&fit=crop',
+        id: 7,
+        title: 'التجارة الإلكترونية في الخليج تتجاوز 50 مليار دولار',
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=500&fit=crop',
         date: '11 يناير 2026',
         featured: true
       },
-      { id: 23, title: 'الإمارات تطور أكبر ميناء ذكي في المنطقة', date: '9 يناير 2026' },
-      { id: 24, title: 'مصر تفتتح خطوط مترو جديدة في القاهرة', date: '7 يناير 2026' },
-    ]
-  },
-  {
-    id: 'automotive',
-    name: 'سيارات',
-    icon: Car,
-    gradient: 'from-rose-600 to-rose-800',
-    articles: [
-      {
-        id: 25,
-        title: 'السعودية تستعد لإنتاج سيارات كهربائية محلياً',
-        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&h=500&fit=crop',
-        date: '12 يناير 2026',
-        featured: true
-      },
-      { id: 26, title: 'تسلا تعلن عن نموذج جديد لمنطقة الشرق الأوسط', date: '5 يناير 2026' },
-      { id: 27, title: 'معرض جنيف للسيارات يعود بحلة جديدة في 2026', date: '3 يناير 2026' },
-    ]
-  },
-  {
-    id: 'tourism-entertainment',
-    name: 'سياحة وترفيه',
-    icon: Plane,
-    gradient: 'from-sky-600 to-sky-800',
-    articles: [
-      {
-        id: 28,
-        title: 'الخطوط السعودية ثاني أكثر شركات الطيران انضباطاً عالمياً',
-        image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=500&fit=crop',
-        date: '12 يناير 2026',
-        featured: true
-      },
-      { id: 29, title: 'دبي تستقبل 18 مليون سائح في النصف الأول من 2026', date: '8 يناير 2026' },
-      { id: 30, title: 'مشروع نيوم يكشف عن خطط توسعية جديدة للقطاع السياحي', date: '6 يناير 2026' },
-    ]
-  },
-  {
-    id: 'education',
-    name: 'تعليم',
-    icon: GraduationCap,
-    gradient: 'from-purple-600 to-purple-800',
-    articles: [
-      {
-        id: 31,
-        title: 'السعودية تطلق برنامجاً لابتعاث 100 ألف طالب',
-        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=500&fit=crop',
-        date: '10 يناير 2026',
-        featured: true
-      },
-      { id: 32, title: 'الإمارات تستثمر في تقنيات التعليم الذكي', date: '8 يناير 2026' },
-      { id: 33, title: 'افتتاح فروع جديدة لجامعات عالمية في قطر', date: '6 يناير 2026' },
-    ]
-  },
-  {
-    id: 'health',
-    name: 'صحة',
-    icon: HeartPulse,
-    gradient: 'from-red-600 to-red-800',
-    articles: [
-      {
-        id: 34,
-        title: 'السعودية تستثمر 50 مليار ريال في القطاع الصحي',
-        image: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&h=500&fit=crop',
-        date: '11 يناير 2026',
-        featured: true
-      },
-      { id: 35, title: 'الإمارات تطلق مبادرة للسياحة العلاجية', date: '9 يناير 2026' },
-      { id: 36, title: 'مصر تفتتح مدينة طبية متكاملة في العاصمة الإدارية', date: '7 يناير 2026' },
+      { id: 8, title: 'دبي تحتفظ بمركزها كأهم مركز تجاري إقليمي', date: '9 يناير 2026' },
+      { id: 9, title: 'اتفاقية تجارة حرة جديدة بين مصر والهند', date: '7 يناير 2026' },
     ]
   },
   {
@@ -249,6 +98,126 @@ const sectors = [
     ]
   },
   {
+    id: 'real-estate',
+    name: 'عقار',
+    icon: Home,
+    gradient: 'from-stone-600 to-stone-800',
+    articles: [
+      {
+        id: 19,
+        title: 'دبي تسجل مبيعات عقارية بقيمة 100 مليار درهم',
+        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=500&fit=crop',
+        date: '12 يناير 2026',
+        featured: true
+      },
+      { id: 20, title: 'السعودية تطلق مشاريع سكنية ضخمة في الرياض', date: '10 يناير 2026' },
+      { id: 21, title: 'مصر تستقطب استثمارات عقارية خليجية', date: '8 يناير 2026' },
+    ]
+  },
+  {
+    id: 'industry',
+    name: 'صناعة',
+    icon: Factory,
+    gradient: 'from-amber-600 to-amber-800',
+    articles: [
+      {
+        id: 1,
+        title: 'السعودية تطلق استراتيجية صناعية جديدة بقيمة 100 مليار ريال',
+        image: 'https://images.unsplash.com/photo-1565043666747-69f6646db940?w=800&h=500&fit=crop',
+        date: '8 يناير 2026',
+        featured: true
+      },
+      { id: 2, title: 'نمو قطاع التصنيع في الخليج بنسبة 4.5%', date: '5 يناير 2026' },
+      { id: 3, title: 'مصر توقع اتفاقيات لإنشاء 3 مصانع جديدة', date: '3 يناير 2026' },
+    ]
+  },
+  // Page 2 - Technology & Transport
+  {
+    id: 'technology',
+    name: 'تكنولوجيا',
+    icon: Cpu,
+    gradient: 'from-violet-600 to-violet-800',
+    articles: [
+      {
+        id: 43,
+        title: 'OpenAI تطلق ChatGPT Health لمحادثات الصحة واللياقة',
+        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
+        date: '9 يناير 2026',
+        featured: true
+      },
+      { id: 44, title: 'توقيع اتفاقية شراكة في مجال الذكاء الاصطناعي', date: '26 ديسمبر 2025' },
+      { id: 45, title: 'إنترسك 2026 يعلن عن إطلاق فعاليات جديدة للأمن والسلامة', date: '6 يناير 2026' },
+    ]
+  },
+  {
+    id: 'automotive',
+    name: 'سيارات',
+    icon: Car,
+    gradient: 'from-rose-600 to-rose-800',
+    articles: [
+      {
+        id: 25,
+        title: 'السعودية تستعد لإنتاج سيارات كهربائية محلياً',
+        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&h=500&fit=crop',
+        date: '12 يناير 2026',
+        featured: true
+      },
+      { id: 26, title: 'تسلا تعلن عن نموذج جديد لمنطقة الشرق الأوسط', date: '5 يناير 2026' },
+      { id: 27, title: 'معرض جنيف للسيارات يعود بحلة جديدة في 2026', date: '3 يناير 2026' },
+    ]
+  },
+  {
+    id: 'transport',
+    name: 'نقل',
+    icon: Truck,
+    gradient: 'from-slate-600 to-slate-800',
+    articles: [
+      {
+        id: 22,
+        title: 'السعودية تعلن عن شبكة قطارات فائقة السرعة',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=500&fit=crop',
+        date: '11 يناير 2026',
+        featured: true
+      },
+      { id: 23, title: 'الإمارات تطور أكبر ميناء ذكي في المنطقة', date: '9 يناير 2026' },
+      { id: 24, title: 'مصر تفتتح خطوط مترو جديدة في القاهرة', date: '7 يناير 2026' },
+    ]
+  },
+  {
+    id: 'tourism-entertainment',
+    name: 'سياحة وترفيه',
+    icon: Plane,
+    gradient: 'from-sky-600 to-sky-800',
+    articles: [
+      {
+        id: 28,
+        title: 'الخطوط السعودية ثاني أكثر شركات الطيران انضباطاً عالمياً',
+        image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=500&fit=crop',
+        date: '12 يناير 2026',
+        featured: true
+      },
+      { id: 29, title: 'دبي تستقبل 18 مليون سائح في النصف الأول من 2026', date: '8 يناير 2026' },
+      { id: 30, title: 'مشروع نيوم يكشف عن خطط توسعية جديدة للقطاع السياحي', date: '6 يناير 2026' },
+    ]
+  },
+  {
+    id: 'insurance',
+    name: 'تأمين',
+    icon: Shield,
+    gradient: 'from-cyan-600 to-cyan-800',
+    articles: [
+      {
+        id: 16,
+        title: 'نمو قطاع التأمين في السعودية بنسبة 15% خلال 2025',
+        image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=500&fit=crop',
+        date: '9 يناير 2026',
+        featured: true
+      },
+      { id: 17, title: 'شركات التأمين الخليجية تحقق أرباحاً قياسية', date: '7 يناير 2026' },
+      { id: 18, title: 'إطلاق منتجات تأمين رقمية جديدة في الإمارات', date: '5 يناير 2026' },
+    ]
+  },
+  {
     id: 'entrepreneurship',
     name: 'ريادة وابتكار',
     icon: Lightbulb,
@@ -265,21 +234,56 @@ const sectors = [
       { id: 42, title: 'دبي تستضيف أكبر مؤتمر للشركات الناشئة', date: '6 يناير 2026' },
     ]
   },
+  // Page 3 - Other Sectors
   {
-    id: 'technology',
-    name: 'تكنولوجيا',
-    icon: Cpu,
-    gradient: 'from-violet-600 to-violet-800',
+    id: 'agriculture',
+    name: 'زراعة',
+    icon: Wheat,
+    gradient: 'from-green-600 to-green-800',
     articles: [
       {
-        id: 43,
-        title: 'OpenAI تطلق ChatGPT Health لمحادثات الصحة واللياقة',
-        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
-        date: '9 يناير 2026',
+        id: 4,
+        title: 'الإمارات تستثمر 5 مليارات درهم في الزراعة المستدامة',
+        image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=500&fit=crop',
+        date: '10 يناير 2026',
         featured: true
       },
-      { id: 44, title: 'توقيع اتفاقية شراكة في مجال الذكاء الاصطناعي', date: '26 ديسمبر 2025' },
-      { id: 45, title: 'إنترسك 2026 يعلن عن إطلاق فعاليات جديدة للأمن والسلامة', date: '6 يناير 2026' },
+      { id: 5, title: 'السعودية تعلن عن مشروع ضخم للأمن الغذائي', date: '8 يناير 2026' },
+      { id: 6, title: 'مصر تصدر منتجات زراعية بقيمة 3 مليارات دولار', date: '6 يناير 2026' },
+    ]
+  },
+  {
+    id: 'health',
+    name: 'صحة',
+    icon: HeartPulse,
+    gradient: 'from-red-600 to-red-800',
+    articles: [
+      {
+        id: 34,
+        title: 'السعودية تستثمر 50 مليار ريال في القطاع الصحي',
+        image: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&h=500&fit=crop',
+        date: '11 يناير 2026',
+        featured: true
+      },
+      { id: 35, title: 'الإمارات تطلق مبادرة للسياحة العلاجية', date: '9 يناير 2026' },
+      { id: 36, title: 'مصر تفتتح مدينة طبية متكاملة في العاصمة الإدارية', date: '7 يناير 2026' },
+    ]
+  },
+  {
+    id: 'education',
+    name: 'تعليم',
+    icon: GraduationCap,
+    gradient: 'from-purple-600 to-purple-800',
+    articles: [
+      {
+        id: 31,
+        title: 'السعودية تطلق برنامجاً لابتعاث 100 ألف طالب',
+        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=500&fit=crop',
+        date: '10 يناير 2026',
+        featured: true
+      },
+      { id: 32, title: 'الإمارات تستثمر في تقنيات التعليم الذكي', date: '8 يناير 2026' },
+      { id: 33, title: 'افتتاح فروع جديدة لجامعات عالمية في قطر', date: '6 يناير 2026' },
     ]
   },
   {
