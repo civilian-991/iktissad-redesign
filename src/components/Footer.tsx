@@ -61,13 +61,13 @@ export default function Footer() {
   return (
     <footer className="relative overflow-hidden">
       {/* Main Footer */}
-      <div className="bg-midnight text-white relative overflow-hidden">
+      <div className="bg-midnight text-white relative overflow-hidden pt-16">
         <div className="absolute inset-0 star-pattern opacity-20" />
 
         {/* Decorative Gold Line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent" />
 
-        <div className="container-luxury relative pt-32 pb-20">
+        <div className="container-luxury relative py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
             {/* Brand Column */}
             <div className="lg:col-span-4">
