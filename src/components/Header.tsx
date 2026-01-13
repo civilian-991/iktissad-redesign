@@ -23,11 +23,11 @@ const navigation = [
       { name: 'اقتصاد', href: '/sections/economy' },
       { name: 'شركات', href: '/sections/companies' },
       { name: 'أسواق', href: '/sections/markets' },
-      { name: 'رأي', href: '/sections/opinion' },
       { name: 'تكنولوجيا', href: '/sections/technology' },
-      { name: 'بلدان', href: '/sections/countries' },
-      { name: 'تقارير', href: '/sections/reports' },
-      { name: 'مقابلات', href: '/sections/interviews' },
+      { name: 'طاقة وابتكار', href: '/sections/energy-innovation' },
+      { name: 'رأي', href: '/sections/opinion' },
+      { name: 'ملفات', href: '/sections/files' },
+      { name: 'فيديو', href: '/sections/video' },
     ]
   },
   {
