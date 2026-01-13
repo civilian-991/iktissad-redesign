@@ -17,34 +17,43 @@ import {
 const navigation = [
   { name: 'الرئيسية', href: '/' },
   {
-    name: 'قطاعات',
-    href: '/sectors',
+    name: 'الأبواب',
+    href: '/sections',
     submenu: [
-      { name: 'اقتصاد عام', href: '/sectors/economy' },
-      { name: 'مال ومصارف', href: '/sectors/finance' },
-      { name: 'طاقة', href: '/sectors/energy' },
-      { name: 'نفط وغاز', href: '/sectors/oil-gas' },
-      { name: 'عقار وإنشاءات', href: '/sectors/real-estate' },
-      { name: 'تكنولوجيا', href: '/sectors/technology' },
-      { name: 'سياحة وطيران', href: '/sectors/tourism' },
-      { name: 'سيارات ومحركات', href: '/sectors/automotive' },
+      { name: 'اقتصاد', href: '/sections/economy' },
+      { name: 'شركات', href: '/sections/companies' },
+      { name: 'أسواق', href: '/sections/markets' },
+      { name: 'رأي', href: '/sections/opinion' },
+      { name: 'تكنولوجيا', href: '/sections/technology' },
+      { name: 'بلدان', href: '/sections/countries' },
+      { name: 'تقارير', href: '/sections/reports' },
+      { name: 'مقابلات', href: '/sections/interviews' },
     ]
   },
   {
-    name: 'بلدان',
-    href: '/countries',
+    name: 'قطاعات',
+    href: '/sectors',
+    wide: true,
     submenu: [
-      { name: 'السعودية', href: '/countries/saudi' },
-      { name: 'الإمارات', href: '/countries/uae' },
-      { name: 'مصر', href: '/countries/egypt' },
-      { name: 'لبنان', href: '/countries/lebanon' },
-      { name: 'الكويت', href: '/countries/kuwait' },
-      { name: 'قطر', href: '/countries/qatar' },
-      { name: 'البحرين', href: '/countries/bahrain' },
-      { name: 'عُمان', href: '/countries/oman' },
+      { name: 'صناعة', href: '/sectors/industry' },
+      { name: 'زراعة', href: '/sectors/agriculture' },
+      { name: 'تجارة', href: '/sectors/trade' },
+      { name: 'سياحة', href: '/sectors/tourism' },
+      { name: 'عقار', href: '/sectors/real-estate' },
+      { name: 'نقل', href: '/sectors/transport' },
+      { name: 'تأمين', href: '/sectors/insurance' },
+      { name: 'مال ومصارف', href: '/sectors/finance' },
+      { name: 'استثمار', href: '/sectors/investment' },
+      { name: 'سيارات', href: '/sectors/automotive' },
+      { name: 'ريادة وابتكار', href: '/sectors/entrepreneurship' },
+      { name: 'تعليم', href: '/sectors/education' },
+      { name: 'ثقافة وترفيه', href: '/sectors/culture-entertainment' },
+      { name: 'طاقة وبيئة', href: '/sectors/energy-environment' },
+      { name: 'صحة', href: '/sectors/health' },
+      { name: 'اتصالات', href: '/sectors/telecom' },
+      { name: 'رياضة', href: '/sectors/sports' },
     ]
   },
-  { name: 'بروفايل', href: '/profiles' },
   { name: 'المجلة', href: '/magazine' },
   { name: 'مجموعة الإقتصاد والأعمال', href: '/group' },
 ];
@@ -180,16 +189,18 @@ export default function Header() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-full right-0 w-56 bg-white rounded-lg shadow-xl border border-sand overflow-hidden"
+                        className={`absolute top-full right-0 bg-white rounded-lg shadow-xl border border-sand overflow-hidden ${
+                          item.wide ? 'w-[420px]' : 'w-56'
+                        }`}
                       >
-                        <div className="py-2">
+                        <div className={`py-2 ${item.wide ? 'grid grid-cols-2 gap-x-2' : ''}`}>
                           {item.submenu.map((subItem, index) => (
                             <motion.a
                               key={subItem.name}
                               href={subItem.href}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
+                              transition={{ delay: index * 0.03 }}
                               className="block px-4 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:pr-6 transition-all duration-200"
                             >
                               {subItem.name}

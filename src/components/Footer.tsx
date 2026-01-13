@@ -15,21 +15,23 @@ import {
 } from 'lucide-react';
 
 const footerLinks = {
-  sectors: [
-    { name: 'اقتصاد عام', href: '/sectors/economy' },
-    { name: 'مال ومصارف', href: '/sectors/finance' },
-    { name: 'طاقة', href: '/sectors/energy' },
-    { name: 'نفط وغاز', href: '/sectors/oil-gas' },
-    { name: 'عقار وإنشاءات', href: '/sectors/real-estate' },
-    { name: 'تكنولوجيا', href: '/sectors/technology' },
+  sections: [
+    { name: 'اقتصاد', href: '/sections/economy' },
+    { name: 'شركات', href: '/sections/companies' },
+    { name: 'أسواق', href: '/sections/markets' },
+    { name: 'رأي', href: '/sections/opinion' },
+    { name: 'تكنولوجيا', href: '/sections/technology' },
+    { name: 'بلدان', href: '/sections/countries' },
+    { name: 'تقارير', href: '/sections/reports' },
+    { name: 'مقابلات', href: '/sections/interviews' },
   ],
-  countries: [
-    { name: 'السعودية', href: '/countries/saudi' },
-    { name: 'الإمارات', href: '/countries/uae' },
-    { name: 'مصر', href: '/countries/egypt' },
-    { name: 'لبنان', href: '/countries/lebanon' },
-    { name: 'قطر', href: '/countries/qatar' },
-    { name: 'الكويت', href: '/countries/kuwait' },
+  sectors: [
+    { name: 'صناعة', href: '/sectors/industry' },
+    { name: 'زراعة', href: '/sectors/agriculture' },
+    { name: 'تجارة', href: '/sectors/trade' },
+    { name: 'سياحة', href: '/sectors/tourism' },
+    { name: 'عقار', href: '/sectors/real-estate' },
+    { name: 'مال ومصارف', href: '/sectors/finance' },
   ],
   group: [
     { name: 'مجلة الإقتصاد والأعمال', href: '#', external: true },
@@ -143,14 +145,14 @@ export default function Footer() {
             {/* Links Columns */}
             <div className="lg:col-span-8">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-                {/* Sectors */}
+                {/* Sections - الأبواب */}
                 <div>
                   <h4 className="font-[family-name:var(--font-display)] font-bold text-xl mb-8 flex items-center gap-3">
                     <span className="w-3 h-3 bg-gold rounded-full"></span>
-                    <span className="text-gold">القطاعات</span>
+                    <span className="text-gold">الأبواب</span>
                   </h4>
                   <ul className="space-y-4">
-                    {footerLinks.sectors.map((link) => (
+                    {footerLinks.sections.map((link) => (
                       <li key={link.name}>
                         <a
                           href={link.href}
@@ -164,14 +166,14 @@ export default function Footer() {
                   </ul>
                 </div>
 
-                {/* Countries */}
+                {/* Sectors - القطاعات */}
                 <div>
                   <h4 className="font-[family-name:var(--font-display)] font-bold text-xl mb-8 flex items-center gap-3">
                     <span className="w-3 h-3 bg-gold rounded-full"></span>
-                    <span className="text-gold">البلدان</span>
+                    <span className="text-gold">القطاعات</span>
                   </h4>
                   <ul className="space-y-4">
-                    {footerLinks.countries.map((link) => (
+                    {footerLinks.sectors.map((link) => (
                       <li key={link.name}>
                         <a
                           href={link.href}
