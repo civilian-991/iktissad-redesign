@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Factory,
   Building2,
@@ -20,7 +21,9 @@ import {
   Gem,
   Coins,
   ArrowUpLeft,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const sectors = [
@@ -315,7 +318,25 @@ const sectors = [
   },
 ];
 
+const SECTORS_PER_PAGE = 6;
+
 export default function SectorNews() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = Math.ceil(sectors.length / SECTORS_PER_PAGE);
+
+  const visibleSectors = sectors.slice(
+    currentPage * SECTORS_PER_PAGE,
+    (currentPage + 1) * SECTORS_PER_PAGE
+  );
+
+  const nextPage = () => {
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+  };
+
+  const prevPage = () => {
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
   return (
     <section className="py-24 bg-paper relative overflow-hidden">
       {/* Subtle Pattern */}
@@ -343,98 +364,147 @@ export default function SectorNews() {
             </div>
           </div>
 
-          <a
-            href="/sectors"
-            className="btn-outline inline-flex items-center gap-2"
-          >
-            <span>جميع القطاعات</span>
-            <ArrowUpLeft size={16} />
-          </a>
+          <div className="flex items-center gap-4">
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={prevPage}
+                className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
+                aria-label="السابق"
+              >
+                <ChevronRight size={18} />
+              </motion.button>
+              <span className="text-sm text-graphite font-[family-name:var(--font-display)] min-w-[60px] text-center">
+                {currentPage + 1} / {totalPages}
+              </span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={nextPage}
+                className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
+                aria-label="التالي"
+              >
+                <ChevronLeft size={18} />
+              </motion.button>
+            </div>
+
+            <a
+              href="/sectors"
+              className="btn-outline inline-flex items-center gap-2"
+            >
+              <span>جميع القطاعات</span>
+              <ArrowUpLeft size={16} />
+            </a>
+          </div>
         </motion.div>
 
-        {/* All Sectors Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sectors.map((sector, sectorIndex) => (
-            <motion.div
-              key={sector.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: (sectorIndex % 6) * 0.1 }}
-              className="group"
-            >
-              {/* Sector Card */}
-              <div className="bg-white border border-sand hover:border-gold/30 transition-colors duration-500 overflow-hidden">
-                {/* Sector Header */}
-                <div className={`bg-gradient-to-r ${sector.gradient} p-4 flex items-center justify-between`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 flex items-center justify-center">
-                      <sector.icon className="text-white" size={20} />
+        {/* Sectors Grid - Magazine Style */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {visibleSectors.map((sector, sectorIndex) => (
+              <motion.div
+                key={sector.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: sectorIndex * 0.1 }}
+                className="group"
+              >
+                {/* Sector Card */}
+                <div className="bg-white border border-sand hover:border-gold/30 transition-colors duration-500 overflow-hidden">
+                  {/* Sector Header */}
+                  <div className={`bg-gradient-to-r ${sector.gradient} p-4 flex items-center justify-between`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 flex items-center justify-center">
+                        <sector.icon className="text-white" size={20} />
+                      </div>
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg">
+                        {sector.name}
+                      </h3>
                     </div>
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg">
-                      {sector.name}
-                    </h3>
+                    <a
+                      href={`/sectors/${sector.id}`}
+                      className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-xs font-[family-name:var(--font-display)]"
+                    >
+                      المزيد
+                      <ArrowUpLeft size={14} />
+                    </a>
                   </div>
-                  <a
-                    href={`/sectors/${sector.id}`}
-                    className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-xs font-[family-name:var(--font-display)]"
-                  >
-                    المزيد
-                    <ArrowUpLeft size={14} />
-                  </a>
-                </div>
 
-                {/* Featured Article */}
-                {sector.articles.filter(a => a.featured).map(article => (
-                  <a
-                    key={article.id}
-                    href={`/news/${article.id}`}
-                    className="block relative h-52 overflow-hidden"
-                  >
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    {/* Content Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h4 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-relaxed line-clamp-2 mb-2">
-                        {article.title}
-                      </h4>
-                      <span className="text-white/60 text-xs flex items-center gap-1.5">
-                        <Clock size={12} />
-                        {article.date}
-                      </span>
-                    </div>
-                  </a>
-                ))}
-
-                {/* Article List */}
-                <div className="divide-y divide-sand">
-                  {sector.articles.filter(a => !a.featured).map((article, index) => (
+                  {/* Featured Article */}
+                  {sector.articles.filter(a => a.featured).map(article => (
                     <a
                       key={article.id}
                       href={`/news/${article.id}`}
-                      className="flex items-start gap-3 p-4 hover:bg-cream transition-colors group/item"
+                      className="block relative h-52 overflow-hidden"
                     >
-                      <span className={`flex-shrink-0 w-6 h-6 bg-gradient-to-br ${sector.gradient} text-white text-xs flex items-center justify-center font-[family-name:var(--font-display)] font-bold`}>
-                        {index + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <h5 className="font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian leading-relaxed line-clamp-2 group-hover/item:text-gold transition-colors duration-300">
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      {/* Content Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                        <h4 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-relaxed line-clamp-2 mb-2">
                           {article.title}
-                        </h5>
-                        <span className="text-graphite text-xs mt-1.5 flex items-center gap-1">
-                          <Clock size={10} />
+                        </h4>
+                        <span className="text-white/60 text-xs flex items-center gap-1.5">
+                          <Clock size={12} />
                           {article.date}
                         </span>
                       </div>
                     </a>
                   ))}
+
+                  {/* Article List */}
+                  <div className="divide-y divide-sand">
+                    {sector.articles.filter(a => !a.featured).map((article, index) => (
+                      <a
+                        key={article.id}
+                        href={`/news/${article.id}`}
+                        className="flex items-start gap-3 p-4 hover:bg-cream transition-colors group/item"
+                      >
+                        <span className={`flex-shrink-0 w-6 h-6 bg-gradient-to-br ${sector.gradient} text-white text-xs flex items-center justify-center font-[family-name:var(--font-display)] font-bold`}>
+                          {index + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian leading-relaxed line-clamp-2 group-hover/item:text-gold transition-colors duration-300">
+                            {article.title}
+                          </h5>
+                          <span className="text-graphite text-xs mt-1.5 flex items-center gap-1">
+                            <Clock size={10} />
+                            {article.date}
+                          </span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Page Indicators */}
+        <div className="flex items-center justify-center gap-2 mt-10">
+          {Array.from({ length: totalPages }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentPage ? 'w-8 bg-gold' : 'w-2 bg-sand hover:bg-stone'
+              }`}
+              aria-label={`الصفحة ${index + 1}`}
+            />
           ))}
         </div>
       </div>
