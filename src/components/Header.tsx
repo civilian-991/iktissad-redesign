@@ -73,7 +73,6 @@ export default function Header() {
   const [currentDate, setCurrentDate] = useState<string>('');
 
   useEffect(() => {
-    // Set date only on client to avoid hydration mismatch
     setCurrentDate(new Date().toLocaleDateString('ar-EG', {
       weekday: 'long',
       year: 'numeric',
@@ -92,27 +91,31 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar */}
-      <div className="bg-navy text-white py-2 hidden lg:block">
-        <div className="container-luxury flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-silver font-[family-name:var(--font-display)]">
+      {/* Top Bar - Editorial Style */}
+      <div className="bg-obsidian text-white py-2.5 hidden lg:block border-b border-gold/10">
+        <div className="container-editorial flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <span className="text-xs text-white/50 font-[family-name:var(--font-body)]">
               {currentDate}
             </span>
+            <div className="h-3 w-px bg-gold/20" />
+            <span className="text-xs text-gold font-[family-name:var(--font-display)] font-semibold">
+              منذ 1956
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-silver font-[family-name:var(--font-display)]">تابعنا على</span>
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
+            <span className="text-xs text-white/40 font-[family-name:var(--font-display)]">تابعنا</span>
+            <div className="flex items-center gap-4">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-silver hover:text-gold transition-colors duration-300"
+                  className="text-white/40 hover:text-gold transition-colors duration-300"
                   aria-label={social.label}
                 >
-                  <social.icon size={16} />
+                  <social.icon size={14} />
                 </a>
               ))}
             </div>
@@ -126,30 +129,33 @@ export default function Header() {
         animate={{ y: 0 }}
         className={`sticky top-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? 'glass shadow-lg py-3'
-            : 'bg-cream py-4'
+            ? 'glass-light shadow-elevated py-3'
+            : 'bg-paper py-5'
         }`}
       >
-        <div className="container-luxury">
+        <div className="container-editorial">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <motion.a
               href="/"
-              className="flex items-center gap-3 group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-4 group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
             >
+              {/* Logo Mark */}
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold-dark rounded-lg flex items-center justify-center shadow-gold">
-                  <span className="text-white font-[family-name:var(--font-display)] font-black text-2xl">إ</span>
+                <div className="w-14 h-14 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold">
+                  <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-2xl">إ</span>
                 </div>
-                <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-navy rounded-full"></div>
+                {/* Corner Accent */}
+                <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gold" />
               </div>
+              {/* Logo Text */}
               <div className="flex flex-col">
-                <span className="font-[family-name:var(--font-display)] font-black text-xl text-navy leading-tight">
+                <span className="font-[family-name:var(--font-display)] font-black text-xl text-obsidian leading-tight tracking-tight">
                   الإقتصاد والأعمال
                 </span>
-                <span className="text-[10px] text-gold font-[family-name:var(--font-display)] tracking-wider uppercase">
+                <span className="text-[10px] text-gold-muted font-[family-name:var(--font-accent)] tracking-[0.2em] uppercase">
                   Al-Iktissad Wal-Aamal
                 </span>
               </div>
@@ -166,41 +172,42 @@ export default function Header() {
                 >
                   <a
                     href={item.href}
-                    className="flex items-center gap-1 px-4 py-2 font-[family-name:var(--font-display)] font-semibold text-navy hover:text-gold transition-colors duration-300 relative group"
+                    className="flex items-center gap-1.5 px-4 py-2.5 font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian hover:text-gold transition-colors duration-300 relative group"
                   >
                     <span>{item.name}</span>
                     {item.submenu && (
                       <ChevronDown
-                        size={14}
+                        size={12}
                         className={`transition-transform duration-300 ${
                           activeSubmenu === item.name ? 'rotate-180' : ''
                         }`}
                       />
                     )}
-                    <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full"></span>
+                    {/* Underline */}
+                    <span className="absolute bottom-1 right-4 left-4 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-right" />
                   </a>
 
                   {/* Dropdown Menu */}
                   <AnimatePresence>
                     {item.submenu && activeSubmenu === item.name && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
+                        exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.2 }}
-                        className={`absolute top-full right-0 bg-white rounded-lg shadow-xl border border-sand overflow-hidden ${
-                          item.wide ? 'w-[420px]' : 'w-56'
+                        className={`absolute top-full right-0 bg-white shadow-elevated border-t-2 border-gold overflow-hidden ${
+                          item.wide ? 'w-[480px]' : 'w-56'
                         }`}
                       >
-                        <div className={`py-2 ${item.wide ? 'grid grid-cols-2 gap-x-2' : ''}`}>
+                        <div className={`py-3 ${item.wide ? 'grid grid-cols-2 gap-x-4 px-2' : ''}`}>
                           {item.submenu.map((subItem, index) => (
                             <motion.a
                               key={subItem.name}
                               href={subItem.href}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.03 }}
-                              className="block px-4 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:pr-6 transition-all duration-200"
+                              transition={{ delay: index * 0.02 }}
+                              className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:pr-7 transition-all duration-200"
                             >
                               {subItem.name}
                             </motion.a>
@@ -214,13 +221,13 @@ export default function Header() {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsSearchOpen(true)}
-                className="w-10 h-10 rounded-full bg-ivory hover:bg-sand flex items-center justify-center text-navy transition-colors duration-300"
+                className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-all duration-300"
                 aria-label="بحث"
               >
                 <Search size={18} />
@@ -231,7 +238,7 @@ export default function Header() {
                 href="/subscribe"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="hidden md:flex btn-gold"
+                className="hidden md:flex btn-gold items-center gap-2"
               >
                 <span>اشترك الآن</span>
               </motion.a>
@@ -241,7 +248,7 @@ export default function Header() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center"
+                className="lg:hidden w-10 h-10 bg-obsidian text-gold flex items-center justify-center"
                 aria-label="القائمة"
               >
                 <Menu size={20} />
@@ -258,32 +265,54 @@ export default function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-navy/95 flex items-start justify-center pt-32"
+            className="fixed inset-0 z-[100] bg-obsidian/98 flex items-start justify-center pt-32"
             onClick={() => setIsSearchOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: -50, scale: 0.9 }}
+              initial={{ opacity: 0, y: -50, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -50, scale: 0.9 }}
+              exit={{ opacity: 0, y: -50, scale: 0.95 }}
               transition={{ type: "spring", damping: 25 }}
-              className="w-full max-w-2xl mx-4"
+              className="w-full max-w-3xl mx-4"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Search Label */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-6 bg-gold" />
+                <span className="text-gold font-[family-name:var(--font-display)] font-bold">البحث</span>
+              </div>
+
+              {/* Search Input */}
               <div className="relative">
                 <input
                   type="text"
                   placeholder="ابحث في الأخبار والمقالات..."
-                  className="w-full px-6 py-5 pr-14 text-xl bg-white rounded-lg font-[family-name:var(--font-display)] text-navy placeholder:text-silver focus:outline-none focus:ring-4 focus:ring-gold/30"
+                  className="w-full px-8 py-6 text-xl bg-white/5 border border-gold/30 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold transition-colors"
                   autoFocus
                 />
-                <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-gold" size={24} />
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={24} />
               </div>
+
+              {/* Quick Links */}
+              <div className="mt-8 flex flex-wrap gap-3">
+                <span className="text-white/40 text-sm font-[family-name:var(--font-display)]">الأكثر بحثاً:</span>
+                {['أسهم', 'نفط', 'ذهب', 'عقارات', 'بنوك'].map((term) => (
+                  <button
+                    key={term}
+                    className="px-4 py-1.5 border border-gold/20 text-gold/60 text-sm font-[family-name:var(--font-display)] hover:border-gold hover:text-gold transition-colors"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+
+              {/* Close Button */}
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="absolute top-4 left-4 text-white/60 hover:text-white transition-colors"
+                className="absolute top-4 left-4 w-12 h-12 border border-white/20 text-white/60 flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
                 aria-label="إغلاق البحث"
               >
-                <X size={32} />
+                <X size={24} />
               </button>
             </motion.div>
           </motion.div>
@@ -298,7 +327,7 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-[90] lg:hidden"
+              className="fixed inset-0 bg-black/60 z-[90] lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
@@ -306,15 +335,15 @@ export default function Header() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: "spring", damping: 25 }}
-              className="fixed top-0 right-0 bottom-0 w-80 bg-white z-[95] lg:hidden shadow-2xl"
+              className="fixed top-0 right-0 bottom-0 w-80 bg-paper z-[95] lg:hidden shadow-dramatic"
             >
               <div className="flex flex-col h-full">
                 {/* Mobile Menu Header */}
-                <div className="flex items-center justify-between p-4 border-b border-sand">
-                  <span className="font-[family-name:var(--font-display)] font-bold text-navy">القائمة</span>
+                <div className="flex items-center justify-between p-5 border-b border-sand">
+                  <span className="font-[family-name:var(--font-display)] font-bold text-obsidian">القائمة</span>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-10 h-10 rounded-full bg-ivory flex items-center justify-center text-navy"
+                    className="w-10 h-10 border border-sand text-graphite flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
                     aria-label="إغلاق القائمة"
                   >
                     <X size={20} />
@@ -328,18 +357,18 @@ export default function Header() {
                       key={item.name}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: index * 0.05 }}
                     >
                       <a
                         href={item.href}
-                        className="flex items-center justify-between px-6 py-3 font-[family-name:var(--font-display)] font-semibold text-navy hover:bg-cream hover:text-gold transition-colors"
+                        className="flex items-center justify-between px-6 py-3.5 font-[family-name:var(--font-display)] font-semibold text-obsidian hover:bg-cream hover:text-gold transition-colors"
                       >
                         <span>{item.name}</span>
-                        {item.submenu && <ChevronDown size={16} />}
+                        {item.submenu && <ChevronDown size={16} className="text-gold/50" />}
                       </a>
                       {item.submenu && (
-                        <div className="bg-ivory">
-                          {item.submenu.map((subItem) => (
+                        <div className="bg-cream/50 border-r-2 border-gold/20 mr-4">
+                          {item.submenu.slice(0, 6).map((subItem) => (
                             <a
                               key={subItem.name}
                               href={subItem.href}
@@ -348,6 +377,14 @@ export default function Header() {
                               {subItem.name}
                             </a>
                           ))}
+                          {item.submenu.length > 6 && (
+                            <a
+                              href={item.href}
+                              className="block px-8 py-2.5 text-sm text-gold font-semibold"
+                            >
+                              عرض الكل ({item.submenu.length})
+                            </a>
+                          )}
                         </div>
                       )}
                     </motion.div>
@@ -355,24 +392,24 @@ export default function Header() {
                 </nav>
 
                 {/* Mobile Menu Footer */}
-                <div className="p-4 border-t border-sand">
+                <div className="p-5 border-t border-sand">
                   <a
                     href="/subscribe"
-                    className="block w-full btn-gold text-center mb-4"
+                    className="block w-full btn-gold text-center mb-5"
                   >
                     <span>اشترك الآن</span>
                   </a>
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex items-center justify-center gap-5">
                     {socialLinks.map((social) => (
                       <a
                         key={social.label}
                         href={social.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate hover:text-gold transition-colors"
+                        className="text-graphite hover:text-gold transition-colors"
                         aria-label={social.label}
                       >
-                        <social.icon size={20} />
+                        <social.icon size={18} />
                       </a>
                     ))}
                   </div>
