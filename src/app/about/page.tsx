@@ -126,7 +126,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold mb-4 text-white">
                 مسيرتنا
               </h2>
               <p className="text-white/70">
@@ -153,7 +153,7 @@ export default function AboutPage() {
                         <span className="text-gold font-[family-name:var(--font-display)] font-bold text-2xl">
                           {item.year}
                         </span>
-                        <h3 className="text-xl font-[family-name:var(--font-display)] font-bold mt-2 mb-2">
+                        <h3 className="text-xl font-[family-name:var(--font-display)] font-bold mt-2 mb-2 text-white">
                           {item.title}
                         </h3>
                         <p className="text-white/70">{item.description}</p>
