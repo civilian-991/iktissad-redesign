@@ -61,7 +61,7 @@ export default function FeaturedMagazine() {
               <BookOpen className="text-gold" size={28} />
             </div>
             <div>
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-obsidian">
+              <h2 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian">
                 مجلة الإقتصاد والأعمال
               </h2>
               <p className="text-graphite">أكثر من 65 عاماً من التميز في الصحافة الاقتصادية</p>
@@ -105,7 +105,7 @@ export default function FeaturedMagazine() {
                     alt={latestIssue.title}
                     className="relative w-48 md:w-56 h-64 md:h-72 object-cover shadow-2xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#3d5f85]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
                     <span className="px-4 py-2 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm flex items-center gap-2">
                       <BookOpen size={16} />
                       تصفح الآن
@@ -118,7 +118,7 @@ export default function FeaturedMagazine() {
                   <span className="text-gold font-[family-name:var(--font-display)]">
                     {latestIssue.subtitle}
                   </span>
-                  <h3 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-1 mb-4">
+                  <h3 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-1 mb-4">
                     {latestIssue.title}
                   </h3>
 

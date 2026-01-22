@@ -56,7 +56,7 @@ export default function FeaturedProfiles() {
             <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
               شخصيات مؤثرة
             </span>
-            <h2 className="text-4xl font-[family-name:var(--font-display)] font-black text-navy mt-2">
+            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-navy mt-2">
               بروفايل
             </h2>
             <p className="text-slate mt-2 max-w-lg">
@@ -94,7 +94,7 @@ export default function FeaturedProfiles() {
                     alt={profile.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2d4a6a] via-transparent to-transparent opacity-75" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#3d5f85]/60 via-transparent to-transparent" />
 
                   {/* Category Badge */}
                   <span className="absolute top-4 right-4 px-3 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">
