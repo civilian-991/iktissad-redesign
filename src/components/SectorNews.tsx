@@ -360,7 +360,7 @@ export default function SectorNews() {
         >
           <div>
             <span className="section-label">تغطية شاملة</span>
-            <h2 className="text-4xl md:text-5xl font-[family-name:var(--font-display)] font-black text-obsidian mt-3 mb-4">
+            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-3 mb-4">
               أخبار القطاعات
             </h2>
             <div className="divider-editorial max-w-xs">

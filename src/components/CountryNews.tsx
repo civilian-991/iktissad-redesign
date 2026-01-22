@@ -166,7 +166,7 @@ export default function CountryNews() {
             تغطية إقليمية
           </span>
           <h2
-            className="text-4xl font-[family-name:var(--font-display)] font-black mt-2 mb-4 text-white"
+            className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold mt-2 mb-4 text-white"
           >
             أخبار البلدان
           </h2>

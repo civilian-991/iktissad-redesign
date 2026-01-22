@@ -81,7 +81,7 @@ export default function VideoSection() {
             <span className="text-[#d4af37] text-sm font-[family-name:var(--font-display)] font-semibold tracking-wider uppercase">
               شاهد الآن
             </span>
-            <h2 className="text-4xl md:text-5xl font-[family-name:var(--font-display)] font-black text-[#ffffff] mt-3 mb-4">
+            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-[#ffffff] mt-3 mb-4">
               فيديو
             </h2>
             <div className="h-1 w-24 bg-gradient-to-l from-[#d4af37] to-[#cd7f32]" />
