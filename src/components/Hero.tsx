@@ -137,7 +137,7 @@ export default function Hero() {
                     </div>
 
                     {/* Title - white text on dark gradient */}
-                    <h1 className="text-lg md:text-xl font-[family-name:var(--font-display)] font-semibold text-white leading-tight mb-4">
+                    <h1 className="text-base md:text-lg font-[family-name:var(--font-display)] font-medium text-white leading-snug mb-3">
                       {featuredNews[currentSlide].title}
                     </h1>
 
