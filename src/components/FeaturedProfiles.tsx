@@ -94,7 +94,7 @@ export default function FeaturedProfiles() {
                     alt={profile.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2d4a6a] via-transparent to-transparent opacity-75" />
 
                   {/* Category Badge */}
                   <span className="absolute top-4 right-4 px-3 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">

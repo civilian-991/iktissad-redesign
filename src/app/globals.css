@@ -6,12 +6,12 @@
      EDITORIAL PRESTIGE - A Luxury Financial Publication Aesthetic
      ═══════════════════════════════════════════════════════════════ */
 
-  /* Core Palette - Deep & Commanding */
-  --color-obsidian: #08111c;
-  --color-midnight: #0c1829;
-  --color-navy: #132742;
-  --color-navy-light: #1e3a5f;
-  --color-slate-dark: #2d3f52;
+  /* Core Palette - Professional & Readable */
+  --color-obsidian: #1a2a3a;
+  --color-midnight: #243448;
+  --color-navy: #2d4a6a;
+  --color-navy-light: #3d5f85;
+  --color-slate-dark: #4a6580;
 
   /* Precious Metals */
   --color-gold: #d4af37;
@@ -458,10 +458,10 @@ h3 {
 }
 
 .glass-dark {
-  background: rgba(8, 17, 28, 0.85);
+  background: rgba(26, 42, 58, 0.9);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -639,9 +639,9 @@ h3 {
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(8, 17, 28, 0.95) 0%,
-    rgba(8, 17, 28, 0.6) 30%,
-    rgba(8, 17, 28, 0.2) 60%,
+    rgba(26, 42, 58, 0.9) 0%,
+    rgba(26, 42, 58, 0.5) 30%,
+    rgba(26, 42, 58, 0.15) 60%,
     transparent 100%
   );
 }

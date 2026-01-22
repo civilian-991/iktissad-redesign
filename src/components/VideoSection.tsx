@@ -61,13 +61,13 @@ export default function VideoSection() {
   const regularVideos = videos.filter(v => !v.featured);
 
   return (
-    <section className="py-24 bg-[#0a0a0a] relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-[#1a2a3a] via-[#243448] to-[#1a2a3a] relative overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #d4af37 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #d4af37 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4af37]/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#d4af37]/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#d4af37]/10 rounded-full blur-3xl" />
 
       <div className="container-editorial relative">
         {/* Section Header */}
@@ -110,7 +110,7 @@ export default function VideoSection() {
                 transition={{ delay: index * 0.1 }}
                 className="group block"
               >
-                <div className="relative aspect-video overflow-hidden bg-[#1a1a1a]">
+                <div className="relative aspect-video overflow-hidden bg-[#2d4a6a]">
                   <img
                     src={video.thumbnail}
                     alt={video.title}
@@ -123,7 +123,7 @@ export default function VideoSection() {
                       whileHover={{ scale: 1.1 }}
                       className="w-16 h-16 bg-[#d4af37] flex items-center justify-center"
                     >
-                      <Play className="text-[#0a0a0a] fill-[#0a0a0a]" size={28} />
+                      <Play className="text-[#1a2a3a] fill-[#1a2a3a]" size={28} />
                     </motion.div>
                   </div>
 
@@ -133,7 +133,7 @@ export default function VideoSection() {
                   </div>
 
                   {/* Category Badge */}
-                  <div className="absolute top-3 right-3 bg-[#d4af37] text-[#0a0a0a] text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
+                  <div className="absolute top-3 right-3 bg-[#d4af37] text-[#1a2a3a] text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
                     {video.category}
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export default function VideoSection() {
                   <h3 className="font-[family-name:var(--font-display)] font-bold text-[#ffffff] text-lg leading-relaxed group-hover:text-[#d4af37] transition-colors line-clamp-2">
                     {video.title}
                   </h3>
-                  <div className="flex items-center gap-4 mt-2 text-[#999999] text-sm">
+                  <div className="flex items-center gap-4 mt-2 text-[#c8d4e0] text-sm">
                     <span className="flex items-center gap-1">
                       <Eye size={14} />
                       {video.views} مشاهدة
@@ -154,14 +154,14 @@ export default function VideoSection() {
           </div>
 
           {/* Regular Videos - Sidebar List */}
-          <div className="lg:col-span-4 bg-[#1a1a1a] border border-[#333333]">
-            <div className="p-4 border-b border-[#333333]">
+          <div className="lg:col-span-4 bg-[#2d4a6a] border border-[#4a6580]">
+            <div className="p-4 border-b border-[#4a6580]">
               <h3 className="font-[family-name:var(--font-display)] font-bold text-[#ffffff]">
                 المزيد من الفيديوهات
               </h3>
             </div>
 
-            <div className="divide-y divide-[#333333]">
+            <div className="divide-y divide-[#4a6580]">
               {regularVideos.map((video, index) => (
                 <motion.a
                   key={video.id}
@@ -170,10 +170,10 @@ export default function VideoSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex gap-4 p-4 hover:bg-[#252525] transition-colors group"
+                  className="flex gap-4 p-4 hover:bg-[#3d5f85] transition-colors group"
                 >
                   {/* Thumbnail */}
-                  <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-[#2a2a2a]">
+                  <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-[#3d5f85]">
                     <img
                       src={video.thumbnail}
                       alt={video.title}
@@ -181,7 +181,7 @@ export default function VideoSection() {
                     />
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <div className="w-8 h-8 bg-[#d4af37]/90 flex items-center justify-center">
-                        <Play className="text-[#0a0a0a] fill-[#0a0a0a]" size={14} />
+                        <Play className="text-[#1a2a3a] fill-[#1a2a3a]" size={14} />
                       </div>
                     </div>
                     <div className="absolute bottom-1 left-1 bg-black/80 text-[#ffffff] text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
@@ -197,7 +197,7 @@ export default function VideoSection() {
                     <h4 className="font-[family-name:var(--font-display)] font-semibold text-[#ffffff] text-sm leading-relaxed mt-1 group-hover:text-[#d4af37] transition-colors line-clamp-2">
                       {video.title}
                     </h4>
-                    <span className="text-[#777777] text-xs mt-1 flex items-center gap-1">
+                    <span className="text-[#b8c8d8] text-xs mt-1 flex items-center gap-1">
                       <Eye size={12} />
                       {video.views}
                     </span>

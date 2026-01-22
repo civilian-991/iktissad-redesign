@@ -95,7 +95,7 @@ export default function Header() {
       <div className="bg-obsidian text-white py-2.5 hidden lg:block border-b border-gold/10">
         <div className="container-editorial flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <span className="text-xs text-white/50 font-[family-name:var(--font-body)]">
+            <span className="text-xs text-white/80 font-[family-name:var(--font-body)]">
               {currentDate}
             </span>
             <div className="h-3 w-px bg-gold/20" />
@@ -104,7 +104,7 @@ export default function Header() {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="text-xs text-white/40 font-[family-name:var(--font-display)]">تابعنا</span>
+            <span className="text-xs text-white/70 font-[family-name:var(--font-display)]">تابعنا</span>
             <div className="flex items-center gap-4">
               {socialLinks.map((social) => (
                 <a
@@ -112,7 +112,7 @@ export default function Header() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/40 hover:text-gold transition-colors duration-300"
+                  className="text-white/70 hover:text-gold transition-colors duration-300"
                   aria-label={social.label}
                 >
                   <social.icon size={14} />
@@ -265,7 +265,7 @@ export default function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-obsidian/98 flex items-start justify-center pt-32"
+            className="fixed inset-0 z-[100] bg-obsidian/95 flex items-start justify-center pt-32"
             onClick={() => setIsSearchOpen(false)}
           >
             <motion.div
@@ -287,7 +287,7 @@ export default function Header() {
                 <input
                   type="text"
                   placeholder="ابحث في الأخبار والمقالات..."
-                  className="w-full px-8 py-6 text-xl bg-white/5 border border-gold/30 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold transition-colors"
+                  className="w-full px-8 py-6 text-xl bg-white/5 border border-gold/30 text-white font-[family-name:var(--font-display)] placeholder:text-white/60 focus:outline-none focus:border-gold transition-colors"
                   autoFocus
                 />
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={24} />
@@ -295,7 +295,7 @@ export default function Header() {
 
               {/* Quick Links */}
               <div className="mt-8 flex flex-wrap gap-3">
-                <span className="text-white/40 text-sm font-[family-name:var(--font-display)]">الأكثر بحثاً:</span>
+                <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">الأكثر بحثاً:</span>
                 {['أسهم', 'نفط', 'ذهب', 'عقارات', 'بنوك'].map((term) => (
                   <button
                     key={term}

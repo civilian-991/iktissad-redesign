@@ -112,7 +112,7 @@ export default function Hero() {
               </AnimatePresence>
 
               {/* Bottom gradient for text readability */}
-              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#1a2a3a]/95 via-[#1a2a3a]/60 to-transparent" />
 
               {/* Content positioned at bottom */}
               <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">
@@ -147,7 +147,7 @@ export default function Hero() {
                     </p>
 
                     {/* Meta */}
-                    <div className="flex items-center gap-4 text-white/60 text-sm">
+                    <div className="flex items-center gap-4 text-white/80 text-sm">
                       <span className="flex items-center gap-2">
                         <Clock size={14} />
                         {featuredNews[currentSlide].date}
@@ -262,7 +262,7 @@ export default function Hero() {
                       </h3>
 
                       {/* Date */}
-                      <span className="text-charcoal/50 text-xs mt-1 block">
+                      <span className="text-charcoal/70 text-xs mt-1 block">
                         {news.date}
                       </span>
                     </div>

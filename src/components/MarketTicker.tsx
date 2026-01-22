@@ -46,7 +46,7 @@ export default function MarketTicker() {
                   key={index}
                   className="flex items-center gap-3 whitespace-nowrap"
                 >
-                  <span className="text-white/60 text-xs font-[family-name:var(--font-display)]">
+                  <span className="text-white/80 text-xs font-[family-name:var(--font-display)]">
                     {item.name}
                   </span>
                   <span className="text-white text-xs font-[family-name:var(--font-accent)] font-semibold market-ticker">

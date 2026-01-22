@@ -98,25 +98,25 @@ export default function Footer() {
                 </div>
               </motion.a>
 
-              <p className="text-white/50 text-base leading-relaxed mb-10 max-w-sm font-[family-name:var(--font-body)]">
+              <p className="text-white/70 text-base leading-relaxed mb-10 max-w-sm font-[family-name:var(--font-body)]">
                 المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي منذ عام 1956. نغطي أهم التطورات في أسواق المال والأعمال والتجارة.
               </p>
 
               {/* Contact Info */}
               <div className="space-y-4">
-                <a href="mailto:info@iktissadonline.com" className="flex items-center gap-4 text-white/50 hover:text-gold transition-colors group">
+                <a href="mailto:info@iktissadonline.com" className="flex items-center gap-4 text-white/70 hover:text-gold transition-colors group">
                   <div className="w-10 h-10 border border-gold/20 flex items-center justify-center group-hover:border-gold transition-colors">
                     <Mail size={18} className="text-gold" />
                   </div>
                   <span className="text-sm">info@iktissadonline.com</span>
                 </a>
-                <a href="tel:+9611000000" className="flex items-center gap-4 text-white/50 hover:text-gold transition-colors group">
+                <a href="tel:+9611000000" className="flex items-center gap-4 text-white/70 hover:text-gold transition-colors group">
                   <div className="w-10 h-10 border border-gold/20 flex items-center justify-center group-hover:border-gold transition-colors">
                     <Phone size={18} className="text-gold" />
                   </div>
                   <span className="text-sm" dir="ltr">+961 1 000 000</span>
                 </a>
-                <div className="flex items-center gap-4 text-white/50">
+                <div className="flex items-center gap-4 text-white/70">
                   <div className="w-10 h-10 border border-gold/20 flex items-center justify-center">
                     <MapPin size={18} className="text-gold" />
                   </div>
@@ -126,7 +126,7 @@ export default function Footer() {
 
               {/* Social Links */}
               <div className="mt-10">
-                <span className="text-xs text-white/30 font-[family-name:var(--font-display)] block mb-4">تابعنا على</span>
+                <span className="text-xs text-white/60 font-[family-name:var(--font-display)] block mb-4">تابعنا على</span>
                 <div className="flex items-center gap-3">
                   {socialLinks.map((social) => (
                     <motion.a
@@ -136,7 +136,7 @@ export default function Footer() {
                       rel="noopener noreferrer"
                       whileHover={{ scale: 1.1, y: -2 }}
                       whileTap={{ scale: 0.9 }}
-                      className="w-10 h-10 border border-gold/20 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold transition-all duration-300"
+                      className="w-10 h-10 border border-gold/20 flex items-center justify-center text-white/70 hover:text-gold hover:border-gold transition-all duration-300"
                       aria-label={social.label}
                     >
                       <social.icon size={18} />
@@ -160,7 +160,7 @@ export default function Footer() {
                       <li key={link.name}>
                         <a
                           href={link.href}
-                          className="text-sm text-white/50 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {link.name}
@@ -181,7 +181,7 @@ export default function Footer() {
                       <li key={link.name}>
                         <a
                           href={link.href}
-                          className="text-sm text-white/50 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {link.name}
@@ -204,7 +204,7 @@ export default function Footer() {
                           href={link.href}
                           target={link.external ? '_blank' : undefined}
                           rel={link.external ? 'noopener noreferrer' : undefined}
-                          className="text-sm text-white/50 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {link.name}
@@ -226,7 +226,7 @@ export default function Footer() {
                       <li key={link.name}>
                         <a
                           href={link.href}
-                          className="text-sm text-white/50 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {link.name}
@@ -249,10 +249,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Copyright */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-              <p className="text-white/30 text-sm font-[family-name:var(--font-display)]">
+              <p className="text-white/60 text-sm font-[family-name:var(--font-display)]">
                 {new Date().getFullYear()} الإقتصاد والأعمال. جميع الحقوق محفوظة.
               </p>
-              <div className="flex items-center gap-6 text-white/20 text-xs">
+              <div className="flex items-center gap-6 text-white/60 text-xs">
                 <a href="/privacy" className="hover:text-gold transition-colors">سياسة الخصوصية</a>
                 <span className="w-1 h-1 bg-gold/30 rounded-full" />
                 <a href="/terms" className="hover:text-gold transition-colors">شروط الاستخدام</a>
@@ -279,7 +279,7 @@ export default function Footer() {
       {/* Brand Strip */}
       <div className="bg-midnight py-5 border-t border-gold/10">
         <div className="container-editorial">
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 text-xs text-white/20 font-[family-name:var(--font-display)]">
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 text-xs text-white/60 font-[family-name:var(--font-display)]">
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
               مجلة الإقتصاد والأعمال
