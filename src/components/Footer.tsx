@@ -63,7 +63,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden mt-20">
+    <footer className="relative overflow-hidden mt-32">
       {/* Main Footer */}
       <div className="bg-obsidian text-white relative overflow-hidden">
         {/* Pattern Overlay */}
