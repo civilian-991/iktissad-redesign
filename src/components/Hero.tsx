@@ -112,7 +112,7 @@ export default function Hero() {
               </AnimatePresence>
 
               {/* Bottom gradient for text readability */}
-              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#1a2a3a]/95 via-[#1a2a3a]/60 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#002d4f]/95 via-[#002d4f]/60 to-transparent" />
 
               {/* Content positioned at bottom */}
               <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">

@@ -3,15 +3,16 @@
 
 @theme {
   /* ═══════════════════════════════════════════════════════════════
-     EDITORIAL PRESTIGE - A Luxury Financial Publication Aesthetic
+     IKTISSAD EDITORIAL - Premium Financial News Publication
+     Brand Color: #005B9F (Iktissad Blue)
      ═══════════════════════════════════════════════════════════════ */
 
-  /* Core Palette - Professional & Readable */
-  --color-obsidian: #1a2a3a;
-  --color-midnight: #243448;
-  --color-navy: #2d4a6a;
-  --color-navy-light: #3d5f85;
-  --color-slate-dark: #4a6580;
+  /* Core Palette - Iktissad Brand Blue */
+  --color-obsidian: #002d4f;       /* Deepest blue-black for backgrounds */
+  --color-midnight: #003d6b;       /* Dark blue for sections */
+  --color-navy: #005B9F;           /* PRIMARY BRAND COLOR */
+  --color-navy-light: #0077cc;     /* Lighter brand blue for hovers */
+  --color-slate-dark: #3d8fd4;     /* Muted blue for secondary elements */
 
   /* Precious Metals */
   --color-gold: #d4af37;
@@ -48,13 +49,14 @@
   --spacing-section: 7rem;
   --spacing-container: 2.5rem;
 
-  /* Refined Shadows */
-  --shadow-subtle: 0 1px 3px rgba(8, 17, 28, 0.04);
-  --shadow-card: 0 4px 24px rgba(8, 17, 28, 0.08);
-  --shadow-elevated: 0 12px 48px rgba(8, 17, 28, 0.12);
-  --shadow-dramatic: 0 24px 80px rgba(8, 17, 28, 0.2);
+  /* Refined Shadows - Updated for Iktissad Blue */
+  --shadow-subtle: 0 1px 3px rgba(0, 45, 79, 0.06);
+  --shadow-card: 0 4px 24px rgba(0, 45, 79, 0.1);
+  --shadow-elevated: 0 12px 48px rgba(0, 45, 79, 0.15);
+  --shadow-dramatic: 0 24px 80px rgba(0, 45, 79, 0.25);
   --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.25);
-  --shadow-inner: inset 0 2px 8px rgba(8, 17, 28, 0.06);
+  --shadow-blue: 0 8px 32px rgba(0, 91, 159, 0.3);
+  --shadow-inner: inset 0 2px 8px rgba(0, 45, 79, 0.08);
 
   /* Premium Animations */
   --ease-editorial: cubic-bezier(0.19, 1, 0.22, 1);
@@ -458,7 +460,7 @@ h3 {
 }
 
 .glass-dark {
-  background: rgba(26, 42, 58, 0.9);
+  background: rgba(0, 45, 79, 0.92);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(212, 175, 55, 0.15);
@@ -639,9 +641,9 @@ h3 {
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(26, 42, 58, 0.9) 0%,
-    rgba(26, 42, 58, 0.5) 30%,
-    rgba(26, 42, 58, 0.15) 60%,
+    rgba(0, 45, 79, 0.9) 0%,
+    rgba(0, 45, 79, 0.5) 30%,
+    rgba(0, 45, 79, 0.15) 60%,
     transparent 100%
   );
 }
@@ -650,7 +652,7 @@ h3 {
   content: '';
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 100px rgba(8, 17, 28, 0.3);
+  box-shadow: inset 0 0 100px rgba(0, 45, 79, 0.35);
   pointer-events: none;
   z-index: 1;
 }
