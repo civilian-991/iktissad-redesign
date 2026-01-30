@@ -91,8 +91,8 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar - Editorial Style */}
-      <div className="bg-obsidian text-white py-2.5 hidden lg:block border-b border-gold/10">
+      {/* Top Bar - Brand Color */}
+      <div className="bg-navy text-white py-2.5 hidden lg:block border-b border-gold/10">
         <div className="container-editorial flex items-center justify-between">
           <div className="flex items-center gap-8">
             <span className="text-xs text-white/80 font-[family-name:var(--font-body)]">
