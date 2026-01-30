@@ -20,13 +20,15 @@ import {
   Sun,
   TrendingUp,
   Plus,
-  Loader2
+  Loader2,
+  BookOpen
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 const navigation = [
   { name: 'لوحة التحكم', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'المقالات', href: '/admin/articles', icon: FileText, badge: 12 },
+  { name: 'المجلة', href: '/admin/magazines', icon: BookOpen },
   { name: 'المستخدمين', href: '/admin/users', icon: Users },
   { name: 'المكتبة', href: '/admin/media', icon: Image },
   { name: 'الإعدادات', href: '/admin/settings', icon: Settings },
@@ -34,6 +36,7 @@ const navigation = [
 
 const quickActions = [
   { name: 'مقال جديد', href: '/admin/articles/new', icon: Plus },
+  { name: 'عدد جديد', href: '/admin/magazines/new', icon: BookOpen },
   { name: 'مستخدم جديد', href: '/admin/users/new', icon: Users },
 ];
 
