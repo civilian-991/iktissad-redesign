@@ -3,152 +3,174 @@
 
 @theme {
   /* ═══════════════════════════════════════════════════════════════
-     IKTISSAD - Premium Arabic Financial News Publication
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     Brand Color: #005B9F (Iktissad Blue)
-     Aesthetic: Editorial Luxury × Financial Authority
+     IKTISSAD - Premium Arabic Financial News
+     Brand Color: #005B9F
+     Inspired by: Bloomberg, Financial Times, Reuters
      ═══════════════════════════════════════════════════════════════ */
 
   /* ─────────────────────────────────────────────────────────────────
-     PRIMARY BRAND BLUES
-     Built from #005B9F - A commanding, trustworthy blue
+     PRIMARY BRAND BLUES (from #005B9F)
+     Professional, trustworthy, authoritative
      ───────────────────────────────────────────────────────────────── */
-  --color-brand: #005B9F;          /* ★ PRIMARY BRAND COLOR */
-  --color-brand-dark: #004577;     /* Deep brand for emphasis */
-  --color-brand-darker: #00304f;   /* Darkest - for dramatic backgrounds */
-  --color-brand-light: #0070c4;    /* Lighter brand for hovers */
-  --color-brand-lighter: #3d9be0;  /* Soft brand for highlights */
-  --color-brand-subtle: #e8f4fc;   /* Whisper of brand for backgrounds */
+  --color-brand-950: #001a33;      /* Near black blue */
+  --color-brand-900: #002647;      /* Darkest backgrounds */
+  --color-brand-800: #003a6b;      /* Dark sections */
+  --color-brand-700: #004d8f;      /* Dark accents */
+  --color-brand: #005B9F;          /* ★ PRIMARY BRAND */
+  --color-brand-500: #0073c7;      /* Hover states */
+  --color-brand-400: #2b8fd9;      /* Links, lighter accents */
+  --color-brand-300: #5aabeb;      /* Highlights */
+  --color-brand-200: #9dcaf5;      /* Soft backgrounds */
+  --color-brand-100: #d4e9fc;      /* Subtle tints */
+  --color-brand-50: #eef6fd;       /* Near white blue */
 
-  /* Legacy aliases for backward compatibility */
+  /* Legacy aliases */
   --color-obsidian: #005B9F;
-  --color-midnight: #004577;
+  --color-midnight: #003a6b;
   --color-navy: #005B9F;
-  --color-navy-light: #0070c4;
-  --color-slate-dark: #3d9be0;
+  --color-navy-light: #0073c7;
+  --color-brand-dark: #003a6b;
+  --color-brand-darker: #002647;
+  --color-brand-light: #0073c7;
+  --color-brand-lighter: #2b8fd9;
+  --color-slate-dark: #2b8fd9;
 
   /* ─────────────────────────────────────────────────────────────────
-     GOLD & PRECIOUS METALS
-     Luxurious accents that pair timelessly with deep blue
+     ACCENT - AMBER/ORANGE (Complementary to Blue)
+     Bloomberg-inspired warm accent for CTAs and highlights
      ───────────────────────────────────────────────────────────────── */
-  --color-gold: #c9a227;           /* Rich, saturated gold - primary accent */
-  --color-gold-bright: #e0b830;    /* Vibrant gold for CTAs */
-  --color-gold-light: #f5d668;     /* Light gold for highlights */
-  --color-gold-muted: #a68a2c;     /* Subdued gold for subtle elements */
-  --color-gold-pale: #fdf6e3;      /* Barely-there gold tint */
-  --color-copper: #b5651d;         /* Warm copper for variety */
-  --color-bronze: #7a5c3e;         /* Deep bronze for depth */
-  --color-champagne: #f7e7ce;      /* Soft champagne glow */
+  --color-accent-700: #b45309;     /* Dark amber */
+  --color-accent-600: #d97706;     /* Deep amber */
+  --color-accent: #f59e0b;         /* ★ PRIMARY ACCENT */
+  --color-accent-400: #fbbf24;     /* Bright amber */
+  --color-accent-300: #fcd34d;     /* Light amber */
+  --color-accent-200: #fde68a;     /* Pale amber */
+  --color-accent-100: #fef3c7;     /* Near white amber */
+
+  /* Gold aliases (maps to accent) */
+  --color-gold: #f59e0b;
+  --color-gold-bright: #fbbf24;
+  --color-gold-light: #fcd34d;
+  --color-gold-muted: #d97706;
+  --color-gold-pale: #fef3c7;
+  --color-copper: #ea580c;
+  --color-bronze: #c2410c;
+  --color-champagne: #fef3c7;
 
   /* ─────────────────────────────────────────────────────────────────
-     EDITORIAL PAPER TONES
-     Warm, sophisticated backgrounds that feel printed, not digital
+     NEUTRALS - CLEAN SLATE GRAYS
+     Modern, cool grays (not warm/creamy)
      ───────────────────────────────────────────────────────────────── */
-  --color-paper: #fdfbf8;          /* Purest warm white */
-  --color-paper-warm: #faf7f2;     /* Slightly warmer base */
-  --color-cream: #f5f1e8;          /* Classic cream */
-  --color-ivory: #eee9dc;          /* Aged paper feel */
-  --color-sand: #e2d9c8;           /* Sandy neutral */
-  --color-stone: #c9bea8;          /* Deeper neutral */
-  --color-taupe: #a69882;          /* Warm gray-brown */
+  --color-slate-950: #020617;      /* Near black */
+  --color-slate-900: #0f172a;      /* Darkest gray */
+  --color-slate-800: #1e293b;      /* Very dark */
+  --color-slate-700: #334155;      /* Dark gray */
+  --color-slate-600: #475569;      /* Medium dark */
+  --color-slate-500: #64748b;      /* Medium gray */
+  --color-slate-400: #94a3b8;      /* Light gray */
+  --color-slate-300: #cbd5e1;      /* Lighter */
+  --color-slate-200: #e2e8f0;      /* Very light */
+  --color-slate-100: #f1f5f9;      /* Near white */
+  --color-slate-50: #f8fafc;       /* White-ish */
+
+  /* Paper/Background aliases */
+  --color-paper: #ffffff;
+  --color-paper-warm: #f8fafc;
+  --color-cream: #f1f5f9;
+  --color-ivory: #e2e8f0;
+  --color-sand: #cbd5e1;
+  --color-stone: #94a3b8;
+  --color-taupe: #64748b;
 
   /* ─────────────────────────────────────────────────────────────────
-     INK & TEXT COLORS
-     Rich, readable text hierarchy with warm undertones
+     TEXT COLORS
+     Clean, readable hierarchy
      ───────────────────────────────────────────────────────────────── */
-  --color-ink: #1a1612;            /* Deep warm black - primary text */
-  --color-ink-soft: #2d2823;       /* Slightly softer headlines */
-  --color-charcoal: #3d3730;       /* Secondary text */
-  --color-graphite: #5c5549;       /* Tertiary text, captions */
-  --color-pewter: #7d7567;         /* Muted text, timestamps */
-  --color-silver: #9e968a;         /* Disabled, placeholder text */
+  --color-ink: #0f172a;            /* Primary text */
+  --color-ink-soft: #1e293b;       /* Headlines */
+  --color-charcoal: #334155;       /* Secondary text */
+  --color-graphite: #475569;       /* Tertiary */
+  --color-pewter: #64748b;         /* Captions */
+  --color-silver: #94a3b8;         /* Muted */
 
   /* ─────────────────────────────────────────────────────────────────
-     SEMANTIC COLORS - MARKET DATA
-     Carefully calibrated for financial data visualization
+     SEMANTIC - MARKET DATA
      ───────────────────────────────────────────────────────────────── */
-  /* Profit/Gain - Prosperous green with gold warmth */
-  --color-profit: #0f8a5f;         /* Primary profit indicator */
-  --color-profit-light: #2db87a;   /* Lighter profit */
-  --color-profit-bg: #e6f5ef;      /* Background for profit areas */
+  --color-profit: #059669;         /* Green - gains */
+  --color-profit-light: #10b981;
+  --color-profit-bg: #ecfdf5;
 
-  /* Loss/Decline - Clear red without aggression */
-  --color-loss: #c93545;           /* Primary loss indicator */
-  --color-loss-light: #e05565;     /* Lighter loss */
-  --color-loss-bg: #fcedef;        /* Background for loss areas */
+  --color-loss: #dc2626;           /* Red - losses */
+  --color-loss-light: #ef4444;
+  --color-loss-bg: #fef2f2;
 
-  /* Warning/Alert - Amber that bridges gold accent */
-  --color-warning: #d4850a;        /* Warning indicator */
-  --color-warning-light: #f0a82e;  /* Lighter warning */
-  --color-warning-bg: #fef7e6;     /* Background for warnings */
+  --color-warning: #d97706;        /* Amber - alerts */
+  --color-warning-light: #f59e0b;
+  --color-warning-bg: #fffbeb;
 
-  /* Info - Uses brand blue */
-  --color-info: #005B9F;           /* Info indicator */
-  --color-info-light: #3d9be0;     /* Lighter info */
-  --color-info-bg: #e8f4fc;        /* Background for info */
+  --color-info: #005B9F;           /* Blue - info */
+  --color-info-light: #2b8fd9;
+  --color-info-bg: #eef6fd;
 
   /* ─────────────────────────────────────────────────────────────────
-     SPECIAL PURPOSE COLORS
+     SPECIAL COLORS
      ───────────────────────────────────────────────────────────────── */
-  --color-teal: #0a7373;           /* Alternative accent */
-  --color-burgundy: #722f37;       /* Premium dark accent */
-  --color-slate: #64748b;          /* Neutral blue-gray */
+  --color-teal: #0d9488;
+  --color-burgundy: #991b1b;
+  --color-slate: #64748b;
 
-  /* Overlay colors */
-  --color-overlay-light: rgba(253, 251, 248, 0.95);
-  --color-overlay-dark: rgba(0, 48, 79, 0.92);
+  /* Overlays */
+  --color-overlay-light: rgba(255, 255, 255, 0.95);
+  --color-overlay-dark: rgba(15, 23, 42, 0.92);
   --color-overlay-brand: rgba(0, 91, 159, 0.95);
 
   /* ─────────────────────────────────────────────────────────────────
      TYPOGRAPHY
-     Distinctive Arabic-first pairing with editorial English
      ───────────────────────────────────────────────────────────────── */
   --font-display: 'Tajawal', 'system-ui', sans-serif;
-  --font-body: 'Amiri', 'Georgia', serif;
+  --font-body: 'Tajawal', 'system-ui', sans-serif;
   --font-accent: 'Playfair Display', serif;
 
   /* ─────────────────────────────────────────────────────────────────
-     SPACING SYSTEM
+     SPACING
      ───────────────────────────────────────────────────────────────── */
-  --spacing-section: 7rem;
-  --spacing-container: 2.5rem;
+  --spacing-section: 6rem;
+  --spacing-container: 2rem;
 
   /* ─────────────────────────────────────────────────────────────────
-     SHADOWS
-     Based on brand blue for cohesive depth perception
+     SHADOWS (blue-tinted for cohesion)
      ───────────────────────────────────────────────────────────────── */
-  --shadow-subtle: 0 1px 3px rgba(0, 69, 119, 0.05);
-  --shadow-card: 0 4px 20px rgba(0, 69, 119, 0.08);
-  --shadow-elevated: 0 12px 40px rgba(0, 69, 119, 0.12);
-  --shadow-dramatic: 0 24px 64px rgba(0, 48, 79, 0.2);
-  --shadow-gold: 0 8px 32px rgba(201, 162, 39, 0.2);
-  --shadow-blue: 0 8px 32px rgba(0, 91, 159, 0.25);
-  --shadow-inner: inset 0 2px 8px rgba(0, 69, 119, 0.06);
-  --shadow-glow-brand: 0 0 40px rgba(0, 91, 159, 0.3);
-  --shadow-glow-gold: 0 0 40px rgba(201, 162, 39, 0.3);
+  --shadow-subtle: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-card: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-elevated: 0 10px 40px rgba(15, 23, 42, 0.12);
+  --shadow-dramatic: 0 20px 60px rgba(15, 23, 42, 0.18);
+  --shadow-gold: 0 4px 20px rgba(245, 158, 11, 0.25);
+  --shadow-blue: 0 4px 20px rgba(0, 91, 159, 0.25);
+  --shadow-inner: inset 0 2px 4px rgba(15, 23, 42, 0.05);
+  --shadow-glow-brand: 0 0 30px rgba(0, 91, 159, 0.25);
+  --shadow-glow-gold: 0 0 30px rgba(245, 158, 11, 0.25);
 
   /* ─────────────────────────────────────────────────────────────────
      ANIMATIONS
-     Premium, editorial motion design
      ───────────────────────────────────────────────────────────────── */
   --ease-editorial: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-instant: 0.1s;
   --duration-fast: 0.2s;
-  --duration-medium: 0.4s;
-  --duration-slow: 0.7s;
+  --duration-medium: 0.35s;
+  --duration-slow: 0.6s;
 
   /* ─────────────────────────────────────────────────────────────────
      BORDERS & RADII
      ───────────────────────────────────────────────────────────────── */
-  --border-subtle: 1px solid rgba(0, 91, 159, 0.1);
-  --border-light: 1px solid var(--color-sand);
-  --border-gold: 1px solid var(--color-gold);
+  --border-subtle: 1px solid rgba(0, 91, 159, 0.08);
+  --border-light: 1px solid #e2e8f0;
+  --border-gold: 1px solid #f59e0b;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --radius-xl: 20px;
+  --radius-xl: 16px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
