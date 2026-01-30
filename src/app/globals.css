@@ -8,8 +8,8 @@
      ═══════════════════════════════════════════════════════════════ */
 
   /* Core Palette - Iktissad Brand Blue */
-  --color-obsidian: #002d4f;       /* Deepest blue-black for backgrounds */
-  --color-midnight: #003d6b;       /* Dark blue for sections */
+  --color-obsidian: #005B9F;       /* PRIMARY BRAND COLOR - used for main UI elements */
+  --color-midnight: #004a82;       /* Slightly darker brand blue */
   --color-navy: #005B9F;           /* PRIMARY BRAND COLOR */
   --color-navy-light: #0077cc;     /* Lighter brand blue for hovers */
   --color-slate-dark: #3d8fd4;     /* Muted blue for secondary elements */
