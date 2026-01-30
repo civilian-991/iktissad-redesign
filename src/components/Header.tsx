@@ -138,16 +138,18 @@ export default function Header() {
             {/* Logo */}
             <motion.a
               href="/"
-              className="flex items-center gap-3 group"
+              className="flex items-center group"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >
-              {/* Official Logo */}
-              <img
-                src="/logo.png"
-                alt="الإقتصاد والأعمال"
-                className="h-10 md:h-12 w-auto brightness-0"
-              />
+              {/* Official Logo with Navy Background */}
+              <div className="bg-navy px-4 py-2 rounded">
+                <img
+                  src="/logo-white.png"
+                  alt="الإقتصاد والأعمال - Al-Iktissad Wal-Aamal"
+                  className="h-10 md:h-12 w-auto"
+                />
+              </div>
             </motion.a>
 
             {/* Desktop Navigation */}
