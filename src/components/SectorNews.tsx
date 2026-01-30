@@ -456,7 +456,7 @@ export default function SectorNews() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       {/* Content Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#002d4f] via-[#002d4f]/50 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-darker via-brand-darker/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <h4 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-relaxed line-clamp-2 mb-2">
                           {article.title}

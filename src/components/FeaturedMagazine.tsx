@@ -105,7 +105,7 @@ export default function FeaturedMagazine() {
                     alt={latestIssue.title}
                     className="relative w-48 md:w-56 h-64 md:h-72 object-cover shadow-2xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0077cc]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-light/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
                     <span className="px-4 py-2 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm flex items-center gap-2">
                       <BookOpen size={16} />
                       تصفح الآن

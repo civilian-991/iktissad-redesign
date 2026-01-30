@@ -61,13 +61,13 @@ export default function VideoSection() {
   const regularVideos = videos.filter(v => !v.featured);
 
   return (
-    <section className="py-24 bg-gradient-to-br from-[#002d4f] via-[#003d6b] to-[#002d4f] relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-brand-darker via-brand-dark to-brand-darker relative overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #d4af37 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,_var(--color-gold)_1px,_transparent_0)] bg-[length:40px_40px]" />
 
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#d4af37]/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl" />
 
       <div className="container-editorial relative">
         {/* Section Header */}
@@ -78,18 +78,18 @@ export default function VideoSection() {
           className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
         >
           <div>
-            <span className="text-[#d4af37] text-sm font-[family-name:var(--font-display)] font-semibold tracking-wider uppercase">
+            <span className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold tracking-wider uppercase">
               شاهد الآن
             </span>
-            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-[#ffffff] mt-3 mb-4">
+            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-white mt-3 mb-4">
               فيديو
             </h2>
-            <div className="h-1 w-24 bg-gradient-to-l from-[#d4af37] to-[#cd7f32]" />
+            <div className="h-1 w-24 bg-gradient-to-l from-gold to-copper" />
           </div>
 
           <a
             href="/videos"
-            className="inline-flex items-center gap-2 text-[#d4af37] hover:text-[#e5c158] transition-colors font-[family-name:var(--font-display)] font-semibold"
+            className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors font-[family-name:var(--font-display)] font-semibold"
           >
             <span>جميع الفيديوهات</span>
             <ArrowUpLeft size={18} />
@@ -110,7 +110,7 @@ export default function VideoSection() {
                 transition={{ delay: index * 0.1 }}
                 className="group block"
               >
-                <div className="relative aspect-video overflow-hidden bg-[#005B9F]">
+                <div className="relative aspect-video overflow-hidden bg-brand">
                   <img
                     src={video.thumbnail}
                     alt={video.title}
@@ -121,28 +121,28 @@ export default function VideoSection() {
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
-                      className="w-16 h-16 bg-[#d4af37] flex items-center justify-center"
+                      className="w-16 h-16 bg-gold flex items-center justify-center"
                     >
-                      <Play className="text-[#002d4f] fill-[#002d4f]" size={28} />
+                      <Play className="text-brand-darker fill-brand-darker" size={28} />
                     </motion.div>
                   </div>
 
                   {/* Duration Badge */}
-                  <div className="absolute bottom-3 left-3 bg-black/80 text-[#ffffff] text-xs px-2 py-1 font-[family-name:var(--font-display)]">
+                  <div className="absolute bottom-3 left-3 bg-black/80 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
                     {video.duration}
                   </div>
 
                   {/* Category Badge */}
-                  <div className="absolute top-3 right-3 bg-[#d4af37] text-[#002d4f] text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
+                  <div className="absolute top-3 right-3 bg-gold text-brand-darker text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
                     {video.category}
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-[#ffffff] text-lg leading-relaxed group-hover:text-[#d4af37] transition-colors line-clamp-2">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
                     {video.title}
                   </h3>
-                  <div className="flex items-center gap-4 mt-2 text-[#c8d4e0] text-sm">
+                  <div className="flex items-center gap-4 mt-2 text-white/70 text-sm">
                     <span className="flex items-center gap-1">
                       <Eye size={14} />
                       {video.views} مشاهدة
@@ -154,14 +154,14 @@ export default function VideoSection() {
           </div>
 
           {/* Regular Videos - Sidebar List */}
-          <div className="lg:col-span-4 bg-[#005B9F] border border-[#3d8fd4]">
-            <div className="p-4 border-b border-[#3d8fd4]">
-              <h3 className="font-[family-name:var(--font-display)] font-bold text-[#ffffff]">
+          <div className="lg:col-span-4 bg-brand border border-brand-lighter">
+            <div className="p-4 border-b border-brand-lighter">
+              <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
                 المزيد من الفيديوهات
               </h3>
             </div>
 
-            <div className="divide-y divide-[#3d8fd4]">
+            <div className="divide-y divide-brand-lighter">
               {regularVideos.map((video, index) => (
                 <motion.a
                   key={video.id}
@@ -170,34 +170,34 @@ export default function VideoSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex gap-4 p-4 hover:bg-[#0077cc] transition-colors group"
+                  className="flex gap-4 p-4 hover:bg-brand-light transition-colors group"
                 >
                   {/* Thumbnail */}
-                  <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-[#0077cc]">
+                  <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-brand-light">
                     <img
                       src={video.thumbnail}
                       alt={video.title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="w-8 h-8 bg-[#d4af37]/90 flex items-center justify-center">
-                        <Play className="text-[#002d4f] fill-[#002d4f]" size={14} />
+                      <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
+                        <Play className="text-brand-darker fill-brand-darker" size={14} />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 left-1 bg-black/80 text-[#ffffff] text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
+                    <div className="absolute bottom-1 left-1 bg-black/80 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
                       {video.duration}
                     </div>
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <span className="text-[#d4af37] text-xs font-[family-name:var(--font-display)] font-semibold">
+                    <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold">
                       {video.category}
                     </span>
-                    <h4 className="font-[family-name:var(--font-display)] font-semibold text-[#ffffff] text-sm leading-relaxed mt-1 group-hover:text-[#d4af37] transition-colors line-clamp-2">
+                    <h4 className="font-[family-name:var(--font-display)] font-semibold text-white text-sm leading-relaxed mt-1 group-hover:text-gold transition-colors line-clamp-2">
                       {video.title}
                     </h4>
-                    <span className="text-[#b8c8d8] text-xs mt-1 flex items-center gap-1">
+                    <span className="text-white/60 text-xs mt-1 flex items-center gap-1">
                       <Eye size={12} />
                       {video.views}
                     </span>
