@@ -138,27 +138,16 @@ export default function Header() {
             {/* Logo */}
             <motion.a
               href="/"
-              className="flex items-center gap-4 group"
+              className="flex items-center gap-3 group"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >
-              {/* Logo Mark */}
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold">
-                  <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-2xl">إ</span>
-                </div>
-                {/* Corner Accent */}
-                <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-gold" />
-              </div>
-              {/* Logo Text */}
-              <div className="flex flex-col">
-                <span className="font-[family-name:var(--font-display)] font-black text-xl text-obsidian leading-tight tracking-tight">
-                  الإقتصاد والأعمال
-                </span>
-                <span className="text-[10px] text-gold-muted font-[family-name:var(--font-accent)] tracking-[0.2em] uppercase">
-                  Al-Iktissad Wal-Aamal
-                </span>
-              </div>
+              {/* Official Logo */}
+              <img
+                src="/logo.png"
+                alt="الإقتصاد والأعمال"
+                className="h-10 md:h-12 w-auto brightness-0"
+              />
             </motion.a>
 
             {/* Desktop Navigation */}
