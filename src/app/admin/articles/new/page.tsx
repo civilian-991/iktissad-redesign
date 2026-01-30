@@ -78,7 +78,7 @@ export default function NewArticlePage() {
     setIsSaving(false);
   };
 
-  const toolbarButtons = [
+  const toolbarButtons: Array<{ icon?: React.ComponentType<{ size?: number }>; label?: string; divider?: boolean }> = [
     { icon: Bold, label: 'عريض' },
     { icon: Italic, label: 'مائل' },
     { icon: Underline, label: 'تسطير' },
@@ -211,7 +211,7 @@ export default function NewArticlePage() {
               {toolbarButtons.map((btn, index) =>
                 btn.divider ? (
                   <div key={index} className="w-px h-6 bg-gold/10 mx-1" />
-                ) : (
+                ) : btn.icon ? (
                   <button
                     key={index}
                     title={btn.label}
@@ -219,7 +219,7 @@ export default function NewArticlePage() {
                   >
                     <btn.icon size={16} />
                   </button>
-                )
+                ) : null
               )}
             </div>
 

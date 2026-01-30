@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   FileText,
@@ -19,8 +19,10 @@ import {
   Moon,
   Sun,
   TrendingUp,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
+import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 const navigation = [
   { name: 'لوحة التحكم', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -41,6 +43,23 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
+  // Skip AuthProvider for login page to avoid issues
+  if (pathname === '/admin/login') {
+    return <AuthProvider>{children}</AuthProvider>;
+  }
+
+  return (
+    <AuthProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AuthProvider>
+  );
+}
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
@@ -61,9 +80,33 @@ export default function AdminLayout({
     return () => clearInterval(interval);
   }, []);
 
-  // Skip layout for login page
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/admin/login');
+    }
+  }, [user, authLoading, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/admin/login');
+  };
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-obsidian flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-gold animate-spin mx-auto mb-4" />
+          <p className="text-white/60 font-[family-name:var(--font-display)]">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render content if not authenticated
+  if (!user) {
+    return null;
   }
 
   return (
@@ -298,14 +341,14 @@ export default function AdminLayout({
                 }`}
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-bronze flex items-center justify-center">
-                  <span className="text-obsidian font-bold text-sm">م</span>
+                  <span className="text-obsidian font-bold text-sm">{user?.name?.charAt(0) || 'م'}</span>
                 </div>
                 <div className="hidden md:block text-right">
                   <p className={`text-sm font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
-                    مدير النظام
+                    {user?.name || 'المستخدم'}
                   </p>
                   <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
-                    admin@iktissad.com
+                    {user?.email || ''}
                   </p>
                 </div>
                 <ChevronDown size={16} className={darkMode ? 'text-white/50' : 'text-graphite'} />
@@ -323,15 +366,16 @@ export default function AdminLayout({
                   >
                     <div className={`p-4 border-b ${darkMode ? 'border-gold/10' : 'border-sand'}`}>
                       <p className={`font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
-                        مدير النظام
+                        {user?.name || 'المستخدم'}
                       </p>
                       <p className={`text-sm ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
-                        صلاحيات كاملة
+                        {user?.role === 'admin' ? 'صلاحيات كاملة' : user?.role === 'editor' ? 'محرر' : 'كاتب'}
                       </p>
                     </div>
                     <div className="p-2">
                       <Link
                         href="/admin/settings"
+                        onClick={() => setUserMenuOpen(false)}
                         className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
                           darkMode
                             ? 'text-white/70 hover:text-white hover:bg-white/5'
@@ -342,6 +386,7 @@ export default function AdminLayout({
                         <span className="font-[family-name:var(--font-display)] text-sm">الإعدادات</span>
                       </Link>
                       <button
+                        onClick={handleLogout}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
                           darkMode
                             ? 'text-loss hover:bg-loss/10'

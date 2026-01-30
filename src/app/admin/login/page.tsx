@@ -1,25 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Eye, EyeOff, Lock, Mail, ArrowLeft, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function AdminLoginPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/admin/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login - replace with actual auth
-    setTimeout(() => {
+    setError(null);
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      router.push('/admin/dashboard');
+    } else {
+      setError(result.error || 'حدث خطأ أثناء تسجيل الدخول');
       setIsLoading(false);
-      window.location.href = '/admin/dashboard';
-    }, 1500);
+    }
   };
 
   return (
@@ -161,6 +178,18 @@ export default function AdminLoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 bg-loss/10 border border-loss/20 text-loss rounded-xl px-4 py-3"
+              >
+                <AlertCircle size={18} />
+                <span className="font-[family-name:var(--font-display)] text-sm">{error}</span>
+              </motion.div>
+            )}
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
