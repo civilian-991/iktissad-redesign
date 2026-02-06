@@ -422,8 +422,8 @@ export default function SectorNews() {
                 transition={{ delay: sectorIndex * 0.1 }}
                 className="group"
               >
-                {/* Sector Card */}
-                <div className="bg-white border border-sand hover:border-gold/30 transition-colors duration-500 overflow-hidden">
+                {/* Sector Card - with enhanced hover effects */}
+                <div className="bg-white border border-sand hover:border-gold/50 hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                   {/* Sector Header */}
                   <div className={`bg-gradient-to-r ${sector.gradient} p-4 flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
@@ -448,7 +448,7 @@ export default function SectorNews() {
                     <a
                       key={article.id}
                       href={`/news/${article.id}`}
-                      className="block relative h-52 overflow-hidden"
+                      className="block relative h-52 overflow-hidden group/featured"
                     >
                       <img
                         src={article.image}

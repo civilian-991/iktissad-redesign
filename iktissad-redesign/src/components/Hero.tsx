@@ -111,8 +111,8 @@ export default function Hero() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Bottom gradient for text readability */}
-              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-brand-darker/95 via-brand-darker/60 to-transparent" />
+              {/* Bottom gradient for text readability - reduced to ~60% for better image visibility */}
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-brand-darker/75 via-brand-darker/40 to-transparent" />
 
               {/* Content positioned at bottom */}
               <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">

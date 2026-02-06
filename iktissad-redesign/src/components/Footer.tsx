@@ -141,7 +141,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden mt-32">
+    <footer className="relative overflow-hidden">
       {/* Main Footer */}
       <div className="bg-obsidian text-white relative overflow-hidden">
         {/* Pattern Overlay */}
