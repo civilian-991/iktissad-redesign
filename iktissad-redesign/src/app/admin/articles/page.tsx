@@ -435,7 +435,7 @@ export default function ArticlesPage() {
                     {article.author}
                   </td>
                   <td className="p-4">
-                    <Badge variant="gold" size="sm">
+                    <Badge variant="warning" size="sm">
                       {getCategoryName(article.categoryKey)}
                     </Badge>
                   </td>
