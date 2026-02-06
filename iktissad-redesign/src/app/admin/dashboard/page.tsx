@@ -413,7 +413,7 @@ export default function DashboardPage() {
                       </Link>
                     </td>
                     <td className="py-4">
-                      <Badge variant="gold" size="sm">
+                      <Badge variant="warning" size="sm">
                         {getCategoryName(article.categoryKey)}
                       </Badge>
                     </td>
