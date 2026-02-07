@@ -89,7 +89,7 @@ const modalVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       damping: 25,
       stiffness: 300,
     },
@@ -396,7 +396,7 @@ export interface SheetProps {
   className?: string;
 }
 
-const sheetAnimationVariants: Record<SheetPosition, { initial: object; animate: object; exit: object }> = {
+const sheetAnimationVariants: Record<SheetPosition, { initial: Record<string, string | number>; animate: Record<string, string | number>; exit: Record<string, string | number> }> = {
   right: {
     initial: { x: '100%' },
     animate: { x: 0 },
