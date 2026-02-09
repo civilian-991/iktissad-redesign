@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import Image from 'next/image';
 import { MapPin, Clock, ArrowUpLeft } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const countries = [
   {
@@ -146,6 +148,7 @@ const countries = [
 ];
 
 export default function CountryNews() {
+  const { t } = useTranslation();
   const [activeCountry, setActiveCountry] = useState(countries[0]);
 
   return (
@@ -163,12 +166,12 @@ export default function CountryNews() {
           className="text-center mb-12"
         >
           <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider [text-shadow:_0_1px_4px_rgb(0_0_0_/_50%)]">
-            تغطية إقليمية
+            {t('components.countryNews.subtitle')}
           </span>
           <h2
             className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold mt-2 mb-4 text-white"
           >
-            أخبار البلدان
+            {t('components.countryNews.title')}
           </h2>
           <div className="flex items-center justify-center gap-3 text-gold/50">
             <span className="w-16 h-px bg-gradient-to-r from-transparent to-gold/50"></span>
@@ -196,7 +199,7 @@ export default function CountryNews() {
                   : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
               }`}
             >
-              <img src={country.flag} alt={country.name} className="w-6 h-4 object-cover rounded-sm" />
+              <Image src={country.flag} alt={country.name} width={32} height={24} className="w-6 h-4 object-cover rounded-sm" />
               {country.name}
             </motion.button>
           ))}
@@ -217,15 +220,16 @@ export default function CountryNews() {
               href={`/news/${activeCountry.articles[0].id}`}
               className="relative h-96 lg:h-auto min-h-[400px] rounded-2xl overflow-hidden group"
             >
-              <img
-                src={activeCountry.articles[0].image}
+              <Image
+                src={activeCountry.articles[0].image as string}
                 alt={activeCountry.articles[0].title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               {/* Solid brand background - guaranteed contrast */}
               <div className="absolute bottom-0 left-0 right-0 bg-brand p-6 lg:p-8 rounded-b-2xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <img src={activeCountry.flag} alt={activeCountry.name} className="w-8 h-5 object-cover rounded-sm" />
+                  <Image src={activeCountry.flag} alt={activeCountry.name} width={32} height={24} className="w-8 h-5 object-cover rounded-sm" />
                   <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
                     {activeCountry.name}
                   </span>
@@ -279,7 +283,7 @@ export default function CountryNews() {
                 transition={{ delay: 0.3 }}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl border-2 border-dashed border-gold/30 text-gold font-[family-name:var(--font-display)] font-semibold hover:border-gold hover:bg-gold/10 transition-all duration-300"
               >
-                عرض جميع أخبار {activeCountry.name}
+                {t('components.countryNews.viewAllNews', { country: activeCountry.name })}
                 <ArrowUpLeft size={18} />
               </motion.a>
             </div>

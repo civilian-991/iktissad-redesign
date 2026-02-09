@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Amiri:wght@400;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -49,6 +48,7 @@
 
   /* Gold aliases (maps to accent) */
   --color-gold: #f59e0b;
+  --color-gold-dark: #b45309;
   --color-gold-bright: #fbbf24;
   --color-gold-light: #fcd34d;
   --color-gold-muted: #d97706;
@@ -118,6 +118,15 @@
   --color-teal: #0d9488;
   --color-burgundy: #991b1b;
   --color-slate: #64748b;
+
+  /* Social Media Brand Colors */
+  --color-social-facebook: #1877f2;
+  --color-social-twitter: #1da1f2;
+  --color-social-linkedin: #0a66c2;
+  --color-social-youtube: #ff0000;
+  --color-social-instagram: #e4405f;
+  --color-social-whatsapp: #25d366;
+  --color-social-telegram: #0088cc;
 
   /* Overlays */
   --color-overlay-light: rgba(255, 255, 255, 0.95);
@@ -277,6 +286,11 @@ h3 {
   background-size: 40px 40px;
 }
 
+/* Geometric Pattern */
+.geometric-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23005B9F' stroke-width='0.4' opacity='0.08'%3E%3Cpath d='M0 40 L40 0 L80 40 L40 80 Z'/%3E%3Cpath d='M20 40 L40 20 L60 40 L40 60 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
 /* Diagonal Lines */
 .pattern-diagonal {
   background-image: repeating-linear-gradient(
@@ -424,6 +438,25 @@ h3 {
 
 .btn-outline:hover {
   background: var(--color-obsidian);
+  color: var(--color-gold);
+}
+
+.btn-navy {
+  background: var(--color-navy);
+  color: white;
+  padding: 0.875rem 2rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-editorial);
+}
+
+.btn-navy:hover {
+  background: var(--color-navy-light);
+  border-color: var(--color-gold);
   color: var(--color-gold);
 }
 

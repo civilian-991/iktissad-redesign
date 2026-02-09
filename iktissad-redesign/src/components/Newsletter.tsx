@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Send, CheckCircle, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function Newsletter() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -57,7 +59,7 @@ export default function Newsletter() {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-[family-name:var(--font-display)] font-black text-white mb-4"
           >
-            اشترك في نشرتنا الإخبارية
+            {t('newsletter.title')}
           </motion.h2>
 
           {/* Subtitle */}
@@ -68,7 +70,7 @@ export default function Newsletter() {
             transition={{ delay: 0.1 }}
             className="text-white/80 text-lg mb-8 max-w-2xl mx-auto"
           >
-            احصل على آخر الأخبار الاقتصادية والتحليلات المالية مباشرة في بريدك الإلكتروني
+            {t('newsletter.subtitle')}
           </motion.p>
 
           {/* Form */}
@@ -85,7 +87,7 @@ export default function Newsletter() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="أدخل بريدك الإلكتروني"
+                placeholder={t('newsletter.placeholder')}
                 className="w-full px-6 py-4 pr-14 rounded-xl bg-white text-navy font-[family-name:var(--font-display)] placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-white/30"
                 required
               />
@@ -106,12 +108,12 @@ export default function Newsletter() {
               {isSubmitted ? (
                 <>
                   <CheckCircle size={20} />
-                  تم الاشتراك
+                  {t('newsletter.success')}
                 </>
               ) : (
                 <>
                   <Send size={20} />
-                  اشترك الآن
+                  {t('newsletter.button')}
                 </>
               )}
             </motion.button>
@@ -127,15 +129,15 @@ export default function Newsletter() {
           >
             <span className="flex items-center gap-2">
               <Sparkles size={16} className="text-white" />
-              محتوى حصري
+              {t('newsletter.features.exclusive')}
             </span>
             <span className="flex items-center gap-2">
               <Sparkles size={16} className="text-white" />
-              تحليلات أسبوعية
+              {t('newsletter.features.weekly')}
             </span>
             <span className="flex items-center gap-2">
               <Sparkles size={16} className="text-white" />
-              بدون إزعاج
+              {t('newsletter.features.noSpam')}
             </span>
           </motion.div>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ChevronLeft, Clock, TrendingUp, ArrowUpLeft, Flame } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const featuredNews = [
   {
@@ -64,6 +65,7 @@ const sideNews = [
 ];
 
 export default function Hero() {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -166,7 +168,7 @@ export default function Hero() {
                   whileTap={{ scale: 0.9 }}
                   onClick={prevSlide}
                   className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
-                  aria-label="السابق"
+                  aria-label={t('common.actions.previous')}
                 >
                   <ChevronRight size={24} />
                 </motion.button>
@@ -175,7 +177,7 @@ export default function Hero() {
                   whileTap={{ scale: 0.9 }}
                   onClick={nextSlide}
                   className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
-                  aria-label="التالي"
+                  aria-label={t('common.actions.next')}
                 >
                   <ChevronLeft size={24} />
                 </motion.button>
@@ -192,7 +194,7 @@ export default function Hero() {
                         ? 'w-8 bg-gold'
                         : 'w-3 bg-white/40 hover:bg-white/60'
                     }`}
-                    aria-label={`الخبر ${index + 1}`}
+                    aria-label={t('components.hero.storyLabel', { number: index + 1 })}
                   />
                 ))}
               </div>
@@ -213,11 +215,11 @@ export default function Hero() {
                 <div className="flex items-center gap-3">
                   <Flame size={18} className="text-gold" />
                   <h2 className="font-[family-name:var(--font-display)] font-bold text-lg">
-                    الأكثر قراءة
+                    {t('common.labels.mostRead')}
                   </h2>
                 </div>
                 <a href="/trending" className="text-gold text-sm font-[family-name:var(--font-display)] hover:underline flex items-center gap-1">
-                  المزيد
+                  {t('common.actions.viewMore')}
                   <ArrowUpLeft size={14} />
                 </a>
               </div>
@@ -251,7 +253,7 @@ export default function Hero() {
                         {news.trending && (
                           <span className="flex items-center gap-1 text-profit text-xs font-semibold">
                             <TrendingUp size={12} />
-                            رائج
+                            {t('common.labels.trending')}
                           </span>
                         )}
                       </div>
@@ -278,7 +280,7 @@ export default function Hero() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
                 </span>
-                <span className="text-sm font-[family-name:var(--font-display)] font-bold">عاجل</span>
+                <span className="text-sm font-[family-name:var(--font-display)] font-bold">{t('components.hero.badge')}</span>
                 <p className="text-white/90 text-sm truncate flex-1 font-[family-name:var(--font-body)]">
                   مؤشر تاسي يسجل ارتفاعاً بنسبة 1.2% في تداولات اليوم
                 </p>

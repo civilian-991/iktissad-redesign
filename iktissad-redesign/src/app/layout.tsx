@@ -1,5 +1,21 @@
 import type { Metadata } from "next";
+import { Tajawal, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
+
+const tajawal = Tajawal({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "700", "800", "900"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-accent",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "الإقتصاد والأعمال | Al-Iktissad Wal-Aamal",
@@ -30,13 +46,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
+    <html lang="ar" dir="rtl" className={`${tajawal.variable} ${playfair.variable}`}>
       <body className="antialiased min-h-screen bg-cream">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

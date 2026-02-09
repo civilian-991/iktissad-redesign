@@ -9,6 +9,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import Link from 'next/link';
 import {
   Facebook,
   Twitter,
@@ -154,27 +155,28 @@ export default function Footer() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             {/* Brand Column */}
             <div className="lg:col-span-4">
-              <motion.a
+              <Link
                 href="/"
                 className="flex items-center gap-4 mb-10"
-                whileHover={{ scale: 1.02 }}
               >
-                {/* Logo */}
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold">
-                    <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-3xl">إ</span>
+                <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-4">
+                  {/* Logo */}
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold">
+                      <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-3xl">إ</span>
+                    </div>
+                    <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-gold" />
                   </div>
-                  <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-gold" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-[family-name:var(--font-display)] font-black text-2xl text-white leading-tight">
-                    {t('common.brand.name')}
-                  </span>
-                  <span className="text-xs text-gold font-[family-name:var(--font-accent)] tracking-[0.15em] mt-1">
-                    {t('common.brand.nameEn')}
-                  </span>
-                </div>
-              </motion.a>
+                  <div className="flex flex-col">
+                    <span className="font-[family-name:var(--font-display)] font-black text-2xl text-white leading-tight">
+                      {t('common.brand.name')}
+                    </span>
+                    <span className="text-xs text-gold font-[family-name:var(--font-accent)] tracking-[0.15em] mt-1">
+                      {t('common.brand.nameEn')}
+                    </span>
+                  </div>
+                </motion.div>
+              </Link>
 
               <p className="text-white/70 text-base leading-relaxed mb-10 max-w-sm font-[family-name:var(--font-body)]">
                 {t('common.brand.description')}
@@ -238,13 +240,13 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {footerLinksConfig.sections.map((link) => (
                       <li key={link.key}>
-                        <a
+                        <Link
                           href={link.href}
                           className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getSectionName(link.key)}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -259,13 +261,13 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {footerLinksConfig.sectors.map((link) => (
                       <li key={link.key}>
-                        <a
+                        <Link
                           href={link.href}
                           className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getSectorName(link.key)}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -304,13 +306,13 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {footerLinksConfig.about.map((link) => (
                       <li key={link.key}>
-                        <a
+                        <Link
                           href={link.href}
                           className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getAboutName(link.key)}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -333,13 +335,13 @@ export default function Footer() {
                 {new Date().getFullYear()} {t('legal.copyright', { brand: t('common.brand.name') })}
               </p>
               <div className="flex items-center gap-6 text-white/60 text-xs">
-                <a href="/privacy" className="hover:text-gold transition-colors">
+                <Link href="/privacy" className="hover:text-gold transition-colors">
                   {t('legal.privacy')}
-                </a>
+                </Link>
                 <span className="w-1 h-1 bg-gold/30 rounded-full" />
-                <a href="/terms" className="hover:text-gold transition-colors">
+                <Link href="/terms" className="hover:text-gold transition-colors">
                   {t('legal.terms')}
-                </a>
+                </Link>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import NextImage from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Upload,
@@ -380,10 +381,11 @@ export default function MediaLibraryPage() {
               {/* Thumbnail */}
               <div className="aspect-square bg-white/5 relative">
                 {item.type === 'image' || item.type === 'video' ? (
-                  <img
+                  <NextImage
                     src={item.url}
                     alt={item.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -488,9 +490,9 @@ export default function MediaLibraryPage() {
                         onChange={() => toggleSelectItem(item.id)}
                         className="w-4 h-4 rounded border-gold/30 bg-transparent checked:bg-gold"
                       />
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 relative">
                         {item.type === 'image' || item.type === 'video' ? (
-                          <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                          <NextImage src={item.url} alt={item.name} fill className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             {getTypeIcon(item.type)}
@@ -654,9 +656,11 @@ export default function MediaLibraryPage() {
               {/* Preview Content */}
               <div className="p-4">
                 {previewItem.type === 'image' && (
-                  <img
+                  <NextImage
                     src={previewItem.url.replace('w=400&h=300', 'w=800&h=600')}
                     alt={previewItem.name}
+                    width={800}
+                    height={600}
                     className="w-full max-h-[60vh] object-contain rounded-xl"
                   />
                 )}

@@ -3,7 +3,7 @@
  * IKTISSAD Design System
  *
  * Main admin dashboard layout with sidebar, header, and navigation.
- * Uses design tokens and i18n for internationalization.
+ * Uses Stack Auth for authentication, design tokens and i18n.
  */
 
 'use client';
@@ -31,7 +31,8 @@ import {
   Loader2,
   BookOpen
 } from 'lucide-react';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { useUser } from "@stackframe/stack";
+import { stackClient } from "@/stack";
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes, config } from '@/lib/design-tokens';
 import { Badge } from '@/components/ui';
@@ -79,27 +80,66 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
-  // Skip AuthProvider for login page
+  // Skip layout chrome for login redirect page
   if (pathname === '/admin/login') {
-    return <AuthProvider>{children}</AuthProvider>;
+    return <>{children}</>;
   }
 
-  return (
-    <AuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AuthProvider>
-  );
+  // Use auth-aware layout when Stack Auth is configured, otherwise dev mode
+  if (stackClient) {
+    return <AdminLayoutWithAuth>{children}</AdminLayoutWithAuth>;
+  }
+  return <AdminLayoutContent user={{ displayName: 'Admin', primaryEmail: 'admin@iktissad.com', signOut: async () => {} }}>{children}</AdminLayoutContent>;
+}
+
+// Auth-aware wrapper that uses the useUser hook
+function AdminLayoutWithAuth({ children }: { children: React.ReactNode }) {
+  const user = useUser();
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (user === null) {
+      router.push('/handler/sign-in?after_auth_return_to=/admin/dashboard');
+    }
+  }, [user, router]);
+
+  // Show loading state while checking auth
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen bg-obsidian flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-gold animate-spin mx-auto mb-4" />
+          <p className="text-white/60 font-[family-name:var(--font-display)]">
+            {t('common.actions.loading')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return <AdminLayoutContent user={user}>{children}</AdminLayoutContent>;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // LAYOUT CONTENT
 // ═══════════════════════════════════════════════════════════════
 
-function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+interface AdminUser {
+  displayName?: string | null;
+  primaryEmail?: string | null;
+  signOut: () => Promise<void>;
+}
+
+function AdminLayoutContent({ children, user }: { children: React.ReactNode; user: AdminUser }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
-  const { user, isLoading: authLoading, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
@@ -131,13 +171,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return actionKeys[key] || key;
   };
 
-  // Get role display name
-  const getRoleDisplay = (role?: string): string => {
-    if (role === 'admin') return t('admin.userMenu.fullAccess');
-    if (role === 'editor') return t('admin.users.roles.editor');
-    return t('admin.users.roles.writer');
-  };
-
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date().toLocaleTimeString('ar-SA', {
@@ -150,36 +183,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/admin/login');
+  const handleLogout = async () => {
+    if (user) {
+      await user.signOut();
     }
-  }, [user, authLoading, router]);
-
-  const handleLogout = () => {
-    logout();
-    router.push('/admin/login');
+    router.push('/');
   };
 
-  // Show loading state while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-obsidian flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-gold animate-spin mx-auto mb-4" />
-          <p className="text-white/60 font-[family-name:var(--font-display)]">
-            {t('common.actions.loading')}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render content if not authenticated
-  if (!user) {
-    return null;
-  }
+  const displayName = user.displayName || user.primaryEmail || t('admin.userMenu.user');
+  const displayEmail = user.primaryEmail || '';
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-obsidian' : 'bg-cream'} transition-colors duration-500`}>
@@ -415,14 +427,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 }`}
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-bronze flex items-center justify-center">
-                  <span className="text-obsidian font-bold text-sm">{user?.name?.charAt(0) || 'م'}</span>
+                  <span className="text-obsidian font-bold text-sm">{displayName.charAt(0)}</span>
                 </div>
                 <div className="hidden md:block text-right">
                   <p className={`text-sm font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
-                    {user?.name || t('admin.userMenu.user')}
+                    {displayName}
                   </p>
                   <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
-                    {user?.email || ''}
+                    {displayEmail}
                   </p>
                 </div>
                 <ChevronDown size={iconSizes.sm} className={darkMode ? 'text-white/50' : 'text-graphite'} />
@@ -440,10 +452,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   >
                     <div className={`p-4 border-b ${darkMode ? 'border-gold/10' : 'border-sand'}`}>
                       <p className={`font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
-                        {user?.name || t('admin.userMenu.user')}
+                        {displayName}
                       </p>
                       <p className={`text-sm ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
-                        {getRoleDisplay(user?.role)}
+                        {t('admin.userMenu.fullAccess')}
                       </p>
                     </div>
                     <div className="p-2">

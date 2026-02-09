@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Play, Eye, ArrowUpLeft } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const videos = [
   {
@@ -57,6 +58,7 @@ const videos = [
 ];
 
 export default function VideoSection() {
+  const { t } = useTranslation();
   const featuredVideos = videos.filter(v => v.featured);
   const regularVideos = videos.filter(v => !v.featured);
 
@@ -79,10 +81,10 @@ export default function VideoSection() {
         >
           <div>
             <span className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold tracking-wider uppercase">
-              شاهد الآن
+              {t('components.videoSection.watchNow')}
             </span>
             <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-white mt-3 mb-4">
-              فيديو
+              {t('components.videoSection.title')}
             </h2>
             <div className="h-1 w-24 bg-gradient-to-l from-gold to-copper" />
           </div>
@@ -91,7 +93,7 @@ export default function VideoSection() {
             href="/videos"
             className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors font-[family-name:var(--font-display)] font-semibold"
           >
-            <span>جميع الفيديوهات</span>
+            <span>{t('components.videoSection.allVideos')}</span>
             <ArrowUpLeft size={18} />
           </a>
         </motion.div>
@@ -145,7 +147,7 @@ export default function VideoSection() {
                   <div className="flex items-center gap-4 mt-2 text-white/70 text-sm">
                     <span className="flex items-center gap-1">
                       <Eye size={14} />
-                      {video.views} مشاهدة
+                      {video.views} {t('components.videoSection.viewsLabel')}
                     </span>
                   </div>
                 </div>
@@ -157,7 +159,7 @@ export default function VideoSection() {
           <div className="lg:col-span-4 bg-brand border border-brand-lighter">
             <div className="p-4 border-b border-brand-lighter">
               <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
-                المزيد من الفيديوهات
+                {t('components.videoSection.moreVideos')}
               </h3>
             </div>
 

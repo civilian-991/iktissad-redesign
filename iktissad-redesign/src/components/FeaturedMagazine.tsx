@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { BookOpen, Eye, ArrowLeft, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const latestIssue = {
   id: 'AR0542',
@@ -39,6 +40,7 @@ const recentIssues = [
 ];
 
 export default function FeaturedMagazine() {
+  const { t } = useTranslation();
   return (
     <section className="py-20 bg-cream relative overflow-hidden">
       {/* Subtle Pattern */}
@@ -62,16 +64,16 @@ export default function FeaturedMagazine() {
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian">
-                مجلة الإقتصاد والأعمال
+                {t('nav.group.magazine')}
               </h2>
-              <p className="text-graphite">أكثر من 65 عاماً من التميز في الصحافة الاقتصادية</p>
+              <p className="text-graphite">{t('components.featuredMagazine.subtitle')}</p>
             </div>
           </div>
           <a
             href="/magazine"
             className="hidden md:flex items-center gap-2 text-gold hover:text-gold-dark transition-colors font-[family-name:var(--font-display)] font-semibold"
           >
-            <span>جميع الأعداد</span>
+            <span>{t('pages.magazine.allIssues')}</span>
             <ArrowLeft size={18} />
           </a>
         </motion.div>
@@ -88,7 +90,7 @@ export default function FeaturedMagazine() {
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="text-gold" size={20} />
                 <span className="text-gold font-[family-name:var(--font-display)] font-semibold">
-                  العدد الأخير
+                  {t('components.featuredMagazine.latestIssue')}
                 </span>
               </div>
 
@@ -108,7 +110,7 @@ export default function FeaturedMagazine() {
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-light/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
                     <span className="px-4 py-2 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm flex items-center gap-2">
                       <BookOpen size={16} />
-                      تصفح الآن
+                      {t('components.featuredMagazine.browseNow')}
                     </span>
                   </div>
                 </motion.a>
@@ -125,17 +127,17 @@ export default function FeaturedMagazine() {
                   <div className="flex items-center gap-6 mb-6 text-graphite text-sm">
                     <span className="flex items-center gap-2">
                       <BookOpen size={16} />
-                      {latestIssue.pages} صفحة
+                      {latestIssue.pages} {t('components.featuredMagazine.pages')}
                     </span>
                     <span className="flex items-center gap-2">
                       <Eye size={16} />
-                      {latestIssue.views.toLocaleString()} قراءة
+                      {latestIssue.views.toLocaleString()} {t('components.featuredMagazine.reads')}
                     </span>
                   </div>
 
                   <div className="mb-6">
                     <h4 className="text-charcoal font-[family-name:var(--font-display)] font-semibold mb-3 text-sm">
-                      في هذا العدد:
+                      {t('components.featuredMagazine.inThisIssue')}
                     </h4>
                     <ul className="space-y-2">
                       {latestIssue.highlights.map((highlight, i) => (
@@ -160,13 +162,13 @@ export default function FeaturedMagazine() {
                       className="flex items-center gap-2 px-6 py-3 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
                     >
                       <BookOpen size={18} />
-                      تصفح العدد
+                      {t('components.featuredMagazine.browseIssue')}
                     </a>
                     <a
                       href="/magazine"
                       className="flex items-center gap-2 px-6 py-3 border border-obsidian text-obsidian font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
                     >
-                      أرشيف المجلة
+                      {t('components.featuredMagazine.archive')}
                     </a>
                   </div>
                 </div>
@@ -182,7 +184,7 @@ export default function FeaturedMagazine() {
             className="space-y-4"
           >
             <h4 className="text-obsidian font-[family-name:var(--font-display)] font-semibold mb-4">
-              أعداد سابقة
+              {t('pages.magazine.pastIssues')}
             </h4>
 
             {recentIssues.map((issue, index) => (
@@ -215,7 +217,7 @@ export default function FeaturedMagazine() {
               href="/magazine"
               className="block text-center py-3 text-gold hover:text-gold-dark font-[family-name:var(--font-display)] font-semibold transition-colors"
             >
-              عرض جميع الأعداد
+              {t('components.featuredMagazine.viewAllIssues')}
             </a>
           </motion.div>
         </div>

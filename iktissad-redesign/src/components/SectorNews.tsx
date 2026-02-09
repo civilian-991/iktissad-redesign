@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from '@/lib/i18n';
 import {
   Factory,
   Building2,
@@ -325,6 +326,7 @@ const sectors = [
 const SECTORS_PER_PAGE = 6;
 
 export default function SectorNews() {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = Math.ceil(sectors.length / SECTORS_PER_PAGE);
 
@@ -359,9 +361,9 @@ export default function SectorNews() {
           className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
         >
           <div>
-            <span className="section-label">تغطية شاملة</span>
+            <span className="section-label">{t('components.sectorNews.subtitle')}</span>
             <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-3 mb-4">
-              أخبار القطاعات
+              {t('components.sectorNews.title')}
             </h2>
             <div className="divider-editorial max-w-xs">
               <div className="diamond-accent" />
@@ -376,7 +378,7 @@ export default function SectorNews() {
                 whileTap={{ scale: 0.9 }}
                 onClick={prevPage}
                 className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
-                aria-label="السابق"
+                aria-label={t('common.actions.previous')}
               >
                 <ChevronRight size={18} />
               </motion.button>
@@ -388,7 +390,7 @@ export default function SectorNews() {
                 whileTap={{ scale: 0.9 }}
                 onClick={nextPage}
                 className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
-                aria-label="التالي"
+                aria-label={t('common.actions.next')}
               >
                 <ChevronLeft size={18} />
               </motion.button>
@@ -398,7 +400,7 @@ export default function SectorNews() {
               href="/sectors"
               className="btn-outline inline-flex items-center gap-2"
             >
-              <span>جميع القطاعات</span>
+              <span>{t('components.sectorNews.allSectors')}</span>
               <ArrowUpLeft size={16} />
             </a>
           </div>
@@ -438,7 +440,7 @@ export default function SectorNews() {
                       href={`/sectors/${sector.id}`}
                       className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-xs font-[family-name:var(--font-display)]"
                     >
-                      المزيد
+                      {t('common.actions.viewMore')}
                       <ArrowUpLeft size={14} />
                     </a>
                   </div>
@@ -507,7 +509,7 @@ export default function SectorNews() {
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentPage ? 'w-8 bg-gold' : 'w-2 bg-sand hover:bg-stone'
               }`}
-              aria-label={`الصفحة ${index + 1}`}
+              aria-label={t('components.sectorNews.pageLabel', { page: index + 1 })}
             />
           ))}
         </div>

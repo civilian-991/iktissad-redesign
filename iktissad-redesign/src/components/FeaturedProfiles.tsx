@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Quote, ArrowUpLeft } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const profiles = [
   {
@@ -39,6 +40,7 @@ const profiles = [
 ];
 
 export default function FeaturedProfiles() {
+  const { t } = useTranslation();
   return (
     <section className="py-20 bg-cream relative overflow-hidden">
       {/* Decorative Pattern */}
@@ -54,20 +56,20 @@ export default function FeaturedProfiles() {
         >
           <div>
             <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
-              شخصيات مؤثرة
+              {t('components.featuredProfiles.subtitle')}
             </span>
             <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-navy mt-2">
-              بروفايل
+              {t('components.featuredProfiles.sectionTitle')}
             </h2>
             <p className="text-slate mt-2 max-w-lg">
-              قادة الأعمال والشخصيات المؤثرة في عالم الاقتصاد والمال العربي
+              {t('components.featuredProfiles.description')}
             </p>
           </div>
           <a
             href="/profiles"
             className="btn-navy flex items-center gap-2 self-start"
           >
-            <span>جميع الشخصيات</span>
+            <span>{t('components.featuredProfiles.viewAllProfiles')}</span>
             <ArrowUpLeft size={18} />
           </a>
         </motion.div>
@@ -97,7 +99,7 @@ export default function FeaturedProfiles() {
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-light/60 via-transparent to-transparent" />
 
                   {/* Category Badge */}
-                  <span className="absolute top-4 right-4 px-3 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">
+                  <span className="absolute top-4 right-4 px-3 py-1 bg-gold text-obsidian text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">
                     {profile.category}
                   </span>
 

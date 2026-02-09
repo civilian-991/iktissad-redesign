@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const marketData = [
   { name: 'تاسي', value: '12,458.32', change: '+1.24%', up: true },
@@ -15,6 +16,7 @@ const marketData = [
 ];
 
 export default function MarketTicker() {
+  const { t } = useTranslation();
   return (
     <div className="bg-obsidian border-b border-gold/10 overflow-hidden">
       <div className="container-editorial">
@@ -23,7 +25,7 @@ export default function MarketTicker() {
           <div className="flex-shrink-0 flex items-center gap-2 pl-6 border-l border-gold/20">
             <div className="w-2 h-2 rounded-full bg-profit animate-pulse" />
             <span className="text-gold text-xs font-[family-name:var(--font-display)] font-bold whitespace-nowrap">
-              الأسواق الآن
+              {t('components.marketTicker.marketsNow')}
             </span>
           </div>
 
