@@ -1,6 +1,6 @@
 /**
  * IKTISSAD Design System - Design Tokens
- * Deep Navy + Champagne Gold — Classic Financial Authority
+ * #F5EEDC + #27548A + #183B4E + #DDA853
  *
  * These values mirror the CSS custom properties in globals.css
  */
@@ -10,45 +10,45 @@
 // ═══════════════════════════════════════════════════════════════
 
 export const colors = {
-  // Navy Scale (deep, rich blues)
+  // Dark Base Scale (#183B4E deep teal-navy)
   brand: {
-    950: '#0A1628',
-    900: '#0F1D32',
-    800: '#15253E',
-    700: '#1B2A4A',
-    DEFAULT: '#1B2A4A',
-    500: '#2E4263',
-    400: '#3D5579',
-    300: '#5A7499',
-    200: '#8CA3BF',
-    100: '#C2D1E0',
-    50: '#EDF1F5',
+    950: '#0C1E2A',
+    900: '#102735',
+    800: '#183B4E',
+    700: '#1E4A60',
+    DEFAULT: '#27548A',
+    500: '#326E8A',
+    400: '#4A8AAA',
+    300: '#6FA8C4',
+    200: '#9DC3DA',
+    100: '#CDDFE9',
+    50: '#EBF2F7',
   },
 
-  // Champagne Gold Scale
+  // Gold Accent Scale (#DDA853)
   accent: {
-    700: '#8B7340',
-    600: '#A6894B',
-    DEFAULT: '#C5A55A',
-    400: '#D4B872',
-    300: '#DFC98E',
-    200: '#EBDBAF',
-    100: '#F5EDD5',
+    700: '#A17A30',
+    600: '#C49240',
+    DEFAULT: '#DDA853',
+    400: '#E5BA6F',
+    300: '#ECCC8E',
+    200: '#F3DDAF',
+    100: '#F9EED3',
   },
 
-  // Warm Neutrals (with blue hint)
+  // Warm Neutrals (based on #F5EEDC cream)
   slate: {
-    950: '#0F1D32',
-    900: '#1A2438',
-    800: '#2A3344',
-    700: '#3D4A5C',
-    600: '#546172',
-    500: '#6E7B8B',
-    400: '#8F9AAA',
-    300: '#B5BEC8',
-    200: '#D5DAE0',
-    100: '#ECEEF2',
-    50: '#F6F7F9',
+    950: '#183B4E',
+    900: '#1E4A60',
+    800: '#2A5A6E',
+    700: '#3D6E7E',
+    600: '#548490',
+    500: '#6E98A2',
+    400: '#8FB0B8',
+    300: '#B5CCD2',
+    200: '#D8E3E0',
+    100: '#EDE8DA',
+    50: '#F5EEDC',
   },
 
   // Semantic Colors
@@ -59,12 +59,12 @@ export const colors = {
     loss: '#dc2626',
     lossLight: '#ef4444',
     lossBg: '#fef2f2',
-    warning: '#A6894B',
-    warningLight: '#C5A55A',
-    warningBg: '#F5EDD5',
-    info: '#4A6FA5',
-    infoLight: '#6B8FBF',
-    infoBg: '#EDF1F5',
+    warning: '#C49240',
+    warningLight: '#DDA853',
+    warningBg: '#F9EED3',
+    info: '#27548A',
+    infoLight: '#4A8AAA',
+    infoBg: '#EBF2F7',
   },
 
   // Social Media Brand Colors
@@ -80,39 +80,39 @@ export const colors = {
 
   // Special Colors
   special: {
-    teal: '#0d9488',
+    teal: '#183B4E',
     burgundy: '#7A1B1B',
-    gold: '#C5A55A',
-    goldBright: '#D4B872',
-    goldLight: '#DFC98E',
-    goldMuted: '#A6894B',
-    copper: '#B8956A',
-    bronze: '#9A7B50',
+    gold: '#DDA853',
+    goldBright: '#E5BA6F',
+    goldLight: '#ECCC8E',
+    goldMuted: '#C49240',
+    copper: '#C49240',
+    bronze: '#A17A30',
   },
 
   // Paper/Background
   paper: {
-    DEFAULT: '#FAFBFC',
-    warm: '#F8F9FB',
-    cream: '#F2F4F7',
-    ivory: '#ECEEF2',
+    DEFAULT: '#F5EEDC',
+    warm: '#F2EACD',
+    cream: '#EDE5D0',
+    ivory: '#E5DCCA',
   },
 
   // Text Colors
   text: {
-    ink: '#1A2438',
-    inkSoft: '#2A3344',
-    charcoal: '#3D4A5C',
-    graphite: '#546172',
-    pewter: '#6E7B8B',
-    silver: '#8F9AAA',
+    ink: '#183B4E',
+    inkSoft: '#1E4A60',
+    charcoal: '#2A5A6E',
+    graphite: '#3D6E7E',
+    pewter: '#548490',
+    silver: '#6E98A2',
   },
 
   // Overlays
   overlay: {
-    light: 'rgba(250, 251, 252, 0.95)',
-    dark: 'rgba(15, 29, 50, 0.94)',
-    brand: 'rgba(15, 29, 50, 0.95)',
+    light: 'rgba(245, 238, 220, 0.95)',
+    dark: 'rgba(24, 59, 78, 0.94)',
+    brand: 'rgba(24, 59, 78, 0.95)',
   },
 } as const;
 
@@ -215,19 +215,19 @@ export const spacing = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════
-// SHADOWS — Navy-tinted for cohesion
+// SHADOWS — Teal-navy tinted for cohesion
 // ═══════════════════════════════════════════════════════════════
 
 export const shadows = {
-  subtle: '0 1px 2px rgba(15, 29, 50, 0.04)',
-  card: '0 2px 8px rgba(15, 29, 50, 0.06)',
-  elevated: '0 8px 30px rgba(15, 29, 50, 0.08)',
-  dramatic: '0 16px 50px rgba(15, 29, 50, 0.12)',
-  gold: '0 4px 20px rgba(197, 165, 90, 0.15)',
-  blue: '0 4px 20px rgba(27, 42, 74, 0.15)',
-  inner: 'inset 0 1px 3px rgba(15, 29, 50, 0.04)',
-  glowBrand: '0 0 30px rgba(15, 29, 50, 0.15)',
-  glowGold: '0 0 30px rgba(197, 165, 90, 0.18)',
+  subtle: '0 1px 2px rgba(24, 59, 78, 0.05)',
+  card: '0 2px 8px rgba(24, 59, 78, 0.07)',
+  elevated: '0 8px 30px rgba(24, 59, 78, 0.10)',
+  dramatic: '0 16px 50px rgba(24, 59, 78, 0.14)',
+  gold: '0 4px 20px rgba(221, 168, 83, 0.20)',
+  blue: '0 4px 20px rgba(39, 84, 138, 0.15)',
+  inner: 'inset 0 1px 3px rgba(24, 59, 78, 0.05)',
+  glowBrand: '0 0 30px rgba(24, 59, 78, 0.15)',
+  glowGold: '0 0 30px rgba(221, 168, 83, 0.22)',
 } as const;
 
 // ═══════════════════════════════════════════════════════════════

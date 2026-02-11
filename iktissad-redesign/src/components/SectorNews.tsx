@@ -34,7 +34,7 @@ const sectors = [
     id: 'finance',
     name: 'مال ومصارف',
     icon: Building2,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 10,
@@ -51,7 +51,7 @@ const sectors = [
     id: 'investment',
     name: 'استثمار',
     icon: TrendingUp,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 13,
@@ -68,7 +68,7 @@ const sectors = [
     id: 'trade',
     name: 'تجارة',
     icon: ShoppingBag,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 7,
@@ -85,7 +85,7 @@ const sectors = [
     id: 'energy-environment',
     name: 'طاقة وبيئة',
     icon: Leaf,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 37,
@@ -102,7 +102,7 @@ const sectors = [
     id: 'real-estate',
     name: 'عقار',
     icon: Home,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 19,
@@ -119,7 +119,7 @@ const sectors = [
     id: 'industry',
     name: 'صناعة',
     icon: Factory,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 1,
@@ -137,7 +137,7 @@ const sectors = [
     id: 'technology',
     name: 'تكنولوجيا',
     icon: Cpu,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 43,
@@ -154,7 +154,7 @@ const sectors = [
     id: 'automotive',
     name: 'سيارات',
     icon: Car,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 25,
@@ -171,7 +171,7 @@ const sectors = [
     id: 'transport',
     name: 'نقل',
     icon: Truck,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 22,
@@ -188,7 +188,7 @@ const sectors = [
     id: 'tourism-entertainment',
     name: 'سياحة وترفيه',
     icon: Plane,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 28,
@@ -205,7 +205,7 @@ const sectors = [
     id: 'insurance',
     name: 'تأمين',
     icon: Shield,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 16,
@@ -222,7 +222,7 @@ const sectors = [
     id: 'entrepreneurship',
     name: 'ريادة وابتكار',
     icon: Lightbulb,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 40,
@@ -240,7 +240,7 @@ const sectors = [
     id: 'agriculture',
     name: 'زراعة',
     icon: Wheat,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 4,
@@ -257,7 +257,7 @@ const sectors = [
     id: 'health',
     name: 'صحة',
     icon: HeartPulse,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 34,
@@ -274,7 +274,7 @@ const sectors = [
     id: 'education',
     name: 'تعليم',
     icon: GraduationCap,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 31,
@@ -291,7 +291,7 @@ const sectors = [
     id: 'luxury',
     name: 'رفاهية',
     icon: Gem,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 46,
@@ -308,7 +308,7 @@ const sectors = [
     id: 'wealth',
     name: 'ثروات',
     icon: Coins,
-    gradient: 'from-navy to-brand-dark',
+    gradient: 'from-obsidian to-brand-darker',
     articles: [
       {
         id: 49,
