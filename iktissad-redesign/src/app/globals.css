@@ -25,7 +25,7 @@
   /* Legacy aliases */
   --color-obsidian: #183B4E;
   --color-midnight: #0C1E2A;
-  --color-navy: #27548A;
+  --color-navy: #183B4E;
   --color-navy-light: #1E4A60;
   --color-brand-dark: #102735;
   --color-brand-darker: #0C1E2A;
@@ -375,7 +375,7 @@ h3 {
   font-weight: 700;
   font-size: 0.875rem;
   letter-spacing: 0.03em;
-  border: 1px solid var(--color-gold-muted);
+  border: 1px solid var(--color-gold);
   border-radius: 0;
   cursor: pointer;
   position: relative;
@@ -387,7 +387,7 @@ h3 {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--color-gold-bright);
+  background: var(--color-gold-dark);
   opacity: 0;
   transition: opacity var(--duration-fast);
 }
@@ -398,7 +398,7 @@ h3 {
 }
 
 .btn-gold:hover::before {
-  opacity: 1;
+  opacity: 0.15;
 }
 
 .btn-gold span {
