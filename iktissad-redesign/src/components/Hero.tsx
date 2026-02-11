@@ -208,25 +208,25 @@ export default function Hero() {
           </div>
 
           {/* Side Panel - Light background with dark text */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 flex flex-col">
             {/* Header */}
-            <div className="bg-obsidian text-white p-4 mb-1">
+            <div className="bg-obsidian text-white px-4 py-3 mb-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Flame size={18} className="text-gold" />
-                  <h2 className="font-[family-name:var(--font-display)] font-bold text-lg">
+                <div className="flex items-center gap-2">
+                  <Flame size={15} className="text-gold" />
+                  <h2 className="font-[family-name:var(--font-display)] font-bold text-sm">
                     {t('common.labels.mostRead')}
                   </h2>
                 </div>
-                <a href="/trending" className="text-gold text-sm font-[family-name:var(--font-display)] hover:underline flex items-center gap-1">
+                <a href="/trending" className="text-gold text-xs font-[family-name:var(--font-display)] hover:underline flex items-center gap-1">
                   {t('common.actions.viewMore')}
-                  <ArrowUpLeft size={14} />
+                  <ArrowUpLeft size={12} />
                 </a>
               </div>
             </div>
 
             {/* News List - cream/light background */}
-            <div className="bg-cream border border-charcoal/10">
+            <div className="bg-cream border border-charcoal/10 flex-1 flex flex-col">
               {sideNews.map((news, index) => (
                 <motion.a
                   key={news.id}
@@ -234,19 +234,19 @@ export default function Hero() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className={`block p-4 hover:bg-gold/10 transition-colors group ${
+                  className={`flex-1 flex items-center px-4 py-3 hover:bg-gold/10 transition-colors group ${
                     index !== sideNews.length - 1 ? 'border-b border-charcoal/10' : ''
                   }`}
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-3 w-full">
                     {/* Number */}
-                    <span className="font-[family-name:var(--font-accent)] text-3xl font-bold text-gold/60 group-hover:text-gold transition-colors leading-none">
+                    <span className="font-[family-name:var(--font-accent)] text-2xl font-bold text-gold/60 group-hover:text-gold transition-colors leading-none">
                       {String(index + 1).padStart(2, '0')}
                     </span>
 
                     <div className="flex-1 min-w-0">
                       {/* Category & Trending */}
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-0.5">
                         <span className="text-gold text-xs font-[family-name:var(--font-display)] font-bold">
                           {news.category}
                         </span>
@@ -259,14 +259,9 @@ export default function Hero() {
                       </div>
 
                       {/* Title - Dark text on light background */}
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-charcoal text-sm leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-charcoal text-sm leading-snug group-hover:text-gold transition-colors line-clamp-2">
                         {news.title}
                       </h3>
-
-                      {/* Date */}
-                      <span className="text-charcoal/70 text-xs mt-1 block">
-                        {news.date}
-                      </span>
                     </div>
                   </div>
                 </motion.a>
@@ -274,14 +269,14 @@ export default function Hero() {
             </div>
 
             {/* Breaking News - Red accent */}
-            <div className="bg-loss text-white p-4 mt-1">
+            <div className="bg-loss text-white px-4 py-3 mt-1">
               <div className="flex items-center gap-3">
-                <span className="relative flex h-2.5 w-2.5">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
                 </span>
-                <span className="text-sm font-[family-name:var(--font-display)] font-bold">{t('components.hero.badge')}</span>
-                <p className="text-white/90 text-sm truncate flex-1 font-[family-name:var(--font-body)]">
+                <span className="text-xs font-[family-name:var(--font-display)] font-bold shrink-0">{t('components.hero.badge')}</span>
+                <p className="text-white/90 text-xs truncate flex-1 font-[family-name:var(--font-body)]">
                   مؤشر تاسي يسجل ارتفاعاً بنسبة 1.2% في تداولات اليوم
                 </p>
               </div>
