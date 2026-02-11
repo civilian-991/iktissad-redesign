@@ -88,7 +88,7 @@ export default function FeaturedProfiles() {
               className="group relative"
             >
               {/* Card */}
-              <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg">
+              <div className="relative bg-paper overflow-hidden shadow-card border border-sand">
                 {/* Image */}
                 <div className="relative h-64 overflow-hidden">
                   <img
@@ -128,11 +128,11 @@ export default function FeaturedProfiles() {
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-gold rounded-2xl transition-colors duration-300 pointer-events-none" />
+                <div className="absolute inset-0 border border-transparent group-hover:border-gold transition-colors duration-300 pointer-events-none" />
               </div>
 
               {/* Decorative Shadow */}
-              <div className="absolute -bottom-3 left-3 right-3 h-6 bg-navy/10 rounded-2xl -z-10 blur-md" />
+              <div className="absolute -bottom-3 left-3 right-3 h-6 bg-obsidian/8 -z-10 blur-md" />
             </motion.a>
           ))}
         </div>

@@ -120,7 +120,7 @@ export default function VideoSection() {
                   />
 
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                  <div className="absolute inset-0 bg-obsidian/30 group-hover:bg-obsidian/40 transition-colors flex items-center justify-center">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       className="w-16 h-16 bg-gold flex items-center justify-center"
@@ -130,7 +130,7 @@ export default function VideoSection() {
                   </div>
 
                   {/* Duration Badge */}
-                  <div className="absolute bottom-3 left-3 bg-black/80 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
+                  <div className="absolute bottom-3 left-3 bg-obsidian/80 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
                     {video.duration}
                   </div>
 
@@ -181,12 +181,12 @@ export default function VideoSection() {
                       alt={video.title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-obsidian/30 flex items-center justify-center">
                       <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
                         <Play className="text-brand-darker fill-brand-darker" size={14} />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 left-1 bg-black/80 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
+                    <div className="absolute bottom-1 left-1 bg-obsidian/80 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
                       {video.duration}
                     </div>
                   </div>

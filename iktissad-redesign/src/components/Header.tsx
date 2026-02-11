@@ -239,7 +239,7 @@ export default function Header() {
               <motion.div
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                className="bg-navy px-4 py-2 rounded"
+                className="bg-navy px-4 py-2"
               >
                 <Image
                   src="/logo-white.png"
@@ -285,7 +285,7 @@ export default function Header() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: animations.durationMs.fast / 1000 }}
-                        className={`absolute top-full right-0 bg-white shadow-elevated border-t-2 border-gold overflow-hidden`}
+                        className={`absolute top-full right-0 bg-paper shadow-elevated border-t-2 border-gold overflow-hidden`}
                         style={{ width: item.wide ? config.submenu.wideWidth : config.submenu.normalWidth }}
                       >
                         <div className={`py-3 ${item.wide ? 'grid grid-cols-2 gap-x-4 px-2' : ''}`}>
@@ -439,7 +439,7 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[90] lg:hidden"
+              className="fixed inset-0 bg-obsidian/60 z-[90] lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div

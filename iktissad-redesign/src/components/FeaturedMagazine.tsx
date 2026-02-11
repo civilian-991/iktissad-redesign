@@ -86,7 +86,7 @@ export default function FeaturedMagazine() {
             viewport={{ once: true }}
             className="lg:col-span-2"
           >
-            <div className="bg-white border border-sand p-6 md:p-8">
+            <div className="bg-paper border border-sand p-6 md:p-8">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="text-gold" size={20} />
                 <span className="text-gold font-[family-name:var(--font-display)] font-semibold">
@@ -196,7 +196,7 @@ export default function FeaturedMagazine() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ x: -5 }}
-                className="flex items-center gap-4 p-3 bg-white border border-sand hover:border-gold/50 transition-all group"
+                className="flex items-center gap-4 p-3 bg-paper border border-sand hover:border-gold/50 transition-all group"
               >
                 <img
                   src={issue.cover}

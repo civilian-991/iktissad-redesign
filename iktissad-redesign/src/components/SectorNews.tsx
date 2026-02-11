@@ -425,7 +425,7 @@ export default function SectorNews() {
                 className="group"
               >
                 {/* Sector Card - with enhanced hover effects */}
-                <div className="bg-white border border-sand hover:border-gold/50 hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                <div className="bg-paper border border-sand hover:border-gold/50 hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                   {/* Sector Header */}
                   <div className={`bg-gradient-to-r ${sector.gradient} p-4 flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
