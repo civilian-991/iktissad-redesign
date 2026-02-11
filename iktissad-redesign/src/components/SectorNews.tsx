@@ -34,7 +34,7 @@ const sectors = [
     id: 'finance',
     name: 'مال ومصارف',
     icon: Building2,
-    gradient: 'from-blue-600 to-blue-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 10,
@@ -51,7 +51,7 @@ const sectors = [
     id: 'investment',
     name: 'استثمار',
     icon: TrendingUp,
-    gradient: 'from-indigo-600 to-indigo-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 13,
@@ -68,7 +68,7 @@ const sectors = [
     id: 'trade',
     name: 'تجارة',
     icon: ShoppingBag,
-    gradient: 'from-orange-600 to-orange-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 7,
@@ -85,7 +85,7 @@ const sectors = [
     id: 'energy-environment',
     name: 'طاقة وبيئة',
     icon: Leaf,
-    gradient: 'from-emerald-600 to-emerald-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 37,
@@ -102,7 +102,7 @@ const sectors = [
     id: 'real-estate',
     name: 'عقار',
     icon: Home,
-    gradient: 'from-stone-600 to-stone-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 19,
@@ -119,7 +119,7 @@ const sectors = [
     id: 'industry',
     name: 'صناعة',
     icon: Factory,
-    gradient: 'from-amber-600 to-amber-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 1,
@@ -137,7 +137,7 @@ const sectors = [
     id: 'technology',
     name: 'تكنولوجيا',
     icon: Cpu,
-    gradient: 'from-violet-600 to-violet-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 43,
@@ -154,7 +154,7 @@ const sectors = [
     id: 'automotive',
     name: 'سيارات',
     icon: Car,
-    gradient: 'from-rose-600 to-rose-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 25,
@@ -171,7 +171,7 @@ const sectors = [
     id: 'transport',
     name: 'نقل',
     icon: Truck,
-    gradient: 'from-slate-600 to-slate-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 22,
@@ -188,7 +188,7 @@ const sectors = [
     id: 'tourism-entertainment',
     name: 'سياحة وترفيه',
     icon: Plane,
-    gradient: 'from-sky-600 to-sky-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 28,
@@ -205,7 +205,7 @@ const sectors = [
     id: 'insurance',
     name: 'تأمين',
     icon: Shield,
-    gradient: 'from-cyan-600 to-cyan-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 16,
@@ -222,7 +222,7 @@ const sectors = [
     id: 'entrepreneurship',
     name: 'ريادة وابتكار',
     icon: Lightbulb,
-    gradient: 'from-yellow-600 to-yellow-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 40,
@@ -240,7 +240,7 @@ const sectors = [
     id: 'agriculture',
     name: 'زراعة',
     icon: Wheat,
-    gradient: 'from-green-600 to-green-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 4,
@@ -257,7 +257,7 @@ const sectors = [
     id: 'health',
     name: 'صحة',
     icon: HeartPulse,
-    gradient: 'from-red-600 to-red-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 34,
@@ -274,7 +274,7 @@ const sectors = [
     id: 'education',
     name: 'تعليم',
     icon: GraduationCap,
-    gradient: 'from-purple-600 to-purple-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 31,
@@ -291,7 +291,7 @@ const sectors = [
     id: 'luxury',
     name: 'رفاهية',
     icon: Gem,
-    gradient: 'from-pink-600 to-pink-800',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 46,
@@ -308,7 +308,7 @@ const sectors = [
     id: 'wealth',
     name: 'ثروات',
     icon: Coins,
-    gradient: 'from-gold to-bronze',
+    gradient: 'from-navy to-brand-dark',
     articles: [
       {
         id: 49,
@@ -429,8 +429,8 @@ export default function SectorNews() {
                   {/* Sector Header */}
                   <div className={`bg-gradient-to-r ${sector.gradient} p-4 flex items-center justify-between`}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 flex items-center justify-center">
-                        <sector.icon className="text-white" size={20} />
+                      <div className="w-10 h-10 bg-gold/20 border border-gold/30 flex items-center justify-center">
+                        <sector.icon className="text-gold" size={20} />
                       </div>
                       <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg">
                         {sector.name}
