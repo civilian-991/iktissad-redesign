@@ -1,71 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mapArticleRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Article } from "@/types";
 
-const mockArticles: Article[] = [
-  {
-    id: "art-001",
-    title: "الاقتصاد السعودي يحقق نمواً بنسبة 3.5% في الربع الثالث",
-    titleEn: "Saudi Economy Achieves 3.5% Growth in Q3",
-    slug: "saudi-economy-q3-growth",
-    excerpt: "حقق الاقتصاد السعودي نمواً ملحوظاً في الربع الثالث مدفوعاً بالقطاعات غير النفطية",
-    excerptEn: "Saudi economy achieves notable growth in Q3 driven by non-oil sectors",
-    content: "",
-    contentEn: "",
-    featuredImage: "/images/articles/saudi-economy.jpg",
-    section: "economics",
-    sector: "oil-gas",
-    country: "saudi-arabia",
-    author: { name: "أحمد الخالدي", avatar: "/images/authors/ahmed.jpg" },
-    tags: ["اقتصاد", "السعودية", "نمو"],
-    status: "published",
-    views: 12540,
-    publishedAt: "2025-11-15T08:00:00Z",
-    createdAt: "2025-11-14T10:30:00Z",
-    updatedAt: "2025-11-15T08:00:00Z",
-  },
-  {
-    id: "art-002",
-    title: "الإمارات تطلق استراتيجية جديدة للذكاء الاصطناعي",
-    titleEn: "UAE Launches New AI Strategy",
-    slug: "uae-ai-strategy-2025",
-    excerpt: "أعلنت دولة الإمارات عن استراتيجية شاملة لتعزيز استخدام الذكاء الاصطناعي",
-    excerptEn: "The UAE announces a comprehensive strategy to enhance AI use",
-    content: "",
-    contentEn: "",
-    featuredImage: "/images/articles/uae-ai.jpg",
-    section: "technology",
-    sector: "technology",
-    country: "uae",
-    author: { name: "فاطمة المري", avatar: "/images/authors/fatima.jpg" },
-    tags: ["تكنولوجيا", "الإمارات", "ذكاء اصطناعي"],
-    status: "published",
-    views: 8320,
-    publishedAt: "2025-11-12T10:00:00Z",
-    createdAt: "2025-11-11T14:00:00Z",
-    updatedAt: "2025-11-12T10:00:00Z",
-  },
-  {
-    id: "art-003",
-    title: "مصر تستقطب استثمارات أجنبية بقيمة 10 مليارات دولار",
-    titleEn: "Egypt Attracts $10 Billion in Foreign Investment",
-    slug: "egypt-foreign-investment-2025",
-    excerpt: "نجحت مصر في استقطاب استثمارات أجنبية ضخمة في قطاعات البنية التحتية والطاقة المتجددة",
-    excerptEn: "Egypt successfully attracts massive foreign investments in infrastructure and renewable energy",
-    content: "",
-    contentEn: "",
-    featuredImage: "/images/articles/egypt-investment.jpg",
-    section: "investment",
-    sector: "energy",
-    country: "egypt",
-    author: { name: "محمد السيد", avatar: "/images/authors/mohammed.jpg" },
-    tags: ["استثمار", "مصر", "طاقة متجددة"],
-    status: "published",
-    views: 6750,
-    publishedAt: "2025-11-10T12:00:00Z",
-    createdAt: "2025-11-09T09:00:00Z",
-    updatedAt: "2025-11-10T12:00:00Z",
-  },
-];
+const ARTICLE_SELECT = `
+  *,
+  users:author_id ( name, avatar ),
+  sections:section_id ( slug ),
+  sectors:sector_id ( slug ),
+  countries:country_id ( slug )
+`;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -80,28 +24,36 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const lowerQuery = query.toLowerCase();
+  const supabase = await createClient();
 
-  // Simple mock search: filter articles where title, titleEn, excerpt, or tags match
-  const results = mockArticles.filter(
-    (article) =>
-      article.title.toLowerCase().includes(lowerQuery) ||
-      article.titleEn.toLowerCase().includes(lowerQuery) ||
-      article.excerpt.toLowerCase().includes(lowerQuery) ||
-      article.excerptEn.toLowerCase().includes(lowerQuery) ||
-      article.tags.some((tag) => tag.toLowerCase().includes(lowerQuery)) ||
-      article.section.toLowerCase().includes(lowerQuery) ||
-      article.country.toLowerCase().includes(lowerQuery)
-  );
+  // Use ilike for simple text search across title, title_en, excerpt, excerpt_en
+  const pattern = `%${query}%`;
 
-  const total = results.length;
-  const totalPages = Math.ceil(total / pageSize);
   const start = (page - 1) * pageSize;
-  const paginatedData = results.slice(start, start + pageSize);
+  const { data: rows, count, error } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT, { count: "exact" })
+    .eq("status", "published")
+    .or(
+      `title.ilike.${pattern},title_en.ilike.${pattern},excerpt.ilike.${pattern},excerpt_en.ilike.${pattern}`
+    )
+    .order("published_at", { ascending: false })
+    .range(start, start + pageSize - 1);
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  const total = count ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
 
   const response: ApiResponse<Article[]> = {
-    data: paginatedData,
-    pagination: { page, pageSize, total, totalPages },
+    data: articles,
+    pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
   };
 
   return NextResponse.json(response);

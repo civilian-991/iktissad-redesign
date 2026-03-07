@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import {
   Settings,
   Globe,
@@ -81,11 +82,59 @@ export default function SettingsPage() {
   const [smtpUser, setSmtpUser] = useState('noreply@iktissad.com');
   const [smtpPass, setSmtpPass] = useState('');
 
-  const handleSave = async () => {
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('iktissad-admin-settings');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.siteName) setSiteName(s.siteName);
+        if (s.siteDescription) setSiteDescription(s.siteDescription);
+        if (s.language) setLanguage(s.language);
+        if (s.timezone) setTimezone(s.timezone);
+        if (s.darkMode !== undefined) setDarkMode(s.darkMode);
+        if (s.accentColor) setAccentColor(s.accentColor);
+        if (s.fontSize) setFontSize(s.fontSize);
+        if (s.emailNotifications !== undefined) setEmailNotifications(s.emailNotifications);
+        if (s.newArticleNotify !== undefined) setNewArticleNotify(s.newArticleNotify);
+        if (s.newCommentNotify !== undefined) setNewCommentNotify(s.newCommentNotify);
+        if (s.newUserNotify !== undefined) setNewUserNotify(s.newUserNotify);
+        if (s.weeklyReport !== undefined) setWeeklyReport(s.weeklyReport);
+        if (s.twoFactorAuth !== undefined) setTwoFactorAuth(s.twoFactorAuth);
+        if (s.sessionTimeout) setSessionTimeout(s.sessionTimeout);
+        if (s.smtpHost) setSmtpHost(s.smtpHost);
+        if (s.smtpPort) setSmtpPort(s.smtpPort);
+        if (s.smtpUser) setSmtpUser(s.smtpUser);
+      }
+    } catch {
+      // Ignore parse errors from corrupted localStorage
+    }
+  }, []);
+
+  const handleSave = useCallback(async () => {
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSaving(false);
-  };
+    try {
+      const settings = {
+        siteName, siteDescription, language, timezone,
+        darkMode, accentColor, fontSize,
+        emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport,
+        twoFactorAuth, sessionTimeout,
+        smtpHost, smtpPort, smtpUser,
+      };
+      localStorage.setItem('iktissad-admin-settings', JSON.stringify(settings));
+      toast.success('تم حفظ الإعدادات بنجاح');
+    } catch {
+      toast.error('حدث خطأ أثناء حفظ الإعدادات');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    siteName, siteDescription, language, timezone,
+    darkMode, accentColor, fontSize,
+    emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport,
+    twoFactorAuth, sessionTimeout,
+    smtpHost, smtpPort, smtpUser,
+  ]);
 
   const renderTabContent = () => {
     switch (activeTab) {

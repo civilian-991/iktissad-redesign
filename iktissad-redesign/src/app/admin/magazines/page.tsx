@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import useSWR from 'swr';
+import { toast } from 'sonner';
 import {
   BookOpen,
   Plus,
@@ -23,10 +25,14 @@ import {
   ChevronRight,
   Upload,
   Check,
-  X
+  X,
+  Loader2,
 } from 'lucide-react';
+import { swrFetcher, magazinesKey, deleteMagazine } from '@/lib/api-client';
+import type { MagazineIssue, ApiResponse } from '@/types';
 
-const magazines = [
+// Kept as fallback for when API returns no data
+const magazinesFallback: any[] = [
   {
     id: 'AR0542',
     title: 'العدد 542',
@@ -138,11 +144,47 @@ export default function MagazinesPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [magazineToDelete, setMagazineToDelete] = useState<string | null>(null);
 
+  // Fetch from API
+  const { data, isLoading, mutate } = useSWR<ApiResponse<MagazineIssue[]>>(
+    magazinesKey({ status: selectedStatus !== 'all' ? selectedStatus : undefined }),
+    swrFetcher,
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
+
+  // Map API data to the shape the UI expects
+  const magazines = (data?.data ?? []).map(m => ({
+    id: m.id,
+    title: m.title,
+    subtitle: m.titleEn || m.subtitle || '',
+    cover: m.coverImage || '',
+    year: m.publishDate ? new Date(m.publishDate).getFullYear() : 2026,
+    month: '',
+    pages: m.pages ?? 0,
+    views: m.views ?? 0,
+    downloads: m.downloads ?? 0,
+    featured: m.featured ?? false,
+    status: m.status,
+    publishDate: m.publishDate || '',
+    highlights: m.highlights || [],
+  }));
+
+  const handleDeleteMagazine = useCallback(async () => {
+    if (!magazineToDelete) return;
+    try {
+      await deleteMagazine(magazineToDelete);
+      toast.success('تم حذف العدد بنجاح');
+      mutate();
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ');
+    }
+    setShowDeleteModal(false);
+    setMagazineToDelete(null);
+  }, [magazineToDelete, mutate]);
+
   const filteredMagazines = magazines.filter(mag => {
     const matchesSearch = mag.title.includes(searchQuery) || mag.subtitle.includes(searchQuery);
     const matchesYear = selectedYear === null || mag.year === selectedYear;
-    const matchesStatus = selectedStatus === 'all' || mag.status === selectedStatus;
-    return matchesSearch && matchesYear && matchesStatus;
+    return matchesSearch && matchesYear;
   });
 
   const toggleSelection = (id: string) => {
@@ -591,11 +633,7 @@ export default function MagazinesPage() {
                     إلغاء
                   </button>
                   <button
-                    onClick={() => {
-                      // Handle delete
-                      setShowDeleteModal(false);
-                      setMagazineToDelete(null);
-                    }}
+                    onClick={handleDeleteMagazine}
                     className="flex-1 px-4 py-3 bg-loss text-white font-[family-name:var(--font-display)] font-semibold rounded-xl hover:bg-loss/80 transition-colors"
                   >
                     حذف

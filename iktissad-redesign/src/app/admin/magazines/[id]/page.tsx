@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { use } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import useSWR from 'swr';
 import {
   ArrowRight,
   Save,
@@ -23,52 +26,59 @@ import {
   History,
   ExternalLink
 } from 'lucide-react';
+import type { ApiResponse, MagazineIssue } from '@/types';
+import { swrFetcher, updateMagazine, deleteMagazine } from '@/lib/api-client';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
   'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
 ];
 
-// Mock data - in production, fetch from API
-const getMagazineData = (id: string) => ({
-  id,
-  issueNumber: id.replace('AR0', ''),
-  title: `العدد ${id.replace('AR0', '')}`,
-  year: 2026,
-  month: 'يناير',
-  pages: 84,
-  cover: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=560&fit=crop',
-  pdfFile: `magazine-${id}.pdf`,
-  publishDate: '2026-01-01',
-  status: 'published',
-  featured: true,
-  views: 12500,
-  downloads: 3200,
-  highlights: [
-    'توقعات الاقتصاد العربي 2026',
-    'مقابلة حصرية مع وزير المالية السعودي',
-    'ملف خاص: مستقبل التقنية المالية'
-  ],
-  createdAt: '2025-12-28',
-  updatedAt: '2026-01-02'
-});
-
 export default function EditMagazinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const magazineData = getMagazineData(id);
+  const router = useRouter();
 
-  const [issueNumber, setIssueNumber] = useState(magazineData.issueNumber);
-  const [year, setYear] = useState(magazineData.year);
-  const [month, setMonth] = useState(magazineData.month);
-  const [pages, setPages] = useState(String(magazineData.pages));
-  const [publishDate, setPublishDate] = useState(magazineData.publishDate);
-  const [status, setStatus] = useState(magazineData.status);
-  const [featured, setFeatured] = useState(magazineData.featured);
-  const [coverImage, setCoverImage] = useState<string | null>(magazineData.cover);
-  const [pdfFile, setPdfFile] = useState<string | null>(magazineData.pdfFile);
-  const [highlights, setHighlights] = useState<string[]>(magazineData.highlights);
+  const { data, isLoading } = useSWR<ApiResponse<MagazineIssue>>(
+    `/api/magazines/${id}`,
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+
+  const magazine = data?.data;
+
+  const [issueNumber, setIssueNumber] = useState('');
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(months[new Date().getMonth()]);
+  const [pages, setPages] = useState('');
+  const [publishDate, setPublishDate] = useState('');
+  const [status, setStatus] = useState('draft');
+  const [featured, setFeatured] = useState(false);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<string | null>(null);
+  const [highlights, setHighlights] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Populate form fields when data loads
+  useEffect(() => {
+    if (magazine && !initialized) {
+      setIssueNumber(String(magazine.issueNumber ?? ''));
+      if (magazine.publishDate) {
+        const d = new Date(magazine.publishDate);
+        setYear(d.getFullYear());
+        setMonth(months[d.getMonth()] || months[0]);
+        setPublishDate(magazine.publishDate.split('T')[0] || '');
+      }
+      setPages(String(magazine.pages ?? ''));
+      setStatus(magazine.status || 'draft');
+      setFeatured(magazine.featured ?? false);
+      setCoverImage(magazine.coverImage || null);
+      setPdfFile(magazine.pdfUrl || null);
+      setHighlights(magazine.highlights?.length ? magazine.highlights : ['']);
+      setInitialized(true);
+    }
+  }, [magazine, initialized]);
 
   const addHighlight = () => {
     setHighlights([...highlights, '']);
@@ -86,9 +96,60 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSaving(false);
+    try {
+      await updateMagazine(id, {
+        title: `العدد ${issueNumber}`,
+        titleEn: `Issue ${issueNumber}`,
+        issueNumber: Number(issueNumber),
+        coverImage: coverImage || '',
+        pdfUrl: pdfFile || '',
+        publishDate: publishDate || undefined,
+        status,
+        featured,
+        pages: pages ? Number(pages) : undefined,
+        highlights: highlights.filter(h => h.trim()),
+      });
+      toast.success('تم حفظ التغييرات بنجاح');
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleDelete = async () => {
+    try {
+      await deleteMagazine(id);
+      toast.success('تم حذف العدد بنجاح');
+      router.push('/admin/magazines');
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ أثناء الحذف');
+      setShowDeleteModal(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 size={32} className="animate-spin text-gold" />
+      </div>
+    );
+  }
+
+  if (!magazine && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <BookOpen size={48} className="text-white/20 mb-4" />
+        <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-white mb-2">
+          العدد غير موجود
+        </h2>
+        <p className="text-white/50 mb-4">لم يتم العثور على العدد المطلوب</p>
+        <Link href="/admin/magazines" className="text-gold hover:underline">
+          العودة إلى قائمة الأعداد
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -106,7 +167,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               تعديل العدد {issueNumber}
             </h1>
             <p className="text-white/50 text-sm">
-              آخر تحديث: {new Date(magazineData.updatedAt).toLocaleDateString('ar-SA')}
+              {magazine?.updatedAt
+                ? `آخر تحديث: ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA')}`
+                : ''}
             </p>
           </div>
         </div>
@@ -145,10 +208,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'المشاهدات', value: magazineData.views.toLocaleString(), icon: Eye, trend: '+12%' },
-          { label: 'التحميلات', value: magazineData.downloads.toLocaleString(), icon: Download, trend: '+8%' },
-          { label: 'الصفحات', value: magazineData.pages, icon: FileText, trend: null },
-          { label: 'الحالة', value: magazineData.status === 'published' ? 'منشور' : 'مسودة', icon: BookOpen, trend: null },
+          { label: 'المشاهدات', value: (magazine?.views ?? 0).toLocaleString(), icon: Eye, trend: null },
+          { label: 'التحميلات', value: (magazine?.downloads ?? 0).toLocaleString(), icon: Download, trend: null },
+          { label: 'الصفحات', value: magazine?.pages ?? 0, icon: FileText, trend: null },
+          { label: 'الحالة', value: status === 'published' ? 'منشور' : 'مسودة', icon: BookOpen, trend: null },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -482,21 +545,28 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             </h2>
 
             <div className="space-y-4">
-              {[
-                { action: 'تم تحديث العدد', user: 'محمد مدني', time: 'منذ ساعتين' },
-                { action: 'تم نشر العدد', user: 'محمد مدني', time: 'منذ 3 أيام' },
-                { action: 'تم إنشاء العدد', user: 'محمد مدني', time: 'منذ أسبوع' },
-              ].map((log, index) => (
-                <div key={index} className="flex items-start gap-3 text-sm">
+              {magazine?.updatedAt && (
+                <div className="flex items-start gap-3 text-sm">
                   <div className="w-2 h-2 mt-2 rounded-full bg-gold/50" />
                   <div>
-                    <p className="text-white/80">{log.action}</p>
+                    <p className="text-white/80">تم تحديث العدد</p>
                     <p className="text-white/40 text-xs">
-                      {log.user} • {log.time}
+                      {new Date(magazine.updatedAt).toLocaleDateString('ar-SA')}
                     </p>
                   </div>
                 </div>
-              ))}
+              )}
+              {magazine?.createdAt && (
+                <div className="flex items-start gap-3 text-sm">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-gold/50" />
+                  <div>
+                    <p className="text-white/80">تم إنشاء العدد</p>
+                    <p className="text-white/40 text-xs">
+                      {new Date(magazine.createdAt).toLocaleDateString('ar-SA')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -572,11 +642,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                     إلغاء
                   </button>
                   <button
-                    onClick={() => {
-                      // Handle delete
-                      setShowDeleteModal(false);
-                      window.location.href = '/admin/magazines';
-                    }}
+                    onClick={handleDelete}
                     className="flex-1 px-4 py-3 bg-loss text-white font-[family-name:var(--font-display)] font-semibold rounded-xl hover:bg-loss/80 transition-colors"
                   >
                     حذف

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   ArrowRight,
   Save,
@@ -18,6 +20,7 @@ import {
   X,
   Loader2
 } from 'lucide-react';
+import { createUser } from '@/lib/api-client';
 
 const roles = [
   { value: 'admin', label: 'مدير', description: 'صلاحيات كاملة للنظام' },
@@ -38,6 +41,7 @@ const departments = [
 ];
 
 export default function NewUserPage() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,10 +55,36 @@ export default function NewUserPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error('يرجى إدخال الاسم الكامل');
+      return;
+    }
+    if (!email.trim()) {
+      toast.error('يرجى إدخال البريد الإلكتروني');
+      return;
+    }
+    if (password && password !== confirmPassword) {
+      toast.error('كلمتا المرور غير متطابقتين');
+      return;
+    }
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSaving(false);
-    window.location.href = '/admin/users';
+    try {
+      await createUser({
+        name,
+        email,
+        phone: phone || undefined,
+        role,
+        department: department || undefined,
+        avatar: avatar || undefined,
+        status: 'active',
+      });
+      toast.success('تم إنشاء المستخدم بنجاح');
+      router.push('/admin/users');
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

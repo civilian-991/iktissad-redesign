@@ -99,7 +99,7 @@ export default function FeaturedProfiles() {
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-light/60 via-transparent to-transparent" />
 
                   {/* Category Badge */}
-                  <span className="absolute top-4 right-4 px-3 py-1 bg-gold text-obsidian text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">
+                  <span className="absolute top-4 right-4 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded-full">
                     {profile.category}
                   </span>
 

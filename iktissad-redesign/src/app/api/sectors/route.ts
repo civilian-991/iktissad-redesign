@@ -1,40 +1,42 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mapSectorRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Sector } from "@/types";
 
-const mockSectors: Sector[] = [
-  {
-    slug: "oil-gas",
-    name: "النفط والغاز",
-    nameEn: "Oil & Gas",
-    description: "تغطية شاملة لقطاع النفط والغاز في المنطقة العربية والأسواق العالمية",
-    descriptionEn: "Comprehensive coverage of the oil and gas sector in the Arab region and global markets",
-    articleCount: 312,
-  },
-  {
-    slug: "banking",
-    name: "البنوك والخدمات المالية",
-    nameEn: "Banking & Financial Services",
-    description: "أخبار وتحليلات القطاع المصرفي والخدمات المالية في العالم العربي",
-    descriptionEn: "News and analysis of the banking sector and financial services in the Arab world",
-    articleCount: 198,
-  },
-  {
-    slug: "energy",
-    name: "الطاقة المتجددة",
-    nameEn: "Renewable Energy",
-    description: "مستجدات قطاع الطاقة المتجددة والاستدامة في المنطقة",
-    descriptionEn: "Updates on the renewable energy and sustainability sector in the region",
-    articleCount: 145,
-  },
-];
-
 export async function GET() {
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows, error } = await supabase
+    .from("sectors")
+    .select()
+    .order("name", { ascending: true }) as { data: any[] | null; error: any };
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  // Count articles per sector
+  const sectors: Sector[] = [];
+  for (const row of rows ?? []) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await supabase
+      .from("articles")
+      .select("id", { count: "exact", head: true })
+      .eq("sector_id", row.id)
+      .eq("status", "published" as const) as { count: number | null };
+    sectors.push(mapSectorRow(row, count ?? 0));
+  }
+
   const response: ApiResponse<Sector[]> = {
-    data: mockSectors,
+    data: sectors,
     pagination: {
       page: 1,
       pageSize: 50,
-      total: mockSectors.length,
+      total: sectors.length,
       totalPages: 1,
     },
   };

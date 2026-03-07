@@ -1,48 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mapSectionRow, mapArticleRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Section } from "@/types";
 
-const mockSections: Section[] = [
-  {
-    slug: "economics",
-    name: "اقتصاد",
-    nameEn: "Economics",
-    description: "أخبار وتحليلات اقتصادية شاملة تغطي الأسواق العربية والعالمية",
-    descriptionEn: "Comprehensive economic news and analysis covering Arab and global markets",
-    articleCount: 245,
-  },
-  {
-    slug: "technology",
-    name: "تكنولوجيا",
-    nameEn: "Technology",
-    description: "آخر المستجدات في عالم التكنولوجيا والتحول الرقمي في المنطقة العربية",
-    descriptionEn: "Latest developments in technology and digital transformation in the Arab region",
-    articleCount: 128,
-  },
-  {
-    slug: "investment",
-    name: "استثمار",
-    nameEn: "Investment",
-    description: "فرص الاستثمار والتحليلات المالية وأخبار الأسواق والبورصات",
-    descriptionEn: "Investment opportunities, financial analysis, and stock market news",
-    articleCount: 187,
-  },
-];
+const ARTICLE_SELECT = `
+  *,
+  users:author_id ( name, avatar ),
+  sections:section_id ( slug ),
+  sectors:sector_id ( slug ),
+  countries:country_id ( slug )
+`;
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const supabase = await createClient();
 
-  const section = mockSections.find((s) => s.slug === slug);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: row, error } = await supabase
+    .from("sections")
+    .select()
+    .eq("slug", slug)
+    .single() as { data: any; error: any };
 
-  if (!section) {
+  if (error || !row) {
     return NextResponse.json(
       { error: "Section not found" } satisfies ApiResponse<never>,
       { status: 404 }
     );
   }
 
-  const response: ApiResponse<Section> = { data: section };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await supabase
+    .from("articles")
+    .select("id", { count: "exact", head: true })
+    .eq("section_id", row.id)
+    .eq("status", "published" as const) as { count: number | null };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: articleRows } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .eq("section_id", row.id)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(10) as { data: any[] | null };
+
+  const section = mapSectionRow(row, count ?? 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles = (articleRows ?? []).map((r: any) => mapArticleRow(r));
+
+  const response: ApiResponse<Section & { articles: typeof articles }> = {
+    data: { ...section, articles },
+  };
   return NextResponse.json(response);
 }

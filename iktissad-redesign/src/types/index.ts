@@ -1,6 +1,11 @@
 // =============================================================================
 // IKTISSAD Shared Types
 // =============================================================================
+//
+// These are the camelCase frontend types used by components and pages.
+// For the snake_case database row types, see src/lib/supabase/types.ts.
+// Mappers to convert between the two live in src/lib/supabase/mappers.ts.
+// =============================================================================
 
 export interface Article {
   id: string;
@@ -32,18 +37,31 @@ export interface MagazineIssue {
   issueNumber: number;
   title: string;
   titleEn: string;
+  subtitle: string;
   coverImage: string;
   publishDate: string;
   articles: Article[];
   pdfUrl: string;
+  pages: number;
+  views: number;
+  downloads: number;
+  featured: boolean;
+  status: "published" | "draft" | "scheduled";
+  highlights: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "editor" | "author";
+  role: "admin" | "editor" | "author" | "contributor";
   avatar: string;
+  department: string;
+  status: "active" | "inactive" | "suspended";
+  articleCount: number;
+  lastActive: string;
   createdAt: string;
 }
 
@@ -55,6 +73,7 @@ export interface MediaItem {
   size: number;
   alt: string;
   altEn: string;
+  folder: string;
   uploadedBy: string;
   createdAt: string;
 }

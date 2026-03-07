@@ -1,72 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { mapArticleRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Article } from "@/types";
 
-const mockArticles: Article[] = [
-  {
-    id: "art-001",
-    title: "الاقتصاد السعودي يحقق نمواً بنسبة 3.5% في الربع الثالث",
-    titleEn: "Saudi Economy Achieves 3.5% Growth in Q3",
-    slug: "saudi-economy-q3-growth",
-    excerpt: "حقق الاقتصاد السعودي نمواً ملحوظاً في الربع الثالث مدفوعاً بالقطاعات غير النفطية",
-    excerptEn: "Saudi economy achieves notable growth in Q3 driven by non-oil sectors",
-    content: "<p>تفاصيل المقال الكامل هنا...</p>",
-    contentEn: "<p>Full article content here...</p>",
-    featuredImage: "/images/articles/saudi-economy.jpg",
-    section: "economics",
-    sector: "oil-gas",
-    country: "saudi-arabia",
-    author: { name: "أحمد الخالدي", avatar: "/images/authors/ahmed.jpg" },
-    tags: ["اقتصاد", "السعودية", "نمو"],
-    status: "published",
-    views: 12540,
-    publishedAt: "2025-11-15T08:00:00Z",
-    createdAt: "2025-11-14T10:30:00Z",
-    updatedAt: "2025-11-15T08:00:00Z",
-  },
-  {
-    id: "art-002",
-    title: "الإمارات تطلق استراتيجية جديدة للذكاء الاصطناعي",
-    titleEn: "UAE Launches New AI Strategy",
-    slug: "uae-ai-strategy-2025",
-    excerpt: "أعلنت دولة الإمارات عن استراتيجية شاملة لتعزيز استخدام الذكاء الاصطناعي في القطاعات الحكومية والخاصة",
-    excerptEn: "The UAE announces a comprehensive strategy to enhance AI use in public and private sectors",
-    content: "<p>تفاصيل المقال الكامل هنا...</p>",
-    contentEn: "<p>Full article content here...</p>",
-    featuredImage: "/images/articles/uae-ai.jpg",
-    section: "technology",
-    sector: "technology",
-    country: "uae",
-    author: { name: "فاطمة المري", avatar: "/images/authors/fatima.jpg" },
-    tags: ["تكنولوجيا", "الإمارات", "ذكاء اصطناعي"],
-    status: "published",
-    views: 8320,
-    publishedAt: "2025-11-12T10:00:00Z",
-    createdAt: "2025-11-11T14:00:00Z",
-    updatedAt: "2025-11-12T10:00:00Z",
-  },
-  {
-    id: "art-003",
-    title: "مصر تستقطب استثمارات أجنبية بقيمة 10 مليارات دولار",
-    titleEn: "Egypt Attracts $10 Billion in Foreign Investment",
-    slug: "egypt-foreign-investment-2025",
-    excerpt: "نجحت مصر في استقطاب استثمارات أجنبية ضخمة في قطاعات البنية التحتية والطاقة المتجددة",
-    excerptEn: "Egypt successfully attracts massive foreign investments in infrastructure and renewable energy sectors",
-    content: "<p>تفاصيل المقال الكامل هنا...</p>",
-    contentEn: "<p>Full article content here...</p>",
-    featuredImage: "/images/articles/egypt-investment.jpg",
-    section: "investment",
-    sector: "energy",
-    country: "egypt",
-    author: { name: "محمد السيد", avatar: "/images/authors/mohammed.jpg" },
-    tags: ["استثمار", "مصر", "طاقة متجددة"],
-    status: "published",
-    views: 6750,
-    publishedAt: "2025-11-10T12:00:00Z",
-    createdAt: "2025-11-09T09:00:00Z",
-    updatedAt: "2025-11-10T12:00:00Z",
-  },
-];
+const ARTICLE_SELECT = `
+  *,
+  users:author_id ( name, avatar ),
+  sections:section_id ( slug ),
+  sectors:sector_id ( slug ),
+  countries:country_id ( slug )
+`;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -74,43 +20,168 @@ export async function GET(request: NextRequest) {
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
   const section = searchParams.get("section");
   const country = searchParams.get("country");
+  const sector = searchParams.get("sector");
   const status = searchParams.get("status");
 
-  let filtered = [...mockArticles];
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("articles")
+    .select(ARTICLE_SELECT, { count: "exact" });
 
   if (section) {
-    filtered = filtered.filter((a) => a.section === section);
-  }
-  if (country) {
-    filtered = filtered.filter((a) => a.country === country);
-  }
-  if (status) {
-    filtered = filtered.filter((a) => a.status === status);
+    const { data: sec } = await supabase
+      .from("sections")
+      .select("id")
+      .eq("slug", section)
+      .single();
+    if (sec) query = query.eq("section_id", (sec as { id: string }).id);
   }
 
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / pageSize);
+  if (country) {
+    const { data: c } = await supabase
+      .from("countries")
+      .select("id")
+      .eq("slug", country)
+      .single();
+    if (c) query = query.eq("country_id", (c as { id: string }).id);
+  }
+
+  if (sector) {
+    const { data: s } = await supabase
+      .from("sectors")
+      .select("id")
+      .eq("slug", sector)
+      .single();
+    if (s) query = query.eq("sector_id", (s as { id: string }).id);
+  }
+
+  if (status) {
+    query = query.eq("status", status as "published" | "draft" | "review" | "scheduled");
+  }
+
   const start = (page - 1) * pageSize;
-  const paginatedData = filtered.slice(start, start + pageSize);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows, count, error } = await (query as any)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .range(start, start + pageSize - 1);
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  const total = count ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
 
   const response: ApiResponse<Article[]> = {
-    data: paginatedData,
-    pagination: { page, pageSize, total, totalPages },
+    data: articles,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
   };
 
   return NextResponse.json(response);
 }
 
-export async function POST() {
+const createArticleSchema = z.object({
+  title: z.string().min(1),
+  titleEn: z.string().optional().default(""),
+  slug: z.string().min(1),
+  excerpt: z.string().optional().default(""),
+  excerptEn: z.string().optional().default(""),
+  content: z.string().optional().default(""),
+  contentEn: z.string().optional().default(""),
+  featuredImage: z.string().optional().default(""),
+  sectionSlug: z.string().optional(),
+  sectorSlug: z.string().optional(),
+  countrySlug: z.string().optional(),
+  authorId: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional().default([]),
+  status: z.enum(["published", "draft", "review", "scheduled"]).optional().default("draft"),
+  publishedAt: z.string().optional(),
+});
+
+export async function POST(request: NextRequest) {
   const auth = await requireAuth();
   if (!auth.authenticated) {
     return unauthorizedResponse();
   }
 
-  return NextResponse.json(
-    {
-      error: "Not implemented – database integration pending",
-    } satisfies ApiResponse<never>,
-    { status: 501 }
-  );
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" } satisfies ApiResponse<never>,
+      { status: 400 }
+    );
+  }
+
+  const parsed = createArticleSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues.map((i) => i.message).join(", ") } satisfies ApiResponse<never>,
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
+  const admin = createAdminClient();
+
+  // Resolve slugs to IDs
+  let sectionId: string | null = null;
+  let sectorId: string | null = null;
+  let countryId: string | null = null;
+
+  if (data.sectionSlug) {
+    const { data: sec } = await admin.from("sections").select("id").eq("slug", data.sectionSlug).single();
+    sectionId = (sec as { id: string } | null)?.id ?? null;
+  }
+  if (data.sectorSlug) {
+    const { data: sec } = await admin.from("sectors").select("id").eq("slug", data.sectorSlug).single();
+    sectorId = (sec as { id: string } | null)?.id ?? null;
+  }
+  if (data.countrySlug) {
+    const { data: c } = await admin.from("countries").select("id").eq("slug", data.countrySlug).single();
+    countryId = (c as { id: string } | null)?.id ?? null;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: row, error } = await (admin.from("articles") as any)
+    .insert({
+      title: data.title,
+      title_en: data.titleEn,
+      slug: data.slug,
+      excerpt: data.excerpt,
+      excerpt_en: data.excerptEn,
+      content: data.content,
+      content_en: data.contentEn,
+      featured_image: data.featuredImage,
+      section_id: sectionId,
+      sector_id: sectorId,
+      country_id: countryId,
+      author_id: data.authorId ?? null,
+      tags: data.tags,
+      status: data.status,
+      published_at: data.publishedAt ?? null,
+    })
+    .select(ARTICLE_SELECT)
+    .single();
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  const response: ApiResponse<Article> = { data: mapArticleRow(row) };
+  return NextResponse.json(response, { status: 201 });
 }

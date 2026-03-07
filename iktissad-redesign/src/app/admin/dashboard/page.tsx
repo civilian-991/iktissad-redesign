@@ -4,6 +4,7 @@
  *
  * Main dashboard with statistics, charts, and quick actions.
  * Uses design tokens and i18n for internationalization.
+ * Fetches real data from API routes via SWR.
  */
 
 'use client';
@@ -11,6 +12,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import useSWR from 'swr';
 import {
   TrendingUp,
   TrendingDown,
@@ -24,11 +26,14 @@ import {
   Clock,
   Zap,
   Globe,
-  Activity
+  Activity,
+  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-import { iconSizes, colors } from '@/lib/design-tokens';
+import { iconSizes } from '@/lib/design-tokens';
 import { Badge, StatusBadge } from '@/components/ui';
+import { swrFetcher, articlesKey, usersKey } from '@/lib/api-client';
+import type { Article, AdminUser, ApiResponse } from '@/types';
 
 // ═══════════════════════════════════════════════════════════════
 // STATS CONFIGURATION
@@ -36,49 +41,18 @@ import { Badge, StatusBadge } from '@/components/ui';
 
 interface StatConfig {
   key: 'visitsToday' | 'publishedArticles' | 'activeUsers' | 'newComments';
-  value: string;
-  change: string;
-  trend: 'up' | 'down';
   icon: typeof Eye;
   color: string;
 }
 
 const statsConfig: StatConfig[] = [
-  {
-    key: 'visitsToday',
-    value: '24,521',
-    change: '+12.5%',
-    trend: 'up',
-    icon: Eye,
-    color: 'from-emerald-500 to-teal',
-  },
-  {
-    key: 'publishedArticles',
-    value: '1,847',
-    change: '+3.2%',
-    trend: 'up',
-    icon: FileText,
-    color: 'from-gold to-bronze',
-  },
-  {
-    key: 'activeUsers',
-    value: '8,429',
-    change: '-2.1%',
-    trend: 'down',
-    icon: Users,
-    color: 'from-purple-500 to-indigo-600',
-  },
-  {
-    key: 'newComments',
-    value: '342',
-    change: '+18.7%',
-    trend: 'up',
-    icon: MessageSquare,
-    color: 'from-rose-500 to-pink-600',
-  },
+  { key: 'visitsToday', icon: Eye, color: 'from-emerald-500 to-teal' },
+  { key: 'publishedArticles', icon: FileText, color: 'from-gold to-bronze' },
+  { key: 'activeUsers', icon: Users, color: 'from-purple-500 to-indigo-600' },
+  { key: 'newComments', icon: MessageSquare, color: 'from-rose-500 to-pink-600' },
 ];
 
-// Chart data (mock)
+// Chart data (mock - would need an analytics endpoint)
 const chartDataConfig = [
   { dayKey: 'saturday', views: 4200, articles: 12 },
   { dayKey: 'sunday', views: 5100, articles: 15 },
@@ -89,47 +63,7 @@ const chartDataConfig = [
   { dayKey: 'friday', views: 6500, articles: 19 },
 ];
 
-// Recent articles
-const recentArticles = [
-  {
-    id: 1,
-    titleKey: 'centralBankMeasures',
-    title: 'البنك المركزي يعلن عن إجراءات جديدة لدعم الاقتصاد',
-    categoryKey: 'economy',
-    status: 'published' as const,
-    views: 12500,
-    date: '2024-01-15',
-  },
-  {
-    id: 2,
-    titleKey: 'stockMarketRise',
-    title: 'ارتفاع مؤشرات البورصة مع تزايد ثقة المستثمرين',
-    categoryKey: 'markets',
-    status: 'published' as const,
-    views: 8900,
-    date: '2024-01-15',
-  },
-  {
-    id: 3,
-    titleKey: 'techSectorGrowth',
-    title: 'قطاع التكنولوجيا يقود النمو في الربع الأخير',
-    categoryKey: 'technology',
-    status: 'draft' as const,
-    views: 0,
-    date: '2024-01-14',
-  },
-  {
-    id: 4,
-    titleKey: 'gdpGrowth',
-    title: 'توقعات بنمو الناتج المحلي بنسبة 4%',
-    categoryKey: 'economy',
-    status: 'review' as const,
-    views: 0,
-    date: '2024-01-14',
-  },
-];
-
-// Top countries
+// Top countries (mock - would need an analytics endpoint)
 const topCountries = [
   { nameKey: 'saudi', visitors: 8520, percentage: 35 },
   { nameKey: 'uae', visitors: 5230, percentage: 22 },
@@ -138,7 +72,7 @@ const topCountries = [
   { nameKey: 'kuwait', visitors: 2100, percentage: 9 },
 ];
 
-// Activity log
+// Activity log (mock - would need an activity tracking table)
 interface ActivityItem {
   type: 'article' | 'comment' | 'user';
   user: string;
@@ -182,6 +116,31 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month'>('week');
   const maxViews = Math.max(...chartDataConfig.map(d => d.views));
 
+  // Fetch real data from API
+  const { data: articlesRes, isLoading: articlesLoading } = useSWR<ApiResponse<Article[]>>(
+    articlesKey({ pageSize: 5 }),
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+  const { data: usersRes, isLoading: usersLoading } = useSWR<ApiResponse<AdminUser[]>>(
+    usersKey({ pageSize: 1 }),
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+
+  const recentArticles = articlesRes?.data ?? [];
+  const totalArticles = articlesRes?.pagination?.total ?? 0;
+  const totalUsers = usersRes?.pagination?.total ?? 0;
+  const isLoading = articlesLoading || usersLoading;
+
+  // Build stats values from real data
+  const statsValues: Record<string, { value: string; change: string; trend: 'up' | 'down' }> = {
+    visitsToday: { value: '-', change: '-', trend: 'up' },
+    publishedArticles: { value: totalArticles.toLocaleString(), change: '+3.2%', trend: 'up' },
+    activeUsers: { value: totalUsers.toLocaleString(), change: '-', trend: 'up' },
+    newComments: { value: '-', change: '-', trend: 'up' },
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'published':
@@ -193,16 +152,6 @@ export default function DashboardPage() {
       default:
         return 'default';
     }
-  };
-
-  const getCategoryName = (key: string) => {
-    const categories: Record<string, string> = {
-      economy: t('nav.sections.economy'),
-      markets: t('nav.sections.markets'),
-      technology: t('nav.sections.technology'),
-      companies: t('nav.sections.companies'),
-    };
-    return categories[key] || key;
   };
 
   return (
@@ -236,38 +185,47 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsConfig.map((stat, index) => (
-          <motion.div
-            key={stat.key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="relative bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-5 overflow-hidden group hover:border-gold/20 transition-colors"
-          >
-            {/* Background Gradient */}
-            <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:opacity-20 transition-opacity`} />
+        {statsConfig.map((stat, index) => {
+          const sv = statsValues[stat.key];
+          return (
+            <motion.div
+              key={stat.key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="relative bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-5 overflow-hidden group hover:border-gold/20 transition-colors"
+            >
+              {/* Background Gradient */}
+              <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2 group-hover:opacity-20 transition-opacity`} />
 
-            <div className="relative">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
-                  <stat.icon className="text-white" size={iconSizes.lg} />
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
+                    <stat.icon className="text-white" size={iconSizes.lg} />
+                  </div>
+                  {sv.change !== '-' && (
+                    <span className={`flex items-center gap-1 text-sm font-[family-name:var(--font-display)] font-semibold ${
+                      sv.trend === 'up' ? 'text-profit' : 'text-loss'
+                    }`}>
+                      {sv.trend === 'up' ? <TrendingUp size={iconSizes.sm} /> : <TrendingDown size={iconSizes.sm} />}
+                      {sv.change}
+                    </span>
+                  )}
                 </div>
-                <span className={`flex items-center gap-1 text-sm font-[family-name:var(--font-display)] font-semibold ${
-                  stat.trend === 'up' ? 'text-profit' : 'text-loss'
-                }`}>
-                  {stat.trend === 'up' ? <TrendingUp size={iconSizes.sm} /> : <TrendingDown size={iconSizes.sm} />}
-                  {stat.change}
-                </span>
+                <h3 className="text-white/60 text-sm font-[family-name:var(--font-display)] mb-1">
+                  {t(`admin.dashboard.stats.${stat.key}`)}
+                </h3>
+                <p className="text-3xl font-[family-name:var(--font-display)] font-bold text-white">
+                  {isLoading ? (
+                    <Loader2 size={24} className="animate-spin text-white/30" />
+                  ) : (
+                    sv.value
+                  )}
+                </p>
               </div>
-              <h3 className="text-white/60 text-sm font-[family-name:var(--font-display)] mb-1">
-                {t(`admin.dashboard.stats.${stat.key}`)}
-              </h3>
-              <p className="text-3xl font-[family-name:var(--font-display)] font-bold text-white">
-                {stat.value}
-              </p>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Main Grid */}
@@ -366,7 +324,7 @@ export default function DashboardPage() {
 
       {/* Second Row */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Recent Articles */}
+        {/* Recent Articles - from real API */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -387,46 +345,56 @@ export default function DashboardPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gold/10">
-                  <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                    {t('admin.articles.table.article')}
-                  </th>
-                  <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                    {t('admin.articles.table.section')}
-                  </th>
-                  <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                    {t('admin.articles.table.status')}
-                  </th>
-                  <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                    {t('admin.articles.table.stats')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentArticles.map((article) => (
-                  <tr key={article.id} className="border-b border-gold/5 hover:bg-white/5 transition-colors">
-                    <td className="py-4 pr-0 pl-4">
-                      <Link href={`/admin/articles/${article.id}`} className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm line-clamp-1">
-                        {article.title}
-                      </Link>
-                    </td>
-                    <td className="py-4">
-                      <Badge variant="warning" size="sm">
-                        {getCategoryName(article.categoryKey)}
-                      </Badge>
-                    </td>
-                    <td className="py-4">
-                      <StatusBadge status={article.status} />
-                    </td>
-                    <td className="py-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                      {article.views.toLocaleString()}
-                    </td>
+            {articlesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 size={24} className="animate-spin text-gold/50" />
+              </div>
+            ) : recentArticles.length === 0 ? (
+              <p className="text-center text-white/40 py-8 font-[family-name:var(--font-display)]">
+                {t('admin.articles.empty')}
+              </p>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gold/10">
+                    <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                      {t('admin.articles.table.article')}
+                    </th>
+                    <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                      {t('admin.articles.table.section')}
+                    </th>
+                    <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                      {t('admin.articles.table.status')}
+                    </th>
+                    <th className="text-right pb-3 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                      {t('admin.articles.table.stats')}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recentArticles.map((article) => (
+                    <tr key={article.id} className="border-b border-gold/5 hover:bg-white/5 transition-colors">
+                      <td className="py-4 pr-0 pl-4">
+                        <Link href={`/admin/articles/${article.id}`} className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm line-clamp-1">
+                          {article.title}
+                        </Link>
+                      </td>
+                      <td className="py-4">
+                        <Badge variant="warning" size="sm">
+                          {article.section || '-'}
+                        </Badge>
+                      </td>
+                      <td className="py-4">
+                        <StatusBadge status={article.status} />
+                      </td>
+                      <td className="py-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
+                        {article.views.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </motion.div>
 

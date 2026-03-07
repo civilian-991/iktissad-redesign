@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   ArrowRight,
   Save,
@@ -18,6 +20,7 @@ import {
   Image as ImageIcon,
   Loader2
 } from 'lucide-react';
+import { createMagazine } from '@/lib/api-client';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -25,6 +28,7 @@ const months = [
 ];
 
 export default function NewMagazinePage() {
+  const router = useRouter();
   const [issueNumber, setIssueNumber] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(months[new Date().getMonth()]);
@@ -51,10 +55,37 @@ export default function NewMagazinePage() {
     setHighlights(newHighlights);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (saveStatus?: string) => {
+    if (!issueNumber.trim()) {
+      toast.error('يرجى إدخال رقم العدد');
+      return;
+    }
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSaving(false);
+    try {
+      const title = `العدد ${issueNumber}`;
+      const res = await createMagazine({
+        title,
+        titleEn: `Issue ${issueNumber}`,
+        issueNumber: Number(issueNumber),
+        coverImage: coverImage || '',
+        pdfUrl: pdfFile || '',
+        publishDate: publishDate || undefined,
+        status: saveStatus || status,
+        featured,
+        pages: pages ? Number(pages) : undefined,
+        highlights: highlights.filter(h => h.trim()),
+      });
+      toast.success('تم حفظ العدد بنجاح');
+      if (res.data?.id) {
+        router.push(`/admin/magazines/${res.data.id}`);
+      } else {
+        router.push('/admin/magazines');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -84,7 +115,7 @@ export default function NewMagazinePage() {
             معاينة
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={isSaving}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-70"
           >
@@ -450,7 +481,7 @@ export default function NewMagazinePage() {
                 <span className="font-[family-name:var(--font-display)]">معاينة على الموقع</span>
               </button>
               <button
-                onClick={handleSave}
+                onClick={() => handleSave('draft')}
                 disabled={isSaving}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors"
               >

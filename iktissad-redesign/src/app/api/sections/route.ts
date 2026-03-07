@@ -1,40 +1,42 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mapSectionRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Section } from "@/types";
 
-const mockSections: Section[] = [
-  {
-    slug: "economics",
-    name: "اقتصاد",
-    nameEn: "Economics",
-    description: "أخبار وتحليلات اقتصادية شاملة تغطي الأسواق العربية والعالمية",
-    descriptionEn: "Comprehensive economic news and analysis covering Arab and global markets",
-    articleCount: 245,
-  },
-  {
-    slug: "technology",
-    name: "تكنولوجيا",
-    nameEn: "Technology",
-    description: "آخر المستجدات في عالم التكنولوجيا والتحول الرقمي في المنطقة العربية",
-    descriptionEn: "Latest developments in technology and digital transformation in the Arab region",
-    articleCount: 128,
-  },
-  {
-    slug: "investment",
-    name: "استثمار",
-    nameEn: "Investment",
-    description: "فرص الاستثمار والتحليلات المالية وأخبار الأسواق والبورصات",
-    descriptionEn: "Investment opportunities, financial analysis, and stock market news",
-    articleCount: 187,
-  },
-];
-
 export async function GET() {
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows, error } = await supabase
+    .from("sections")
+    .select()
+    .order("name", { ascending: true }) as { data: any[] | null; error: any };
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  // Count articles per section
+  const sections: Section[] = [];
+  for (const row of rows ?? []) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await supabase
+      .from("articles")
+      .select("id", { count: "exact", head: true })
+      .eq("section_id", row.id)
+      .eq("status", "published" as const) as { count: number | null };
+    sections.push(mapSectionRow(row, count ?? 0));
+  }
+
   const response: ApiResponse<Section[]> = {
-    data: mockSections,
+    data: sections,
     pagination: {
       page: 1,
       pageSize: 50,
-      total: mockSections.length,
+      total: sections.length,
       totalPages: 1,
     },
   };

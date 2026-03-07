@@ -120,7 +120,7 @@ export default function VideoSection() {
                   />
 
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-obsidian/30 group-hover:bg-obsidian/40 transition-colors flex items-center justify-center">
+                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm group-hover:bg-white/10 transition-colors flex items-center justify-center">
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       className="w-16 h-16 bg-gold flex items-center justify-center"
@@ -130,7 +130,7 @@ export default function VideoSection() {
                   </div>
 
                   {/* Duration Badge */}
-                  <div className="absolute bottom-3 left-3 bg-obsidian/80 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
+                  <div className="absolute bottom-3 left-3 bg-white/10 backdrop-blur-sm border border-white/10 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
                     {video.duration}
                   </div>
 
@@ -156,14 +156,14 @@ export default function VideoSection() {
           </div>
 
           {/* Regular Videos - Sidebar List */}
-          <div className="lg:col-span-4 bg-brand border border-brand-lighter">
-            <div className="p-4 border-b border-brand-lighter">
+          <div className="lg:col-span-4 bg-white/5 backdrop-blur-sm border border-white/10">
+            <div className="p-4 border-b border-white/10">
               <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
                 {t('components.videoSection.moreVideos')}
               </h3>
             </div>
 
-            <div className="divide-y divide-brand-lighter">
+            <div className="divide-y divide-white/10">
               {regularVideos.map((video, index) => (
                 <motion.a
                   key={video.id}
@@ -172,7 +172,7 @@ export default function VideoSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex gap-4 p-4 hover:bg-brand-light transition-colors group"
+                  className="flex gap-4 p-4 hover:bg-white/10 transition-all duration-300 group"
                 >
                   {/* Thumbnail */}
                   <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-brand-light">
@@ -181,12 +181,12 @@ export default function VideoSection() {
                       alt={video.title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-obsidian/30 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center">
                       <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
                         <Play className="text-brand-darker fill-brand-darker" size={14} />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 left-1 bg-obsidian/80 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
+                    <div className="absolute bottom-1 left-1 bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
                       {video.duration}
                     </div>
                   </div>

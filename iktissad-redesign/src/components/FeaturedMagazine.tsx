@@ -196,7 +196,7 @@ export default function FeaturedMagazine() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ x: -5 }}
-                className="flex items-center gap-4 p-3 bg-paper border border-sand hover:border-gold/50 transition-all group"
+                className="flex items-center gap-4 p-3 bg-obsidian/5 backdrop-blur-sm border border-obsidian/10 hover:bg-obsidian/10 hover:border-gold/30 transition-all duration-300 group"
               >
                 <img
                   src={issue.cover}

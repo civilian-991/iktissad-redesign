@@ -36,6 +36,7 @@ import { stackClient } from "@/stack";
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes, config } from '@/lib/design-tokens';
 import { Badge } from '@/components/ui';
+import { Toaster } from 'sonner';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION CONFIGURATION
@@ -499,6 +500,19 @@ function AdminLayoutContent({ children, user }: { children: React.ReactNode; use
           {children}
         </main>
       </div>
+
+      {/* Toast notifications */}
+      <Toaster
+        position="bottom-left"
+        theme="dark"
+        toastOptions={{
+          style: {
+            background: 'var(--color-midnight, #183B4E)',
+            border: '1px solid rgba(221,168,83,0.2)',
+            color: '#fff',
+          },
+        }}
+      />
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>

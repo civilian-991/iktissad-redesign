@@ -1,69 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { mapCountryRow, mapArticleRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, Country } from "@/types";
 
-const mockCountries: Country[] = [
-  {
-    slug: "saudi-arabia",
-    name: "المملكة العربية السعودية",
-    nameEn: "Saudi Arabia",
-    flag: "🇸🇦",
-    economicOverview: "تعد المملكة العربية السعودية أكبر اقتصاد في منطقة الشرق الأوسط وشمال أفريقيا وعضو فاعل في مجموعة العشرين",
-    economicOverviewEn: "Saudi Arabia is the largest economy in the MENA region and an active member of the G20",
-    keyIndicators: {
-      gdp: "1.1 trillion USD",
-      gdpGrowth: "3.5%",
-      inflation: "2.1%",
-      population: "36 million",
-      unemployment: "4.8%",
-    },
-  },
-  {
-    slug: "uae",
-    name: "الإمارات العربية المتحدة",
-    nameEn: "United Arab Emirates",
-    flag: "🇦🇪",
-    economicOverview: "اقتصاد متنوع يعتمد على السياحة والتجارة والخدمات المالية إلى جانب النفط والغاز",
-    economicOverviewEn: "A diversified economy relying on tourism, trade, and financial services alongside oil and gas",
-    keyIndicators: {
-      gdp: "507 billion USD",
-      gdpGrowth: "4.2%",
-      inflation: "1.8%",
-      population: "10 million",
-      unemployment: "2.9%",
-    },
-  },
-  {
-    slug: "egypt",
-    name: "جمهورية مصر العربية",
-    nameEn: "Egypt",
-    flag: "🇪🇬",
-    economicOverview: "أكبر اقتصاد في شمال أفريقيا من حيث عدد السكان ويشهد إصلاحات اقتصادية واسعة",
-    economicOverviewEn: "The largest economy in North Africa by population, undergoing extensive economic reforms",
-    keyIndicators: {
-      gdp: "476 billion USD",
-      gdpGrowth: "4.0%",
-      inflation: "14.5%",
-      population: "105 million",
-      unemployment: "7.1%",
-    },
-  },
-];
+const ARTICLE_SELECT = `
+  *,
+  users:author_id ( name, avatar ),
+  sections:section_id ( slug ),
+  sectors:sector_id ( slug ),
+  countries:country_id ( slug )
+`;
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const supabase = await createClient();
 
-  const country = mockCountries.find((c) => c.slug === slug);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: row, error } = await supabase
+    .from("countries")
+    .select()
+    .eq("slug", slug)
+    .single() as { data: any; error: any };
 
-  if (!country) {
+  if (error || !row) {
     return NextResponse.json(
       { error: "Country not found" } satisfies ApiResponse<never>,
       { status: 404 }
     );
   }
 
-  const response: ApiResponse<Country> = { data: country };
+  // Also fetch articles for this country
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: articleRows } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .eq("country_id", row.id)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(10) as { data: any[] | null };
+
+  const country = mapCountryRow(row);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles = (articleRows ?? []).map((r: any) => mapArticleRow(r));
+
+  const response: ApiResponse<Country & { articles: typeof articles }> = {
+    data: { ...country, articles },
+  };
   return NextResponse.json(response);
 }

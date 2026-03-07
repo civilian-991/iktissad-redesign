@@ -22,22 +22,13 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gold via-gold-dark to-gold relative overflow-hidden">
+    <section className="py-20 bg-obsidian relative overflow-hidden">
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl" />
 
       {/* Pattern Overlay */}
-      <div className="absolute inset-0 opacity-10">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <defs>
-            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
+      <div className="absolute inset-0 pattern-grid opacity-30" />
 
       <div className="container-luxury relative">
         <div className="max-w-4xl mx-auto text-center">
@@ -47,9 +38,9 @@ export default function Newsletter() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ type: "spring", duration: 0.6 }}
-            className="w-20 h-20 mx-auto mb-6 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center"
+            className="w-20 h-20 mx-auto mb-6 bg-gold/10 border border-gold/20 flex items-center justify-center"
           >
-            <Mail size={36} className="text-white" />
+            <Mail size={36} className="text-gold" />
           </motion.div>
 
           {/* Title */}
@@ -57,7 +48,7 @@ export default function Newsletter() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-[family-name:var(--font-display)] font-black text-white mb-4"
+            className="text-3xl md:text-4xl font-[family-name:var(--font-display)] font-black text-gold mb-4"
           >
             {t('newsletter.title')}
           </motion.h2>
@@ -88,10 +79,10 @@ export default function Newsletter() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('newsletter.placeholder')}
-                className="w-full px-6 py-4 pr-14 rounded-xl bg-white text-navy font-[family-name:var(--font-display)] placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-white/30"
+                className="w-full px-6 py-4 pr-14 bg-white/5 border border-gold/20 text-white font-[family-name:var(--font-display)] placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-colors"
                 required
               />
-              <Mail className="absolute right-5 top-1/2 -translate-y-1/2 text-gold" size={20} />
+              <Mail className="absolute right-5 top-1/2 -translate-y-1/2 text-gold/50" size={20} />
             </div>
 
             <motion.button
@@ -99,10 +90,10 @@ export default function Newsletter() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={isSubmitted}
-              className={`px-8 py-4 rounded-xl font-[family-name:var(--font-display)] font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+              className={`px-8 py-4 font-[family-name:var(--font-display)] font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
                 isSubmitted
-                  ? 'bg-green-500 text-white'
-                  : 'bg-navy text-white hover:bg-navy-light'
+                  ? 'bg-profit text-white'
+                  : 'bg-gold text-obsidian hover:bg-gold-light'
               }`}
             >
               {isSubmitted ? (
@@ -125,18 +116,18 @@ export default function Newsletter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-6 mt-8 text-white/70 text-sm"
+            className="flex flex-wrap justify-center gap-6 mt-8 text-white/50 text-sm"
           >
             <span className="flex items-center gap-2">
-              <Sparkles size={16} className="text-white" />
+              <Sparkles size={16} className="text-gold/60" />
               {t('newsletter.features.exclusive')}
             </span>
             <span className="flex items-center gap-2">
-              <Sparkles size={16} className="text-white" />
+              <Sparkles size={16} className="text-gold/60" />
               {t('newsletter.features.weekly')}
             </span>
             <span className="flex items-center gap-2">
-              <Sparkles size={16} className="text-white" />
+              <Sparkles size={16} className="text-gold/60" />
               {t('newsletter.features.noSpam')}
             </span>
           </motion.div>

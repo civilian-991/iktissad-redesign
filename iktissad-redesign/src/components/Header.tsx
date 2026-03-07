@@ -21,8 +21,7 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-  Youtube,
-  Globe
+  Youtube
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
@@ -94,7 +93,7 @@ const socialLinks = [
 // ═══════════════════════════════════════════════════════════════
 
 export default function Header() {
-  const { t, locale, setLocale } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
@@ -182,10 +181,6 @@ export default function Header() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const toggleLocale = () => {
-    setLocale(locale === 'ar' ? 'en' : 'ar');
-  };
-
   return (
     <>
       {/* Top Bar - Brand Color */}
@@ -237,14 +232,13 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center group">
               <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="bg-navy px-4 py-2"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Image
-                  src="/logo-white.png"
+                  src="/logo.png"
                   alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
-                  width={180}
+                  width={220}
                   height={48}
                   className="h-10 md:h-12 w-auto"
                   priority
@@ -314,18 +308,6 @@ export default function Header() {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              {/* Language Switcher */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={toggleLocale}
-                className="flex items-center gap-1.5 px-3 py-2 border border-sand hover:border-gold text-graphite hover:text-gold transition-all duration-300 text-sm font-[family-name:var(--font-display)] font-semibold"
-                aria-label={locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
-              >
-                <Globe size={iconSizes.sm} />
-                <span>{locale === 'ar' ? 'EN' : 'AR'}</span>
-              </motion.button>
-
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -462,17 +444,6 @@ export default function Header() {
                     aria-label={t('header.menu.close')}
                   >
                     <X size={iconSizes.lg} />
-                  </button>
-                </div>
-
-                {/* Language Toggle in Mobile */}
-                <div className="px-6 py-3 border-b border-sand/50">
-                  <button
-                    onClick={toggleLocale}
-                    className="flex items-center gap-2 text-sm font-[family-name:var(--font-display)] font-semibold text-graphite hover:text-gold transition-colors"
-                  >
-                    <Globe size={iconSizes.sm} />
-                    <span>{locale === 'ar' ? 'English' : 'العربية'}</span>
                   </button>
                 </div>
 

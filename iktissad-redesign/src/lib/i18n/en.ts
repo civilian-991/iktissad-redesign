@@ -346,6 +346,18 @@ export const en = {
           code: 'Code',
           image: 'Image',
         },
+        ai: {
+          translateTitle: 'Translate Title',
+          translating: 'Translating...',
+          translateSuccess: 'Translation complete',
+          translateError: 'Translation failed',
+          generateExcerpt: 'Auto-generate Excerpt',
+          generatingExcerpt: 'Generating...',
+          excerptSuccess: 'Excerpt generated',
+          excerptError: 'Failed to generate excerpt',
+          noContent: 'Write article content first',
+          noTitle: 'Write title first',
+        },
       },
       categories: {
         economy: 'Economy',

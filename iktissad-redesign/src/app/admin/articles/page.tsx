@@ -3,14 +3,16 @@
  * IKTISSAD Design System
  *
  * Article management page with search, filters, and bulk actions.
- * Uses design tokens and i18n for internationalization.
+ * Fetches real data from /api/articles via SWR.
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import useSWR from 'swr';
+import { toast } from 'sonner';
 import {
   Plus,
   Search,
@@ -26,111 +28,64 @@ import {
   Clock,
   AlertCircle,
   Download,
-  Upload
+  Upload,
+  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { Button, Badge, StatusBadge, SearchInput } from '@/components/ui';
+import { Button, Badge, StatusBadge } from '@/components/ui';
+import { swrFetcher, articlesKey, deleteArticle } from '@/lib/api-client';
+import type { Article, ApiResponse } from '@/types';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
-const categoryKeys = ['all', 'economy', 'markets', 'companies', 'technology', 'investment', 'energy'] as const;
 const statusKeys = ['all', 'published', 'draft', 'review', 'scheduled'] as const;
 
-type CategoryKey = typeof categoryKeys[number];
 type StatusKey = typeof statusKeys[number];
 type ArticleStatus = 'published' | 'draft' | 'review' | 'scheduled';
 
-interface Article {
-  id: number;
-  title: string;
-  excerpt: string;
-  categoryKey: string;
-  author: string;
-  status: ArticleStatus;
-  views: number;
-  comments: number;
-  date: string;
-  image: string;
-}
-
-// Mock articles data
-const mockArticles: Article[] = [
+const COUNTRY_REGIONS = [
   {
-    id: 1,
-    title: 'البنك المركزي يعلن عن إجراءات جديدة لدعم الاقتصاد',
-    excerpt: 'أعلن البنك المركزي عن حزمة من الإجراءات الجديدة التي تهدف إلى دعم النمو الاقتصادي...',
-    categoryKey: 'economy',
-    author: 'أحمد المنصور',
-    status: 'published',
-    views: 12500,
-    comments: 45,
-    date: '2024-01-15',
-    image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=100&h=60&fit=crop',
+    id: 'gulf', name: 'الخليج',
+    countries: [
+      { id: 'saudi', name: 'السعودية' },
+      { id: 'uae', name: 'الإمارات' },
+      { id: 'qatar', name: 'قطر' },
+      { id: 'kuwait', name: 'الكويت' },
+      { id: 'bahrain', name: 'البحرين' },
+      { id: 'oman', name: 'عُمان' },
+    ],
   },
   {
-    id: 2,
-    title: 'ارتفاع مؤشرات البورصة مع تزايد ثقة المستثمرين',
-    excerpt: 'شهدت البورصة ارتفاعاً ملحوظاً في مؤشراتها الرئيسية...',
-    categoryKey: 'markets',
-    author: 'سارة العلي',
-    status: 'published',
-    views: 8900,
-    comments: 32,
-    date: '2024-01-15',
-    image: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=100&h=60&fit=crop',
+    id: 'mashreq', name: 'المشرق العربي',
+    countries: [
+      { id: 'lebanon', name: 'لبنان' },
+      { id: 'syria', name: 'سوريا' },
+      { id: 'jordan', name: 'الأردن' },
+      { id: 'iraq', name: 'العراق' },
+    ],
   },
   {
-    id: 3,
-    title: 'قطاع التكنولوجيا يقود النمو في الربع الأخير',
-    excerpt: 'حقق قطاع التكنولوجيا نمواً استثنائياً خلال الربع الأخير من العام...',
-    categoryKey: 'technology',
-    author: 'محمد الخالدي',
-    status: 'draft',
-    views: 0,
-    comments: 0,
-    date: '2024-01-14',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&h=60&fit=crop',
+    id: 'northafrica', name: 'شمال أفريقيا',
+    countries: [
+      { id: 'egypt', name: 'مصر' },
+      { id: 'morocco', name: 'المغرب' },
+      { id: 'algeria', name: 'الجزائر' },
+      { id: 'tunisia', name: 'تونس' },
+    ],
   },
   {
-    id: 4,
-    title: 'توقعات بنمو الناتج المحلي بنسبة 4% خلال العام الجاري',
-    excerpt: 'توقع خبراء اقتصاديون نمو الناتج المحلي الإجمالي...',
-    categoryKey: 'economy',
-    author: 'نور الدين',
-    status: 'review',
-    views: 0,
-    comments: 0,
-    date: '2024-01-14',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=100&h=60&fit=crop',
+    id: 'world', name: 'العالم',
+    countries: [
+      { id: 'usa', name: 'أمريكا' },
+      { id: 'china', name: 'الصين' },
+      { id: 'europe', name: 'أوروبا' },
+      { id: 'india', name: 'الهند' },
+    ],
   },
-  {
-    id: 5,
-    title: 'الاستثمارات الأجنبية تتجاوز التوقعات',
-    excerpt: 'سجلت الاستثمارات الأجنبية المباشرة أرقاماً قياسية...',
-    categoryKey: 'investment',
-    author: 'فاطمة الزهراء',
-    status: 'published',
-    views: 6700,
-    comments: 28,
-    date: '2024-01-13',
-    image: 'https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=100&h=60&fit=crop',
-  },
-  {
-    id: 6,
-    title: 'قمة اقتصادية تجمع قادة الأعمال في المنطقة',
-    excerpt: 'انطلقت أعمال القمة الاقتصادية السنوية...',
-    categoryKey: 'companies',
-    author: 'عمر الشريف',
-    status: 'scheduled',
-    views: 0,
-    comments: 0,
-    date: '2024-01-20',
-    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=100&h=60&fit=crop',
-  },
-];
+] as const;
 
 // ═══════════════════════════════════════════════════════════════
 // COMPONENT
@@ -139,26 +94,39 @@ const mockArticles: Article[] = [
 export default function ArticlesPage() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>('all');
+  const [selectedSection, setSelectedSection] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState<StatusKey>('all');
-  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
+  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'views' | 'title'>('date');
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [filterRegion, setFilterRegion] = useState('');
+  const [filterCountry, setFilterCountry] = useState('');
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  // Get category name from translations
-  const getCategoryName = (key: string): string => {
-    if (key === 'all') return t('admin.articles.filters.all');
-    const categories: Record<string, string> = {
-      economy: t('nav.sections.economy'),
-      markets: t('nav.sections.markets'),
-      companies: t('nav.sections.companies'),
-      technology: t('nav.sections.technology'),
-      investment: t('nav.sectors.investment'),
-      energy: t('nav.sections.energy'),
-    };
-    return categories[key] || key;
-  };
+  // Build SWR key from filters
+  const swrKey = articlesKey({
+    page,
+    pageSize,
+    section: selectedSection !== 'all' ? selectedSection : undefined,
+    status: selectedStatus !== 'all' ? selectedStatus : undefined,
+    search: searchQuery || undefined,
+    country: filterCountry || undefined,
+  });
+
+  const { data, isLoading, mutate } = useSWR<ApiResponse<Article[]>>(
+    swrKey,
+    swrFetcher,
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
+
+  const articles = data?.data ?? [];
+  const pagination = data?.pagination;
+  const total = pagination?.total ?? 0;
+  const totalPages = pagination?.totalPages ?? 1;
+
+  const publishedCount = articles.filter(a => a.status === 'published').length;
 
   // Get status label from translations
   const getStatusLabel = (status: StatusKey): string => {
@@ -166,24 +134,17 @@ export default function ArticlesPage() {
     return t(`admin.articles.status.${status}`);
   };
 
-  const filteredArticles = mockArticles.filter((article) => {
-    const matchesSearch = article.title.includes(searchQuery) || article.excerpt.includes(searchQuery);
-    const matchesCategory = selectedCategory === 'all' || article.categoryKey === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || article.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  const toggleSelectArticle = (id: number) => {
+  const toggleSelectArticle = (id: string) => {
     setSelectedArticles((prev) =>
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    if (selectedArticles.length === filteredArticles.length) {
+    if (selectedArticles.length === articles.length) {
       setSelectedArticles([]);
     } else {
-      setSelectedArticles(filteredArticles.map((a) => a.id));
+      setSelectedArticles(articles.map((a) => a.id));
     }
   };
 
@@ -202,7 +163,29 @@ export default function ArticlesPage() {
     }
   };
 
-  const publishedCount = mockArticles.filter(a => a.status === 'published').length;
+  // Delete a single article
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      await deleteArticle(id);
+      toast.success(t('admin.articles.actions.deleted'));
+      mutate();
+      setOpenMenu(null);
+    } catch (err: any) {
+      toast.error(err.message || t('admin.common.error'));
+    }
+  }, [mutate, t]);
+
+  // Bulk delete
+  const handleBulkDelete = useCallback(async () => {
+    try {
+      await Promise.all(selectedArticles.map((id) => deleteArticle(id)));
+      toast.success(t('admin.articles.bulkActions.deleteSuccess'));
+      setSelectedArticles([]);
+      mutate();
+    } catch (err: any) {
+      toast.error(err.message || t('admin.common.error'));
+    }
+  }, [selectedArticles, mutate, t]);
 
   return (
     <div className="space-y-6">
@@ -213,16 +196,10 @@ export default function ArticlesPage() {
             {t('admin.articles.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {mockArticles.length} {t('admin.common.articles')} • {publishedCount} {t('admin.articles.status.published')}
+            {total} {t('admin.common.articles')}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="md" leftIcon={<Upload size={iconSizes.md} />}>
-            {t('common.actions.import')}
-          </Button>
-          <Button variant="ghost" size="md" leftIcon={<Download size={iconSizes.md} />}>
-            {t('common.actions.export')}
-          </Button>
           <Link href="/admin/articles/new">
             <Button variant="primary" size="md" leftIcon={<Plus size={iconSizes.md} />}>
               {t('admin.articles.newArticle')}
@@ -240,7 +217,7 @@ export default function ArticlesPage() {
               type="text"
               placeholder={t('admin.articles.searchPlaceholder')}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-12 pl-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
             />
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40" size={iconSizes.md} />
@@ -270,25 +247,7 @@ export default function ArticlesPage() {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="pt-4 mt-4 border-t border-gold/10 grid md:grid-cols-3 gap-4">
-                {/* Category Filter */}
-                <div>
-                  <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
-                    {t('admin.articles.filters.section')}
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value as CategoryKey)}
-                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
-                  >
-                    {categoryKeys.map((cat) => (
-                      <option key={cat} value={cat} className="bg-midnight">
-                        {getCategoryName(cat)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
+              <div className="pt-4 mt-4 border-t border-gold/10 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Status Filter */}
                 <div>
                   <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
@@ -296,13 +255,48 @@ export default function ArticlesPage() {
                   </label>
                   <select
                     value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value as StatusKey)}
+                    onChange={(e) => { setSelectedStatus(e.target.value as StatusKey); setPage(1); }}
                     className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
                     {statusKeys.map((status) => (
                       <option key={status} value={status} className="bg-midnight">
                         {getStatusLabel(status)}
                       </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Region Filter */}
+                <div>
+                  <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
+                    المنطقة
+                  </label>
+                  <select
+                    value={filterRegion}
+                    onChange={(e) => { setFilterRegion(e.target.value); setFilterCountry(''); setPage(1); }}
+                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
+                  >
+                    <option value="" className="bg-midnight">كل المناطق</option>
+                    {COUNTRY_REGIONS.map((r) => (
+                      <option key={r.id} value={r.id} className="bg-midnight">{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Country Filter */}
+                <div>
+                  <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
+                    البلد
+                  </label>
+                  <select
+                    value={filterCountry}
+                    onChange={(e) => { setFilterCountry(e.target.value); setPage(1); }}
+                    disabled={!filterRegion}
+                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30 disabled:opacity-40"
+                  >
+                    <option value="" className="bg-midnight">كل البلدان</option>
+                    {filterRegion && COUNTRY_REGIONS.find((r) => r.id === filterRegion)?.countries.map((c) => (
+                      <option key={c.id} value={c.id} className="bg-midnight">{c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -341,10 +335,7 @@ export default function ArticlesPage() {
               {t('admin.articles.bulkActions.selected', { count: selectedArticles.length })}
             </span>
             <div className="flex items-center gap-2">
-              <Button variant="success" size="sm">
-                {t('admin.articles.bulkActions.publish')}
-              </Button>
-              <Button variant="danger" size="sm">
+              <Button variant="danger" size="sm" onClick={handleBulkDelete}>
                 {t('admin.articles.bulkActions.delete')}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setSelectedArticles([])}>
@@ -357,182 +348,222 @@ export default function ArticlesPage() {
 
       {/* Articles Table */}
       <div className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gold/10 bg-white/5">
-                <th className="text-right p-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedArticles.length === filteredArticles.length && filteredArticles.length > 0}
-                    onChange={toggleSelectAll}
-                    className="w-4 h-4 rounded border-gold/30 bg-transparent checked:bg-gold"
-                  />
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.article')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.author')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.section')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.status')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.stats')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.date')}
-                </th>
-                <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  {t('admin.articles.table.actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredArticles.map((article, index) => (
-                <motion.tr
-                  key={article.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`border-b border-gold/5 hover:bg-white/5 transition-colors ${
-                    selectedArticles.includes(article.id) ? 'bg-gold/5' : ''
-                  }`}
-                >
-                  <td className="p-4">
+        {isLoading && articles.length === 0 ? (
+          <div className="flex justify-center py-16">
+            <Loader2 size={32} className="animate-spin text-gold/50" />
+          </div>
+        ) : articles.length === 0 ? (
+          <div className="text-center py-16">
+            <FileText size={48} className="mx-auto text-white/20 mb-4" />
+            <p className="text-white/40 font-[family-name:var(--font-display)]">
+              {t('admin.articles.empty')}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gold/10 bg-white/5">
+                  <th className="text-right p-4">
                     <input
                       type="checkbox"
-                      checked={selectedArticles.includes(article.id)}
-                      onChange={() => toggleSelectArticle(article.id)}
+                      checked={selectedArticles.length === articles.length && articles.length > 0}
+                      onChange={toggleSelectAll}
                       className="w-4 h-4 rounded border-gold/30 bg-transparent checked:bg-gold"
                     />
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={article.image}
-                        alt={article.title}
-                        className="w-16 h-10 object-cover rounded-lg"
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.article')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.author')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.section')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.status')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.stats')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.date')}
+                  </th>
+                  <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.articles.table.actions')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {articles.map((article, index) => (
+                  <motion.tr
+                    key={article.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`border-b border-gold/5 hover:bg-white/5 transition-colors ${
+                      selectedArticles.includes(article.id) ? 'bg-gold/5' : ''
+                    }`}
+                  >
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedArticles.includes(article.id)}
+                        onChange={() => toggleSelectArticle(article.id)}
+                        className="w-4 h-4 rounded border-gold/30 bg-transparent checked:bg-gold"
                       />
-                      <div className="min-w-0">
-                        <Link
-                          href={`/admin/articles/${article.id}`}
-                          className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1"
-                        >
-                          {article.title}
-                        </Link>
-                        <p className="text-white/40 text-xs line-clamp-1">
-                          {article.excerpt}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 text-white/70 text-sm font-[family-name:var(--font-display)]">
-                    {article.author}
-                  </td>
-                  <td className="p-4">
-                    <Badge variant="warning" size="sm">
-                      {getCategoryName(article.categoryKey)}
-                    </Badge>
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg font-[family-name:var(--font-display)] ${
-                      article.status === 'published'
-                        ? 'bg-profit/10 text-profit'
-                        : article.status === 'draft'
-                          ? 'bg-white/10 text-white/60'
-                          : article.status === 'scheduled'
-                            ? 'bg-teal/10 text-teal'
-                            : 'bg-gold/10 text-gold'
-                    }`}>
-                      {getStatusIcon(article.status)}
-                      {t(`admin.articles.status.${article.status}`)}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-4 text-white/50 text-xs">
-                      <span className="flex items-center gap-1">
-                        <Eye size={12} />
-                        {article.views.toLocaleString()}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-white/50 text-xs font-[family-name:var(--font-display)] flex items-center gap-1">
-                      <Calendar size={12} />
-                      {new Date(article.date).toLocaleDateString('ar-SA')}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === article.id ? null : article.id)}
-                        className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                      >
-                        <MoreVertical size={iconSizes.md} />
-                      </button>
-                      <AnimatePresence>
-                        {openMenu === article.id && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute left-0 top-full mt-1 w-40 bg-midnight border border-gold/10 rounded-xl shadow-elevated overflow-hidden z-10"
-                          >
-                            <Link
-                              href={`/admin/articles/${article.id}`}
-                              className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-[family-name:var(--font-display)]"
-                            >
-                              <Edit size={iconSizes.sm} />
-                              {t('admin.articles.actions.edit')}
-                            </Link>
-                            <a
-                              href={`/news/${article.id}`}
-                              target="_blank"
-                              className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-[family-name:var(--font-display)]"
-                            >
-                              <Eye size={iconSizes.sm} />
-                              {t('admin.articles.actions.preview')}
-                            </a>
-                            <button className="w-full flex items-center gap-2 px-4 py-2.5 text-loss hover:bg-loss/10 transition-colors text-sm font-[family-name:var(--font-display)]">
-                              <Trash2 size={iconSizes.sm} />
-                              {t('admin.articles.actions.delete')}
-                            </button>
-                          </motion.div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {article.featuredImage && (
+                          <img
+                            src={article.featuredImage}
+                            alt={article.title}
+                            className="w-16 h-10 object-cover rounded-lg"
+                          />
                         )}
-                      </AnimatePresence>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        <div className="min-w-0">
+                          <Link
+                            href={`/admin/articles/${article.id}`}
+                            className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1"
+                          >
+                            {article.title}
+                          </Link>
+                          <p className="text-white/40 text-xs line-clamp-1">
+                            {article.excerpt}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 text-white/70 text-sm font-[family-name:var(--font-display)]">
+                      {article.author?.name ?? '-'}
+                    </td>
+                    <td className="p-4">
+                      <Badge variant="warning" size="sm">
+                        {article.section || '-'}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg font-[family-name:var(--font-display)] ${
+                        article.status === 'published'
+                          ? 'bg-profit/10 text-profit'
+                          : article.status === 'draft'
+                            ? 'bg-white/10 text-white/60'
+                            : article.status === 'scheduled'
+                              ? 'bg-teal/10 text-teal'
+                              : 'bg-gold/10 text-gold'
+                      }`}>
+                        {getStatusIcon(article.status)}
+                        {t(`admin.articles.status.${article.status}`)}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-4 text-white/50 text-xs">
+                        <span className="flex items-center gap-1">
+                          <Eye size={12} />
+                          {article.views.toLocaleString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-white/50 text-xs font-[family-name:var(--font-display)] flex items-center gap-1">
+                        <Calendar size={12} />
+                        {article.publishedAt
+                          ? new Date(article.publishedAt).toLocaleDateString('ar-SA')
+                          : new Date(article.createdAt).toLocaleDateString('ar-SA')}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenu(openMenu === article.id ? null : article.id)}
+                          className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          <MoreVertical size={iconSizes.md} />
+                        </button>
+                        <AnimatePresence>
+                          {openMenu === article.id && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              className="absolute left-0 top-full mt-1 w-40 bg-midnight border border-gold/10 rounded-xl shadow-elevated overflow-hidden z-10"
+                            >
+                              <Link
+                                href={`/admin/articles/${article.id}`}
+                                className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-[family-name:var(--font-display)]"
+                              >
+                                <Edit size={iconSizes.sm} />
+                                {t('admin.articles.actions.edit')}
+                              </Link>
+                              <a
+                                href={`/news/${article.slug}`}
+                                target="_blank"
+                                className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-[family-name:var(--font-display)]"
+                              >
+                                <Eye size={iconSizes.sm} />
+                                {t('admin.articles.actions.preview')}
+                              </a>
+                              <button
+                                onClick={() => handleDelete(article.id)}
+                                className="w-full flex items-center gap-2 px-4 py-2.5 text-loss hover:bg-loss/10 transition-colors text-sm font-[family-name:var(--font-display)]"
+                              >
+                                <Trash2 size={iconSizes.sm} />
+                                {t('admin.articles.actions.delete')}
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Pagination */}
-        <div className="p-4 border-t border-gold/10 flex items-center justify-between">
-          <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {t('admin.articles.pagination.showing', { from: 1, to: filteredArticles.length, total: mockArticles.length })}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              {t('admin.articles.pagination.previous')}
-            </Button>
-            <Button variant="primary" size="sm">
-              1
-            </Button>
-            <Button variant="ghost" size="sm">
-              2
-            </Button>
-            <Button variant="ghost" size="sm">
-              {t('admin.articles.pagination.next')}
-            </Button>
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-gold/10 flex items-center justify-between">
+            <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
+              {t('admin.articles.pagination.showing', {
+                from: (page - 1) * pageSize + 1,
+                to: Math.min(page * pageSize, total),
+                total,
+              })}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                {t('admin.articles.pagination.previous')}
+              </Button>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                <Button
+                  key={p}
+                  variant={p === page ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                {t('admin.articles.pagination.next')}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

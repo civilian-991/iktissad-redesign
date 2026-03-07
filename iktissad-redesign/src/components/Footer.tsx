@@ -10,6 +10,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Facebook,
   Twitter,
@@ -160,21 +161,27 @@ export default function Footer() {
                 className="flex items-center gap-4 mb-10"
               >
                 <motion.div whileHover={{ scale: 1.02 }} className="flex items-center gap-4">
-                  {/* Logo */}
+                  {/* Logo Icon */}
                   <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold">
-                      <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-3xl">إ</span>
+                    <div className="w-14 h-14 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center shadow-gold p-2.5">
+                      <Image
+                        src="/iktissad-icon.png"
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-gold" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-[family-name:var(--font-display)] font-black text-2xl text-white leading-tight">
-                      {t('common.brand.name')}
-                    </span>
-                    <span className="text-xs text-gold font-[family-name:var(--font-accent)] tracking-[0.15em] mt-1">
-                      {t('common.brand.nameEn')}
-                    </span>
-                  </div>
+                  {/* Logo Text */}
+                  <Image
+                    src="/footer-logo.png"
+                    alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
+                    width={180}
+                    height={48}
+                    className="h-10 w-auto"
+                  />
                 </motion.div>
               </Link>
 

@@ -8,9 +8,11 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import useSWR from 'swr';
+import { toast } from 'sonner';
 import {
   Plus,
   Search,
@@ -28,11 +30,14 @@ import {
   Check,
   X,
   Key,
-  Ban
+  Ban,
+  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import { Button, Badge, RoleBadge } from '@/components/ui';
+import { swrFetcher, usersKey, deleteUser } from '@/lib/api-client';
+import type { AdminUser as AdminUserType, ApiResponse } from '@/types';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -45,88 +50,6 @@ type RoleKey = typeof roleKeys[number];
 type StatusKey = typeof statusKeys[number];
 type UserRole = 'admin' | 'editor' | 'author' | 'contributor';
 type UserStatus = 'active' | 'inactive' | 'suspended';
-
-interface UserData {
-  id: number;
-  name: string;
-  email: string;
-  role: UserRole;
-  department: string;
-  status: UserStatus;
-  articles: number;
-  lastActive: string;
-  avatar: string;
-}
-
-// Mock users data
-const mockUsers: UserData[] = [
-  {
-    id: 1,
-    name: 'أحمد المنصور',
-    email: 'ahmed@iktissad.com',
-    role: 'admin',
-    department: 'الإدارة',
-    status: 'active',
-    articles: 156,
-    lastActive: '2024-01-15T10:30:00',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-  },
-  {
-    id: 2,
-    name: 'سارة العلي',
-    email: 'sara@iktissad.com',
-    role: 'editor',
-    department: 'التحرير',
-    status: 'active',
-    articles: 89,
-    lastActive: '2024-01-15T09:15:00',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop',
-  },
-  {
-    id: 3,
-    name: 'محمد الخالدي',
-    email: 'mohamed@iktissad.com',
-    role: 'author',
-    department: 'الأسواق',
-    status: 'active',
-    articles: 67,
-    lastActive: '2024-01-14T16:45:00',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-  },
-  {
-    id: 4,
-    name: 'نور الدين',
-    email: 'nour@iktissad.com',
-    role: 'author',
-    department: 'الشركات',
-    status: 'inactive',
-    articles: 34,
-    lastActive: '2024-01-10T11:20:00',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop',
-  },
-  {
-    id: 5,
-    name: 'فاطمة الزهراء',
-    email: 'fatima@iktissad.com',
-    role: 'contributor',
-    department: 'الطاقة',
-    status: 'active',
-    articles: 23,
-    lastActive: '2024-01-15T08:00:00',
-    avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=100&h=100&fit=crop',
-  },
-  {
-    id: 6,
-    name: 'عمر الشريف',
-    email: 'omar@iktissad.com',
-    role: 'contributor',
-    department: 'الرأي',
-    status: 'suspended',
-    articles: 12,
-    lastActive: '2024-01-05T14:30:00',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop',
-  },
-];
 
 // Stats configuration
 interface StatConfig {
@@ -145,16 +68,51 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<RoleKey>('all');
   const [selectedStatus, setSelectedStatus] = useState<StatusKey>('all');
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  // Fetch from API
+  const swrKey = usersKey({
+    page,
+    pageSize,
+    role: selectedRole !== 'all' ? selectedRole : undefined,
+    status: selectedStatus !== 'all' ? selectedStatus : undefined,
+  });
+
+  const { data, isLoading, mutate } = useSWR<ApiResponse<AdminUserType[]>>(
+    swrKey,
+    swrFetcher,
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
+
+  const users = data?.data ?? [];
+  const total = data?.pagination?.total ?? 0;
+
+  // Client-side search filter (API may not support search param for users)
+  const filteredUsers = searchQuery
+    ? users.filter(u => u.name.includes(searchQuery) || u.email.includes(searchQuery))
+    : users;
+
+  const handleDeleteUser = useCallback(async (id: string) => {
+    try {
+      await deleteUser(id);
+      toast.success(t('admin.users.actions.deleted'));
+      mutate();
+      setOpenMenu(null);
+    } catch (err: any) {
+      toast.error(err.message || t('admin.common.error'));
+    }
+  }, [mutate, t]);
 
   // Stats data
   const statsConfig: StatConfig[] = [
-    { labelKey: 'total', value: mockUsers.length, icon: Users, color: 'from-gold to-bronze' },
-    { labelKey: 'admins', value: mockUsers.filter(u => u.role === 'admin').length, icon: ShieldAlert, color: 'from-loss to-rose-600' },
-    { labelKey: 'editors', value: mockUsers.filter(u => u.role === 'editor').length, icon: ShieldCheck, color: 'from-purple-500 to-indigo-600' },
-    { labelKey: 'writers', value: mockUsers.filter(u => u.role === 'author' || u.role === 'contributor').length, icon: User, color: 'from-teal to-emerald-600' },
+    { labelKey: 'total', value: total, icon: Users, color: 'from-gold to-bronze' },
+    { labelKey: 'admins', value: users.filter(u => u.role === 'admin').length, icon: ShieldAlert, color: 'from-loss to-rose-600' },
+    { labelKey: 'editors', value: users.filter(u => u.role === 'editor').length, icon: ShieldCheck, color: 'from-purple-500 to-indigo-600' },
+    { labelKey: 'writers', value: users.filter(u => u.role === 'author' || u.role === 'contributor').length, icon: User, color: 'from-teal to-emerald-600' },
   ];
 
   // Get role label from translations
@@ -175,14 +133,7 @@ export default function UsersPage() {
     return t(`admin.users.status.${status}`);
   };
 
-  const filteredUsers = mockUsers.filter((user) => {
-    const matchesSearch = user.name.includes(searchQuery) || user.email.includes(searchQuery);
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  const toggleSelectUser = (id: number) => {
+  const toggleSelectUser = (id: string) => {
     setSelectedUsers((prev) =>
       prev.includes(id) ? prev.filter((u) => u !== id) : [...prev, id]
     );
@@ -221,7 +172,7 @@ export default function UsersPage() {
     return t('common.time.now');
   };
 
-  const activeCount = mockUsers.filter(u => u.status === 'active').length;
+  const activeCount = users.filter(u => u.status === 'active').length;
 
   return (
     <div className="space-y-6">
@@ -232,7 +183,7 @@ export default function UsersPage() {
             {t('admin.users.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {mockUsers.length} {t('admin.common.users')} • {activeCount} {t('admin.users.status.active')}
+            {total} {t('admin.common.users')} • {activeCount} {t('admin.users.status.active')}
           </p>
         </div>
         <Link href="/admin/users/new">
@@ -478,10 +429,10 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="p-4 text-white/70 text-sm font-[family-name:var(--font-display)]">
-                    {user.articles}
+                    {user.articleCount}
                   </td>
                   <td className="p-4 text-white/50 text-xs font-[family-name:var(--font-display)]">
-                    {getTimeAgo(user.lastActive)}
+                    {user.lastActive ? getTimeAgo(user.lastActive) : '-'}
                   </td>
                   <td className="p-4">
                     <div className="relative">
@@ -515,7 +466,10 @@ export default function UsersPage() {
                               {t('admin.users.actions.resetPassword')}
                             </button>
                             <div className="border-t border-gold/10 my-1" />
-                            <button className="w-full flex items-center gap-2 px-4 py-2.5 text-loss hover:bg-loss/10 transition-colors text-sm font-[family-name:var(--font-display)]">
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-loss hover:bg-loss/10 transition-colors text-sm font-[family-name:var(--font-display)]"
+                            >
                               <Trash2 size={iconSizes.sm} />
                               {t('admin.users.actions.delete')}
                             </button>
@@ -533,7 +487,7 @@ export default function UsersPage() {
         {/* Pagination */}
         <div className="p-4 border-t border-gold/10 flex items-center justify-between">
           <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {t('admin.articles.pagination.showing', { from: 1, to: filteredUsers.length, total: mockUsers.length })}
+            {t('admin.articles.pagination.showing', { from: 1, to: filteredUsers.length, total })}
           </span>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm">

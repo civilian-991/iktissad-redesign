@@ -117,7 +117,7 @@ export default function Hero() {
               <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-brand-darker/75 via-brand-darker/40 to-transparent" />
 
               {/* Content positioned at bottom */}
-              <div className="absolute inset-x-0 bottom-0 p-6 lg:p-10">
+              <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8 bg-white/5 backdrop-blur-md border-t border-white/10">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentSlide}
@@ -142,11 +142,6 @@ export default function Hero() {
                     <h2 className="!text-xl md:!text-2xl font-[family-name:var(--font-display)] !font-bold text-white !leading-tight mb-3">
                       {featuredNews[currentSlide].title}
                     </h2>
-
-                    {/* Excerpt */}
-                    <p className="text-white/80 text-base leading-relaxed mb-6 max-w-2xl font-[family-name:var(--font-body)] hidden md:block">
-                      {featuredNews[currentSlide].excerpt}
-                    </p>
 
                     {/* Meta */}
                     <div className="flex items-center gap-4 text-white/80 text-sm">

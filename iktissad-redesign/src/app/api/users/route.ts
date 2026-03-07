@@ -1,33 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { mapUserRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, AdminUser } from "@/types";
-
-const mockUsers: AdminUser[] = [
-  {
-    id: "usr-001",
-    email: "admin@iktissad.com",
-    name: "محمد العلي",
-    role: "admin",
-    avatar: "/images/users/admin.jpg",
-    createdAt: "2024-01-15T10:00:00Z",
-  },
-  {
-    id: "usr-002",
-    email: "editor@iktissad.com",
-    name: "سارة الحسن",
-    role: "editor",
-    avatar: "/images/users/editor.jpg",
-    createdAt: "2024-03-20T08:00:00Z",
-  },
-  {
-    id: "usr-003",
-    email: "author@iktissad.com",
-    name: "خالد المنصور",
-    role: "author",
-    avatar: "/images/users/author.jpg",
-    createdAt: "2024-06-10T14:00:00Z",
-  },
-];
 
 export async function GET(request: NextRequest) {
   const auth = await requireAuth();
@@ -38,30 +14,104 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+  const role = searchParams.get("role");
+  const status = searchParams.get("status");
 
-  const total = mockUsers.length;
-  const totalPages = Math.ceil(total / pageSize);
+  const admin = createAdminClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query = admin.from("users").select("*", { count: "exact" }) as any;
+
+  if (role) query = query.eq("role", role);
+  if (status) query = query.eq("status", status);
+
   const start = (page - 1) * pageSize;
-  const paginatedData = mockUsers.slice(start, start + pageSize);
+  const { data: rows, count, error } = await query
+    .order("created_at", { ascending: false })
+    .range(start, start + pageSize - 1);
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  const total = count ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const users: AdminUser[] = (rows ?? []).map((r: any) => mapUserRow(r));
 
   const response: ApiResponse<AdminUser[]> = {
-    data: paginatedData,
-    pagination: { page, pageSize, total, totalPages },
+    data: users,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
   };
 
   return NextResponse.json(response);
 }
 
-export async function POST() {
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1),
+  role: z.enum(["admin", "editor", "author", "contributor"]).optional().default("author"),
+  avatar: z.string().optional().default(""),
+  department: z.string().optional().default(""),
+  status: z.enum(["active", "inactive", "suspended"]).optional().default("active"),
+});
+
+export async function POST(request: NextRequest) {
   const auth = await requireAuth();
   if (!auth.authenticated) {
     return unauthorizedResponse();
   }
 
-  return NextResponse.json(
-    {
-      error: "Not implemented – database integration pending",
-    } satisfies ApiResponse<never>,
-    { status: 501 }
-  );
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" } satisfies ApiResponse<never>,
+      { status: 400 }
+    );
+  }
+
+  const parsed = createUserSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues.map((i) => i.message).join(", ") } satisfies ApiResponse<never>,
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
+  const admin = createAdminClient();
+
+  const { data: row, error } = await admin
+    .from("users")
+    .insert({
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      avatar: data.avatar,
+      department: data.department,
+      status: data.status,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    const isDuplicate = error.message.includes("duplicate");
+    return NextResponse.json(
+      { error: isDuplicate ? "Email already exists" : error.message } satisfies ApiResponse<never>,
+      { status: isDuplicate ? 409 : 500 }
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response: ApiResponse<AdminUser> = { data: mapUserRow(row as any) };
+  return NextResponse.json(response, { status: 201 });
 }

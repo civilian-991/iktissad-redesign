@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
 interface NewsletterSubscription {
@@ -6,49 +8,59 @@ interface NewsletterSubscription {
   subscribedAt: string;
 }
 
+const subscribeSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
 export async function POST(request: NextRequest) {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { email } = body;
-
-    if (!email || typeof email !== "string") {
-      return NextResponse.json(
-        {
-          error: "A valid email address is required",
-        } satisfies ApiResponse<never>,
-        { status: 400 }
-      );
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        {
-          error: "Invalid email format",
-        } satisfies ApiResponse<never>,
-        { status: 400 }
-      );
-    }
-
-    // In production, this would save to a database or email service
-    // For now, return a success response with mock data
-    const subscription: NewsletterSubscription = {
-      email,
-      subscribedAt: new Date().toISOString(),
-    };
-
-    const response: ApiResponse<NewsletterSubscription> = {
-      data: subscription,
-    };
-
-    return NextResponse.json(response, { status: 201 });
+    body = await request.json();
   } catch {
     return NextResponse.json(
-      {
-        error: "Invalid request body",
-      } satisfies ApiResponse<never>,
+      { error: "Invalid request body" } satisfies ApiResponse<never>,
       { status: 400 }
     );
   }
+
+  const parsed = subscribeSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0].message } satisfies ApiResponse<never>,
+      { status: 400 }
+    );
+  }
+
+  const { email } = parsed.data;
+  const admin = createAdminClient();
+
+  // Upsert: if already subscribed, update status to active
+  const { data: row, error } = await admin
+    .from("newsletter_subscribers")
+    .upsert(
+      { email, status: "active", subscribed_at: new Date().toISOString() },
+      { onConflict: "email" }
+    )
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const r = row as any;
+  const subscription: NewsletterSubscription = {
+    email: r.email,
+    subscribedAt: r.subscribed_at,
+  };
+
+  const response: ApiResponse<NewsletterSubscription> = {
+    data: subscription,
+  };
+
+  return NextResponse.json(response, { status: 201 });
 }

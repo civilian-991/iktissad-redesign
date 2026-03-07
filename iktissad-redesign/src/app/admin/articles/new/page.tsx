@@ -2,44 +2,37 @@
  * Admin New Article Page
  * IKTISSAD Design System
  *
- * Article creation/editing page with rich text editor.
+ * Article creation page with TipTap rich text editor and Supabase image upload.
  * Uses design tokens and i18n for internationalization.
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   ArrowRight,
   Save,
   Eye,
   Clock,
-  Image as ImageIcon,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Link2,
-  Quote,
-  Code,
-  AlignRight,
-  AlignCenter,
-  AlignLeft,
-  Heading1,
-  Heading2,
-  Upload,
-  X,
   Calendar,
   Tag,
   FileText,
-  Send
+  Send,
+  Languages,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { Button, Badge, Input, Textarea } from '@/components/ui';
+import { Button } from '@/components/ui';
+import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
+import MediaPicker from '@/components/admin/MediaPicker';
+import { createArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -52,32 +45,46 @@ type CategoryKey = typeof categoryKeys[number];
 type TagKey = typeof tagKeys[number];
 type ArticleStatus = 'draft' | 'review' | 'scheduled' | 'published';
 
-interface ToolbarButton {
-  icon?: typeof Bold;
-  labelKey?: string;
-  divider?: boolean;
-}
-
-const toolbarButtonsConfig: ToolbarButton[] = [
-  { icon: Bold, labelKey: 'bold' },
-  { icon: Italic, labelKey: 'italic' },
-  { icon: Underline, labelKey: 'underline' },
-  { divider: true },
-  { icon: Heading1, labelKey: 'heading1' },
-  { icon: Heading2, labelKey: 'heading2' },
-  { divider: true },
-  { icon: List, labelKey: 'bulletList' },
-  { icon: ListOrdered, labelKey: 'numberedList' },
-  { divider: true },
-  { icon: AlignRight, labelKey: 'alignRight' },
-  { icon: AlignCenter, labelKey: 'alignCenter' },
-  { icon: AlignLeft, labelKey: 'alignLeft' },
-  { divider: true },
-  { icon: Link2, labelKey: 'link' },
-  { icon: Quote, labelKey: 'quote' },
-  { icon: Code, labelKey: 'code' },
-  { icon: ImageIcon, labelKey: 'image' },
-];
+const COUNTRY_REGIONS = [
+  {
+    id: 'gulf', name: 'الخليج',
+    countries: [
+      { id: 'saudi', name: 'السعودية' },
+      { id: 'uae', name: 'الإمارات' },
+      { id: 'qatar', name: 'قطر' },
+      { id: 'kuwait', name: 'الكويت' },
+      { id: 'bahrain', name: 'البحرين' },
+      { id: 'oman', name: 'عُمان' },
+    ],
+  },
+  {
+    id: 'mashreq', name: 'المشرق العربي',
+    countries: [
+      { id: 'lebanon', name: 'لبنان' },
+      { id: 'syria', name: 'سوريا' },
+      { id: 'jordan', name: 'الأردن' },
+      { id: 'iraq', name: 'العراق' },
+    ],
+  },
+  {
+    id: 'northafrica', name: 'شمال أفريقيا',
+    countries: [
+      { id: 'egypt', name: 'مصر' },
+      { id: 'morocco', name: 'المغرب' },
+      { id: 'algeria', name: 'الجزائر' },
+      { id: 'tunisia', name: 'تونس' },
+    ],
+  },
+  {
+    id: 'world', name: 'العالم',
+    countries: [
+      { id: 'usa', name: 'أمريكا' },
+      { id: 'china', name: 'الصين' },
+      { id: 'europe', name: 'أوروبا' },
+      { id: 'india', name: 'الهند' },
+    ],
+  },
+] as const;
 
 // ═══════════════════════════════════════════════════════════════
 // COMPONENT
@@ -85,6 +92,7 @@ const toolbarButtonsConfig: ToolbarButton[] = [
 
 export default function NewArticlePage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
@@ -93,8 +101,17 @@ export default function NewArticlePage() {
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [status, setStatus] = useState<ArticleStatus>('draft');
   const [scheduledDate, setScheduledDate] = useState('');
+  const [titleEn, setTitleEn] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+
+  // Ref to access the TipTap editor's insertImage function
+  const editorInsertImageRef = useRef<((url: string, alt?: string) => void) | null>(null);
 
   const toggleTag = (tag: TagKey) => {
     setSelectedTags((prev) =>
@@ -103,24 +120,95 @@ export default function NewArticlePage() {
   };
 
   const handleSave = async (saveStatus: ArticleStatus) => {
+    if (!title.trim()) {
+      toast.error(t('admin.articles.editor.titleRequired'));
+      return;
+    }
     setIsSaving(true);
     setStatus(saveStatus);
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSaving(false);
+    try {
+      const slug = title.trim().replace(/\s+/g, '-').toLowerCase();
+      const res = await createArticle({
+        title,
+        titleEn,
+        slug,
+        excerpt,
+        content,
+        section: category || undefined,
+        country: selectedCountry || undefined,
+        tags: selectedTags,
+        featuredImage: featuredImage || '',
+        status: saveStatus,
+        publishedAt: saveStatus === 'published' ? new Date().toISOString() : scheduledDate || undefined,
+      });
+      toast.success(
+        saveStatus === 'published'
+          ? t('admin.articles.editor.publishSuccess')
+          : t('admin.articles.editor.saveSuccess')
+      );
+      if (res.data?.id) {
+        router.push(`/admin/articles/${res.data.id}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || t('admin.common.error'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  // Get category name from translations
   const getCategoryName = (key: CategoryKey): string => {
     return t(`admin.articles.categories.${key}`);
   };
 
-  // Get tag name from translations
   const getTagName = (key: TagKey): string => {
     return t(`admin.articles.tags.${key}`);
   };
 
-  // Status options config
+  // Handle image selection from MediaPicker for inline insertion
+  const handleMediaSelect = useCallback((url: string, name?: string) => {
+    if (editorInsertImageRef.current) {
+      editorInsertImageRef.current(url, name);
+    }
+  }, []);
+
+  const handleTranslateTitle = async () => {
+    if (!title.trim()) {
+      toast.error(t('admin.articles.editor.ai.noTitle'));
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const res = await aiTranslate(title, 'ar', 'en');
+      if (res.data?.translatedText) {
+        setTitleEn(res.data.translatedText);
+        toast.success(t('admin.articles.editor.ai.translateSuccess'));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t('admin.articles.editor.ai.translateError'));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleGenerateExcerpt = async () => {
+    if (!content.trim()) {
+      toast.error(t('admin.articles.editor.ai.noContent'));
+      return;
+    }
+    setIsGeneratingExcerpt(true);
+    try {
+      const res = await aiGenerateExcerpt(content, 'ar');
+      if (res.data?.excerpt) {
+        setExcerpt(res.data.excerpt);
+        toast.success(t('admin.articles.editor.ai.excerptSuccess'));
+      }
+    } catch (err: any) {
+      toast.error(err.message || t('admin.articles.editor.ai.excerptError'));
+    } finally {
+      setIsGeneratingExcerpt(false);
+    }
+  };
+
   const statusOptions = [
     { value: 'draft' as const, labelKey: 'draft', icon: FileText, color: 'text-white/60' },
     { value: 'review' as const, labelKey: 'review', icon: Clock, color: 'text-gold' },
@@ -207,6 +295,25 @@ export default function NewArticlePage() {
               placeholder={t('admin.articles.editor.titlePlaceholder')}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-4 px-5 text-white text-xl font-[family-name:var(--font-display)] font-bold placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
             />
+            {/* English title + AI translate button */}
+            <div className="flex items-center gap-2 mt-3">
+              <input
+                type="text"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                placeholder="English title (EN)"
+                className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+              />
+              <button
+                onClick={handleTranslateTitle}
+                disabled={isTranslating || !title.trim()}
+                className="flex items-center gap-1.5 px-3 py-2.5 bg-white/5 border border-gold/20 rounded-xl text-gold text-xs font-[family-name:var(--font-display)] hover:bg-gold/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                title={t('admin.articles.editor.ai.translateTitle')}
+              >
+                {isTranslating ? <Loader2 size={14} className="animate-spin" /> : <Languages size={14} />}
+                {isTranslating ? t('admin.articles.editor.ai.translating') : t('admin.articles.editor.ai.translateTitle')}
+              </button>
+            </div>
           </motion.div>
 
           {/* Excerpt */}
@@ -216,9 +323,20 @@ export default function NewArticlePage() {
             transition={{ delay: 0.1 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
-            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              {t('admin.articles.editor.excerptLabel')}
-            </label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-white/70 text-sm font-[family-name:var(--font-display)]">
+                {t('admin.articles.editor.excerptLabel')}
+              </label>
+              <button
+                onClick={handleGenerateExcerpt}
+                disabled={isGeneratingExcerpt || !content.trim()}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-gold/20 rounded-lg text-gold text-xs font-[family-name:var(--font-display)] hover:bg-gold/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                title={t('admin.articles.editor.ai.generateExcerpt')}
+              >
+                {isGeneratingExcerpt ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                {isGeneratingExcerpt ? t('admin.articles.editor.ai.generatingExcerpt') : t('admin.articles.editor.ai.generateExcerpt')}
+              </button>
+            </div>
             <textarea
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
@@ -228,46 +346,26 @@ export default function NewArticlePage() {
             />
           </motion.div>
 
-          {/* Content Editor */}
+          {/* Content Editor - TipTap */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden"
           >
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-1 p-3 border-b border-gold/10 bg-white/5">
-              {toolbarButtonsConfig.map((btn, index) =>
-                btn.divider ? (
-                  <div key={index} className="w-px h-6 bg-gold/10 mx-1" />
-                ) : btn.icon ? (
-                  <button
-                    key={index}
-                    title={t(`admin.articles.editor.toolbar.${btn.labelKey}`)}
-                    className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <btn.icon size={iconSizes.md} />
-                  </button>
-                ) : null
-              )}
-            </div>
-
-            {/* Editor */}
-            <div className="p-6">
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={t('admin.articles.editor.contentPlaceholder')}
-                rows={20}
-                className="w-full bg-transparent text-white font-[family-name:var(--font-body)] text-lg leading-relaxed placeholder:text-white/30 focus:outline-none resize-none"
-              />
-            </div>
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder={t('admin.articles.editor.contentPlaceholder')}
+              dir="rtl"
+              minHeight={400}
+              onImageInsert={() => setShowMediaPicker(true)}
+            />
           </motion.div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Featured Image */}
+          {/* Featured Image - Supabase Upload */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -277,42 +375,15 @@ export default function NewArticlePage() {
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
               {t('admin.articles.editor.featuredImage')}
             </label>
-            {featuredImage ? (
-              <div className="relative group">
-                <img
-                  src={featuredImage}
-                  alt="Featured"
-                  className="w-full aspect-video object-cover rounded-xl"
-                />
-                <button
-                  onClick={() => setFeaturedImage(null)}
-                  className="absolute top-2 left-2 p-1.5 bg-obsidian/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X size={iconSizes.md} />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors">
-                <Upload className="text-gold/50 mb-2" size={32} />
-                <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-                  {t('admin.articles.editor.uploadImage')}
-                </span>
-                <span className="text-white/30 text-xs mt-1">
-                  {t('admin.articles.editor.imageFormats')}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setFeaturedImage(URL.createObjectURL(file));
-                    }
-                  }}
-                />
-              </label>
-            )}
+            <ImageUploader
+              bucket="articles"
+              folder="featured"
+              currentImage={featuredImage}
+              onUpload={(url) => setFeaturedImage(url)}
+              onRemove={() => setFeaturedImage(null)}
+              hintText={t('admin.articles.editor.uploadImage')}
+              formatHint={t('admin.articles.editor.imageFormats')}
+            />
           </motion.div>
 
           {/* Category */}
@@ -337,6 +408,42 @@ export default function NewArticlePage() {
                 </option>
               ))}
             </select>
+          </motion.div>
+
+          {/* Country / بلدان */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+              بلدان
+            </label>
+            {/* Region */}
+            <select
+              value={selectedRegion}
+              onChange={(e) => { setSelectedRegion(e.target.value); setSelectedCountry(''); }}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors mb-3"
+            >
+              <option value="" className="bg-midnight">-- اختر المنطقة --</option>
+              {COUNTRY_REGIONS.map((r) => (
+                <option key={r.id} value={r.id} className="bg-midnight">{r.name}</option>
+              ))}
+            </select>
+            {/* Country */}
+            {selectedRegion && (
+              <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+              >
+                <option value="" className="bg-midnight">-- اختر البلد --</option>
+                {COUNTRY_REGIONS.find((r) => r.id === selectedRegion)?.countries.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-midnight">{c.name}</option>
+                ))}
+              </select>
+            )}
           </motion.div>
 
           {/* Tags */}
@@ -427,6 +534,15 @@ export default function NewArticlePage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Media Picker Modal - for inserting images into the editor */}
+      <MediaPicker
+        open={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={handleMediaSelect}
+        bucket="articles"
+        folder="content"
+      />
     </div>
   );
 }

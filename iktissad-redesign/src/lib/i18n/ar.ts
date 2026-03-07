@@ -346,6 +346,18 @@ export const ar = {
           code: 'كود',
           image: 'صورة',
         },
+        ai: {
+          translateTitle: 'ترجمة العنوان',
+          translating: 'جاري الترجمة...',
+          translateSuccess: 'تمت الترجمة بنجاح',
+          translateError: 'فشلت الترجمة',
+          generateExcerpt: 'توليد الملخص تلقائياً',
+          generatingExcerpt: 'جاري التوليد...',
+          excerptSuccess: 'تم توليد الملخص بنجاح',
+          excerptError: 'فشل توليد الملخص',
+          noContent: 'اكتب محتوى المقال أولاً',
+          noTitle: 'اكتب العنوان أولاً',
+        },
       },
       categories: {
         economy: 'اقتصاد',
