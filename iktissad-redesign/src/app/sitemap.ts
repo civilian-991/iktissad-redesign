@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { createClient } from "@/lib/supabase/server";
 
 const BASE_URL = "https://www.iktissadonline.com";
 
@@ -48,7 +49,7 @@ const countrySlugs = [
   "tunisia",
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, changeFrequency: "hourly", priority: 1.0 },
     { url: `${BASE_URL}/about`, changeFrequency: "monthly", priority: 0.6 },
@@ -56,8 +57,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/contact`, changeFrequency: "monthly", priority: 0.5 },
     {
       url: `${BASE_URL}/subscribe`,
-      changeFrequency: "monthly",
-      priority: 0.6,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${BASE_URL}/advertise`,
@@ -105,5 +106,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...sectionPages, ...sectorPages, ...countryPages];
+  // ── Dynamic magazine issue pages ──────────────────────────────────────────
+  let issuePages: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: issues } = await (supabase as any)
+      .from("magazine_issues")
+      .select("id, updated_at")
+      .eq("status", "published")
+      .order("publish_date", { ascending: false })
+      .limit(50);
+
+    if (issues) {
+      issuePages = (issues as Array<{ id: string; updated_at: string }>).map(
+        (issue) => ({
+          url: `${BASE_URL}/magazine/${issue.id}`,
+          lastModified: issue.updated_at,
+          changeFrequency: "monthly" as const,
+          priority: 0.8,
+        }),
+      );
+    }
+  } catch {
+    // Supabase not configured — skip dynamic issue pages
+  }
+
+  return [
+    ...staticPages,
+    ...sectionPages,
+    ...sectorPages,
+    ...countryPages,
+    ...issuePages,
+  ];
 }

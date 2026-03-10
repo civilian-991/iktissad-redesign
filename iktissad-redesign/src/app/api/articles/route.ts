@@ -9,9 +9,9 @@ import type { ApiResponse, Article } from "@/types";
 const ARTICLE_SELECT = `
   *,
   users:author_id ( name, avatar ),
-  sections:section_id ( slug ),
-  sectors:sector_id ( slug ),
-  countries:country_id ( slug )
+  sections:section_id ( slug, name ),
+  sectors:sector_id ( slug, name ),
+  countries:country_id ( slug, name )
 `;
 
 export async function GET(request: NextRequest) {

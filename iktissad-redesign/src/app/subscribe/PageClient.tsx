@@ -1,272 +1,465 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Check, Crown, Star, Zap, Mail, CreditCard, Shield, Gift } from 'lucide-react';
+import { Check, X, Crown, Star, Zap, Shield, CreditCard } from 'lucide-react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 
-const plans = [
+interface Plan {
+  id: string;
+  name: string;
+  name_ar: string;
+  price_monthly: number;
+  price_annual: number | null;
+  features: string[];
+  features_ar: string[];
+  sort_order: number;
+}
+
+interface Props {
+  plans?: Plan[];
+  redirectTo?: string;
+}
+
+// ─── Static tier definitions (shown when no DB plans are loaded) ───────────
+const staticTiers = [
   {
     id: 'free',
-    name: 'مجاني',
-    price: '0',
-    period: 'دائماً',
-    description: 'للقراء العاديين',
+    slug: 'free',
+    nameAr: 'مجاني',
+    nameEn: 'Free',
+    priceMonthly: 0,
+    priceAnnual: 0,
     icon: Star,
-    features: [
-      'الوصول للأخبار اليومية',
+    color: 'from-slate-400 to-slate-500',
+    badgeClass: 'bg-slate-100 text-slate-700',
+    popular: false,
+    featuresAr: [
+      '5 مقالات شهرياً',
+      'تصفح المجلة فقط (preview)',
       'النشرة الإخبارية الأسبوعية',
-      '5 مقالات مميزة شهرياً',
-      'تطبيق الهاتف المحمول'
     ],
-    color: 'from-slate-400 to-slate-600',
-    popular: false
+    lockedAr: [
+      'العدد الحالي كاملاً',
+      'تحميل PDF',
+      'كامل الأرشيف',
+      'وصول مبكر',
+      'إشعارات فورية',
+    ],
+  },
+  {
+    id: 'digital',
+    slug: 'digital',
+    nameAr: 'رقمي',
+    nameEn: 'Digital',
+    priceMonthly: 49,
+    priceAnnual: 399,
+    icon: Zap,
+    color: 'from-brand to-brand-600',
+    badgeClass: 'bg-brand-50 text-brand-800',
+    popular: false,
+    featuresAr: [
+      '5 مقالات شهرياً',
+      'العدد الحالي كاملاً',
+      '12 شهراً أرشيف',
+      'تحميل PDF',
+      'النشرة الإخبارية الأسبوعية',
+    ],
+    lockedAr: [
+      'كامل الأرشيف',
+      'وصول مبكر',
+      'إشعارات فورية',
+    ],
   },
   {
     id: 'premium',
-    name: 'بريميوم',
-    price: '9.99',
-    period: 'شهرياً',
-    description: 'للمستثمرين والمهتمين',
+    slug: 'premium',
+    nameAr: 'مميز',
+    nameEn: 'Premium',
+    priceMonthly: 99,
+    priceAnnual: 799,
     icon: Crown,
-    features: [
-      'جميع مميزات الباقة المجانية',
-      'وصول غير محدود للمقالات',
-      'تحليلات حصرية يومية',
-      'تنبيهات الأخبار العاجلة',
-      'بدون إعلانات',
-      'تقارير قطاعية شهرية'
-    ],
     color: 'from-gold to-gold-dark',
-    popular: true
-  },
-  {
-    id: 'enterprise',
-    name: 'المؤسسات',
-    price: '49.99',
-    period: 'شهرياً',
-    description: 'للشركات والمؤسسات',
-    icon: Zap,
-    features: [
-      'جميع مميزات بريميوم',
-      '10 حسابات للموظفين',
-      'واجهة برمجة التطبيقات API',
-      'تقارير مخصصة',
-      'مدير حساب مخصص',
-      'تدريب وورش عمل',
-      'أولوية الدعم الفني'
+    badgeClass: 'bg-gold-pale text-obsidian',
+    popular: true,
+    featuresAr: [
+      '5 مقالات شهرياً',
+      'العدد الحالي كاملاً',
+      'كامل الأرشيف (65+ سنة)',
+      'تحميل PDF',
+      'وصول مبكر للأعداد الجديدة',
+      'إشعارات فورية',
+      'النشرة الإخبارية الأسبوعية',
     ],
-    color: 'from-navy to-navy-light',
-    popular: false
+    lockedAr: [],
+  },
+];
+
+// ─── Comparison table rows ──────────────────────────────────────────────────
+const comparisonRows = [
+  { labelAr: 'مقالات شهرية', free: '5 فقط', digital: 'غير محدود', premium: 'غير محدود' },
+  { labelAr: 'تصفح المجلة', free: true, digital: true, premium: true },
+  { labelAr: 'العدد الحالي كاملاً', free: false, digital: true, premium: true },
+  { labelAr: 'أرشيف المجلة (12 شهراً)', free: false, digital: true, premium: true },
+  { labelAr: 'كامل الأرشيف (65+ سنة)', free: false, digital: false, premium: true },
+  { labelAr: 'تحميل PDF', free: false, digital: true, premium: true },
+  { labelAr: 'وصول مبكر', free: false, digital: false, premium: true },
+  { labelAr: 'إشعارات فورية', free: false, digital: false, premium: true },
+  { labelAr: 'النشرة الإخبارية', free: true, digital: true, premium: true },
+];
+
+function CellValue({ val }: { val: boolean | string }) {
+  if (typeof val === 'boolean') {
+    return val ? (
+      <Check size={20} className="text-profit mx-auto" aria-label="متاح" />
+    ) : (
+      <X size={20} className="text-loss/40 mx-auto" aria-label="غير متاح" />
+    );
   }
-];
+  return <span className="text-sm text-charcoal font-semibold">{val}</span>;
+}
 
-const benefits = [
-  { icon: Mail, title: 'نشرات حصرية', desc: 'تحليلات يومية في بريدك' },
-  { icon: CreditCard, title: 'دفع آمن', desc: 'تشفير كامل للمعاملات' },
-  { icon: Shield, title: 'إلغاء مجاني', desc: 'ألغِ اشتراكك في أي وقت' },
-  { icon: Gift, title: 'عروض خاصة', desc: 'خصومات حصرية للمشتركين' },
-];
-
-export default function SubscribePageClient() {
+export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
   const { t } = useTranslation();
-  const [selectedPlan, setSelectedPlan] = useState('premium');
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const router = useRouter();
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
+  const [selectedTier, setSelectedTier] = useState('premium');
+
+  // Calculate annual discount % for a tier
+  function discountPercent(monthly: number, annual: number | null): number {
+    if (!annual || monthly === 0) return 0;
+    const annualMonthly = annual / 12;
+    return Math.round((1 - annualMonthly / monthly) * 100);
+  }
+
+  // Map DB plans to static tiers (if available), or use static defaults
+  function getPlanId(tierSlug: string): string | null {
+    const dbPlan = plans.find(
+      (p) => p.name.toLowerCase() === tierSlug || p.name_ar === tierSlug
+    );
+    return dbPlan?.id ?? null;
+  }
+
+  function handleChoose(tierSlug: string) {
+    if (tierSlug === 'free') {
+      router.push('/');
+      return;
+    }
+    const planId = getPlanId(tierSlug) ?? tierSlug;
+    const url = new URL('/checkout', window.location.origin);
+    url.searchParams.set('plan', planId);
+    url.searchParams.set('billing', billing);
+    if (redirectTo) url.searchParams.set('redirect', redirectTo);
+    router.push(url.pathname + url.search);
+  }
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-cream">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-navy via-navy-light to-navy py-20 overflow-hidden">
-          <div className="absolute inset-0 star-pattern opacity-20" />
-          <div className="absolute top-0 left-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+      <main className="min-h-screen bg-paper" dir="rtl">
 
-          <div className="container-luxury relative">
+        {/* ── Hero ────────────────────────────────────────────────────── */}
+        <section className="relative bg-gradient-to-br from-obsidian via-navy-light to-brand py-24 overflow-hidden">
+          <div className="absolute inset-0 star-pattern opacity-20" />
+          <div className="absolute top-0 start-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 end-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+
+          <div className="container-luxury relative text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center max-w-3xl mx-auto"
+              transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 rounded-full text-gold text-sm font-[family-name:var(--font-display)] mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 rounded-full text-gold text-sm mb-6">
                 <Crown size={16} />
-                اشتراك مميز
+                {t('pages.subscribe.title')}
               </span>
-              <h1 className="text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-6">
-                احصل على تجربة قراءة استثنائية
+              <h1 className="text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-4">
+                اشترك الآن في إقتصاد
               </h1>
-              <p className="text-white/70 text-lg">
-                اشترك الآن واحصل على وصول غير محدود للتحليلات والتقارير الحصرية
+              <p className="text-white/70 text-lg max-w-xl mx-auto">
+                {t('pages.subscribe.subtitle')}
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Billing Toggle */}
-        <section className="py-8">
-          <div className="container-luxury">
-            <div className="flex items-center justify-center gap-4">
-              <span className={`font-[family-name:var(--font-display)] ${billingPeriod === 'monthly' ? 'text-navy' : 'text-slate'}`}>
-                شهري
+        {/* ── Billing Toggle ───────────────────────────────────────────── */}
+        <section className="py-8 bg-ivory">
+          <div className="container-luxury flex items-center justify-center gap-4">
+            <button
+              onClick={() => setBilling('monthly')}
+              className={`px-5 py-2 rounded-full font-[family-name:var(--font-display)] font-semibold transition-all ${
+                billing === 'monthly'
+                  ? 'bg-obsidian text-white shadow-md'
+                  : 'text-charcoal hover:text-navy'
+              }`}
+            >
+              {t('pages.subscribe.monthly')}
+            </button>
+
+            {/* Toggle pill */}
+            <button
+              onClick={() => setBilling(billing === 'monthly' ? 'annual' : 'monthly')}
+              className="relative w-14 h-7 bg-gold rounded-full focus:outline-none"
+              aria-label="تبديل دورة الفوترة"
+            >
+              <motion.div
+                animate={{ x: billing === 'annual' ? -28 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute top-0.5 end-0.5 w-6 h-6 bg-white rounded-full shadow"
+              />
+            </button>
+
+            <button
+              onClick={() => setBilling('annual')}
+              className={`px-5 py-2 rounded-full font-[family-name:var(--font-display)] font-semibold transition-all ${
+                billing === 'annual'
+                  ? 'bg-obsidian text-white shadow-md'
+                  : 'text-charcoal hover:text-navy'
+              }`}
+            >
+              {t('pages.subscribe.annual')}
+              <span className="text-gold text-xs me-1">
+                {' '}({t('pages.subscribe.save')})
               </span>
-              <button
-                onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
-                className="relative w-16 h-8 bg-navy rounded-full"
-              >
-                <motion.div
-                  animate={{ x: billingPeriod === 'yearly' ? -24 : 0 }}
-                  className="absolute top-1 right-1 w-6 h-6 bg-gold rounded-full"
-                />
-              </button>
-              <span className={`font-[family-name:var(--font-display)] ${billingPeriod === 'yearly' ? 'text-navy' : 'text-slate'}`}>
-                سنوي
-                <span className="text-gold text-xs mr-1">(وفر 20%)</span>
-              </span>
-            </div>
+            </button>
           </div>
         </section>
 
-        {/* Plans */}
-        <section className="py-12">
+        {/* ── Pricing Cards ────────────────────────────────────────────── */}
+        <section className="py-14">
           <div className="container-luxury">
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {plans.map((plan, index) => (
-                <motion.div
-                  key={plan.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => setSelectedPlan(plan.id)}
-                  className={`relative bg-white rounded-2xl p-6 cursor-pointer transition-all ${
-                    selectedPlan === plan.id
-                      ? 'ring-2 ring-gold shadow-xl scale-105'
-                      : 'shadow-lg hover:shadow-xl'
-                  } ${plan.popular ? 'md:-mt-4 md:mb-4' : ''}`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 right-4 px-4 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-bold rounded-full">
-                      الأكثر شعبية
-                    </div>
-                  )}
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+              {staticTiers.map((tier, i) => {
+                const price =
+                  billing === 'annual' && tier.priceAnnual
+                    ? tier.priceAnnual
+                    : tier.priceMonthly;
+                const discount = discountPercent(
+                  tier.priceMonthly,
+                  tier.priceAnnual
+                );
+                const isSelected = selectedTier === tier.id;
 
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
-                    <plan.icon className="text-white" size={28} />
-                  </div>
-
-                  <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-1">
-                    {plan.name}
-                  </h3>
-                  <p className="text-slate text-sm mb-4">{plan.description}</p>
-
-                  <div className="mb-6">
-                    <span className="text-4xl font-[family-name:var(--font-display)] font-black text-navy">
-                      ${billingPeriod === 'yearly' ? (parseFloat(plan.price) * 0.8 * 12).toFixed(0) : plan.price}
-                    </span>
-                    <span className="text-slate text-sm mr-1">
-                      /{billingPeriod === 'yearly' ? 'سنوياً' : plan.period}
-                    </span>
-                  </div>
-
-                  <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm text-charcoal">
-                        <Check size={18} className="text-gold flex-shrink-0 mt-0.5" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    className={`w-full py-3 rounded-lg font-[family-name:var(--font-display)] font-bold transition-colors ${
-                      selectedPlan === plan.id
-                        ? 'bg-gold text-white'
-                        : 'bg-ivory text-navy hover:bg-gold hover:text-white'
-                    }`}
+                return (
+                  <motion.div
+                    key={tier.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => setSelectedTier(tier.id)}
+                    className={`relative flex flex-col bg-white rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
+                      isSelected
+                        ? 'ring-2 ring-gold shadow-xl scale-[1.03]'
+                        : 'shadow-md hover:shadow-xl'
+                    } ${tier.popular ? 'md:-mt-4 md:mb-4' : ''}`}
                   >
-                    {plan.id === 'free' ? 'ابدأ مجاناً' : 'اشترك الآن'}
-                  </button>
-                </motion.div>
-              ))}
+                    {/* Popular badge */}
+                    {tier.popular && (
+                      <div className="absolute -top-3 start-1/2 -translate-x-1/2 px-4 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-bold rounded-full whitespace-nowrap">
+                        الأكثر شعبية
+                      </div>
+                    )}
+
+                    {/* Icon */}
+                    <div
+                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center mb-4`}
+                    >
+                      <tier.icon className="text-white" size={26} />
+                    </div>
+
+                    <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian mb-1">
+                      {tier.nameAr}
+                    </h3>
+                    <p className="text-pewter text-sm mb-4">
+                      {tier.nameEn}
+                    </p>
+
+                    {/* Price */}
+                    <div className="mb-6">
+                      {tier.priceMonthly === 0 ? (
+                        <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
+                          مجاني
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
+                            {price.toLocaleString('ar-SA')}
+                          </span>
+                          <span className="text-pewter text-sm me-1"> ر.س</span>
+                          <span className="text-pewter text-xs">
+                            /{billing === 'annual' ? 'سنوياً' : 'شهرياً'}
+                          </span>
+                          {billing === 'annual' && discount > 0 && (
+                            <span className="inline-block ms-2 text-xs px-2 py-0.5 bg-profit/10 text-profit rounded-full font-semibold">
+                              وفر {discount}%
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-2 mb-6 flex-1">
+                      {tier.featuresAr.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-sm text-charcoal">
+                          <Check size={16} className="text-profit flex-shrink-0 mt-0.5" />
+                          {f}
+                        </li>
+                      ))}
+                      {tier.lockedAr.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-sm text-pewter/50 line-through">
+                          <X size={16} className="text-loss/30 flex-shrink-0 mt-0.5" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChoose(tier.id);
+                      }}
+                      className={`w-full py-3 rounded-xl font-[family-name:var(--font-display)] font-bold transition-all duration-200 ${
+                        tier.id === 'free'
+                          ? 'bg-ivory text-obsidian hover:bg-sand'
+                          : isSelected
+                          ? 'bg-gold text-white hover:bg-gold-dark shadow-md'
+                          : 'bg-obsidian text-white hover:bg-navy-light'
+                      }`}
+                    >
+                      {tier.id === 'free'
+                        ? t('pages.subscribe.choose')
+                        : t('pages.subscribe.startTrial')}
+                    </button>
+
+                    {tier.id !== 'free' && (
+                      <p className="text-center text-xs text-pewter mt-3">
+                        7 أيام تجريبية مجانية — {t('pages.subscribe.paymentNote')}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* Benefits */}
+        {/* ── Feature Comparison Table ─────────────────────────────────── */}
         <section className="py-16 bg-ivory">
           <div className="container-luxury">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-12"
+              className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian text-center mb-10"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                {t('pages.subscribe.features')}
-              </h2>
-            </motion.div>
+              {t('pages.subscribe.comparison.title')}
+            </motion.h2>
 
-            <div className="grid md:grid-cols-4 gap-6">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                    <benefit.icon className="text-gold" size={28} />
+            <div className="max-w-4xl mx-auto overflow-x-auto rounded-2xl shadow-lg">
+              <table className="w-full bg-white text-center" dir="rtl">
+                <thead>
+                  <tr className="bg-obsidian text-white">
+                    <th className="p-4 text-start font-[family-name:var(--font-display)] font-semibold">
+                      {t('pages.subscribe.comparison.feature')}
+                    </th>
+                    <th className="p-4 font-[family-name:var(--font-display)] font-semibold">مجاني</th>
+                    <th className="p-4 font-[family-name:var(--font-display)] font-semibold text-gold">رقمي</th>
+                    <th className="p-4 font-[family-name:var(--font-display)] font-semibold text-gold">مميز ✦</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparisonRows.map((row, i) => (
+                    <tr
+                      key={row.labelAr}
+                      className={`border-b border-ivory transition-colors ${
+                        i % 2 === 0 ? 'bg-white' : 'bg-paper'
+                      }`}
+                    >
+                      <td className="p-4 text-start text-sm font-medium text-charcoal">
+                        {row.labelAr}
+                      </td>
+                      <td className="p-4">
+                        <CellValue val={row.free} />
+                      </td>
+                      <td className="p-4">
+                        <CellValue val={row.digital} />
+                      </td>
+                      <td className="p-4">
+                        <CellValue val={row.premium} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Trust Badges ─────────────────────────────────────────────── */}
+        <section className="py-14">
+          <div className="container-luxury">
+            <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto text-center">
+              {[
+                { icon: Shield, titleAr: 'دفع آمن', descAr: 'بوابة دفع مشفرة ومعتمدة' },
+                { icon: CreditCard, titleAr: 'إلغاء مجاني', descAr: 'ألغِ اشتراكك في أي وقت' },
+                { icon: Star, titleAr: '7 أيام مجانية', descAr: 'جرّب قبل أن تشترك' },
+              ].map(({ icon: Icon, titleAr, descAr }) => (
+                <div key={titleAr} className="flex flex-col items-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center">
+                    <Icon className="text-gold" size={24} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-slate text-sm">{benefit.desc}</p>
-                </motion.div>
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian">{titleAr}</h3>
+                  <p className="text-pewter text-sm">{descAr}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className="py-16">
+        {/* ── FAQ ──────────────────────────────────────────────────────── */}
+        <section className="py-14 bg-ivory">
           <div className="container-luxury max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                {t('pages.subscribe.faq')}
-              </h2>
-            </motion.div>
-
+            <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian text-center mb-8">
+              {t('pages.subscribe.faq')}
+            </h2>
             <div className="space-y-4">
               {[
-                { q: 'هل يمكنني إلغاء اشتراكي في أي وقت؟', a: 'نعم، يمكنك إلغاء اشتراكك في أي وقت دون أي رسوم إضافية.' },
-                { q: 'ما هي طرق الدفع المتاحة؟', a: 'نقبل بطاقات فيزا وماستركارد وأمريكان إكسبريس، بالإضافة إلى PayPal.' },
-                { q: 'هل هناك فترة تجريبية؟', a: 'نعم، نقدم فترة تجريبية مجانية لمدة 7 أيام لباقة بريميوم.' },
-              ].map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-xl p-6 shadow-sm"
-                >
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy mb-2">
+                {
+                  q: 'هل يمكنني إلغاء اشتراكي في أي وقت؟',
+                  a: 'نعم، يمكنك إلغاء اشتراكك في أي وقت دون أي رسوم إضافية. سيستمر وصولك حتى نهاية الفترة المدفوعة.',
+                },
+                {
+                  q: 'كيف تعمل فترة التجربة المجانية؟',
+                  a: 'تحصل على 7 أيام مجانية كاملة عند اشتراكك في أي باقة مدفوعة. لن يُقتطع منك أي مبلغ إلا بعد انتهاء الفترة التجريبية.',
+                },
+                {
+                  q: 'ما هي طرق الدفع المتاحة؟',
+                  a: t('pages.subscribe.paymentNote'),
+                },
+                {
+                  q: 'هل يمكنني ترقية أو تخفيض باقتي؟',
+                  a: 'نعم، يمكنك تغيير باقتك في أي وقت من صفحة إدارة الاشتراك.',
+                },
+              ].map((faq, i) => (
+                <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian mb-2">
                     {faq.q}
                   </h3>
-                  <p className="text-slate">{faq.a}</p>
-                </motion.div>
+                  <p className="text-pewter text-sm leading-relaxed">{faq.a}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
+
       </main>
       <Footer />
     </>

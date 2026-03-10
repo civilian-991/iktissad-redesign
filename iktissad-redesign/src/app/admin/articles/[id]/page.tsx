@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { use } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -29,14 +29,19 @@ import {
   Loader2,
   Languages,
   Sparkles,
+  Check,
+  AlertCircle,
+  RefreshCcw,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
+import ArticleAnalyticsPanel from '@/components/admin/ArticleAnalyticsPanel';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
+import type { JSONContent } from '@tiptap/core';
 
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
 type TagKey = typeof tagKeys[number];
@@ -104,6 +109,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [titleEn, setTitleEn] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
+  // editorBody stores TipTap JSON for the new editor; falls back to content string
+  const [editorBody, setEditorBody] = useState<JSONContent | null>(null);
   const [section, setSection] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
@@ -116,6 +123,53 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [initialized, setInitialized] = useState(false);
+
+  // Auto-save state
+  type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
+  const lastSavedHashRef = useRef<string>('');
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const getContentHash = useCallback(() =>
+    JSON.stringify({ title, excerpt, content, section, selectedTags, selectedCountry }),
+    [title, excerpt, content, section, selectedTags, selectedCountry]
+  );
+
+  const performAutoSave = useCallback(async () => {
+    if (!title.trim()) return;
+    const hash = getContentHash();
+    if (hash === lastSavedHashRef.current) return;
+    setAutoSaveStatus('saving');
+    try {
+      await updateArticle(id, {
+        title, titleEn: '', excerpt, content,
+        // Pass TipTap JSON body if available (new format)
+        ...(editorBody ? { body: editorBody } : {}),
+        section: section || undefined,
+        country: selectedCountry || undefined,
+        tags: selectedTags,
+        featuredImage: featuredImage || '',
+        status,
+      });
+      lastSavedHashRef.current = hash;
+      setAutoSaveStatus('saved');
+    } catch {
+      setAutoSaveStatus('error');
+    }
+  }, [id, title, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, getContentHash]);
+
+  // Trigger auto-save 30s after last change (only after initialization)
+  useEffect(() => {
+    if (!initialized || !title.trim()) return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setAutoSaveStatus('idle');
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 30_000);
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [title, excerpt, content, section, selectedTags, selectedCountry, featuredImage, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -154,6 +208,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         titleEn,
         excerpt,
         content,
+        // Pass TipTap JSON body if editor has produced output
+        ...(editorBody ? { body: editorBody } : {}),
         section: section || undefined,
         country: selectedCountry || undefined,
         tags: selectedTags,
@@ -264,6 +320,30 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Auto-save indicator */}
+          {autoSaveStatus === 'saving' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-white/50 font-[family-name:var(--font-display)]">
+              <Loader2 size={12} className="animate-spin" />
+              {t('admin.editor.autoSaving')}
+            </span>
+          )}
+          {autoSaveStatus === 'saved' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-profit font-[family-name:var(--font-display)]">
+              <Check size={12} />
+              {t('admin.editor.autoSaved')}
+            </span>
+          )}
+          {autoSaveStatus === 'error' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-loss font-[family-name:var(--font-display)]">
+              <AlertCircle size={12} />
+              {t('admin.editor.saveFailed')}
+              <button onClick={performAutoSave} className="underline hover:no-underline flex items-center gap-1">
+                <RefreshCcw size={10} />
+                {t('admin.editor.retry')}
+              </button>
+            </span>
+          )}
+
           <button
             onClick={() => setShowDeleteModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-loss/10 border border-loss/20 rounded-xl text-loss hover:bg-loss/20 transition-all font-[family-name:var(--font-display)] text-sm"
@@ -404,12 +484,23 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           >
             <RichTextEditor
               value={content}
-              onChange={setContent}
+              onChange={(json) => {
+                setEditorBody(json);
+              }}
               placeholder={t('admin.articles.editor.contentPlaceholder')}
               dir="rtl"
               minHeight={400}
               onImageInsert={() => setShowMediaPicker(true)}
             />
+          </motion.div>
+
+          {/* Article Analytics — collapsible */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <ArticleAnalyticsPanel articleId={id} />
           </motion.div>
         </div>
 

@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,9 @@ import {
   Languages,
   Sparkles,
   Loader2,
+  Check,
+  AlertCircle,
+  RefreshCcw,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -32,7 +35,7 @@ import { Button } from '@/components/ui';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
-import { createArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
+import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -109,6 +112,74 @@ export default function NewArticlePage() {
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+
+  // Auto-save state
+  type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
+  // Store saved article id so subsequent auto-saves use PUT
+  const savedArticleIdRef = useRef<string | null>(null);
+  // Track content hash to avoid unnecessary saves
+  const lastSavedHashRef = useRef<string>('');
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Content hash for change detection
+  const getContentHash = useCallback(() =>
+    JSON.stringify({ title, excerpt, content, category, selectedTags, selectedCountry }),
+    [title, excerpt, content, category, selectedTags, selectedCountry]
+  );
+
+  // Auto-save function
+  const performAutoSave = useCallback(async () => {
+    if (!title.trim()) return; // Don't save empty articles
+    const hash = getContentHash();
+    if (hash === lastSavedHashRef.current) return; // No changes
+
+    setAutoSaveStatus('saving');
+    try {
+      if (savedArticleIdRef.current) {
+        // Update existing draft
+        await updateArticle(savedArticleIdRef.current, {
+          title, titleEn, excerpt, content,
+          section: category || undefined,
+          country: selectedCountry || undefined,
+          tags: selectedTags,
+          featuredImage: featuredImage || '',
+          status: 'draft',
+        });
+      } else {
+        // Create new draft
+        const slug = title.trim().replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+        const res = await createArticle({
+          title, titleEn, slug, excerpt, content,
+          section: category || undefined,
+          country: selectedCountry || undefined,
+          tags: selectedTags,
+          featuredImage: featuredImage || '',
+          status: 'draft',
+        });
+        if (res.data?.id) {
+          savedArticleIdRef.current = res.data.id;
+        }
+      }
+      lastSavedHashRef.current = hash;
+      setAutoSaveStatus('saved');
+    } catch {
+      setAutoSaveStatus('error');
+    }
+  }, [title, titleEn, excerpt, content, category, selectedTags, selectedCountry, featuredImage, getContentHash]);
+
+  // Trigger auto-save 30s after last change
+  useEffect(() => {
+    if (!title.trim()) return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setAutoSaveStatus('idle');
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 30_000);
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [title, titleEn, excerpt, content, category, selectedTags, selectedCountry, featuredImage, performAutoSave]);
 
   // Ref to access the TipTap editor's insertImage function
   const editorInsertImageRef = useRef<((url: string, alt?: string) => void) | null>(null);
@@ -236,6 +307,30 @@ export default function NewArticlePage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Auto-save indicator */}
+          {autoSaveStatus === 'saving' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-white/50 font-[family-name:var(--font-display)]">
+              <Loader2 size={12} className="animate-spin" />
+              {t('admin.editor.autoSaving')}
+            </span>
+          )}
+          {autoSaveStatus === 'saved' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-profit font-[family-name:var(--font-display)]">
+              <Check size={12} />
+              {t('admin.editor.autoSaved')}
+            </span>
+          )}
+          {autoSaveStatus === 'error' && (
+            <span className="hidden sm:flex items-center gap-1.5 text-xs text-loss font-[family-name:var(--font-display)]">
+              <AlertCircle size={12} />
+              {t('admin.editor.saveFailed')}
+              <button onClick={performAutoSave} className="underline hover:no-underline flex items-center gap-1">
+                <RefreshCcw size={10} />
+                {t('admin.editor.retry')}
+              </button>
+            </span>
+          )}
+
           <Button
             variant={showPreview ? 'outline' : 'ghost'}
             size="md"
@@ -354,7 +449,10 @@ export default function NewArticlePage() {
           >
             <RichTextEditor
               value={content}
-              onChange={setContent}
+              onChange={(json) => {
+                // Store JSON stringified for backward compat with the content field
+                setContent(JSON.stringify(json));
+              }}
               placeholder={t('admin.articles.editor.contentPlaceholder')}
               dir="rtl"
               minHeight={400}

@@ -1,37 +1,22 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 /**
- * Verify admin authentication for protected API routes.
+ * Verify Supabase Auth session for protected API routes (server-side).
  *
- * Checks the Supabase session via the sb-access-token cookie.
- * Falls back to an x-api-key header for service-to-service calls.
+ * Uses the Supabase SSR server client (cookie-based session) which is the
+ * correct approach post-Stack Auth removal.
  *
- * Returns the authenticated user id on success, or null.
+ * Returns { authenticated: true, userId } on success, or { authenticated: false }.
  */
 export async function requireAuth(): Promise<{ authenticated: boolean; userId?: string }> {
   try {
-    // 1. Try Supabase session cookie
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("sb-access-token")?.value
-      ?? cookieStore.get("sb-localhost-auth-token")?.value;
-
-    if (accessToken) {
-      const supabase = createAdminClient();
-      const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-      if (!error && user) {
-        return { authenticated: true, userId: user.id };
-      }
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!error && user) {
+      return { authenticated: true, userId: user.id };
     }
-
-    // 2. Fallback: check x-api-key header (for server-to-server / admin CLI)
-    //    Compare against SUPABASE_SERVICE_ROLE_KEY as a simple shared secret.
-    //    In production you would use a dedicated admin API key.
-
-    // Note: headers() is not available here without the request object,
-    // so callers needing header-based auth should pass the request.
-
     return { authenticated: false };
   } catch {
     return { authenticated: false };
@@ -40,24 +25,27 @@ export async function requireAuth(): Promise<{ authenticated: boolean; userId?: 
 
 /**
  * Overload that accepts a Request so we can also check the Authorization header.
+ * Useful for service-to-service calls and CLI tools.
  */
 export async function requireAuthFromRequest(
   request: Request
 ): Promise<{ authenticated: boolean; userId?: string }> {
-  // First try cookie-based auth
+  // First try cookie-based session (standard browser requests)
   const cookieAuth = await requireAuth();
   if (cookieAuth.authenticated) return cookieAuth;
 
-  // Then try Authorization: Bearer <service_role_key>
+  // Then try Authorization: Bearer <token>
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
+
+    // Allow service-role key as a shared secret for server-to-server calls
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (serviceKey && token === serviceKey) {
       return { authenticated: true, userId: "service-role" };
     }
 
-    // Try as a Supabase access token
+    // Try as a Supabase user access token
     const supabase = createAdminClient();
     const { data: { user }, error } = await supabase.auth.getUser(token);
     if (!error && user) {

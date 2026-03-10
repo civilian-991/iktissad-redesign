@@ -1,16 +1,8 @@
-"use client";
+/**
+ * Stack Auth has been removed from this project.
+ * Authentication is now handled exclusively by Supabase Auth.
+ *
+ * This file is kept as a stub so that any stale imports compile without error.
+ */
 
-import "client-only";
-import { StackClientApp } from "@stackframe/stack";
-
-const projectId = process.env.NEXT_PUBLIC_STACK_PROJECT_ID;
-const publishableClientKey = process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY;
-
-export const stackClient =
-  projectId && publishableClientKey
-    ? new StackClientApp({
-        projectId,
-        publishableClientKey,
-        tokenStore: "cookie",
-      })
-    : null;
+export const stackClient = null;

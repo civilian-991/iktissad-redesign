@@ -1,36 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Search, Filter, Clock, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Clock, X, SlidersHorizontal, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import { useSearchParams, useRouter } from 'next/navigation';
+import useSWR from 'swr';
+import { swrFetcher } from '@/lib/api-client';
+import type { Article, ApiResponse } from '@/types';
 
-const mockResults = [
-  { id: 1, title: 'فتح السوق السعودي أمام جميع فئات المستثمرين الأجانب', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop', category: 'مال ومصارف', date: '11 يناير 2026', excerpt: 'أعلنت هيئة السوق المالية السعودية عن قرار تاريخي يتيح لجميع فئات المستثمرين الأجانب...' },
-  { id: 2, title: 'الخطوط السعودية ثاني أكثر شركات الطيران انضباطاً عالمياً', image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop', category: 'سياحة وطيران', date: '12 يناير 2026', excerpt: 'حققت الخطوط الجوية السعودية المركز الثاني عالمياً في التزام المواعيد...' },
-  { id: 3, title: 'البنك المركزي المصري يسجل أعلى احتياطي نقد أجنبي', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop', category: 'مال ومصارف', date: '7 يناير 2026', excerpt: 'سجل احتياطي النقد الأجنبي في مصر مستوى قياسياً جديداً...' },
-  { id: 4, title: 'OpenAI تطلق ChatGPT Health لمحادثات الصحة واللياقة', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop', category: 'تكنولوجيا', date: '9 يناير 2026', excerpt: 'أعلنت شركة OpenAI عن إطلاق ميزة جديدة متخصصة في الصحة...' },
-  { id: 5, title: 'إفتتاح منتدى الأعمال المصري السوري في دمشق', image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=300&fit=crop', category: 'اقتصاد عام', date: '11 يناير 2026', excerpt: 'افتتح في العاصمة السورية دمشق منتدى الأعمال المصري السوري...' },
-  { id: 6, title: 'وزير الطاقة والمياه يشيد بمواقف دولة قطر الداعمة للبنان', image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=300&fit=crop', category: 'طاقة', date: '12 يناير 2026', excerpt: 'أكد وزير الطاقة والمياه على العلاقات المتميزة بين البلدين الشقيقين...' },
-];
-
-const categories = ['الكل', 'اقتصاد عام', 'مال ومصارف', 'طاقة', 'تكنولوجيا', 'سياحة وطيران'];
-const sortOptions = ['الأحدث', 'الأكثر قراءة', 'الأكثر صلة'];
+const sortOptions = ['الأحدث', 'الأكثر قراءة'];
 
 export default function SearchPageClient() {
   const { t } = useTranslation();
-  const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('الكل');
-  const [sortBy, setSortBy] = useState('الأحدث');
-  const [showFilters, setShowFilters] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const filteredResults = mockResults.filter(result => {
-    const matchesQuery = query === '' || result.title.includes(query) || result.excerpt.includes(query);
-    const matchesCategory = activeCategory === 'الكل' || result.category === activeCategory;
-    return matchesQuery && matchesCategory;
-  });
+  const [query, setQuery] = useState(searchParams.get('q') ?? '');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [sortBy, setSortBy] = useState('الأحدث');
+
+  // Debounce: only fire search 500ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 500);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Sync URL param
+  useEffect(() => {
+    if (debouncedQuery) {
+      router.replace(`/search?q=${encodeURIComponent(debouncedQuery)}`, { scroll: false });
+    }
+  }, [debouncedQuery, router]);
+
+  const apiUrl = debouncedQuery.trim()
+    ? `/api/search?q=${encodeURIComponent(debouncedQuery.trim())}&pageSize=20`
+    : null;
+
+  const { data, isLoading } = useSWR<ApiResponse<Article[]>>(apiUrl, swrFetcher);
+
+  let results = data?.data ?? [];
+
+  // Client-side sort
+  if (sortBy === 'الأكثر قراءة') {
+    results = [...results].sort((a, b) => b.views - a.views);
+  }
+
+  const clearQuery = useCallback(() => {
+    setQuery('');
+    setDebouncedQuery('');
+    router.replace('/search', { scroll: false });
+  }, [router]);
 
   return (
     <>
@@ -60,29 +82,12 @@ export default function SearchPageClient() {
                 <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-gold" size={24} />
                 {query && (
                   <button
-                    onClick={() => setQuery('')}
+                    onClick={clearQuery}
                     className="absolute left-5 top-1/2 -translate-y-1/2 text-slate hover:text-navy"
                   >
                     <X size={20} />
                   </button>
                 )}
-              </div>
-
-              {/* Quick Filters */}
-              <div className="flex flex-wrap justify-center gap-2 mt-6">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-[family-name:var(--font-display)] transition-all ${
-                      activeCategory === category
-                        ? 'bg-gold text-white'
-                        : 'bg-white/10 text-white/70 hover:bg-white/20'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
               </div>
             </motion.div>
           </div>
@@ -92,22 +97,21 @@ export default function SearchPageClient() {
         <section className="py-12">
           <div className="container-luxury">
             {/* Results Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <span className="text-slate">
-                  {filteredResults.length} نتيجة
-                  {query && <span className="text-navy font-semibold"> لـ "{query}"</span>}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm text-navy font-[family-name:var(--font-display)] text-sm md:hidden"
-                >
-                  <SlidersHorizontal size={16} />
-                  فلترة
-                </button>
+            {debouncedQuery && (
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  {isLoading ? (
+                    <span className="text-slate flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin" />
+                      جارٍ البحث...
+                    </span>
+                  ) : (
+                    <span className="text-slate">
+                      {results.length} نتيجة
+                      <span className="text-navy font-semibold"> لـ &quot;{debouncedQuery}&quot;</span>
+                    </span>
+                  )}
+                </div>
 
                 <div className="hidden md:flex items-center gap-2">
                   <span className="text-slate text-sm">ترتيب:</span>
@@ -126,48 +130,10 @@ export default function SearchPageClient() {
                   ))}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Results Grid */}
-            {filteredResults.length > 0 ? (
-              <div className="space-y-6">
-                {filteredResults.map((result, index) => (
-                  <motion.a
-                    key={result.id}
-                    href={`/news/${result.id}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="flex gap-6 bg-white rounded-xl p-4 shadow-sm hover:shadow-lg transition-all group"
-                  >
-                    <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        src={result.image}
-                        alt={result.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-center">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-[family-name:var(--font-display)] font-semibold rounded">
-                          {result.category}
-                        </span>
-                        <span className="text-slate text-xs flex items-center gap-1">
-                          <Clock size={12} />
-                          {result.date}
-                        </span>
-                      </div>
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg leading-snug group-hover:text-gold transition-colors mb-2">
-                        {result.title}
-                      </h3>
-                      <p className="text-slate text-sm line-clamp-2">
-                        {result.excerpt}
-                      </p>
-                    </div>
-                  </motion.a>
-                ))}
-              </div>
-            ) : (
+            {!debouncedQuery && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -175,7 +141,20 @@ export default function SearchPageClient() {
               >
                 <Search className="mx-auto text-slate mb-4" size={48} />
                 <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-2">
-                  {t('pages.search.noResults', { query })}
+                  ابدأ بكتابة كلمة للبحث
+                </h3>
+              </motion.div>
+            )}
+
+            {debouncedQuery && !isLoading && results.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20"
+              >
+                <Search className="mx-auto text-slate mb-4" size={48} />
+                <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-2">
+                  {t('pages.search.noResults', { query: debouncedQuery })}
                 </h3>
                 <p className="text-slate">
                   {t('pages.search.noResultsSuggestion')}
@@ -183,12 +162,51 @@ export default function SearchPageClient() {
               </motion.div>
             )}
 
-            {/* Load More */}
-            {filteredResults.length > 0 && (
-              <div className="text-center mt-12">
-                <button className="px-8 py-3 bg-navy text-white rounded-lg font-[family-name:var(--font-display)] font-semibold hover:bg-navy-light transition-colors">
-                  {t('common.actions.viewMore')}
-                </button>
+            {results.length > 0 && (
+              <div className="space-y-6">
+                {results.map((result, index) => (
+                  <motion.a
+                    key={result.id}
+                    href={`/news/${result.id}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04 }}
+                    className="flex gap-6 bg-white rounded-xl p-4 shadow-sm hover:shadow-lg transition-all group"
+                  >
+                    {result.featuredImage && (
+                      <div className="w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
+                        <img
+                          src={result.featuredImage}
+                          alt={result.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        {result.sector && (
+                          <span className="px-3 py-1 bg-gold/20 text-gold text-xs font-[family-name:var(--font-display)] font-semibold rounded">
+                            {result.sector}
+                          </span>
+                        )}
+                        {result.publishedAt && (
+                          <span className="text-slate text-xs flex items-center gap-1">
+                            <Clock size={12} />
+                            {new Date(result.publishedAt).toLocaleDateString('ar-SA')}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg leading-snug group-hover:text-gold transition-colors mb-2">
+                        {result.title}
+                      </h3>
+                      {result.excerpt && (
+                        <p className="text-slate text-sm line-clamp-2">
+                          {result.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  </motion.a>
+                ))}
               </div>
             )}
           </div>

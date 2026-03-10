@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import type { ApiResponse, MagazineIssue } from '@/types';
 import { swrFetcher, updateMagazine, deleteMagazine } from '@/lib/api-client';
+import { uploadFile } from '@/lib/supabase/storage';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -57,6 +58,8 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   const [pdfFile, setPdfFile] = useState<string | null>(null);
   const [highlights, setHighlights] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -205,6 +208,29 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 border-b border-gold/10 overflow-x-auto">
+        {[
+          { href: `/admin/magazines/${id}`, label: 'نظرة عامة' },
+          { href: `/admin/magazines/${id}/board`, label: 'لوحة التحرير' },
+          { href: `/admin/magazines/${id}/sections`, label: 'الأقسام' },
+          { href: `/admin/magazines/${id}/spreads`, label: 'المحتوى' },
+          { href: `/admin/magazines/${id}/analytics`, label: 'التحليلات' },
+        ].map((tab) => (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            className={`px-4 py-2.5 text-sm font-[family-name:var(--font-display)] whitespace-nowrap border-b-2 transition-colors ${
+              tab.href === `/admin/magazines/${id}`
+                ? 'border-gold text-gold'
+                : 'border-transparent text-white/50 hover:text-white hover:border-white/20'
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -341,9 +367,13 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               )}
 
               <label className="flex-1 flex flex-col items-center justify-center h-64 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
-                <Upload size={32} className="text-gold/50 mb-3" />
+                {isUploadingCover ? (
+                  <Loader2 size={32} className="text-gold animate-spin mb-3" />
+                ) : (
+                  <Upload size={32} className="text-gold/50 mb-3" />
+                )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  {coverImage ? 'استبدال الصورة' : 'رفع صورة الغلاف'}
+                  {isUploadingCover ? 'جاري الرفع...' : coverImage ? 'استبدال الصورة' : 'رفع صورة الغلاف'}
                 </span>
                 <span className="text-white/40 text-sm mt-1">
                   PNG, JPG أو WebP
@@ -352,10 +382,18 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      setCoverImage(URL.createObjectURL(file));
+                    if (!file) return;
+                    setIsUploadingCover(true);
+                    try {
+                      const { publicUrl } = await uploadFile('magazines', file, 'covers');
+                      setCoverImage(publicUrl);
+                      toast.success('تم رفع صورة الغلاف');
+                    } catch (err: any) {
+                      toast.error(err.message || 'فشل رفع الصورة');
+                    } finally {
+                      setIsUploadingCover(false);
                     }
                   }}
                 />
@@ -378,11 +416,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             {pdfFile ? (
               <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
                 <FileText size={32} className="text-gold" />
-                <div className="flex-1">
-                  <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    {pdfFile}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-[family-name:var(--font-display)] font-semibold truncate">
+                    {pdfFile.split('/').pop() ?? 'ملف PDF'}
                   </p>
-                  <p className="text-white/50 text-sm">ملف PDF جاهز</p>
+                  <p className="text-white/50 text-sm">ملف PDF جاهز للقراءة</p>
                 </div>
                 <button
                   onClick={() => setPdfFile(null)}
@@ -393,18 +431,30 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
-                <Upload size={24} className="text-gold/50 mb-2" />
+                {isUploadingPdf ? (
+                  <Loader2 size={24} className="text-gold animate-spin mb-2" />
+                ) : (
+                  <Upload size={24} className="text-gold/50 mb-2" />
+                )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  اضغط لرفع ملف PDF
+                  {isUploadingPdf ? 'جاري الرفع...' : 'اضغط لرفع ملف PDF'}
                 </span>
                 <input
                   type="file"
                   accept=".pdf"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      setPdfFile(file.name);
+                    if (!file) return;
+                    setIsUploadingPdf(true);
+                    try {
+                      const { publicUrl } = await uploadFile('magazines', file, 'pdfs');
+                      setPdfFile(publicUrl);
+                      toast.success('تم رفع ملف PDF');
+                    } catch (err: any) {
+                      toast.error(err.message || 'فشل رفع الملف');
+                    } finally {
+                      setIsUploadingPdf(false);
                     }
                   }}
                 />

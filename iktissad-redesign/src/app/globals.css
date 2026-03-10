@@ -899,6 +899,139 @@ h3 {
   margin: 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MAGAZINE READER TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Magazine article body container.
+ * Applied by BlockRenderer — sets the typographic context for all child blocks.
+ */
+.magazine-article-body {
+  font-family: var(--font-body, 'Tajawal', sans-serif);
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  line-height: 1.8;
+  color: #183B4E;
+}
+
+/**
+ * Paragraph spacing within the article body.
+ * Sibling paragraphs get top margin for rhythm.
+ * Direct child paragraphs only — avoids affecting nested containers.
+ */
+.magazine-article-body > p + p,
+.magazine-article-body > .magazine-paragraph + .magazine-paragraph {
+  margin-block-start: 1.25em;
+}
+
+/**
+ * Paragraphs after floated blocks (pull quotes, sidebars) clear the float.
+ */
+.magazine-article-body > p:not(.magazine-paragraph) {
+  clear: both;
+}
+
+/**
+ * RTL justified text with kashida support.
+ * text-justify: auto enables Arabic kashida (character stretching) on Chrome/Edge.
+ * hyphens: none + word-break: keep-all prevents broken Arabic words.
+ */
+.magazine-justified {
+  text-align: justify;
+  text-justify: auto;
+  hyphens: none;
+  word-break: keep-all;
+}
+
+/**
+ * Fluid type scale utility classes for magazine headings.
+ */
+.magazine-heading-1 { font-size: clamp(2rem, 4vw, 3rem); }
+.magazine-heading-2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.magazine-heading-3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+
+/**
+ * Drop cap — Arabic gold ornament before first paragraph.
+ *
+ * NOTE: ::first-letter is intentionally NOT used here because Arabic connected
+ * letterforms (kashida) break when the initial letter is isolated via CSS.
+ * Instead we use a ::before ornament on the first paragraph.
+ */
+.magazine-article-body > p:first-of-type::before {
+  content: '❧';
+  float: inline-start;
+  font-size: 3.5em;
+  line-height: 0.8;
+  margin-inline-end: 0.1em;
+  color: #DDA853;
+  font-family: var(--font-accent, 'Playfair Display', serif);
+}
+
+/**
+ * Running head — sticky top bar showing issue number + section name.
+ * Used in the magazine reader shell (ReaderClient / ArticleSpread).
+ */
+.magazine-running-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-family: var(--font-body, 'Tajawal', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #DDA853;
+  background: rgba(24, 59, 78, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  direction: rtl;
+}
+
+/**
+ * Folio — page number display in gold.
+ * Positioned absolutely within each spread wrapper.
+ */
+.magazine-folio {
+  position: absolute;
+  bottom: 1.5rem;
+  inset-inline-end: 2rem;
+  font-family: var(--font-body, 'Tajawal', sans-serif);
+  font-size: 0.875rem;
+  color: #DDA853;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+/**
+ * Paper grain overlay — uses SVG feTurbulence filter.
+ * Applied as an absolutely positioned child of the spread wrapper.
+ * Opacity kept very low (0.04) so it reads as texture, not noise.
+ */
+.magazine-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.04;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+/**
+ * Photo essay scroll strip — hide scrollbar visually while keeping it functional.
+ */
+.photo-essay-strip::-webkit-scrollbar {
+  display: none;
+}
+.photo-essay-strip {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Card hover utility */
 .card-hover {
   transition: all 0.4s var(--ease-editorial);
@@ -922,4 +1055,54 @@ h3 {
 
 .clickable-card:active {
   transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAGAZINE READER — Phase 4C
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes paywallIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Reader toolbar hide/show */
+.reader-toolbar {
+  transition: opacity 0.3s ease;
+}
+.reader-toolbar.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* TOC panel slide transition */
+.toc-panel {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toc-panel.closed {
+  /* Slides off to right (RTL: off-screen inline-end) */
+  transform: translateX(100%);
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .reader-toolbar,
+  .toc-panel {
+    transition: none;
+  }
+  .magazine-grain {
+    display: none;
+  }
+  @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } }
+  @keyframes pulse   { 0%, 100% { opacity: 1; } }
 }

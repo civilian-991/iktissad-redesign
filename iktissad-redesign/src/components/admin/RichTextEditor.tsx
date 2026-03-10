@@ -3,19 +3,33 @@
  *
  * Full-featured editor with RTL support for Arabic content.
  * Toolbar matches the existing admin article editor styling.
- * Uses TipTap extensions for formatting, alignment, images, links.
+ * Includes custom block extensions: PullQuote, Figure, Sidebar, Callout, OrnamentalDivider.
+ * Table support, character count, color, highlight, text focus.
+ *
+ * OUTPUT: TipTap JSON (editor.getJSON()) — NOT HTML.
+ * Backward-compatible: string defaultValue loaded via setContent().
  */
 
 'use client';
 
 import { useCallback, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import type { JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
+import CharacterCount from '@tiptap/extension-character-count';
+import Color from '@tiptap/extension-color';
+import Highlight from '@tiptap/extension-highlight';
+import Focus from '@tiptap/extension-focus';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TextStyle } from '@tiptap/extension-text-style';
 import {
   Bold,
   Italic,
@@ -32,18 +46,28 @@ import {
   Heading2,
   Image as ImageIcon,
   Unlink,
+  Table as TableIcon,
+  Minus,
+  MessageSquareQuote,
+  Type,
+  Languages,
 } from 'lucide-react';
 import { iconSizes } from '@/lib/design-tokens';
+import { PullQuoteExtension } from './tiptap/PullQuoteExtension';
+import { FigureExtension } from './tiptap/FigureExtension';
+import { SidebarExtension } from './tiptap/SidebarExtension';
+import { CalloutExtension } from './tiptap/CalloutExtension';
+import { DividerExtension } from './tiptap/DividerExtension';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════════════════════════
 
 export interface RichTextEditorProps {
-  /** HTML content value */
-  value?: string;
-  /** Called when content changes, receives HTML string */
-  onChange?: (html: string) => void;
+  /** TipTap JSON content (preferred) or legacy HTML string */
+  value?: JSONContent | string;
+  /** Called when content changes — receives TipTap JSON */
+  onChange?: (json: JSONContent) => void;
   /** Placeholder text */
   placeholder?: string;
   /** Text direction */
@@ -56,39 +80,12 @@ export interface RichTextEditorProps {
   onImageInsert?: () => void;
   /** Additional className for the editor wrapper */
   className?: string;
+  /**
+   * @deprecated Pass JSONContent to value instead.
+   * Legacy prop alias for string HTML value.
+   */
+  defaultValue?: JSONContent | string;
 }
-
-interface ToolbarButtonConfig {
-  icon?: typeof Bold;
-  label: string;
-  action: string;
-  divider?: boolean;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TOOLBAR CONFIGURATION
-// ═══════════════════════════════════════════════════════════════
-
-const toolbarButtons: ToolbarButtonConfig[] = [
-  { icon: Bold, label: 'Bold', action: 'bold' },
-  { icon: Italic, label: 'Italic', action: 'italic' },
-  { icon: UnderlineIcon, label: 'Underline', action: 'underline' },
-  { label: '', action: '', divider: true },
-  { icon: Heading1, label: 'Heading 1', action: 'heading1' },
-  { icon: Heading2, label: 'Heading 2', action: 'heading2' },
-  { label: '', action: '', divider: true },
-  { icon: List, label: 'Bullet List', action: 'bulletList' },
-  { icon: ListOrdered, label: 'Ordered List', action: 'orderedList' },
-  { label: '', action: '', divider: true },
-  { icon: AlignRight, label: 'Align Right', action: 'alignRight' },
-  { icon: AlignCenter, label: 'Align Center', action: 'alignCenter' },
-  { icon: AlignLeft, label: 'Align Left', action: 'alignLeft' },
-  { label: '', action: '', divider: true },
-  { icon: Link2, label: 'Link', action: 'link' },
-  { icon: Quote, label: 'Blockquote', action: 'blockquote' },
-  { icon: Code, label: 'Code Block', action: 'codeBlock' },
-  { icon: ImageIcon, label: 'Image', action: 'image' },
-];
 
 // ═══════════════════════════════════════════════════════════════
 // LINK INPUT MODAL
@@ -148,11 +145,45 @@ function LinkInput({
 }
 
 // ═══════════════════════════════════════════════════════════════
+// TOOLBAR BUTTON
+// ═══════════════════════════════════════════════════════════════
+
+function ToolbarButton({
+  icon: Icon,
+  label,
+  onClick,
+  active = false,
+  title,
+}: {
+  icon: React.ElementType;
+  label?: string;
+  onClick: () => void;
+  active?: boolean;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      title={title ?? label}
+      onClick={onClick}
+      className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
+        active
+          ? 'text-gold bg-gold/10'
+          : 'text-white/50 hover:text-white hover:bg-white/10'
+      }`}
+    >
+      <Icon size={iconSizes.md} />
+      {label && <span className="text-xs">{label}</span>}
+    </button>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════════
 
 export default function RichTextEditor({
-  value = '',
+  value,
   onChange,
   placeholder = '',
   dir = 'rtl',
@@ -160,11 +191,16 @@ export default function RichTextEditor({
   showToolbar = true,
   onImageInsert,
   className = '',
+  defaultValue,
 }: RichTextEditorProps) {
   const [showLinkInput, setShowLinkInput] = useState(false);
 
+  // Resolve initial content — accept JSON or legacy HTML string
+  const resolvedValue = value ?? defaultValue ?? '';
+
   const editor = useEditor({
     extensions: [
+      // ── Core ──────────────────────────────────────────────
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
         blockquote: {},
@@ -185,16 +221,38 @@ export default function RichTextEditor({
           target: '_blank',
         },
       }),
+      // Keep TipTap Image for simple inline images (media picker)
       Image.configure({
         HTMLAttributes: {
           class: 'rounded-xl max-w-full mx-auto my-4',
         },
       }),
-      Placeholder.configure({
-        placeholder,
-      }),
+      Placeholder.configure({ placeholder }),
+
+      // ── Custom Blocks ─────────────────────────────────────
+      PullQuoteExtension,
+      FigureExtension,
+      SidebarExtension,
+      CalloutExtension,
+      DividerExtension,
+
+      // ── Table ─────────────────────────────────────────────
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+
+      // ── Typography / Color ────────────────────────────────
+      TextStyle, // Required for Color extension
+      Color.configure({ types: ['textStyle'] }),
+      Highlight.configure({ multicolor: true }),
+
+      // ── UX ───────────────────────────────────────────────
+      CharacterCount,
+      Focus.configure({ className: 'has-focus', mode: 'all' }),
     ],
-    content: value,
+    // Accept both JSON and HTML string as initial content
+    content: typeof resolvedValue === 'string' ? resolvedValue : resolvedValue,
     editorProps: {
       attributes: {
         class: `prose prose-invert max-w-none focus:outline-none font-[family-name:var(--font-body)] text-lg leading-relaxed text-white`,
@@ -203,11 +261,13 @@ export default function RichTextEditor({
       },
     },
     onUpdate: ({ editor: ed }) => {
-      onChange?.(ed.getHTML());
+      // Output TipTap JSON (not HTML)
+      onChange?.(ed.getJSON());
     },
   });
 
-  // Execute toolbar actions
+  // ── Toolbar Actions ────────────────────────────────────────
+
   const handleAction = useCallback(
     (action: string) => {
       if (!editor) return;
@@ -256,51 +316,55 @@ export default function RichTextEditor({
           if (onImageInsert) {
             onImageInsert();
           } else {
-            // Fallback: prompt for URL
             const url = window.prompt('Image URL:');
             if (url) {
               editor.chain().focus().setImage({ src: url }).run();
             }
           }
           break;
+        case 'table':
+          editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+          break;
+        case 'pullQuote':
+          editor.chain().focus().insertPullQuote().run();
+          break;
+        case 'divider':
+          editor.chain().focus().insertOrnamentalDivider().run();
+          break;
+        case 'rtlToggle': {
+          // Toggle paragraph direction between RTL and LTR
+          const currentDir = editor.getAttributes('paragraph').dir ?? 'rtl';
+          editor
+            .chain()
+            .focus()
+            .updateAttributes('paragraph', { dir: currentDir === 'rtl' ? 'ltr' : 'rtl' })
+            .run();
+          break;
+        }
       }
     },
     [editor, onImageInsert]
   );
 
-  // Check if a toolbar button is active
   const isActive = useCallback(
     (action: string): boolean => {
       if (!editor) return false;
       switch (action) {
-        case 'bold':
-          return editor.isActive('bold');
-        case 'italic':
-          return editor.isActive('italic');
-        case 'underline':
-          return editor.isActive('underline');
-        case 'heading1':
-          return editor.isActive('heading', { level: 1 });
-        case 'heading2':
-          return editor.isActive('heading', { level: 2 });
-        case 'bulletList':
-          return editor.isActive('bulletList');
-        case 'orderedList':
-          return editor.isActive('orderedList');
-        case 'alignRight':
-          return editor.isActive({ textAlign: 'right' });
-        case 'alignCenter':
-          return editor.isActive({ textAlign: 'center' });
-        case 'alignLeft':
-          return editor.isActive({ textAlign: 'left' });
-        case 'link':
-          return editor.isActive('link');
-        case 'blockquote':
-          return editor.isActive('blockquote');
-        case 'codeBlock':
-          return editor.isActive('codeBlock');
-        default:
-          return false;
+        case 'bold':        return editor.isActive('bold');
+        case 'italic':      return editor.isActive('italic');
+        case 'underline':   return editor.isActive('underline');
+        case 'heading1':    return editor.isActive('heading', { level: 1 });
+        case 'heading2':    return editor.isActive('heading', { level: 2 });
+        case 'bulletList':  return editor.isActive('bulletList');
+        case 'orderedList': return editor.isActive('orderedList');
+        case 'alignRight':  return editor.isActive({ textAlign: 'right' });
+        case 'alignCenter': return editor.isActive({ textAlign: 'center' });
+        case 'alignLeft':   return editor.isActive({ textAlign: 'left' });
+        case 'link':        return editor.isActive('link');
+        case 'blockquote':  return editor.isActive('blockquote');
+        case 'codeBlock':   return editor.isActive('codeBlock');
+        case 'pullQuote':   return editor.isActive('pullQuote');
+        default:            return false;
       }
     },
     [editor]
@@ -320,8 +384,8 @@ export default function RichTextEditor({
   );
 
   /**
-   * Insert an image into the editor at the current cursor position.
-   * Called externally via ref or from the MediaPicker.
+   * Insert an image (via TipTap Image extension — simple inline image).
+   * For rich figure with caption/credit, use FigureExtension.insertFigure().
    */
   const insertImage = useCallback(
     (url: string, alt?: string) => {
@@ -336,30 +400,80 @@ export default function RichTextEditor({
 
   if (!editor) return null;
 
+  const charCount = editor.storage.characterCount?.characters?.() ?? 0;
+
   return (
     <div className={`bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden ${className}`}>
-      {/* Toolbar */}
+      {/* ── Toolbar ─────────────────────────────────────────── */}
       {showToolbar && (
         <div className="relative flex flex-wrap items-center gap-1 p-3 border-b border-gold/10 bg-white/5">
-          {toolbarButtons.map((btn, index) =>
-            btn.divider ? (
-              <div key={index} className="w-px h-6 bg-gold/10 mx-1" />
-            ) : btn.icon ? (
-              <button
-                key={index}
-                type="button"
-                title={btn.label}
-                onClick={() => handleAction(btn.action)}
-                className={`p-2 rounded-lg transition-colors ${
-                  isActive(btn.action)
-                    ? 'text-gold bg-gold/10'
-                    : 'text-white/50 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <btn.icon size={iconSizes.md} />
-              </button>
-            ) : null
-          )}
+          {/* Formatting */}
+          <ToolbarButton icon={Bold}           onClick={() => handleAction('bold')}         active={isActive('bold')}         title="Bold" />
+          <ToolbarButton icon={Italic}         onClick={() => handleAction('italic')}       active={isActive('italic')}       title="Italic" />
+          <ToolbarButton icon={UnderlineIcon}  onClick={() => handleAction('underline')}    active={isActive('underline')}    title="Underline" />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Headings */}
+          <ToolbarButton icon={Heading1} onClick={() => handleAction('heading1')} active={isActive('heading1')} title="Heading 1" />
+          <ToolbarButton icon={Heading2} onClick={() => handleAction('heading2')} active={isActive('heading2')} title="Heading 2" />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Lists */}
+          <ToolbarButton icon={List}         onClick={() => handleAction('bulletList')}  active={isActive('bulletList')}  title="Bullet List" />
+          <ToolbarButton icon={ListOrdered}  onClick={() => handleAction('orderedList')} active={isActive('orderedList')} title="Ordered List" />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Alignment */}
+          <ToolbarButton icon={AlignRight}  onClick={() => handleAction('alignRight')}  active={isActive('alignRight')}  title="Align Right (RTL)" />
+          <ToolbarButton icon={AlignCenter} onClick={() => handleAction('alignCenter')} active={isActive('alignCenter')} title="Align Center" />
+          <ToolbarButton icon={AlignLeft}   onClick={() => handleAction('alignLeft')}   active={isActive('alignLeft')}   title="Align Left (LTR)" />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Link / Quote / Code / Image */}
+          <ToolbarButton icon={Link2}     onClick={() => handleAction('link')}       active={isActive('link')}       title="Link" />
+          <ToolbarButton icon={Quote}     onClick={() => handleAction('blockquote')} active={isActive('blockquote')} title="Blockquote" />
+          <ToolbarButton icon={Code}      onClick={() => handleAction('codeBlock')}  active={isActive('codeBlock')}  title="Code Block" />
+          <ToolbarButton icon={ImageIcon} onClick={() => handleAction('image')}      title="Insert Image" />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Table */}
+          <ToolbarButton
+            icon={TableIcon}
+            onClick={() => handleAction('table')}
+            title="إدراج جدول 3×3"
+            label="جدول"
+          />
+
+          <div className="w-px h-6 bg-gold/10 mx-1" />
+
+          {/* Custom blocks */}
+          <ToolbarButton
+            icon={MessageSquareQuote}
+            onClick={() => handleAction('pullQuote')}
+            active={isActive('pullQuote')}
+            title="إدراج اقتباس بارز"
+            label="اقتباس"
+          />
+
+          <ToolbarButton
+            icon={Minus}
+            onClick={() => handleAction('divider')}
+            title="إدراج فاصل زخرفي"
+            label="فاصل"
+          />
+
+          {/* RTL / LTR toggle */}
+          <ToolbarButton
+            icon={Languages}
+            onClick={() => handleAction('rtlToggle')}
+            title="تبديل اتجاه الفقرة (RTL / LTR)"
+            label={dir === 'rtl' ? 'RTL' : 'LTR'}
+          />
 
           {/* Link Input Popover */}
           {showLinkInput && (
@@ -372,12 +486,19 @@ export default function RichTextEditor({
         </div>
       )}
 
-      {/* Editor Content */}
+      {/* ── Editor Content ───────────────────────────────────── */}
       <div className="p-6" dir={dir}>
         <EditorContent editor={editor} />
       </div>
 
-      {/* TipTap Prose Styles */}
+      {/* ── Character Count ──────────────────────────────────── */}
+      <div className="flex justify-end px-6 pb-3">
+        <span className="text-xs text-white/30 font-[family-name:var(--font-display)] tabular-nums">
+          {charCount.toLocaleString('ar')} حرف
+        </span>
+      </div>
+
+      {/* ── TipTap Prose Styles ──────────────────────────────── */}
       <style jsx global>{`
         .tiptap {
           outline: none;
@@ -471,6 +592,18 @@ export default function RichTextEditor({
         .tiptap a:hover {
           color: rgba(221, 168, 83, 0.8);
         }
+        .tiptap hr.ornamental {
+          border: none;
+          text-align: center;
+          margin: 2rem auto;
+          position: relative;
+        }
+        .tiptap hr.ornamental::after {
+          content: '✦  ✦  ✦';
+          color: #DDA853;
+          font-size: 0.875rem;
+          letter-spacing: 0.5rem;
+        }
         .tiptap hr {
           border: none;
           border-top: 1px solid rgba(221, 168, 83, 0.1);
@@ -485,6 +618,41 @@ export default function RichTextEditor({
         }
         .tiptap u {
           text-decoration: underline;
+        }
+        /* Table styles */
+        .tiptap table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1.5rem 0;
+        }
+        .tiptap th {
+          background: rgba(221, 168, 83, 0.15);
+          border: 1px solid rgba(221, 168, 83, 0.2);
+          padding: 0.625rem 0.875rem;
+          color: #DDA853;
+          font-weight: 700;
+          text-align: ${dir === 'rtl' ? 'right' : 'left'};
+        }
+        .tiptap td {
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 0.5rem 0.875rem;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        .tiptap tr:nth-child(even) td {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        /* Focus ring for custom blocks */
+        .tiptap .has-focus {
+          outline: 2px solid rgba(221, 168, 83, 0.4);
+          outline-offset: 2px;
+          border-radius: 0.5rem;
+        }
+        /* Highlight marks */
+        .tiptap mark {
+          background: rgba(221, 168, 83, 0.3);
+          color: inherit;
+          border-radius: 2px;
+          padding: 0 2px;
         }
       `}</style>
     </div>

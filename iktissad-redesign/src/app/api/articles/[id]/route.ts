@@ -56,6 +56,17 @@ const updateArticleSchema = z.object({
   excerptEn: z.string().optional(),
   content: z.string().optional(),
   contentEn: z.string().optional(),
+  /**
+   * Rich article body. Accepts:
+   * - string → legacy HTML, stored as-is in content column
+   * - object/array → TipTap JSON or ArticleBlock[], stored as JSONB in body column
+   */
+  // Accepts string (legacy HTML) or object/array (TipTap JSON / ArticleBlock[])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: (z.any() as z.ZodType<string | Record<string, unknown> | unknown[]>).optional(),
+  deck: z.string().optional(),
+  deckEn: z.string().optional(),
+  accentColor: z.string().optional(),
   featuredImage: z.string().optional(),
   sectionSlug: z.string().optional(),
   sectorSlug: z.string().optional(),
@@ -111,6 +122,20 @@ export async function PUT(
   if (data.tags !== undefined) updateData.tags = data.tags;
   if (data.status !== undefined) updateData.status = data.status;
   if (data.publishedAt !== undefined) updateData.published_at = data.publishedAt;
+  if (data.deck !== undefined) updateData.deck = data.deck;
+  if (data.deckEn !== undefined) updateData.deck_en = data.deckEn;
+  if (data.accentColor !== undefined) updateData.accent_color = data.accentColor;
+
+  // Handle body: string → legacy content column; object/array → JSONB body column
+  if (data.body !== undefined) {
+    if (typeof data.body === "string") {
+      // Legacy HTML string — store in content for backward compat
+      updateData.content = data.body;
+    } else {
+      // TipTap JSON or ArticleBlock[] — store as JSONB
+      updateData.body = data.body;
+    }
+  }
 
   if (data.sectionSlug !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -21,6 +21,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { createMagazine } from '@/lib/api-client';
+import { uploadFile } from '@/lib/supabase/storage';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -40,6 +41,8 @@ export default function NewMagazinePage() {
   const [pdfFile, setPdfFile] = useState<string | null>(null);
   const [highlights, setHighlights] = useState<string[]>(['']);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
 
   const addHighlight = () => {
     setHighlights([...highlights, '']);
@@ -245,10 +248,18 @@ export default function NewMagazinePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      setCoverImage(URL.createObjectURL(file));
+                    if (!file) return;
+                    setIsUploadingCover(true);
+                    try {
+                      const { publicUrl } = await uploadFile('magazines', file, 'covers');
+                      setCoverImage(publicUrl);
+                      toast.success('تم رفع صورة الغلاف');
+                    } catch (err: any) {
+                      toast.error(err.message || 'فشل رفع الصورة');
+                    } finally {
+                      setIsUploadingCover(false);
                     }
                   }}
                 />
@@ -271,11 +282,11 @@ export default function NewMagazinePage() {
             {pdfFile ? (
               <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
                 <FileText size={32} className="text-gold" />
-                <div className="flex-1">
-                  <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    {pdfFile}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-[family-name:var(--font-display)] font-semibold truncate">
+                    {pdfFile.split('/').pop() ?? 'ملف PDF'}
                   </p>
-                  <p className="text-white/50 text-sm">ملف PDF جاهز</p>
+                  <p className="text-white/50 text-sm">ملف PDF جاهز للقراءة</p>
                 </div>
                 <button
                   onClick={() => setPdfFile(null)}
@@ -286,18 +297,30 @@ export default function NewMagazinePage() {
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
-                <Upload size={24} className="text-gold/50 mb-2" />
+                {isUploadingPdf ? (
+                  <Loader2 size={24} className="text-gold animate-spin mb-2" />
+                ) : (
+                  <Upload size={24} className="text-gold/50 mb-2" />
+                )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  اضغط لرفع ملف PDF
+                  {isUploadingPdf ? 'جاري الرفع...' : 'اضغط لرفع ملف PDF'}
                 </span>
                 <input
                   type="file"
                   accept=".pdf"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      setPdfFile(file.name);
+                    if (!file) return;
+                    setIsUploadingPdf(true);
+                    try {
+                      const { publicUrl } = await uploadFile('magazines', file, 'pdfs');
+                      setPdfFile(publicUrl);
+                      toast.success('تم رفع ملف PDF');
+                    } catch (err: any) {
+                      toast.error(err.message || 'فشل رفع الملف');
+                    } finally {
+                      setIsUploadingPdf(false);
                     }
                   }}
                 />

@@ -5,7 +5,14 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/"],
+      disallow: [
+        "/admin/",          // Admin area — protected
+        "/api/",            // API routes — not indexable
+        "/account/",        // User account pages — private
+        "/print/",          // Print mode pages — not for indexing
+        "/magazine/*/reader",  // Web reader — subscriber-only
+        "/magazine/*/read/",   // Article reading mode — subscriber-only
+      ],
     },
     sitemap: "https://www.iktissadonline.com/sitemap.xml",
   };

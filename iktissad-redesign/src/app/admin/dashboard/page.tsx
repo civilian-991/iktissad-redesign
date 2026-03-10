@@ -32,24 +32,25 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import { Badge, StatusBadge } from '@/components/ui';
-import { swrFetcher, articlesKey, usersKey } from '@/lib/api-client';
-import type { Article, AdminUser, ApiResponse } from '@/types';
+import { swrFetcher, articlesKey, usersKey, magazinesKey, subscribersKey } from '@/lib/api-client';
+import type { Article, AdminUser, MagazineIssue, ApiResponse } from '@/types';
+import type { Subscriber } from '@/lib/api-client';
 
 // ═══════════════════════════════════════════════════════════════
 // STATS CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
 interface StatConfig {
-  key: 'visitsToday' | 'publishedArticles' | 'activeUsers' | 'newComments';
+  key: 'visitsToday' | 'publishedArticles' | 'activeUsers' | 'newComments' | 'totalMagazines' | 'activeSubscribers';
   icon: typeof Eye;
   color: string;
 }
 
 const statsConfig: StatConfig[] = [
-  { key: 'visitsToday', icon: Eye, color: 'from-emerald-500 to-teal' },
   { key: 'publishedArticles', icon: FileText, color: 'from-gold to-bronze' },
-  { key: 'activeUsers', icon: Users, color: 'from-purple-500 to-indigo-600' },
-  { key: 'newComments', icon: MessageSquare, color: 'from-rose-500 to-pink-600' },
+  { key: 'totalMagazines', icon: Activity, color: 'from-emerald-500 to-teal' },
+  { key: 'activeSubscribers', icon: Users, color: 'from-purple-500 to-indigo-600' },
+  { key: 'activeUsers', icon: MessageSquare, color: 'from-rose-500 to-pink-600' },
 ];
 
 // Chart data (mock - would need an analytics endpoint)
@@ -127,18 +128,32 @@ export default function DashboardPage() {
     swrFetcher,
     { revalidateOnFocus: false }
   );
+  const { data: magazinesRes, isLoading: magazinesLoading } = useSWR<ApiResponse<MagazineIssue[]>>(
+    magazinesKey({ pageSize: 1 }),
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+  const { data: subscribersRes, isLoading: subscribersLoading } = useSWR<ApiResponse<Subscriber[]>>(
+    subscribersKey({ pageSize: 1, status: 'active' }),
+    swrFetcher,
+    { revalidateOnFocus: false, shouldRetryOnError: false }
+  );
 
   const recentArticles = articlesRes?.data ?? [];
   const totalArticles = articlesRes?.pagination?.total ?? 0;
   const totalUsers = usersRes?.pagination?.total ?? 0;
-  const isLoading = articlesLoading || usersLoading;
+  const totalMagazines = magazinesRes?.pagination?.total ?? 0;
+  const activeSubscribers = subscribersRes?.pagination?.total ?? 0;
+  const isLoading = articlesLoading || usersLoading || magazinesLoading || subscribersLoading;
 
   // Build stats values from real data
   const statsValues: Record<string, { value: string; change: string; trend: 'up' | 'down' }> = {
     visitsToday: { value: '-', change: '-', trend: 'up' },
-    publishedArticles: { value: totalArticles.toLocaleString(), change: '+3.2%', trend: 'up' },
-    activeUsers: { value: totalUsers.toLocaleString(), change: '-', trend: 'up' },
+    publishedArticles: { value: totalArticles.toLocaleString('ar'), change: '+3.2%', trend: 'up' },
+    activeUsers: { value: totalUsers.toLocaleString('ar'), change: '-', trend: 'up' },
     newComments: { value: '-', change: '-', trend: 'up' },
+    totalMagazines: { value: totalMagazines.toLocaleString('ar'), change: '-', trend: 'up' },
+    activeSubscribers: { value: activeSubscribers.toLocaleString('ar'), change: '-', trend: 'up' },
   };
 
   const getStatusBadgeVariant = (status: string) => {

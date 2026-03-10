@@ -3,13 +3,23 @@ import ArticlePageClient from './PageClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  // In production, fetch article data for dynamic title
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/articles/${id}`, { next: { revalidate: 60 } });
+    const json = await res.json();
+    if (json.data) {
+      return {
+        title: `${json.data.title} | الإقتصاد والأعمال`,
+        description: json.data.excerpt || 'اقرأ أحدث المقالات والتحليلات الاقتصادية',
+      };
+    }
+  } catch {}
   return {
-    title: `مقال ${id} | الإقتصاد والأعمال`,
+    title: 'مقال | الإقتصاد والأعمال',
     description: 'اقرأ أحدث المقالات والتحليلات الاقتصادية في مجلة الإقتصاد والأعمال',
   };
 }
 
-export default function ArticlePage() {
-  return <ArticlePageClient />;
+export default function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  return <ArticlePageClient params={params} />;
 }
