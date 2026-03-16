@@ -48,7 +48,7 @@ export default function Hero() {
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
             <span className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm uppercase tracking-widest">
-              {t('common.labels.latest')}
+              {t('common.labels.featured')}
             </span>
           </div>
           {/* Progress dots */}
