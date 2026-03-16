@@ -68,11 +68,11 @@ function relativeDate(
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return labels.today;
   if (diffDays === 1) return labels.yesterday;
-  if (diffDays < 30) return labels.daysAgo.replace('{count}', diffDays.toLocaleString('ar-SA'));
+  if (diffDays < 30) return labels.daysAgo.replace('{count}', diffDays.toLocaleString('ar-SA-u-ca-gregory'));
   const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return labels.monthsAgo.replace('{count}', diffMonths.toLocaleString('ar-SA'));
+  if (diffMonths < 12) return labels.monthsAgo.replace('{count}', diffMonths.toLocaleString('ar-SA-u-ca-gregory'));
   const diffYears = Math.floor(diffMonths / 12);
-  return labels.yearsAgo.replace('{count}', diffYears.toLocaleString('ar-SA'));
+  return labels.yearsAgo.replace('{count}', diffYears.toLocaleString('ar-SA-u-ca-gregory'));
 }
 
 // ─── Badge configs ────────────────────────────────────────────
@@ -277,7 +277,7 @@ export default function SubscribersClient() {
           return (
             <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">
               {amount > 0
-                ? `${amount.toLocaleString('ar-SA')} ${t('admin.subscribers.profile.currency')}`
+                ? `${amount.toLocaleString('ar-SA-u-ca-gregory')} ${t('admin.subscribers.profile.currency')}`
                 : '—'}
             </span>
           );
@@ -361,7 +361,7 @@ export default function SubscribersClient() {
           'البريد الإلكتروني': s.email,
           الخطة: plan?.nameAr ?? 'مجاني',
           الحالة: STATUS_CLS[s.status] ? (t(`admin.subscribers.statuses.${s.status}` as Parameters<typeof t>[0]) || s.status) : s.status,
-          'تاريخ الانضمام': new Date(s.createdAt).toLocaleDateString('ar-SA'),
+          'تاريخ الانضمام': new Date(s.createdAt).toLocaleDateString('ar-SA-u-ca-gregory'),
         };
       })
     );
@@ -391,7 +391,7 @@ export default function SubscribersClient() {
       await Promise.all(
         selectedIds.map((id) => updateSubscriber(id, { status: 'paused' }))
       );
-      toast.success(t('admin.subscribers.bulkSuspendSuccess').replace('{count}', selectedIds.length.toLocaleString('ar-SA')));
+      toast.success(t('admin.subscribers.bulkSuspendSuccess').replace('{count}', selectedIds.length.toLocaleString('ar-SA-u-ca-gregory')));
       setRowSelection({});
       mutate();
     } catch {
@@ -417,7 +417,7 @@ export default function SubscribersClient() {
             {t('admin.subscribers.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {t('admin.subscribers.totalCount').replace('{count}', filtered.length.toLocaleString('ar-SA'))}
+            {t('admin.subscribers.totalCount').replace('{count}', filtered.length.toLocaleString('ar-SA-u-ca-gregory'))}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -531,7 +531,7 @@ export default function SubscribersClient() {
       {selectedIds.length > 0 && (
         <div className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex items-center justify-between">
           <span className="text-gold font-[family-name:var(--font-display)] text-sm">
-            {t('admin.subscribers.selected', { count: selectedIds.length.toLocaleString('ar-SA') })}
+            {t('admin.subscribers.selected', { count: selectedIds.length.toLocaleString('ar-SA-u-ca-gregory') })}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -651,7 +651,7 @@ export default function SubscribersClient() {
         {!isLoading && filtered.length > 0 && (
           <div className="px-4 py-3 border-t border-gold/10 flex items-center justify-between">
             <span className="text-white/40 text-xs font-[family-name:var(--font-display)]">
-              {t('admin.subscribers.totalCount').replace('{count}', filtered.length.toLocaleString('ar-SA'))}
+              {t('admin.subscribers.totalCount').replace('{count}', filtered.length.toLocaleString('ar-SA-u-ca-gregory'))}
             </span>
             <button
               onClick={() => mutate()}

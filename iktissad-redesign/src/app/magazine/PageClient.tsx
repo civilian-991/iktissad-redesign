@@ -123,7 +123,7 @@ export default function MagazinePageClient() {
                   {/* Info */}
                   <div className="p-12 flex flex-col justify-center">
                     <span className="text-gold font-[family-name:var(--font-display)] font-semibold mb-2">
-                      {featuredIssue.subtitle || new Date(featuredIssue.publishDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}
+                      {featuredIssue.subtitle || new Date(featuredIssue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
                     </span>
                     <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
                       {featuredIssue.title}
@@ -263,7 +263,7 @@ export default function MagazinePageClient() {
                         </h3>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gold font-semibold">
-                            {magazine.subtitle || new Date(magazine.publishDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}
+                            {magazine.subtitle || new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
                           </span>
                           {magazine.views > 0 && (
                             <span className="text-slate flex items-center gap-1">

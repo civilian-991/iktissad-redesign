@@ -177,7 +177,7 @@ export default function AdminLayoutClient({
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(
-        new Date().toLocaleTimeString('ar-SA', {
+        new Date().toLocaleTimeString('ar-SA-u-ca-gregory', {
           hour: '2-digit',
           minute: '2-digit',
         })

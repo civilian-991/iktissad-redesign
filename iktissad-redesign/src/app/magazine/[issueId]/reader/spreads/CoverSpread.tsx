@@ -27,7 +27,7 @@ export default function CoverSpread({ spread, issue }: CoverSpreadProps) {
   };
 
   const publishDate = issue.publishDate
-    ? new Date(issue.publishDate).toLocaleDateString('ar-SA', {
+    ? new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', {
         year: 'numeric',
         month: 'long',
       })

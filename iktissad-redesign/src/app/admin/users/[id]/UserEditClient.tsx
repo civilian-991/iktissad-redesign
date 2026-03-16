@@ -255,7 +255,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
   }
 
   const joinDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(user.createdAt).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' })
     : '-';
 
   return (

@@ -132,7 +132,7 @@ export default function ArticleReadingPageClient({
 
   // Format publish date
   const formattedDate = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('ar', {
+    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

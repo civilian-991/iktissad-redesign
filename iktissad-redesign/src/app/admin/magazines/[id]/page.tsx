@@ -171,7 +171,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             </h1>
             <p className="text-white/50 text-sm">
               {magazine?.updatedAt
-                ? `آخر تحديث: ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA')}`
+                ? `آخر تحديث: ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}`
                 : ''}
             </p>
           </div>
@@ -601,7 +601,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <div>
                     <p className="text-white/80">تم تحديث العدد</p>
                     <p className="text-white/40 text-xs">
-                      {new Date(magazine.updatedAt).toLocaleDateString('ar-SA')}
+                      {new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                     </p>
                   </div>
                 </div>
@@ -612,7 +612,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <div>
                     <p className="text-white/80">تم إنشاء العدد</p>
                     <p className="text-white/40 text-xs">
-                      {new Date(magazine.createdAt).toLocaleDateString('ar-SA')}
+                      {new Date(magazine.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                     </p>
                   </div>
                 </div>

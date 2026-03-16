@@ -197,7 +197,7 @@ export default function FeaturedMagazine() {
                     {issue.subtitle && <p className="text-graphite text-sm">{issue.subtitle}</p>}
                     {issue.publishDate && (
                       <p className="text-graphite text-xs">
-                        {new Date(issue.publishDate).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}
+                        {new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
                       </p>
                     )}
                   </div>

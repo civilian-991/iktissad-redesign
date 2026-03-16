@@ -115,7 +115,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                       {featuredArticle.publishedAt && (
                         <span className="flex items-center gap-2">
                           <Clock size={16} />
-                          {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA')}
+                          {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                         </span>
                       )}
                       {featuredArticle.views > 0 && (
@@ -182,7 +182,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                           {article.publishedAt && (
                             <span className="flex items-center gap-1">
                               <Clock size={14} />
-                              {new Date(article.publishedAt).toLocaleDateString('ar-SA')}
+                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                             </span>
                           )}
                           {article.views > 0 && <span>{article.views.toLocaleString()} مشاهدة</span>}
@@ -208,7 +208,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                           {article.publishedAt && (
                             <span className="flex items-center gap-1">
                               <Clock size={14} />
-                              {new Date(article.publishedAt).toLocaleDateString('ar-SA')}
+                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                             </span>
                           )}
                           {article.views > 0 && <span>{article.views.toLocaleString()} مشاهدة</span>}

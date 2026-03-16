@@ -115,7 +115,7 @@ export default function Hero() {
                           {current.publishedAt && (
                             <span className="flex items-center gap-2">
                               <Clock size={14} />
-                              {new Date(current.publishedAt).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              {new Date(current.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </span>
                           )}
                         </div>

@@ -387,7 +387,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       >
         {[
           { label: t('admin.articles.table.stats'), value: article.views.toLocaleString(), icon: Eye, color: 'text-gold' },
-          { label: t('admin.articles.table.date'), value: article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ar-SA') : '-', icon: Calendar, color: 'text-teal' },
+          { label: t('admin.articles.table.date'), value: article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory') : '-', icon: Calendar, color: 'text-teal' },
           { label: t('admin.articles.table.status'), value: t(`admin.articles.status.${article.status}`), icon: Send, color: 'text-profit' },
           { label: t('admin.articles.table.section'), value: article.section || '-', icon: FileText, color: 'text-purple-400' },
         ].map((stat) => (

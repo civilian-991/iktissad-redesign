@@ -94,7 +94,7 @@ function SectorCard({ sector }: { sector: Sector }) {
             {featured.publishedAt && (
               <span className="text-white/60 text-xs flex items-center gap-1.5">
                 <Clock size={12} />
-                {new Date(featured.publishedAt).toLocaleDateString('ar-SA')}
+                {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
               </span>
             )}
           </div>
@@ -123,7 +123,7 @@ function SectorCard({ sector }: { sector: Sector }) {
               {article.publishedAt && (
                 <span className="text-graphite text-xs mt-1.5 flex items-center gap-1">
                   <Clock size={10} />
-                  {new Date(article.publishedAt).toLocaleDateString('ar-SA')}
+                  {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                 </span>
               )}
             </div>

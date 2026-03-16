@@ -109,7 +109,7 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
           {featured.publishedAt && (
             <span className="text-white text-sm flex items-center gap-2">
               <Clock size={14} />
-              {new Date(featured.publishedAt).toLocaleDateString('ar-SA')}
+              {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
             </span>
           )}
         </div>
@@ -137,7 +137,7 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
                 {article.publishedAt && (
                   <span className="text-white/70 text-sm mt-2 flex items-center gap-2">
                     <Clock size={14} />
-                    {new Date(article.publishedAt).toLocaleDateString('ar-SA')}
+                    {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                   </span>
                 )}
               </div>

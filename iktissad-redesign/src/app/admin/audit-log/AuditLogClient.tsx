@@ -202,7 +202,7 @@ function AuditEntryRow({ entry }: { entry: AuditEntry }) {
             {/* Timestamp */}
             <span
               className="text-white/30 text-xs font-[family-name:var(--font-display)] shrink-0 flex items-center gap-1"
-              title={new Date(entry.created_at).toLocaleString('ar-SA')}
+              title={new Date(entry.created_at).toLocaleString('ar-SA-u-ca-gregory')}
             >
               <Clock size={11} />
               {relativeTime(entry.created_at)}

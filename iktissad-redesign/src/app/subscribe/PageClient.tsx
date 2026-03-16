@@ -289,7 +289,7 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
                       ) : (
                         <>
                           <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
-                            {price.toLocaleString('ar-SA')}
+                            {price.toLocaleString('ar-SA-u-ca-gregory')}
                           </span>
                           <span className="text-pewter text-sm me-1"> ر.س</span>
                           <span className="text-pewter text-xs">

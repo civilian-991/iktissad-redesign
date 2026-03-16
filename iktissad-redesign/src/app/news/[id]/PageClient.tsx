@@ -92,7 +92,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ id: st
   }
 
   const publishedDate = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' })
     : '';
 
   return (
@@ -325,7 +325,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ id: st
                           {related.publishedAt && (
                             <span className="text-xs text-slate mt-1 flex items-center gap-1">
                               <Clock size={10} />
-                              {new Date(related.publishedAt).toLocaleDateString('ar-SA')}
+                              {new Date(related.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                             </span>
                           )}
                         </div>

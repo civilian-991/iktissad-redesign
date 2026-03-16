@@ -192,7 +192,7 @@ export default function SearchPageClient() {
                         {result.publishedAt && (
                           <span className="text-slate text-xs flex items-center gap-1">
                             <Clock size={12} />
-                            {new Date(result.publishedAt).toLocaleDateString('ar-SA')}
+                            {new Date(result.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                           </span>
                         )}
                       </div>

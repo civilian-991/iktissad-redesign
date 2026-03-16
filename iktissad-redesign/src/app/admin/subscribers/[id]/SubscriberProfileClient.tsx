@@ -213,7 +213,7 @@ export default function SubscriberProfileClient({ id }: Props) {
           {[
             { icon: Phone, label: t('admin.subscribers.profile.phone'), value: subscriber.phone ?? '—' },
             { icon: Globe, label: t('admin.subscribers.profile.country'), value: subscriber.countryCode ?? '—' },
-            { icon: Calendar, label: t('admin.subscribers.profile.joinDate'), value: new Date(subscriber.createdAt).toLocaleDateString('ar-SA') },
+            { icon: Calendar, label: t('admin.subscribers.profile.joinDate'), value: new Date(subscriber.createdAt).toLocaleDateString('ar-SA-u-ca-gregory') },
             { icon: Key, label: t('admin.subscribers.profile.gatewayId'), value: maskId(subscriber.gatewayCustomerId) },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label}>
@@ -242,25 +242,25 @@ export default function SubscriberProfileClient({ id }: Props) {
                 {
                   label: t('admin.subscribers.profile.periodStart'),
                   value: subscriber.currentPeriodStart
-                    ? new Date(subscriber.currentPeriodStart).toLocaleDateString('ar-SA')
+                    ? new Date(subscriber.currentPeriodStart).toLocaleDateString('ar-SA-u-ca-gregory')
                     : '—',
                 },
                 {
                   label: t('admin.subscribers.profile.periodEnd'),
                   value: subscriber.currentPeriodEnd
-                    ? new Date(subscriber.currentPeriodEnd).toLocaleDateString('ar-SA')
+                    ? new Date(subscriber.currentPeriodEnd).toLocaleDateString('ar-SA-u-ca-gregory')
                     : '—',
                 },
                 {
                   label: t('admin.subscribers.profile.cancelDate'),
                   value: subscriber.canceledAt
-                    ? new Date(subscriber.canceledAt).toLocaleDateString('ar-SA')
+                    ? new Date(subscriber.canceledAt).toLocaleDateString('ar-SA-u-ca-gregory')
                     : '—',
                 },
                 {
                   label: t('admin.subscribers.profile.trialEnd'),
                   value: subscriber.trialEndsAt
-                    ? new Date(subscriber.trialEndsAt).toLocaleDateString('ar-SA')
+                    ? new Date(subscriber.trialEndsAt).toLocaleDateString('ar-SA-u-ca-gregory')
                     : '—',
                 },
               ].map(({ label, value }) => (
@@ -293,8 +293,8 @@ export default function SubscriberProfileClient({ id }: Props) {
                       </p>
                       <p className="text-white/40 text-xs mt-0.5">
                         {p.paidAt
-                          ? new Date(p.paidAt).toLocaleDateString('ar-SA')
-                          : new Date(p.createdAt).toLocaleDateString('ar-SA')}
+                          ? new Date(p.paidAt).toLocaleDateString('ar-SA-u-ca-gregory')
+                          : new Date(p.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -306,7 +306,7 @@ export default function SubscriberProfileClient({ id }: Props) {
                         {p.status === 'paid' ? t('admin.subscribers.profile.paid') : p.status === 'failed' ? t('admin.subscribers.profile.failed') : p.status}
                       </span>
                       <span className="text-gold font-[family-name:var(--font-display)] text-sm font-bold">
-                        {p.amount.toLocaleString('ar-SA')} {t('admin.subscribers.profile.currency')}
+                        {p.amount.toLocaleString('ar-SA-u-ca-gregory')} {t('admin.subscribers.profile.currency')}
                       </span>
                     </div>
                   </div>
