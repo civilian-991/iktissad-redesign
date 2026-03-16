@@ -48,7 +48,7 @@ export default function Hero() {
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
             <span className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm uppercase tracking-widest">
-              {t('common.labels.featured')}
+              أبرز المقالات
             </span>
           </div>
           {/* Progress dots */}
@@ -135,7 +135,7 @@ export default function Hero() {
                 <div className="flex items-center gap-2">
                   <Flame size={14} className="text-gold" />
                   <span className="font-[family-name:var(--font-display)] font-bold text-white text-sm">
-                    {t('common.labels.featured')}
+                    أبرز المقالات
                   </span>
                 </div>
                 <a href="/search" className="text-gold text-xs flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
