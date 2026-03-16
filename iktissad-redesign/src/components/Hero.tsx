@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ChevronLeft, Clock, TrendingUp, ArrowUpLeft, Flame, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
@@ -13,20 +13,12 @@ export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // Latest articles for slider (with featured image)
   const { data: featuredData } = useSWR<ApiResponse<Article[]>>(
     '/api/articles?status=published&pageSize=5',
     swrFetcher
   );
 
-  // Most-viewed articles for sidebar
-  const { data: sideData } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&pageSize=4&sort=views',
-    swrFetcher
-  );
-
   const featuredNews = (featuredData?.data ?? []).filter(a => a.featuredImage);
-  const sideNews = sideData?.data ?? [];
 
   const nextSlide = useCallback(() => {
     if (featuredNews.length === 0) return;
@@ -44,7 +36,6 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, [isAutoPlaying, nextSlide, featuredNews.length]);
 
-  // Reset slide index when data loads
   useEffect(() => {
     setCurrentSlide(0);
   }, [featuredNews.length]);
@@ -52,186 +43,195 @@ export default function Hero() {
   const current = featuredNews[currentSlide];
 
   return (
-    <section className="bg-paper py-8">
-      <div className="container-editorial">
-        <div className="grid lg:grid-cols-12 gap-6">
-
-          {/* Main Featured Slider */}
-          <div
-            className="lg:col-span-8 relative group"
-            onMouseEnter={() => setIsAutoPlaying(false)}
-            onMouseLeave={() => setIsAutoPlaying(true)}
+    <section
+      className="relative w-full overflow-hidden bg-obsidian"
+      style={{ minHeight: '72vh' }}
+      onMouseEnter={() => setIsAutoPlaying(false)}
+      onMouseLeave={() => setIsAutoPlaying(true)}
+    >
+      {/* Background image layer */}
+      <AnimatePresence mode="wait">
+        {current ? (
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease: 'easeInOut' }}
+            className="absolute inset-0"
           >
-            <div className="relative aspect-[16/10] lg:aspect-[16/9] overflow-hidden bg-charcoal">
-              {!current ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Loader2 className="text-gold animate-spin" size={40} />
-                </div>
-              ) : (
-                <>
+            <img
+              src={current.featuredImage!}
+              alt={current.title}
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="text-gold animate-spin" size={48} />
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Gradient overlays */}
+      {current && (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-obsidian/40 via-transparent to-transparent" />
+        </>
+      )}
+
+      {/* Gold top bar */}
+      <div className="absolute top-0 inset-x-0 h-0.5 bg-gold z-10" />
+
+      {/* Main content */}
+      {current && (
+        <div className="relative z-10 h-full flex flex-col justify-end" style={{ minHeight: '72vh' }}>
+          <div className="container-editorial pb-0">
+            <div className="grid lg:grid-cols-12 gap-0 items-end">
+
+              {/* Article info — left/main column */}
+              <div className="lg:col-span-8 pb-10 lg:pb-14">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlide}
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.55, delay: 0.15 }}
+                  >
+                    {/* Category + trending badge */}
+                    <div className="flex items-center gap-3 mb-5">
+                      {current.sector && (
+                        <span className="bg-gold text-obsidian px-3 py-1 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wider">
+                          {current.sector}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 text-white/60 text-xs">
+                        <Clock size={12} />
+                        {current.publishedAt &&
+                          new Date(current.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <a href={`/news/${current.id}`}>
+                      <h1 className="!text-2xl md:!text-4xl lg:!text-5xl font-[family-name:var(--font-display)] !font-bold text-white !leading-tight mb-4 hover:text-gold transition-colors duration-200 max-w-3xl">
+                        {current.title}
+                      </h1>
+                    </a>
+
+                    {/* Excerpt */}
+                    {current.excerpt && (
+                      <p className="text-white/70 text-sm md:text-base leading-relaxed max-w-2xl mb-6 line-clamp-2">
+                        {current.excerpt}
+                      </p>
+                    )}
+
+                    {/* Read more */}
+                    <a
+                      href={`/news/${current.id}`}
+                      className="inline-flex items-center gap-2 bg-gold text-obsidian text-sm font-bold font-[family-name:var(--font-display)] px-5 py-2.5 hover:bg-amber-400 transition-colors"
+                    >
+                      {t('common.actions.readMore')}
+                      <ArrowUpLeft size={14} />
+                    </a>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Slide counter — right column */}
+              {featuredNews.length > 1 && (
+                <div className="hidden lg:flex lg:col-span-4 pb-14 justify-end items-end">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentSlide}
-                      initial={{ opacity: 0, scale: 1.05 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.7 }}
-                      className="absolute inset-0"
+                      className="flex items-baseline gap-1 font-[family-name:var(--font-accent)]"
                     >
-                      <img
-                        src={current.featuredImage!}
-                        alt={current.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <span className="text-gold text-5xl font-bold leading-none">
+                        {String(currentSlide + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-white/30 text-2xl font-bold">/</span>
+                      <span className="text-white/30 text-2xl font-bold">
+                        {String(featuredNews.length).padStart(2, '0')}
+                      </span>
                     </motion.div>
                   </AnimatePresence>
+                </div>
+              )}
+            </div>
+          </div>
 
-                  <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-brand-darker/75 via-brand-darker/40 to-transparent" />
+          {/* Thumbnail strip + nav */}
+          {featuredNews.length > 1 && (
+            <div className="relative z-10 border-t border-white/10 bg-obsidian/80 backdrop-blur-md">
+              <div className="container-editorial">
+                <div className="flex items-stretch">
 
-                  <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8 bg-white/5 backdrop-blur-md border-t border-white/10">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentSlide}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
+                  {/* Thumbnails */}
+                  <div className="flex-1 flex overflow-hidden">
+                    {featuredNews.map((article, index) => (
+                      <button
+                        key={article.id}
+                        onClick={() => setCurrentSlide(index)}
+                        className={`group flex-1 flex items-center gap-3 px-4 py-3 text-start transition-all duration-300 border-r border-white/10 last:border-r-0 ${
+                          index === currentSlide
+                            ? 'bg-gold/15 border-t-2 border-t-gold'
+                            : 'border-t-2 border-t-transparent hover:bg-white/5'
+                        }`}
                       >
-                        <div className="flex items-center gap-3 mb-4">
-                          {current.sector && (
-                            <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 text-xs font-semibold font-[family-name:var(--font-display)]">
-                              {current.sector}
-                            </span>
+                        {/* Thumb image */}
+                        <div className="w-12 h-9 flex-shrink-0 overflow-hidden hidden md:block">
+                          {article.featuredImage && (
+                            <img
+                              src={article.featuredImage}
+                              alt={article.title}
+                              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                                index === currentSlide ? 'opacity-100' : 'opacity-50 group-hover:opacity-80'
+                              }`}
+                            />
                           )}
                         </div>
-
-                        <a href={`/news/${current.id}`}>
-                          <h2 className="!text-xl md:!text-2xl font-[family-name:var(--font-display)] !font-bold text-white !leading-tight mb-3 hover:text-gold transition-colors">
-                            {current.title}
-                          </h2>
-                        </a>
-
-                        <div className="flex items-center gap-4 text-white/80 text-sm">
-                          {current.publishedAt && (
-                            <span className="flex items-center gap-2">
-                              <Clock size={14} />
-                              {new Date(current.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            </span>
-                          )}
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
+                        {/* Title */}
+                        <p
+                          className={`text-xs font-[family-name:var(--font-display)] font-semibold leading-snug line-clamp-2 transition-colors duration-200 ${
+                            index === currentSlide ? 'text-gold' : 'text-white/50 group-hover:text-white/80'
+                          }`}
+                        >
+                          {article.title}
+                        </p>
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Navigation Controls */}
-                  {featuredNews.length > 1 && (
-                    <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between pointer-events-none">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                        onClick={prevSlide}
-                        className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
-                      >
-                        <ChevronRight size={24} />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                        onClick={nextSlide}
-                        className="w-12 h-12 bg-white/10 backdrop-blur-sm text-white flex items-center justify-center hover:bg-gold hover:text-obsidian transition-all pointer-events-auto"
-                      >
-                        <ChevronLeft size={24} />
-                      </motion.button>
-                    </div>
-                  )}
-
-                  {/* Slide Indicators */}
-                  {featuredNews.length > 1 && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                      {featuredNews.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentSlide(index)}
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            index === currentSlide ? 'w-8 bg-gold' : 'w-3 bg-white/40 hover:bg-white/60'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Gold corner accent */}
-              <div className="absolute top-0 right-0 w-20 h-20">
-                <div className="absolute top-0 right-0 w-full h-1 bg-gold" />
-                <div className="absolute top-0 right-0 w-1 h-full bg-gold" />
+                  {/* Arrow controls */}
+                  <div className="flex items-center border-r border-white/10 flex-shrink-0">
+                    <button
+                      onClick={prevSlide}
+                      className="w-11 h-full flex items-center justify-center text-white/50 hover:text-gold hover:bg-white/5 transition-all"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                    <button
+                      onClick={nextSlide}
+                      className="w-11 h-full flex items-center justify-center text-white/50 hover:text-gold hover:bg-white/5 transition-all border-r border-white/10"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Side Panel - Most Read */}
-          <div className="lg:col-span-4 flex flex-col">
-            <div className="bg-obsidian text-white px-4 py-3 mb-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Flame size={15} className="text-gold" />
-                  <h2 className="font-[family-name:var(--font-display)] font-bold text-sm">
-                    {t('common.labels.mostRead')}
-                  </h2>
-                </div>
-                <a href="/search" className="text-gold text-xs font-[family-name:var(--font-display)] hover:underline flex items-center gap-1">
-                  {t('common.actions.viewMore')}
-                  <ArrowUpLeft size={12} />
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-cream border border-charcoal/10 flex-1 flex flex-col">
-              {sideNews.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <Loader2 className="text-gold animate-spin" size={24} />
-                </div>
-              ) : (
-                sideNews.map((news, index) => (
-                  <motion.a
-                    key={news.id}
-                    href={`/news/${news.id}`}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    className={`flex-1 flex items-center px-4 py-3 hover:bg-gold/10 transition-colors group ${
-                      index !== sideNews.length - 1 ? 'border-b border-charcoal/10' : ''
-                    }`}
-                  >
-                    <div className="flex gap-3 w-full">
-                      <span className="font-[family-name:var(--font-accent)] text-2xl font-bold text-gold/60 group-hover:text-gold transition-colors leading-none">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          {news.sector && (
-                            <span className="text-gold text-xs font-[family-name:var(--font-display)] font-bold">
-                              {news.sector}
-                            </span>
-                          )}
-                          {news.views > 1000 && (
-                            <span className="flex items-center gap-1 text-profit text-xs font-semibold">
-                              <TrendingUp size={12} />
-                              {t('common.labels.trending')}
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-charcoal text-sm leading-snug group-hover:text-gold transition-colors line-clamp-2">
-                          {news.title}
-                        </h3>
-                      </div>
-                    </div>
-                  </motion.a>
-                ))
-              )}
-            </div>
-          </div>
+          )}
         </div>
-      </div>
+      )}
     </section>
   );
 }
