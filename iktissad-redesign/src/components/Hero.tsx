@@ -11,7 +11,7 @@ export default function Hero() {
   const { t } = useTranslation();
 
   const { data: featuredData } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&pageSize=4',
+    '/api/articles?status=published&pageSize=5',
     swrFetcher
   );
 
