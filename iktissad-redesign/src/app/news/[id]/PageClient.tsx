@@ -24,14 +24,14 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 
-export default function ArticlePageClient({ params }: { params: Promise<{ slug: string }> }) {
+export default function ArticlePageClient({ params }: { params: Promise<{ id: string }> }) {
   const { t } = useTranslation();
-  const { slug } = use(params);
+  const { id } = use(params);
   const [copied, setCopied] = useState(false);
   const [readTime, setReadTime] = useState(0);
 
   const { data, error, isLoading } = useSWR<ApiResponse<Article>>(
-    slug ? `/api/articles/${slug}` : null,
+    id ? `/api/articles/${id}` : null,
     swrFetcher
   );
 
@@ -109,9 +109,9 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
       <main className="bg-paper min-h-screen">
         <div className="max-w-[1160px] mx-auto px-6 sm:px-10 lg:px-14">
 
-          {/* ── Breadcrumb bar ── */}
+          {/* ── Section / Breadcrumb bar ── */}
           <div className="border-b border-sand py-3 flex items-center justify-between">
-            <nav className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+            <nav className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/45">
               <a href="/" className="hover:text-gold transition-colors">{t('components.breadcrumb.home')}</a>
               {article.section && (
                 <>
@@ -122,22 +122,22 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
               {article.sector && (
                 <>
                   <ChevronLeft size={9} />
-                  <span className="text-charcoal/25 truncate max-w-[180px]">{article.sector}</span>
+                  <span className="text-charcoal/30 truncate max-w-[180px]">{article.sector}</span>
                 </>
               )}
             </nav>
             {publishedDate && (
-              <span className="text-[11px] font-[family-name:var(--font-display)] text-charcoal/30 hidden sm:block">
+              <span className="text-[11px] font-[family-name:var(--font-display)] text-charcoal/35 hidden sm:block">
                 {publishedDate}
               </span>
             )}
           </div>
 
-          {/* ── Article Header ── */}
+          {/* ── Article Header: split layout ── */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
+            transition={{ duration: 0.5 }}
             className="py-10 lg:py-12"
           >
             <div className={`flex flex-col ${article.featuredImage ? 'lg:flex-row-reverse' : ''} gap-10 lg:gap-14 items-start`}>
@@ -147,14 +147,18 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                 {/* Category badges */}
                 <div className="flex items-center gap-2.5 mb-5">
                   {article.sector && (
-                    <a href={`/sectors/${article.sector}`}
-                      className="text-[10px] font-[family-name:var(--font-display)] font-black text-obsidian bg-gold px-3 py-1 tracking-widest uppercase hover:bg-gold-bright transition-colors">
+                    <a
+                      href={`/sectors/${article.sector}`}
+                      className="text-[10px] font-[family-name:var(--font-display)] font-black text-obsidian bg-gold px-3 py-1 tracking-widest uppercase"
+                    >
                       {article.sector}
                     </a>
                   )}
                   {article.section && (
-                    <a href={`/sections/${article.section}`}
-                      className="text-[10px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand px-3 py-1 hover:border-obsidian/30 transition-colors">
+                    <a
+                      href={`/sections/${article.section}`}
+                      className="text-[10px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand px-3 py-1 hover:border-obsidian/30 transition-colors"
+                    >
                       {article.section}
                     </a>
                   )}
@@ -162,76 +166,82 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
 
                 {/* Title */}
                 <h1
-                  className="font-[family-name:var(--font-display)] font-black text-obsidian mb-5"
-                  style={{ fontSize: 'clamp(1.55rem, 2.8vw, 2.35rem)', lineHeight: 1.32 }}
+                  className="font-[family-name:var(--font-display)] font-black text-obsidian mb-5 leading-snug"
+                  style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', lineHeight: 1.3 }}
                 >
                   {article.title}
                 </h1>
 
-                {/* Gold rule */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-[2px] w-10 bg-gold flex-shrink-0" />
+                {/* Gold accent rule */}
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="h-[2px] w-12 bg-gold flex-shrink-0" />
                   <div className="h-px flex-1 bg-sand" />
                 </div>
 
                 {/* Excerpt */}
                 {article.excerpt && (
                   <p
-                    className="font-[family-name:var(--font-display)] font-medium text-charcoal/70 mb-7"
-                    style={{ fontSize: '1.035rem', lineHeight: 1.95 }}
+                    className="font-[family-name:var(--font-display)] font-medium text-charcoal/75 mb-7 leading-loose"
+                    style={{ fontSize: '1.05rem', lineHeight: 1.9 }}
                   >
                     {article.excerpt}
                   </p>
                 )}
 
-                {/* Meta + share */}
-                <div className="pt-5 border-t border-sand/60 space-y-4">
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    {article.author?.name && (
-                      <span className="flex items-center gap-2 font-[family-name:var(--font-display)]">
-                        <div className="w-6 h-6 rounded-full bg-obsidian/6 border border-sand flex items-center justify-center">
-                          <User size={10} className="text-charcoal/40" />
-                        </div>
-                        <span className="text-[13px] font-semibold text-obsidian">{article.author.name}</span>
-                      </span>
-                    )}
-                    {article.views > 0 && (
-                      <span className="flex items-center gap-1.5 text-[12px] font-[family-name:var(--font-display)] text-charcoal/40">
-                        <Eye size={11} className="text-gold/80" />
-                        {article.views.toLocaleString('ar-SA')} مشاهدة
-                      </span>
-                    )}
-                    {readTime > 0 && (
-                      <span className="flex items-center gap-1.5 text-[12px] font-[family-name:var(--font-display)] text-charcoal/40">
-                        <BookOpen size={11} className="text-gold/80" />
-                        {readTime} دقائق للقراءة
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-[family-name:var(--font-display)] font-black text-charcoal/25 uppercase tracking-[0.2em]">
-                      مشاركة
+                {/* Meta strip */}
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-5 border-t border-sand/70">
+                  {article.author?.name && (
+                    <span className="flex items-center gap-2 font-[family-name:var(--font-display)]">
+                      <div className="w-6 h-6 rounded-full bg-obsidian/8 border border-sand flex items-center justify-center flex-shrink-0">
+                        <User size={10} className="text-charcoal/50" />
+                      </div>
+                      <span className="text-sm font-semibold text-obsidian">{article.author.name}</span>
                     </span>
-                    <div className="flex items-center gap-1.5">
-                      {[
-                        { p: 'facebook', icon: <Facebook size={11} />, color: '#1877f2' },
-                        { p: 'twitter', icon: <Twitter size={11} />, color: '#0f1419' },
-                        { p: 'linkedin', icon: <Linkedin size={11} />, color: '#0a66c2' },
-                      ].map(({ p, icon, color }) => (
-                        <button key={p} onClick={() => handleShare(p)}
-                          className="w-7 h-7 flex items-center justify-center text-white transition-opacity hover:opacity-80"
-                          style={{ backgroundColor: color }}>
-                          {icon}
-                        </button>
-                      ))}
-                      <button onClick={() => handleShare('copy')}
-                        className={`w-7 h-7 border flex items-center justify-center transition-all ${
-                          copied ? 'border-emerald-400 text-emerald-600 bg-emerald-50' : 'border-sand text-charcoal/35 hover:border-obsidian hover:text-obsidian'
-                        }`}>
-                        {copied ? <Check size={11} /> : <Link2 size={11} />}
+                  )}
+                  {article.views > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs font-[family-name:var(--font-display)] text-charcoal/45">
+                      <Eye size={11} className="text-gold" />
+                      {article.views.toLocaleString('ar-SA')} مشاهدة
+                    </span>
+                  )}
+                  {readTime > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs font-[family-name:var(--font-display)] text-charcoal/45">
+                      <BookOpen size={11} className="text-gold" />
+                      {readTime} دقائق للقراءة
+                    </span>
+                  )}
+                </div>
+
+                {/* Share row */}
+                <div className="flex items-center gap-3 mt-5">
+                  <span className="text-[10px] font-[family-name:var(--font-display)] font-black text-charcoal/30 uppercase tracking-widest">
+                    مشاركة
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { p: 'facebook', icon: <Facebook size={11} />, color: '#1877f2' },
+                      { p: 'twitter', icon: <Twitter size={11} />, color: '#0f1419' },
+                      { p: 'linkedin', icon: <Linkedin size={11} />, color: '#0a66c2' },
+                    ].map(({ p, icon, color }) => (
+                      <button
+                        key={p}
+                        onClick={() => handleShare(p)}
+                        className="w-7 h-7 flex items-center justify-center text-white transition-opacity hover:opacity-80"
+                        style={{ backgroundColor: color }}
+                      >
+                        {icon}
                       </button>
-                    </div>
+                    ))}
+                    <button
+                      onClick={() => handleShare('copy')}
+                      className={`w-7 h-7 border flex items-center justify-center transition-all ${
+                        copied
+                          ? 'border-emerald-400 text-emerald-600 bg-emerald-50'
+                          : 'border-sand text-charcoal/40 hover:border-obsidian hover:text-obsidian'
+                      }`}
+                    >
+                      {copied ? <Check size={11} /> : <Link2 size={11} />}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -241,47 +251,55 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.12, duration: 0.55 }}
+                  transition={{ delay: 0.15, duration: 0.6 }}
                   className="w-full lg:w-[420px] flex-shrink-0"
                 >
-                  <div className="overflow-hidden border border-sand/70" style={{ aspectRatio: '4/3' }}>
+                  <div className="relative overflow-hidden border border-sand/80" style={{ aspectRatio: '4/3' }}>
                     <img
                       src={article.featuredImage}
                       alt={article.title}
                       className="w-full h-full object-cover"
                     />
+                    {/* Subtle vignette */}
+                    <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(24,59,78,0.08)] pointer-events-none" />
                   </div>
                 </motion.div>
               )}
             </div>
           </motion.div>
 
-          {/* ── Section divider ── */}
+          {/* ── Full-width rule ── */}
           <div className="relative mb-10">
             <div className="h-px bg-sand" />
-            <div className="absolute right-0 top-0 h-[2px] w-14 bg-gold -translate-y-[0.5px]" />
+            <div className="absolute right-0 top-0 h-[2px] w-16 bg-gold -translate-y-[0.5px]" />
           </div>
 
-          {/* ── Body + Sidebar ── */}
-          <div className="grid lg:grid-cols-[1fr_284px] gap-14 items-start pb-20">
+          {/* ── Article body + Sidebar ── */}
+          <div className="grid lg:grid-cols-[1fr_288px] gap-14 items-start pb-20">
 
             {/* Article body */}
             <motion.article
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.18, duration: 0.5 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <div className="article-body-slug" dangerouslySetInnerHTML={{ __html: article.content ?? '' }} />
+              <div
+                className="article-body-new"
+                dangerouslySetInnerHTML={{ __html: article.content ?? '' }}
+              />
 
               {/* Tags */}
               {article.tags?.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 mt-14 pt-8 border-t border-sand">
-                  <span className="flex items-center gap-1.5 text-[9.5px] font-[family-name:var(--font-display)] font-black text-gold uppercase tracking-widest ml-2">
-                    <Tag size={10} /> الوسوم
+                  <span className="flex items-center gap-1.5 text-[10px] font-[family-name:var(--font-display)] font-black text-gold uppercase tracking-widest ml-2">
+                    <Tag size={11} /> الوسوم
                   </span>
                   {article.tags.map((tag) => (
-                    <a key={tag} href={`/search?q=${encodeURIComponent(tag)}`}
-                      className="px-3 py-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand hover:border-obsidian/35 hover:text-obsidian transition-all">
+                    <a
+                      key={tag}
+                      href={`/search?q=${encodeURIComponent(tag)}`}
+                      className="px-3 py-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/55 border border-sand hover:border-obsidian/40 hover:text-obsidian transition-all"
+                    >
                       {tag}
                     </a>
                   ))}
@@ -293,7 +311,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
             <motion.aside
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
+              transition={{ delay: 0.28 }}
             >
               <div className="sticky top-24 space-y-5">
 
@@ -305,22 +323,29 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                       {t('pages.news.relatedArticles')}
                     </h3>
                   </div>
+
                   {relatedArticles.length === 0 ? (
-                    <p className="text-charcoal/30 text-xs font-[family-name:var(--font-display)] py-8 text-center">
+                    <p className="text-charcoal/35 text-xs font-[family-name:var(--font-display)] py-8 text-center">
                       لا توجد مقالات ذات صلة
                     </p>
                   ) : (
                     <div className="divide-y divide-sand/50">
-                      {relatedArticles.map((related) => (
-                        <a key={related.id} href={`/${related.id}`}
-                          className="flex gap-3 p-3.5 hover:bg-cream/50 transition-colors group">
+                      {relatedArticles.map((related, i) => (
+                        <a
+                          key={related.id}
+                          href={`/news/${related.id}`}
+                          className="flex gap-3 p-3.5 hover:bg-cream/50 transition-colors group"
+                        >
                           {related.featuredImage ? (
-                            <div className="w-16 h-[50px] flex-shrink-0 overflow-hidden border border-sand/50">
-                              <img src={related.featuredImage} alt={related.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div className="w-16 h-[52px] flex-shrink-0 overflow-hidden border border-sand/60">
+                              <img
+                                src={related.featuredImage}
+                                alt={related.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
                             </div>
                           ) : (
-                            <div className="w-16 h-[50px] flex-shrink-0 bg-obsidian/[0.04] border border-sand/50 flex items-center justify-center">
+                            <div className="w-16 h-[52px] flex-shrink-0 bg-obsidian/[0.04] border border-sand/60 flex items-center justify-center">
                               <BookOpen size={12} className="text-charcoal/20" />
                             </div>
                           )}
@@ -344,10 +369,13 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                       ))}
                     </div>
                   )}
+
                   {article.sector && (
-                    <div className="border-t border-sand/50 p-3">
-                      <a href={`/sectors/${article.sector}`}
-                        className="flex items-center justify-center gap-2 w-full py-2.5 text-[11px] font-[family-name:var(--font-display)] font-bold text-obsidian/55 border border-obsidian/10 hover:bg-obsidian hover:text-gold hover:border-obsidian transition-all group">
+                    <div className="border-t border-sand/60 p-3">
+                      <a
+                        href={`/sectors/${article.sector}`}
+                        className="flex items-center justify-center gap-2 w-full py-2.5 text-[11px] font-[family-name:var(--font-display)] font-bold text-obsidian/60 border border-obsidian/12 hover:bg-obsidian hover:text-gold hover:border-obsidian transition-all group"
+                      >
                         المزيد من {article.sector}
                         <ArrowLeft size={10} className="group-hover:-translate-x-0.5 transition-transform" />
                       </a>
@@ -355,20 +383,28 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                   )}
                 </div>
 
-                {/* Newsletter */}
+                {/* Newsletter widget */}
                 <div className="relative overflow-hidden bg-obsidian p-5">
-                  <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23DDA853' stroke-width='0.5'%3E%3Cpath d='M40 0L55 25L80 40L55 55L40 80L25 55L0 40L25 25Z'/%3E%3Ccircle cx='40' cy='40' r='12'/%3E%3C/g%3E%3C/svg%3E")` }} />
+                  <div
+                    className="absolute inset-0 opacity-[0.05] pointer-events-none"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23DDA853' stroke-width='0.5'%3E%3Cpath d='M40 0L55 25L80 40L55 55L40 80L25 55L0 40L25 25Z'/%3E%3Ccircle cx='40' cy='40' r='12'/%3E%3C/g%3E%3C/svg%3E")`,
+                    }}
+                  />
                   <div className="absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
                   <div className="relative">
                     <p className="text-[9px] font-[family-name:var(--font-display)] font-black text-gold uppercase tracking-[0.22em] mb-2">
                       النشرة الإخبارية
                     </p>
-                    <p className="text-[12px] font-[family-name:var(--font-display)] text-paper/50 mb-4 leading-relaxed">
+                    <p className="text-[12px] font-[family-name:var(--font-display)] text-paper/55 mb-4 leading-relaxed">
                       أحدث التحليلات الاقتصادية مباشرة إلى بريدك
                     </p>
-                    <input type="email" placeholder="بريدك الإلكتروني" dir="ltr"
-                      className="w-full bg-white/[0.06] border border-white/10 text-paper placeholder:text-paper/20 px-3 py-2 text-[12px] font-[family-name:var(--font-display)] mb-2.5 focus:outline-none focus:border-gold/40 transition-colors" />
+                    <input
+                      type="email"
+                      placeholder="بريدك الإلكتروني"
+                      className="w-full bg-white/[0.06] border border-white/10 text-paper placeholder:text-paper/25 px-3 py-2 text-[12px] font-[family-name:var(--font-display)] mb-2.5 focus:outline-none focus:border-gold/40 transition-colors"
+                      dir="ltr"
+                    />
                     <button className="w-full bg-gold text-obsidian py-2 text-[11px] font-[family-name:var(--font-display)] font-black tracking-wide hover:bg-gold-bright transition-colors">
                       اشتراك
                     </button>
@@ -377,6 +413,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
 
               </div>
             </motion.aside>
+
           </div>
         </div>
       </main>
@@ -384,13 +421,13 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
       <Footer />
 
       <style>{`
-        .article-body-slug {
+        .article-body-new {
           font-family: var(--font-body), system-ui, sans-serif;
-          font-size: 1.05rem;
+          font-size: 1.055rem;
           line-height: 2.05;
           color: #1E4A60;
         }
-        .article-body-slug > p:first-of-type::first-letter {
+        .article-body-new > p:first-of-type::first-letter {
           font-family: var(--font-display), system-ui, sans-serif;
           font-size: 3.5rem;
           font-weight: 900;
@@ -401,8 +438,8 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
           margin-bottom: -0.08em;
           margin-top: 0.08em;
         }
-        .article-body-slug p { margin-bottom: 1.6rem; }
-        .article-body-slug h2 {
+        .article-body-new p { margin-bottom: 1.6rem; }
+        .article-body-new h2 {
           font-family: var(--font-display), system-ui, sans-serif;
           font-size: 1.3rem;
           font-weight: 800;
@@ -413,23 +450,24 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
           border-right: 3px solid #DDA853;
           line-height: 1.42;
         }
-        .article-body-slug h3 {
+        .article-body-new h3 {
           font-family: var(--font-display), system-ui, sans-serif;
           font-size: 1.1rem;
           font-weight: 700;
           color: #183B4E;
           margin-top: 2.25rem;
           margin-bottom: 0.875rem;
+          line-height: 1.5;
         }
-        .article-body-slug blockquote {
+        .article-body-new blockquote {
           border-right: 3px solid #DDA853;
           border-top: 1px solid rgba(221,168,83,0.18);
           border-bottom: 1px solid rgba(221,168,83,0.18);
           padding: 1.25rem 1.4rem;
           margin: 2.25rem 0;
-          background: rgba(221,168,83,0.03);
+          background: rgba(221,168,83,0.032);
         }
-        .article-body-slug blockquote p {
+        .article-body-new blockquote p {
           font-size: 1.05rem;
           font-weight: 600;
           color: #183B4E;
@@ -438,20 +476,47 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
           line-height: 1.85;
           font-style: italic;
         }
-        .article-body-slug ul, .article-body-slug ol { padding-right: 1.5rem; margin-bottom: 1.5rem; }
-        .article-body-slug li { margin-bottom: 0.55rem; line-height: 1.9; }
-        .article-body-slug ul li::marker { color: #DDA853; }
-        .article-body-slug a { color: #C49240; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(196,146,64,0.3); }
-        .article-body-slug a:hover { color: #DDA853; }
-        .article-body-slug strong { font-weight: 700; color: #0C1E2A; }
-        .article-body-slug em { color: #275A73; }
-        .article-body-slug img { max-width: 100%; height: auto; margin: 2rem 0; border: 1px solid #E8E0D0; display: block; }
-        .article-body-slug figure { margin: 2rem 0; }
-        .article-body-slug figcaption { font-size: 0.78rem; color: #548490; font-family: var(--font-display), system-ui, sans-serif; margin-top: 0.5rem; text-align: center; }
-        .article-body-slug table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; }
-        .article-body-slug th { background: #183B4E; color: #F5EEDC; padding: 0.65rem 1rem; font-family: var(--font-display), system-ui, sans-serif; font-weight: 700; text-align: right; }
-        .article-body-slug td { padding: 0.6rem 1rem; border-bottom: 1px solid #E8E0D0; color: #2A5A6E; }
-        .article-body-slug tr:nth-child(even) td { background: rgba(245,238,220,0.5); }
+        .article-body-new ul, .article-body-new ol {
+          padding-right: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        .article-body-new li { margin-bottom: 0.55rem; line-height: 1.9; }
+        .article-body-new ul li::marker { color: #DDA853; }
+        .article-body-new a {
+          color: #C49240;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          text-decoration-color: rgba(196,146,64,0.3);
+        }
+        .article-body-new a:hover { color: #DDA853; text-decoration-color: #DDA853; }
+        .article-body-new strong { font-weight: 700; color: #0C1E2A; }
+        .article-body-new em { color: #275A73; }
+        .article-body-new img {
+          max-width: 100%;
+          height: auto;
+          margin: 2rem 0;
+          border: 1px solid #E8E0D0;
+          display: block;
+        }
+        .article-body-new figure { margin: 2rem 0; }
+        .article-body-new figcaption {
+          font-size: 0.8rem;
+          color: #548490;
+          font-family: var(--font-display), system-ui, sans-serif;
+          margin-top: 0.5rem;
+          text-align: center;
+        }
+        .article-body-new table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; }
+        .article-body-new th {
+          background: #183B4E;
+          color: #F5EEDC;
+          padding: 0.65rem 1rem;
+          font-family: var(--font-display), system-ui, sans-serif;
+          font-weight: 700;
+          text-align: right;
+        }
+        .article-body-new td { padding: 0.6rem 1rem; border-bottom: 1px solid #E8E0D0; color: #2A5A6E; }
+        .article-body-new tr:nth-child(even) td { background: rgba(245,238,220,0.5); }
       `}</style>
     </>
   );
@@ -469,8 +534,12 @@ function ReadingProgressBar() {
     return () => window.removeEventListener('scroll', update);
   }, []);
   return (
-    <div className="fixed top-0 right-0 left-0 h-[2px] z-[100] bg-obsidian/5">
-      <motion.div className="h-full bg-gold" style={{ scaleX: progress, transformOrigin: 'right center' }} initial={false} />
+    <div className="fixed top-0 right-0 left-0 h-[2px] z-[100] bg-obsidian/6">
+      <motion.div
+        className="h-full bg-gold"
+        style={{ scaleX: progress, transformOrigin: 'right center' }}
+        initial={false}
+      />
     </div>
   );
 }
