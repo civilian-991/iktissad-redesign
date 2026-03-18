@@ -34,9 +34,9 @@ const profile = {
 };
 
 const relatedArticles = [
-  { id: 1, title: 'صندوق الاستثمارات العامة يستحوذ على حصة في شركة عالمية', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop', date: '7 يناير 2026' },
-  { id: 2, title: 'الرميان: نستهدف أن يصبح الصندوق الأكبر في العالم', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop', date: '5 يناير 2026' },
-  { id: 3, title: 'استثمارات سعودية جديدة في قطاع التكنولوجيا', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop', date: '3 يناير 2026' },
+  { id: 1, slug: 'pif-acquires-stake-global-company', title: 'صندوق الاستثمارات العامة يستحوذ على حصة في شركة عالمية', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop', date: '7 يناير 2026' },
+  { id: 2, slug: 'al-rumayyan-targets-worlds-largest-fund', title: 'الرميان: نستهدف أن يصبح الصندوق الأكبر في العالم', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop', date: '5 يناير 2026' },
+  { id: 3, slug: 'saudi-investments-technology-sector', title: 'استثمارات سعودية جديدة في قطاع التكنولوجيا', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop', date: '3 يناير 2026' },
 ];
 
 export default function ProfileDetailPageClient() {

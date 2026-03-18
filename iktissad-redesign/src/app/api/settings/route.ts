@@ -32,7 +32,7 @@ export async function GET() {
 
 const putSchema = z.object({
   key: z.string().min(1),
-  value: z.record(z.unknown()),
+  value: z.record(z.string(), z.unknown()),
 });
 
 export async function PUT(request: NextRequest) {
