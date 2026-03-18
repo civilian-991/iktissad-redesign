@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     body = CheckoutSessionBody.parse(raw);
   } catch (err) {
     return NextResponse.json<ApiResponse<never>>(
-      { error: err instanceof z.ZodError ? err.errors[0].message : "Invalid request body" },
+      { error: err instanceof z.ZodError ? err.issues[0].message : "Invalid request body" },
       { status: 400 }
     );
   }
