@@ -5,7 +5,7 @@ export async function notifyIndexNow(slugs: string[]): Promise<void> {
   const key = process.env.INDEXNOW_KEY;
   if (!key || slugs.length === 0) return; // silently skip if not configured
 
-  const urls = slugs.map((slug) => `${BASE_URL}/news/${slug}`);
+  const urls = slugs.map((slug) => `${BASE_URL}/${slug}`);
 
   try {
     await fetch(INDEXNOW_API, {

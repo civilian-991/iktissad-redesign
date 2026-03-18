@@ -31,7 +31,7 @@ function buildItem(row: RssArticleRow): string {
     ? new Date(row.published_at).toUTCString()
     : new Date().toUTCString();
   const authorName = row.users?.name ?? '';
-  const articleUrl = `${BASE_URL}/news/${escapeXml(slug)}`;
+  const articleUrl = `${BASE_URL}/${escapeXml(slug)}`;
 
   const authorTag = authorName
     ? `<author>author@iktissadonline.com (${escapeXml(authorName)})</author>`

@@ -429,7 +429,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                         {relatedArticles.map((related, index) => (
                           <motion.a
                             key={related.id}
-                            href={`/news/${related.slug}`}
+                            href={`/${related.slug}`}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.38 + index * 0.07 }}

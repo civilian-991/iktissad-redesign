@@ -86,7 +86,7 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
   return (
     <div className="grid lg:grid-cols-2 gap-8">
       {/* Featured Article */}
-      <a href={`/news/${featured.slug}`} className="relative h-96 lg:h-auto min-h-[400px] overflow-hidden group block">
+      <a href={`/${featured.slug}`} className="relative h-96 lg:h-auto min-h-[400px] overflow-hidden group block">
         {featured.featuredImage ? (
           <img
             src={featured.featuredImage}
@@ -120,7 +120,7 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
         {rest.map((article, index) => (
           <motion.a
             key={article.id}
-            href={`/news/${article.slug}`}
+            href={`/${article.slug}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}

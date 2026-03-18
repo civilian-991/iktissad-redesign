@@ -443,7 +443,7 @@ export default function CommentsClient() {
                     <td className="p-4 hidden md:table-cell">
                       {comment.article ? (
                         <Link
-                          href={`/news/${comment.article.slug}`}
+                          href={`/${comment.article.slug}`}
                           target="_blank"
                           className="text-gold/70 hover:text-gold text-xs font-[family-name:var(--font-display)] line-clamp-2 transition-colors"
                         >

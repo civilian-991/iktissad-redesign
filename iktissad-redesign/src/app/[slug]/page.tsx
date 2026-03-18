@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const url = `${BASE_URL}/news/${slug}`;
+  const url = `${BASE_URL}/${slug}`;
   const images = article.featuredImage
     ? [{ url: article.featuredImage, width: 1200, height: 630, alt: article.title }]
     : [];
@@ -91,7 +91,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `${BASE_URL}/news/${slug}`,
+          '@id': `${BASE_URL}/${slug}`,
         },
         inLanguage: 'ar',
         isAccessibleForFree: true,

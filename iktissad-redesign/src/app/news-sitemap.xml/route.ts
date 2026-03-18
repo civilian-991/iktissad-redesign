@@ -28,7 +28,7 @@ export async function GET() {
         .replace(/'/g, '&apos;');
 
       return `  <url>
-    <loc>${BASE_URL}/news/${article.slug}</loc>
+    <loc>${BASE_URL}/${article.slug}</loc>
     <news:news>
       <news:publication>
         <news:name>${SITE_NAME}</news:name>

@@ -342,7 +342,7 @@ export default function ReadingAnalyticsClient() {
                     </td>
                     <td className="py-3 pe-4 max-w-xs">
                       <Link
-                        href={`/news/${article.articleId}`}
+                        href={`/${article.articleId}`}
                         className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm line-clamp-1"
                       >
                         {article.title}

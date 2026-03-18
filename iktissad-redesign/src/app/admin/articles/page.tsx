@@ -498,7 +498,7 @@ export default function ArticlesPage() {
                                 {t('admin.articles.actions.edit')}
                               </Link>
                               <a
-                                href={`/news/${article.slug}`}
+                                href={`/${article.slug}`}
                                 target="_blank"
                                 className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 transition-colors text-sm font-[family-name:var(--font-display)]"
                               >

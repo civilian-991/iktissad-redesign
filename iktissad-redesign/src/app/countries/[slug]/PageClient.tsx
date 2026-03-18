@@ -145,7 +145,7 @@ export default function CountryPageClient() {
             {/* Featured Article */}
             {featuredArticle && (
               <motion.a
-                href={`/news/${featuredArticle.slug}`}
+                href={`/${featuredArticle.slug}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="block mb-12"
@@ -205,7 +205,7 @@ export default function CountryPageClient() {
               {regularArticles.map((article, index) => (
                 <motion.a
                   key={article.id}
-                  href={`/news/${article.slug}`}
+                  href={`/${article.slug}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}

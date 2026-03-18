@@ -80,7 +80,7 @@ export default function Hero() {
               <AnimatePresence mode="wait">
                 <motion.a
                   key={main.id}
-                  href={`/news/${main.slug}`}
+                  href={`/${main.slug}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

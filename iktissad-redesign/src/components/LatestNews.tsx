@@ -47,7 +47,7 @@ export default function LatestNews() {
             {articles.map((article, i) => (
               <motion.a
                 key={article.id}
-                href={`/news/${article.slug}`}
+                href={`/${article.slug}`}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}

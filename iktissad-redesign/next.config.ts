@@ -34,6 +34,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/news/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

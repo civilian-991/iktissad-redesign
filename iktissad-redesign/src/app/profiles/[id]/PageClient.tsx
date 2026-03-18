@@ -210,7 +210,7 @@ export default function ProfileDetailPageClient() {
                     {relatedArticles.map((article) => (
                       <a
                         key={article.id}
-                        href={`/news/${article.slug}`}
+                        href={`/${article.slug}`}
                         className="flex gap-4 group"
                       >
                         <div className="w-20 h-16 rounded-lg overflow-hidden flex-shrink-0">
