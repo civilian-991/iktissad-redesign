@@ -14,6 +14,9 @@ export default function robots(): MetadataRoute.Robots {
         "/magazine/*/read/",   // Article reading mode — subscriber-only
       ],
     },
-    sitemap: "https://www.iktissadonline.com/sitemap.xml",
+    sitemap: [
+      "https://www.iktissadonline.com/sitemap.xml",
+      "https://www.iktissadonline.com/news-sitemap.xml",
+    ],
   };
 }

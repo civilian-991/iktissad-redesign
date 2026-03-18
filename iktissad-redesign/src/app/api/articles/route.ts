@@ -4,6 +4,7 @@ import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import { notifyIndexNow } from "@/lib/indexnow";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -22,6 +23,8 @@ export async function GET(request: NextRequest) {
   const country = searchParams.get("country");
   const sector = searchParams.get("sector");
   const status = searchParams.get("status");
+  const featured = searchParams.get("featured");
+  const editorChoice = searchParams.get("editorChoice");
 
   const supabase = await createClient();
 
@@ -58,6 +61,14 @@ export async function GET(request: NextRequest) {
 
   if (status) {
     query = query.eq("status", status as "published" | "draft" | "review" | "scheduled");
+  }
+
+  if (featured !== null) {
+    query = query.eq("featured", featured === "true");
+  }
+
+  if (editorChoice !== null) {
+    query = query.eq("editor_choice", editorChoice === "true");
   }
 
   const start = (page - 1) * pageSize;
@@ -182,6 +193,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const response: ApiResponse<Article> = { data: mapArticleRow(row) };
+  const article = mapArticleRow(row);
+
+  // Notify search engines immediately when a new article is published
+  if (article.status === 'published' && article.slug) {
+    void notifyIndexNow([article.slug]);
+  }
+
+  const response: ApiResponse<Article> = { data: article };
   return NextResponse.json(response, { status: 201 });
 }

@@ -1,23 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  verifyMpgsWebhook,
+  getMpgsCredentials,
+  normalizeVpcResponseCode,
+} from "@/lib/mpgs";
 
 /**
  * POST /api/webhooks/payment
  *
- * Gateway-agnostic webhook handler for payment events.
+ * MPGS Hosted Checkout webhook handler.
  *
- * This is a skeleton implementation. When payment gateway docs arrive,
- * fill in the signature verification section and gateway-specific event parsing.
+ * MPGS sends a plain webhook secret in the `x-notification-secret` header.
+ * Verification is a direct comparison (no HMAC over body).
  *
- * The handler responds 200 quickly and performs DB updates synchronously.
- * For high-volume production, move DB updates to a background queue.
+ * Event mapping:
+ *   PAYMENT  + result SUCCESS   → handlePaymentSucceeded
+ *   PAYMENT  + result FAILURE   → handlePaymentFailed
+ *   SUBSCRIPTION + order CAPTURED → handleSubscriptionCreated
+ *   SUBSCRIPTION_UPDATE          → handleSubscriptionUpdated
+ *   SUBSCRIPTION_CANCEL          → handleSubscriptionCanceled
+ *
+ * Always returns 200 to prevent gateway retries on internal errors.
  *
  * Lookup strategy:
  * - Subscribers are located by gateway_customer_id or gateway_subscription_id
  * - These are opaque strings set when the subscription is created via webhook
  */
 
-// ─── Supported event types ────────────────────────────────────────
+// ─── Supported internal event types ──────────────────────────────
 
 type WebhookEventType =
   | "subscription.created"
@@ -28,7 +39,6 @@ type WebhookEventType =
 
 interface WebhookEvent {
   type: WebhookEventType;
-  // Gateway-specific payload — structure varies by provider
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;
 }
@@ -38,15 +48,6 @@ interface WebhookEvent {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCreated(data: Record<string, any>) {
   const admin = createAdminClient();
-
-  // TODO: Map gateway-specific field names to our schema once docs arrive
-  // Expected fields (gateway-dependent):
-  //   gatewayCustomerId  — opaque customer ID from gateway
-  //   gatewaySubscriptionId — opaque subscription ID from gateway
-  //   status             — normalize to our subscription_status enum
-  //   currentPeriodStart — ISO 8601 string
-  //   currentPeriodEnd   — ISO 8601 string
-  //   trialEndsAt        — ISO 8601 string or null
 
   const {
     gateway_customer_id,
@@ -63,10 +64,8 @@ async function handleSubscriptionCreated(data: Record<string, any>) {
     return;
   }
 
-  // Normalize status to our enum (gateway may use different names)
   const normalizedStatus = normalizeStatus(status);
 
-  // Upsert by email (or gateway_customer_id if email not present)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (admin as any)
     .from("subscribers")
@@ -89,7 +88,6 @@ async function handleSubscriptionCreated(data: Record<string, any>) {
 async function handleSubscriptionUpdated(data: Record<string, any>) {
   const admin = createAdminClient();
 
-  // TODO: Map gateway-specific field names to our schema once docs arrive
   const {
     gateway_customer_id,
     gateway_subscription_id,
@@ -117,7 +115,6 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
   if (canceled_at) updatePayload.canceled_at = canceled_at;
   if (gateway_subscription_id) updatePayload.gateway_subscription_id = gateway_subscription_id;
 
-  // Prefer lookup by gateway_subscription_id, fall back to gateway_customer_id
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (admin as any).from("subscribers").update(updatePayload);
 
@@ -137,7 +134,6 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
 async function handleSubscriptionCanceled(data: Record<string, any>) {
   const admin = createAdminClient();
 
-  // TODO: Map gateway-specific field names to our schema once docs arrive
   const { gateway_customer_id, gateway_subscription_id, canceled_at } = data;
 
   if (!gateway_customer_id && !gateway_subscription_id) {
@@ -170,15 +166,6 @@ async function handleSubscriptionCanceled(data: Record<string, any>) {
 async function handlePaymentSucceeded(data: Record<string, any>) {
   const admin = createAdminClient();
 
-  // TODO: Map gateway-specific field names to our schema once docs arrive
-  // Expected fields (gateway-dependent):
-  //   gateway_customer_id
-  //   gateway_payment_id — unique payment transaction ID from gateway
-  //   amount             — amount in smallest currency unit or decimal
-  //   currency           — ISO 4217 currency code (e.g., "SAR")
-  //   description        — optional payment description
-  //   paid_at            — ISO 8601 timestamp
-
   const {
     gateway_customer_id,
     gateway_subscription_id,
@@ -189,7 +176,6 @@ async function handlePaymentSucceeded(data: Record<string, any>) {
     paid_at,
   } = data;
 
-  // Look up the subscriber
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let subscriberQuery = (admin as any)
     .from("subscribers")
@@ -213,7 +199,6 @@ async function handlePaymentSucceeded(data: Record<string, any>) {
     return;
   }
 
-  // Record the payment
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin as any).from("payments").insert({
     subscriber_id: subscriber.id,
@@ -230,24 +215,20 @@ async function handlePaymentSucceeded(data: Record<string, any>) {
     console.error("[webhook] payment.succeeded DB error:", error.message);
   }
 
-  // Ensure subscriber status is active after successful payment
+  // Ensure subscriber is active after successful payment
+  // Only upgrade from past_due / incomplete — don't downgrade trialing → active prematurely
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let updateQuery = (admin as any)
+  await (admin as any)
     .from("subscribers")
     .update({ status: "active", updated_at: new Date().toISOString() })
     .eq("id", subscriber.id)
-    // Only update if currently past_due (don't downgrade trialing → active prematurely)
     .in("status", ["past_due", "incomplete"]);
-
-  await updateQuery;
-  // Ignore error — subscriber may already be active
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handlePaymentFailed(data: Record<string, any>) {
   const admin = createAdminClient();
 
-  // TODO: Map gateway-specific field names to our schema once docs arrive
   const {
     gateway_customer_id,
     gateway_subscription_id,
@@ -257,7 +238,6 @@ async function handlePaymentFailed(data: Record<string, any>) {
     description,
   } = data;
 
-  // Look up the subscriber
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let subscriberQuery = (admin as any)
     .from("subscribers")
@@ -281,7 +261,6 @@ async function handlePaymentFailed(data: Record<string, any>) {
     return;
   }
 
-  // Record failed payment
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (admin as any).from("payments").insert({
     subscriber_id: subscriber.id,
@@ -305,24 +284,14 @@ async function handlePaymentFailed(data: Record<string, any>) {
 
 // ─── Status normalization ─────────────────────────────────────────
 
-/**
- * Normalize gateway-specific status strings to our subscription_status enum.
- * Extend this mapping when gateway docs arrive.
- */
 function normalizeStatus(
   gatewayStatus: string | undefined
 ): "trialing" | "active" | "past_due" | "canceled" | "paused" | "incomplete" {
-  // TODO: Add gateway-specific status mappings here once docs arrive
-  // Example for a hypothetical gateway:
-  //   "TRIAL" → "trialing"
-  //   "ACTIVE" → "active"
-  //   "OVERDUE" → "past_due"
-  //   etc.
-
   const statusMap: Record<string, "trialing" | "active" | "past_due" | "canceled" | "paused" | "incomplete"> = {
     trialing: "trialing",
     trial: "trialing",
     active: "active",
+    captured: "active",
     past_due: "past_due",
     pastdue: "past_due",
     overdue: "past_due",
@@ -338,43 +307,112 @@ function normalizeStatus(
   return statusMap[key] ?? "incomplete";
 }
 
+// ─── MPGS payload → internal event mapper ────────────────────────
+
+/**
+ * Map a raw MPGS webhook payload to our internal WebhookEvent shape.
+ *
+ * MPGS webhook body structure:
+ * {
+ *   "type": "PAYMENT" | "SUBSCRIPTION" | "SUBSCRIPTION_UPDATE" | "SUBSCRIPTION_CANCEL",
+ *   "result": "SUCCESS" | "FAILURE",        // for PAYMENT events
+ *   "order": { "status": "CAPTURED", ... },  // for SUBSCRIPTION events
+ *   "transaction": { "id": "..." },
+ *   "customer": { "id": "...", "email": "..." },
+ *   "subscription": { "id": "..." },
+ *   "response": { "gatewayCode": "..." }
+ * }
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapMpgsPayload(raw: Record<string, any>): WebhookEvent | null {
+  const mpgsType: string = raw.type ?? "";
+  const result: string = raw.result ?? "";
+  const orderStatus: string = raw.order?.status ?? "";
+  const gatewayCode: string = raw.response?.gatewayCode ?? "";
+
+  // Normalize VPC gateway code → simple status for the handlers
+  const normalizedResult = normalizeVpcResponseCode(gatewayCode);
+
+  // Build the flattened data object that all handlers expect
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: Record<string, any> = {
+    gateway_customer_id: raw.customer?.id ?? null,
+    gateway_subscription_id: raw.subscription?.id ?? null,
+    gateway_payment_id: raw.transaction?.id ?? null,
+    // MPGS sends decimal amount; convert to cents for our payment records
+    amount: raw.order?.amount != null ? Math.round(Number(raw.order.amount) * 100) : 0,
+    currency: raw.order?.currency ?? "USD",
+    email: raw.customer?.email ?? null,
+    status: normalizedResult,
+    // Period dates — MPGS may include these on subscription events
+    current_period_start: raw.subscription?.startDate ?? null,
+    current_period_end: raw.subscription?.endDate ?? null,
+    trial_ends_at: raw.subscription?.trialEndDate ?? null,
+    canceled_at: raw.subscription?.canceledDate ?? null,
+    description: raw.order?.description ?? null,
+    paid_at: raw.transaction?.timeOfRecord ?? new Date().toISOString(),
+  };
+
+  switch (mpgsType) {
+    case "PAYMENT":
+      if (result === "SUCCESS") {
+        return { type: "payment.succeeded", data };
+      }
+      return { type: "payment.failed", data };
+
+    case "SUBSCRIPTION":
+      if (orderStatus === "CAPTURED") {
+        return { type: "subscription.created", data };
+      }
+      // Other SUBSCRIPTION events (e.g. initial pending) fall through as an update
+      return { type: "subscription.updated", data };
+
+    case "SUBSCRIPTION_UPDATE":
+      return { type: "subscription.updated", data };
+
+    case "SUBSCRIPTION_CANCEL":
+      return { type: "subscription.canceled", data };
+
+    default:
+      return null;
+  }
+}
+
 // ─── POST /api/webhooks/payment ───────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // TODO: Verify webhook signature from [payment gateway name]
-  // This is gateway-specific — uncomment and implement when docs arrive:
-  //
-  // const rawBody = await request.text();
-  // const signature = request.headers.get("x-gateway-signature") ?? "";
-  // const webhookSecret = process.env.PAYMENT_WEBHOOK_SECRET ?? "";
-  //
-  // Example for HMAC-SHA256 verification (common pattern):
-  // import crypto from "crypto";
-  // const expectedSig = crypto
-  //   .createHmac("sha256", webhookSecret)
-  //   .update(rawBody)
-  //   .digest("hex");
-  // if (signature !== expectedSig) {
-  //   return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-  // }
-  //
-  // For now, parse body directly (no signature check):
+  // ── 1. Read raw body for signature verification ─────────────────
+  const rawBody = await request.text();
 
-  let event: WebhookEvent;
+  // ── 2. Verify MPGS webhook secret ──────────────────────────────
+  const receivedSecret = request.headers.get("x-notification-secret") ?? "";
+  const { webhookSecret } = getMpgsCredentials();
+
+  if (!verifyMpgsWebhook(rawBody, webhookSecret, receivedSecret)) {
+    console.warn("[webhook] Invalid x-notification-secret — rejecting request");
+    return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
+  }
+
+  // ── 3. Parse JSON body ──────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let raw: Record<string, any>;
   try {
-    event = await request.json();
+    raw = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!event?.type) {
-    return NextResponse.json({ error: "Missing event type" }, { status: 400 });
+  // ── 4. Map MPGS payload → internal event ───────────────────────
+  const event = mapMpgsPayload(raw);
+
+  if (!event) {
+    const unknownType = raw.type ?? "(missing)";
+    console.warn(`[webhook] Unrecognised MPGS event type: ${unknownType} — skipping`);
+    // Still 200 — we don't want MPGS to keep retrying unknown types
+    return NextResponse.json({ received: true }, { status: 200 });
   }
 
-  // Return 200 immediately to acknowledge receipt (gateway expects fast response)
-  // Process event synchronously for now — move to background queue in production
-  // if event processing takes > 5 seconds
-
+  // ── 5. Dispatch to handler ─────────────────────────────────────
   try {
     switch (event.type) {
       case "subscription.created":
@@ -396,16 +434,9 @@ export async function POST(request: NextRequest) {
       case "payment.failed":
         await handlePaymentFailed(event.data);
         break;
-
-      default: {
-        // Unknown event type — log and acknowledge to prevent gateway retries
-        const unknownType = (event as { type: string }).type;
-        console.warn(`[webhook] Unknown event type: ${unknownType} — skipping`);
-        break;
-      }
     }
   } catch (err) {
-    // Log but still return 200 to prevent infinite retries from the gateway
+    // Log but still return 200 — prevent infinite gateway retries
     console.error("[webhook] Error processing event:", err);
   }
 

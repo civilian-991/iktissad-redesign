@@ -17,13 +17,13 @@ import {
   Moon,
   Check,
   ChevronDown,
-  Key,
   Lock,
   Eye,
   EyeOff,
   Upload,
   RefreshCw
 } from 'lucide-react';
+import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
 
 const tabs = [
   { id: 'general', label: 'عام', icon: Settings },
@@ -49,6 +49,8 @@ const timezones = [
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // General settings
   const [siteName, setSiteName] = useState('الإقتصاد والأعمال');
@@ -69,7 +71,6 @@ export default function SettingsPage() {
   const [weeklyReport, setWeeklyReport] = useState(true);
 
   // Security
-  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState('30');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -82,61 +83,168 @@ export default function SettingsPage() {
   const [smtpUser, setSmtpUser] = useState('noreply@iktissad.com');
   const [smtpPass, setSmtpPass] = useState('');
 
-  // Load settings from localStorage on mount
+  // Backup
+  const [autoBackup, setAutoBackup] = useState('weekly');
+
+  // Load settings from API on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('iktissad-admin-settings');
-      if (saved) {
-        const s = JSON.parse(saved);
-        if (s.siteName) setSiteName(s.siteName);
-        if (s.siteDescription) setSiteDescription(s.siteDescription);
-        if (s.language) setLanguage(s.language);
-        if (s.timezone) setTimezone(s.timezone);
-        if (s.darkMode !== undefined) setDarkMode(s.darkMode);
-        if (s.accentColor) setAccentColor(s.accentColor);
-        if (s.fontSize) setFontSize(s.fontSize);
-        if (s.emailNotifications !== undefined) setEmailNotifications(s.emailNotifications);
-        if (s.newArticleNotify !== undefined) setNewArticleNotify(s.newArticleNotify);
-        if (s.newCommentNotify !== undefined) setNewCommentNotify(s.newCommentNotify);
-        if (s.newUserNotify !== undefined) setNewUserNotify(s.newUserNotify);
-        if (s.weeklyReport !== undefined) setWeeklyReport(s.weeklyReport);
-        if (s.twoFactorAuth !== undefined) setTwoFactorAuth(s.twoFactorAuth);
-        if (s.sessionTimeout) setSessionTimeout(s.sessionTimeout);
-        if (s.smtpHost) setSmtpHost(s.smtpHost);
-        if (s.smtpPort) setSmtpPort(s.smtpPort);
-        if (s.smtpUser) setSmtpUser(s.smtpUser);
+    async function loadSettings() {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/settings');
+        if (!res.ok) throw new Error('Failed to load settings');
+        const json = await res.json();
+        const s = json.data ?? {};
+
+        // General
+        if (s.general) {
+          const g = s.general;
+          if (g.siteName) setSiteName(g.siteName);
+          if (g.siteDescription) setSiteDescription(g.siteDescription);
+          if (g.language) setLanguage(g.language);
+          if (g.timezone) setTimezone(g.timezone);
+        }
+
+        // Appearance
+        if (s.appearance) {
+          const a = s.appearance;
+          if (a.darkMode !== undefined) setDarkMode(a.darkMode);
+          if (a.accentColor) setAccentColor(a.accentColor);
+          if (a.fontSize) setFontSize(a.fontSize);
+        }
+
+        // Notifications
+        if (s.notifications) {
+          const n = s.notifications;
+          if (n.emailNotifications !== undefined) setEmailNotifications(n.emailNotifications);
+          if (n.newArticleNotify !== undefined) setNewArticleNotify(n.newArticleNotify);
+          if (n.newCommentNotify !== undefined) setNewCommentNotify(n.newCommentNotify);
+          if (n.newUserNotify !== undefined) setNewUserNotify(n.newUserNotify);
+          if (n.weeklyReport !== undefined) setWeeklyReport(n.weeklyReport);
+        }
+
+        // Security
+        if (s.security) {
+          const sec = s.security;
+          if (sec.sessionTimeout) setSessionTimeout(sec.sessionTimeout);
+        }
+
+        // Email
+        if (s.email) {
+          const e = s.email;
+          if (e.smtpHost) setSmtpHost(e.smtpHost);
+          if (e.smtpPort) setSmtpPort(e.smtpPort);
+          if (e.smtpUser) setSmtpUser(e.smtpUser);
+        }
+
+        // Backup
+        if (s.backup) {
+          const b = s.backup;
+          if (b.autoBackup) setAutoBackup(b.autoBackup);
+        }
+      } catch {
+        toast.error('تعذر تحميل الإعدادات');
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      // Ignore parse errors from corrupted localStorage
     }
+
+    loadSettings();
   }, []);
+
+  // Build the value object for the current active tab
+  const getTabValue = useCallback(() => {
+    switch (activeTab) {
+      case 'general':
+        return { siteName, siteDescription, language, timezone };
+      case 'appearance':
+        return { darkMode, accentColor, fontSize };
+      case 'notifications':
+        return { emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport };
+      case 'security':
+        return { sessionTimeout };
+      case 'email':
+        return { smtpHost, smtpPort, smtpUser };
+      case 'backup':
+        return { autoBackup };
+      default:
+        return {};
+    }
+  }, [
+    activeTab,
+    siteName, siteDescription, language, timezone,
+    darkMode, accentColor, fontSize,
+    emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport,
+    sessionTimeout,
+    smtpHost, smtpPort, smtpUser,
+    autoBackup,
+  ]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      const settings = {
-        siteName, siteDescription, language, timezone,
-        darkMode, accentColor, fontSize,
-        emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport,
-        twoFactorAuth, sessionTimeout,
-        smtpHost, smtpPort, smtpUser,
-      };
-      localStorage.setItem('iktissad-admin-settings', JSON.stringify(settings));
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: activeTab, value: getTabValue() }),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error ?? 'خطأ غير معروف');
+      }
       toast.success('تم حفظ الإعدادات بنجاح');
-    } catch {
-      toast.error('حدث خطأ أثناء حفظ الإعدادات');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ الإعدادات';
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
-  }, [
-    siteName, siteDescription, language, timezone,
-    darkMode, accentColor, fontSize,
-    emailNotifications, newArticleNotify, newCommentNotify, newUserNotify, weeklyReport,
-    twoFactorAuth, sessionTimeout,
-    smtpHost, smtpPort, smtpUser,
-  ]);
+  }, [activeTab, getTabValue]);
+
+  const handleChangePassword = useCallback(async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('يرجى ملء جميع حقول كلمة المرور');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('كلمة المرور الجديدة وتأكيدها غير متطابقتين');
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error('يجب أن تكون كلمة المرور الجديدة 8 أحرف على الأقل');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const res = await fetch('/api/settings/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'خطأ غير معروف');
+      toast.success('تم تحديث كلمة المرور بنجاح');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث كلمة المرور';
+      toast.error(msg);
+    } finally {
+      setIsChangingPassword(false);
+    }
+  }, [currentPassword, newPassword, confirmPassword]);
 
   const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-gold" />
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'general':
         return (
@@ -352,31 +460,7 @@ export default function SettingsPage() {
         return (
           <div className="space-y-6">
             {/* Two Factor Auth */}
-            <div className="flex items-center justify-between p-4 bg-white/5 border border-gold/10 rounded-xl">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center">
-                  <Key className="text-gold" size={20} />
-                </div>
-                <div>
-                  <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    المصادقة الثنائية
-                  </p>
-                  <p className="text-white/50 text-sm">
-                    أضف طبقة أمان إضافية لحسابك
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setTwoFactorAuth(!twoFactorAuth)}
-                className={`px-4 py-2 rounded-lg font-[family-name:var(--font-display)] text-sm transition-all ${
-                  twoFactorAuth
-                    ? 'bg-profit/10 text-profit'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                {twoFactorAuth ? 'مفعّل' : 'تفعيل'}
-              </button>
-            </div>
+            <TwoFactorSetup />
 
             {/* Session Timeout */}
             <div>
@@ -432,7 +516,12 @@ export default function SettingsPage() {
                   placeholder="تأكيد كلمة المرور الجديدة"
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
-                <button className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={isChangingPassword}
+                  className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isChangingPassword && <Loader2 size={14} className="animate-spin" />}
                   تحديث كلمة المرور
                 </button>
               </div>
@@ -531,7 +620,11 @@ export default function SettingsPage() {
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
                 النسخ الاحتياطي التلقائي
               </label>
-              <select className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors">
+              <select
+                value={autoBackup}
+                onChange={(e) => setAutoBackup(e.target.value)}
+                className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+              >
                 <option value="daily" className="bg-midnight">يومياً</option>
                 <option value="weekly" className="bg-midnight">أسبوعياً</option>
                 <option value="monthly" className="bg-midnight">شهرياً</option>
@@ -566,7 +659,7 @@ export default function SettingsPage() {
         </div>
         <button
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || isLoading}
           className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
         >
           {isSaving ? (

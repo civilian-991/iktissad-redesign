@@ -223,29 +223,47 @@ export default function Header() {
         animate={{ y: 0 }}
         className={`sticky top-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? 'glass-light shadow-elevated py-3'
-            : 'bg-paper py-5'
+            ? 'glass-light shadow-elevated'
+            : 'bg-paper'
         }`}
       >
-        <div className="container-editorial">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Image
-                  src="/logo.png"
-                  alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
-                  width={220}
-                  height={48}
-                  className="h-10 md:h-12 w-auto"
-                  priority
-                />
-              </motion.div>
-            </Link>
+        {/* Logo Row — centered, nothing beside it */}
+        <div className={`flex items-center justify-center transition-all duration-500 ${
+          isScrolled ? 'py-2 border-b border-sand/60' : 'py-5 border-b border-sand'
+        }`}>
+          {/* Mobile Menu Button — absolute left so it doesn't displace logo */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden absolute start-4 w-10 h-10 bg-obsidian text-gold flex items-center justify-center"
+            aria-label={t('a11y.openMenu')}
+          >
+            <Menu size={iconSizes.lg} />
+          </motion.button>
 
+          <Link href="/" className="flex items-center group">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Image
+                src="/logo.png"
+                alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
+                width={280}
+                height={60}
+                className={`w-auto transition-all duration-500 ${
+                  isScrolled ? 'h-10 md:h-12' : 'h-14 md:h-16'
+                }`}
+                priority
+              />
+            </motion.div>
+          </Link>
+        </div>
+
+        {/* Nav Row — menu + actions */}
+        <div className="container-editorial">
+          <div className="flex items-center justify-between py-1.5">
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
               {navigationConfig.map((item) => (
@@ -257,7 +275,7 @@ export default function Header() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center gap-1.5 px-4 py-2.5 font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian hover:text-gold transition-colors duration-300 relative group"
+                    className="flex items-center gap-1.5 px-4 py-2 font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian hover:text-gold transition-colors duration-300 relative group"
                   >
                     <span>{getNavName(item.key)}</span>
                     {item.submenu && (
@@ -307,13 +325,13 @@ export default function Header() {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ms-auto lg:ms-0">
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsSearchOpen(true)}
-                className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-all duration-300"
+                className="w-9 h-9 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-all duration-300"
                 aria-label={t('common.actions.search')}
               >
                 <Search size={iconSizes.md} />
@@ -331,17 +349,6 @@ export default function Header() {
                   {t('common.actions.subscribe')}
                 </motion.span>
               </Link>
-
-              {/* Mobile Menu Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden w-10 h-10 bg-obsidian text-gold flex items-center justify-center"
-                aria-label={t('a11y.openMenu')}
-              >
-                <Menu size={iconSizes.lg} />
-              </motion.button>
             </div>
           </div>
         </div>

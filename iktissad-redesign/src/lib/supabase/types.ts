@@ -183,6 +183,8 @@ export type Database = {
           author_id: string | null;
           tags: string[];
           status: "published" | "draft" | "review" | "scheduled";
+          featured: boolean;
+          editor_choice: boolean;
           views: number;
           published_at: string | null;
           created_at: string;
@@ -204,6 +206,8 @@ export type Database = {
           author_id?: string | null;
           tags?: string[];
           status?: "published" | "draft" | "review" | "scheduled";
+          featured?: boolean;
+          editor_choice?: boolean;
           views?: number;
           published_at?: string | null;
           created_at?: string;
@@ -225,6 +229,8 @@ export type Database = {
           author_id?: string | null;
           tags?: string[];
           status?: "published" | "draft" | "review" | "scheduled";
+          featured?: boolean;
+          editor_choice?: boolean;
           views?: number;
           published_at?: string | null;
           created_at?: string;

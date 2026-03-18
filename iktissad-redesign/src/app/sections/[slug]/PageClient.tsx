@@ -80,7 +80,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
             {/* Featured Article */}
             {featuredArticle && (
               <motion.a
-                href={`/news/${featuredArticle.id}`}
+                href={`/news/${featuredArticle.slug}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="block mb-12 group"
@@ -127,7 +127,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                 {restArticles.map((article, index) => (
                   <motion.a
                     key={article.id}
-                    href={`/news/${article.id}`}
+                    href={`/news/${article.slug}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}

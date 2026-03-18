@@ -81,6 +81,8 @@ export function mapArticleRow(
     },
     tags: row.tags,
     status: row.status,
+    featured: row.featured ?? false,
+    editorChoice: row.editor_choice ?? false,
     views: row.views,
     publishedAt: row.published_at ?? "",
     createdAt: row.created_at,

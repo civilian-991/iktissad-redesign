@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyIndexNow } from "@/lib/indexnow";
 import type { ApiResponse } from "@/types";
 
 const VALID_STATUSES = [
@@ -91,6 +92,20 @@ export async function PUT(
     changed_by: auth.userId ?? null,
     note: data.note ?? null,
   });
+
+  // Notify search engines when article transitions to published
+  if (data.status === 'published' && oldStatus !== 'published') {
+    // Fetch the slug for IndexNow (updated row only has id/status/updated_at)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: slugRow } = await (admin as any)
+      .from('articles')
+      .select('slug')
+      .eq('id', id)
+      .single();
+    if (slugRow?.slug) {
+      void notifyIndexNow([slugRow.slug]);
+    }
+  }
 
   // If assignee provided, upsert assignment
   if (data.assigneeId) {

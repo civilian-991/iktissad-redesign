@@ -14,7 +14,7 @@ export default function Hero() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const { data: featuredData } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&pageSize=5',
+    '/api/articles?status=published&featured=true&pageSize=5',
     swrFetcher
   );
 
@@ -47,6 +47,7 @@ export default function Hero() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
+            <Flame size={15} className="text-gold" />
             <span className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm uppercase tracking-widest">
               أبرز المقالات
             </span>
@@ -79,7 +80,7 @@ export default function Hero() {
               <AnimatePresence mode="wait">
                 <motion.a
                   key={main.id}
-                  href={`/news/${main.id}`}
+                  href={`/news/${main.slug}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -131,13 +132,7 @@ export default function Hero() {
 
             {/* All 5 articles list — active one highlighted */}
             <div className="lg:col-span-5 flex flex-col bg-paper">
-              <div className="bg-obsidian px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Flame size={14} className="text-gold" />
-                  <span className="font-[family-name:var(--font-display)] font-bold text-white text-sm">
-                    أبرز المقالات
-                  </span>
-                </div>
+              <div className="bg-obsidian px-4 py-3 flex items-center justify-end">
                 <a href="/search" className="text-gold text-xs flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
                   {t('common.actions.viewMore')}
                   <ArrowUpLeft size={11} />

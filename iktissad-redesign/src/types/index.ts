@@ -164,6 +164,8 @@ export interface Article {
   };
   tags: string[];
   status: "published" | "draft" | "review" | "scheduled";
+  featured: boolean;
+  editorChoice: boolean;
   views: number;
   publishedAt: string;
   createdAt: string;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import CookieConsent from "@/components/CookieConsent";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -49,6 +50,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={`${tajawal.variable} ${playfair.variable}`}>
       <body className="antialiased min-h-screen bg-cream">
         <Providers>{children}</Providers>
+        <CookieConsent />
       </body>
     </html>
   );

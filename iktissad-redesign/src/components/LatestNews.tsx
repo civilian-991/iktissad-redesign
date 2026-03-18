@@ -11,7 +11,7 @@ export default function LatestNews() {
   const { t } = useTranslation();
 
   const { data } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&pageSize=12&sort=date',
+    '/api/articles?status=published&featured=false&pageSize=12&sort=date',
     swrFetcher
   );
 
@@ -47,7 +47,7 @@ export default function LatestNews() {
             {articles.map((article, i) => (
               <motion.a
                 key={article.id}
-                href={`/news/${article.id}`}
+                href={`/news/${article.slug}`}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}

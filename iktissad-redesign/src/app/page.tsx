@@ -1,5 +1,4 @@
 import Header from '@/components/Header';
-import MarketTicker from '@/components/MarketTicker';
 import Hero from '@/components/Hero';
 import LatestNews from '@/components/LatestNews';
 import SectorNews from '@/components/SectorNews';
@@ -14,14 +13,14 @@ export default function Home() {
   return (
     <>
       <Header />
-      <MarketTicker />
       <main>
+        <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
         <Hero />
         <LatestNews />
-        <SectorNews />
-        <VideoSection />
-        <FeaturedMagazine />
         <CountryNews />
+        <FeaturedMagazine />
+        <VideoSection />
+        <SectorNews />
         <FeaturedProfiles />
         <Newsletter />
       </main>

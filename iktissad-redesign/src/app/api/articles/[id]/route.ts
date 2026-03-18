@@ -4,6 +4,7 @@ import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import { notifyIndexNow } from "@/lib/indexnow";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -174,7 +175,14 @@ export async function PUT(
     );
   }
 
-  const response: ApiResponse<Article> = { data: mapArticleRow(row) };
+  const article = mapArticleRow(row);
+
+  // Notify search engines when an article is published or updated while published
+  if (article.status === 'published' && article.slug) {
+    void notifyIndexNow([article.slug]);
+  }
+
+  const response: ApiResponse<Article> = { data: article };
   return NextResponse.json(response);
 }
 

@@ -77,7 +77,7 @@ function SectorCard({ sector }: { sector: Sector }) {
           <Loader2 className="text-gold animate-spin" size={24} />
         </div>
       ) : featured ? (
-        <a href={`/news/${featured.id}`} className="block relative h-52 overflow-hidden group/featured">
+        <a href={`/news/${featured.slug}`} className="block relative h-52 overflow-hidden group/featured">
           {featured.featuredImage ? (
             <img
               src={featured.featuredImage}
@@ -110,7 +110,7 @@ function SectorCard({ sector }: { sector: Sector }) {
         {rest.map((article, index) => (
           <a
             key={article.id}
-            href={`/news/${article.id}`}
+            href={`/news/${article.slug}`}
             className="flex items-start gap-3 p-4 hover:bg-cream transition-colors group/item"
           >
             <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-obsidian to-brand-darker text-white text-xs flex items-center justify-center font-[family-name:var(--font-display)] font-bold">

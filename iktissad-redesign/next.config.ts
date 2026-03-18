@@ -34,6 +34,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        // IndexNow key verification: /{key}.txt → /api/indexnow/key
+        source: '/:key(\\w{32,}).txt',
+        destination: '/api/indexnow/key',
+      },
+    ];
+  },
   compress: true,
   poweredByHeader: false,
   async headers() {

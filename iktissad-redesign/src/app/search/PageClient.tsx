@@ -167,7 +167,7 @@ export default function SearchPageClient() {
                 {results.map((result, index) => (
                   <motion.a
                     key={result.id}
-                    href={`/news/${result.id}`}
+                    href={`/news/${result.slug}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.04 }}
