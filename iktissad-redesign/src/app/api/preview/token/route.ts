@@ -8,12 +8,14 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // Generate a tokenized preview link for a draft article.
 // Requires an active Supabase auth session.
 //
-// Request body: { articleId: string | number }
+// Request body: { articleId: string }  — UUID of the article
 // Response:     { data: { token: string, expiresAt: string, url: string } }
 // ---------------------------------------------------------------------------
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 interface RequestBody {
-  articleId?: string | number
+  articleId?: string
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -33,18 +35,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const { articleId } = body
-  if (articleId === undefined || articleId === null || articleId === '') {
+  if (!articleId || !UUID_RE.test(articleId)) {
     return NextResponse.json(
-      { error: 'حقل articleId مطلوب.' },
-      { status: 400 }
-    )
-  }
-
-  // Normalise articleId to a number (the DB column is bigint)
-  const articleIdNum = Number(articleId)
-  if (!Number.isFinite(articleIdNum) || articleIdNum <= 0) {
-    return NextResponse.json(
-      { error: 'قيمة articleId غير صالحة.' },
+      { error: 'قيمة articleId غير صالحة — يجب أن تكون UUID صحيحاً.' },
       { status: 400 }
     )
   }
@@ -60,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     .from('preview_tokens' as never)
     .insert({
       token,
-      article_id: articleIdNum,
+      article_id: articleId,
       created_by: auth.userId ?? null,
       expires_at: expiresAt,
     } as never)

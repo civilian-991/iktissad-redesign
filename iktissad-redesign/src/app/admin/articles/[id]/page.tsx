@@ -698,6 +698,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               targetKeyword={seoKeyword}
               articleType={articleType ?? undefined}
               sectionSlug={section || undefined}
+              currentArticleId={id}
               onTargetKeywordChange={setSeoKeyword}
               onEntityClick={(entity) => {
                 if (!selectedTags.includes(entity)) {

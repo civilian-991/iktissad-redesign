@@ -7,7 +7,7 @@
 create table if not exists preview_tokens (
   id           uuid        primary key default gen_random_uuid(),
   token        text        not null unique,
-  article_id   bigint      not null references articles(id) on delete cascade,
+  article_id   uuid        not null references articles(id) on delete cascade,
   created_by   uuid        references auth.users(id) on delete set null,
   expires_at   timestamptz not null default (now() + interval '48 hours'),
   used_count   integer     not null default 0,

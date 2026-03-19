@@ -11,6 +11,9 @@ import {
   Tag,
 } from "lucide-react";
 import type { SEOAnalysisResult, SEOIssue } from "@/app/api/ai/seo-analysis/route";
+import SEOInternalLinks from "@/components/admin/SEOInternalLinks";
+import SEOConversionSignal from "@/components/admin/SEOConversionSignal";
+import SEOCompetitorGap from "@/components/admin/SEOCompetitorGap";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,6 +26,7 @@ export interface SEOPanelProps {
   targetKeyword?: string;
   articleType?: string;
   sectionSlug?: string;
+  currentArticleId?: string;
   onTargetKeywordChange?: (keyword: string) => void;
   onEntityClick?: (entity: string) => void;
 }
@@ -231,6 +235,7 @@ export default function SEOPanel({
   targetKeyword: targetKeywordProp = "",
   articleType,
   sectionSlug,
+  currentArticleId,
   onTargetKeywordChange,
   onEntityClick,
 }: SEOPanelProps) {
@@ -557,6 +562,29 @@ export default function SEOPanel({
           {/* Google snippet preview */}
           <SnippetPreview title={title} excerpt={excerpt} />
         </>
+      )}
+
+      {/* ── Differentiated signals ─────────────────────────────────────── */}
+
+      <SEOInternalLinks
+        title={title}
+        content={content}
+        targetKeyword={localKeyword || undefined}
+        currentArticleId={currentArticleId}
+      />
+
+      <SEOConversionSignal
+        sectionSlug={sectionSlug}
+        articleType={articleType}
+      />
+
+      {localKeyword.trim().length > 3 && (
+        <SEOCompetitorGap
+          title={title}
+          content={content}
+          targetKeyword={localKeyword}
+          articleType={articleType}
+        />
       )}
     </div>
   );
