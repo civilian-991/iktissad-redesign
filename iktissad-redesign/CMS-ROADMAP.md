@@ -1,7 +1,7 @@
 # IKTISSAD CMS — 2026 Roadmap
 > The first AI-native Arabic newsroom CMS
 
-**Last updated:** March 19, 2026 — Phase 4 complete
+**Last updated:** March 19, 2026 — Phase 5 complete
 **Vision:** A content operating system that creates, optimizes, and distributes Arabic financial journalism — with AI that thinks like an Arabic editor, not a translation layer.
 
 ---
@@ -283,12 +283,12 @@ Article card block pulls from CMS via search modal. Save-draft + send flows. DB:
 
 ---
 
-## Phase 5 — Content Intelligence + Monetization (OPTIMIZE + MONETIZE)
+## Phase 5 — Content Intelligence + Monetization (OPTIMIZE + MONETIZE) ✅ COMPLETE
 > Turn analytics into editorial decisions. Connect content performance to revenue.
 
-**Timeline: Month 3–4**
+**Completed: March 2026**
 
-### 5.1 — Article Performance Dashboard in Editor
+### 5.1 — Article Performance Dashboard in Editor ✅
 
 For published articles, show a live panel inside the editor:
 - Total views, unique readers, return readers
@@ -300,7 +300,7 @@ For published articles, show a live panel inside the editor:
 
 The `ArticleAnalyticsPanel.tsx` component already exists — embed it in the published article detail page.
 
-### 5.2 — Revenue Attribution per Article
+### 5.2 — Revenue Attribution per Article ✅
 
 **The metric that makes the CMS business-critical:**
 - Track which articles a subscriber read before converting
@@ -312,7 +312,7 @@ Surface in: article list (revenue column), article editor sidebar, dashboard wid
 
 DB: Extend `reading_sessions` to join with subscription events. New `conversion_touches` table for attribution model.
 
-### 5.3 — Paywall Optimization Suggestions
+### 5.3 — Paywall Optimization Suggestions ✅
 
 AI-powered paywall intelligence:
 - "Move this article behind the paywall — it's performing in your top 10% for engagement but 100% free"
@@ -320,7 +320,7 @@ AI-powered paywall intelligence:
 - Suggest optimal metering threshold (currently free articles before paywall shows)
 - A/B test free vs. gated variants
 
-### 5.4 — Content Gap Analysis
+### 5.4 — Content Gap Analysis ✅
 
 Dashboard widget:
 - Topics trending in GCC financial news (via RSS / news API) vs. your coverage
@@ -328,7 +328,7 @@ Dashboard widget:
 - Geographic coverage gaps (countries mentioned in fewer than N articles this month)
 - "Suggested story ideas" one-click to create article with brief pre-filled
 
-### 5.5 — AI Performance Recommendations
+### 5.5 — AI Performance Recommendations ✅
 
 For each published article with below-average performance:
 - "This article gets 42% fewer views than your section average — suggestions:"
@@ -555,7 +555,7 @@ Revisit when the team actually hits the wall of concurrent editing conflicts. Pr
 | 2 | Newsroom Collaboration | Month 2 | COLLABORATE | Medium | ✅ Done |
 | 3 | Editorial Calendar | Month 2 | COLLABORATE | Low | ✅ Done |
 | 4 | Distribution Engine | Month 3 | DISTRIBUTE | Medium | ✅ Done |
-| 5 | Content Intelligence + Monetization | Month 3–4 | OPTIMIZE + MONETIZE | Medium | ⬜ |
+| 5 | Content Intelligence + Monetization | Month 3–4 | OPTIMIZE + MONETIZE | Medium | ✅ Done |
 | 6 | Content Safety (Versioning) | Month 4 | CREATE | Low | ⬜ |
 | 7 | Smart Media | Month 4–5 | CREATE | Medium | ⬜ |
 | 8 | Automation & Webhooks | Month 5 | DISTRIBUTE | Medium | ⬜ |

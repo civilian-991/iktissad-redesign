@@ -42,6 +42,7 @@ import {
   FlaskConical,
   Share2,
   Mail,
+  BrainCircuit,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -84,8 +85,9 @@ const navigationConfig: NavItem[] = [
   { key: 'calendar',    href: '/admin/calendar',     icon: CalendarDays },
   { key: 'headlines',   href: '/admin/headlines',    icon: FlaskConical },
   { key: 'distribute',  href: '/admin/distribute',   icon: Share2 },
-  { key: 'newsletters', href: '/admin/newsletters',  icon: Mail },
-  { key: 'magazine',    href: '/admin/magazines',    icon: BookOpen },
+  { key: 'newsletters',         href: '/admin/newsletters',          icon: Mail },
+  { key: 'contentIntelligence', href: '/admin/content-intelligence', icon: BrainCircuit },
+  { key: 'magazine',            href: '/admin/magazines',            icon: BookOpen },
   { key: 'users',       href: '/admin/users',        icon: Users },
   { key: 'media',       href: '/admin/media',        icon: Image },
   { key: 'settings',    href: '/admin/settings',     icon: Settings },
@@ -158,8 +160,9 @@ export default function AdminLayoutClient({
       calendar:    'التقويم التحريري',
       headlines:   'مختبر A/B للعناوين',
       distribute:  'التوزيع الاجتماعي',
-      newsletters: 'النشرات البريدية',
-      magazine:    t('admin.common.magazine'),
+      newsletters:         'النشرات البريدية',
+      contentIntelligence: 'ذكاء المحتوى',
+      magazine:            t('admin.common.magazine'),
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),
       settings:    t('admin.common.settings'),

@@ -996,3 +996,32 @@ export async function sendNewsletter(
     method: "POST",
   });
 }
+
+// ─── Phase 5: Content Intelligence ───────────────────────────────────────────
+
+export const revenueAttributionKey = (articleId?: string) =>
+  articleId
+    ? `/api/admin/revenue-attribution?articleId=${articleId}`
+    : '/api/admin/revenue-attribution';
+
+export const contentGapKey = () => '/api/admin/content-gap';
+
+export async function getPaywallSuggestions(
+  articleId: string
+): Promise<ApiResponse<import('@/types').PaywallSuggestionData>> {
+  return api<import('@/types').PaywallSuggestionData>(
+    `/api/ai/paywall-suggestions?articleId=${articleId}`
+  );
+}
+
+export async function getPerformanceRecommendations(
+  articleId: string
+): Promise<ApiResponse<import('@/types').ArticlePerformanceRecommendations>> {
+  return api<import('@/types').ArticlePerformanceRecommendations>(
+    '/api/ai/performance-recommendations',
+    {
+      method: 'POST',
+      body: JSON.stringify({ articleId }),
+    }
+  );
+}

@@ -47,6 +47,8 @@ import AIBubbleMenu from '@/components/admin/AIBubbleMenu';
 import EditorialComments from '@/components/admin/EditorialComments';
 import SEOPanel from '@/components/admin/SEOPanel';
 import SplitPreview from '@/components/admin/SplitPreview';
+import PaywallOptimizer from '@/components/admin/PaywallOptimizer';
+import AIPerformanceRecommendations from '@/components/admin/AIPerformanceRecommendations';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
@@ -761,6 +763,16 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 }
               }}
             />
+          </motion.div>
+
+          {/* Paywall Optimizer */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+            <PaywallOptimizer articleId={id} articleStatus={status} />
+          </motion.div>
+
+          {/* AI Performance Recommendations */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}>
+            <AIPerformanceRecommendations articleId={id} articleStatus={status} />
           </motion.div>
 
           {/* Status */}

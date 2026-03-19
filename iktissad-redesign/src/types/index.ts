@@ -597,3 +597,100 @@ export interface Ad {
   active: boolean;
   createdAt: string;
 }
+
+// ─── Phase 5: Content Intelligence & Revenue Attribution ─────────────────────
+
+export type ConversionTouch = {
+  id: string;
+  subscriberId: string;
+  articleId: string;
+  sessionId: string | null;
+  touchPosition: number;
+  createdAt: string;
+};
+
+export type ArticleRevenueAttribution = {
+  articleId: string;
+  title: string;
+  conversionCount: number;
+  estimatedRevenue: number;
+  avgScrollDepth: number;
+  readThroughRate: number;
+  isPaywalled: boolean;
+  articleType: string | null;
+};
+
+export type RevenueAttributionData = {
+  articles: ArticleRevenueAttribution[];
+  totalConversions: number;
+  totalAttributedRevenue: number;
+  topConvertingArticleType: string | null;
+};
+
+export type ContentGapSectionCoverage = {
+  sectionName: string;
+  articleCount: number;
+  targetCount: number;
+  gapPercentage: number;
+};
+
+export type ContentGapCountryCoverage = {
+  country: string;
+  articleCount: number;
+  lastArticleDate: string | null;
+};
+
+export type UnderperformingArticle = {
+  id: string;
+  title: string;
+  views: number;
+  avgScrollDepth: number;
+  sectionAvgViews: number;
+  performanceRatio: number;
+  suggestions: string[];
+};
+
+export type StoryIdea = {
+  topic: string;
+  topicAr: string;
+  reason: string;
+  targetSection: string;
+  priority: 'high' | 'medium' | 'low';
+};
+
+export type ContentGapData = {
+  coverageBySection: ContentGapSectionCoverage[];
+  coverageByCountry: ContentGapCountryCoverage[];
+  underperformingArticles: UnderperformingArticle[];
+  suggestedStoryIdeas: StoryIdea[];
+};
+
+export type PaywallSuggestion = {
+  type: 'gate' | 'meter' | 'optimize' | 'promote';
+  priority: 'high' | 'medium' | 'low';
+  titleAr: string;
+  descriptionAr: string;
+  dataPoint: string;
+};
+
+export type PaywallSuggestionData = {
+  articleId: string;
+  currentStatus: 'free' | 'paywalled';
+  engagementScore: number;
+  suggestions: PaywallSuggestion[];
+};
+
+export type PerformanceRecommendation = {
+  category: 'headline' | 'internal_links' | 'content_depth' | 'multimedia' | 'seo';
+  titleAr: string;
+  descriptionAr: string;
+  impactLevel: 'high' | 'medium' | 'low';
+  actionable: boolean;
+};
+
+export type ArticlePerformanceRecommendations = {
+  articleId: string;
+  overallScore: number;
+  performanceSummaryAr: string;
+  recommendations: PerformanceRecommendation[];
+};

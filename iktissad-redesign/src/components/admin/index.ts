@@ -11,3 +11,8 @@ export { default as AIBubbleMenu } from './AIBubbleMenu';
 export { default as SEOPanel } from './SEOPanel';
 export { default as SplitPreview } from './SplitPreview';
 export { default as TipTapRenderer } from './TipTapRenderer';
+// Phase 5 — Revenue, Paywall & Content Intelligence
+export { default as RevenueAttributionWidget } from './RevenueAttributionWidget';
+export { default as PaywallOptimizer } from './PaywallOptimizer';
+export { default as ContentGapWidget } from './ContentGapWidget';
+export { default as AIPerformanceRecommendations } from './AIPerformanceRecommendations';
