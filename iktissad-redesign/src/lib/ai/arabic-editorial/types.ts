@@ -71,3 +71,12 @@ export interface BuildSystemPromptOptions {
   /** Override the default ideal word count for this article type */
   wordCountOverride?: number
 }
+
+/** All article types as an ordered array (for rendering select options). */
+export const ALL_ARTICLE_TYPES: ArticleType[] = [
+  ArticleType.NEWS,
+  ArticleType.REPORT,
+  ArticleType.ANALYSIS,
+  ArticleType.INTERVIEW,
+  ArticleType.OPINION,
+]

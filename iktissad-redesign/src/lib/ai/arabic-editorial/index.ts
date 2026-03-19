@@ -8,10 +8,8 @@
  * @module arabic-editorial
  */
 
-import { ArticleType } from './types'
-
 // ── Types ────────────────────────────────────────────────────────────────────
-export { ArticleType } from './types'
+export { ArticleType, ALL_ARTICLE_TYPES } from './types'
 export type {
   ArticleTypeConfig,
   ArabicEditorialSystemPrompt,
@@ -41,12 +39,3 @@ export {
   buildContextFragment,
 } from './prompt-builder'
 
-// ── Convenience array ────────────────────────────────────────────────────────
-/** All article types as an ordered array (for rendering select options). */
-export const ALL_ARTICLE_TYPES: ArticleType[] = [
-  ArticleType.NEWS,
-  ArticleType.REPORT,
-  ArticleType.ANALYSIS,
-  ArticleType.INTERVIEW,
-  ArticleType.OPINION,
-]

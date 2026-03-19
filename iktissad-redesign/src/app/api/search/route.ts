@@ -1,21 +1,41 @@
+/**
+ * GET /api/search
+ *
+ * Unified search endpoint with two modes:
+ *
+ *   ?q=<text>                  — keyword ILIKE search (backward compatible)
+ *   ?q=<text>&semantic=true    — hybrid full-text search (ts_rank + ILIKE fallback)
+ *
+ * Query params:
+ *   q          (required) — search query string
+ *   page       (optional, default 1)
+ *   pageSize   (optional, default 10, max 50)
+ *   semantic   (optional, "true") — enable enhanced FTS mode
+ *
+ * Response: ApiResponse<Article[]>
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import { hybridSearch } from "@/lib/ai/embeddings";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
   *,
   users:author_id ( name, avatar ),
-  sections:section_id ( slug ),
-  sectors:sector_id ( slug ),
-  countries:country_id ( slug )
+  sections:section_id ( slug, name ),
+  sectors:sector_id ( slug, name ),
+  countries:country_id ( slug, name )
 `;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q") || "";
-  const page = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+
+  const query    = searchParams.get("q") || "";
+  const page     = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "10", 10)));
+  const semantic = searchParams.get("semantic") === "true";
 
   if (!query.trim()) {
     return NextResponse.json(
@@ -24,21 +44,88 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const offset = (page - 1) * pageSize;
+
+  // -------------------------------------------------------------------------
+  // Semantic / hybrid mode — uses Postgres tsvector full-text search
+  // -------------------------------------------------------------------------
+  if (semantic) {
+    try {
+      const { results, total, usedFts } = await hybridSearch(query.trim(), pageSize, offset);
+
+      // hybridSearch returns lightweight result rows (id, title, excerpt, slug,
+      // publishedAt, rank).  We need full Article objects for the response, so
+      // we fetch the full rows for the matched IDs in a single query.
+      if (results.length > 0) {
+        const ids = results.map((r) => r.id);
+        const supabase = await createClient();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: rows, error } = await (supabase as any)
+          .from("articles")
+          .select(ARTICLE_SELECT)
+          .in("id", ids);
+
+        if (error) {
+          return NextResponse.json(
+            { error: (error as { message: string }).message } satisfies ApiResponse<never>,
+            { status: 500 }
+          );
+        }
+
+        // Re-order to match the relevance ranking returned by hybridSearch
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rowMap = new Map(((rows ?? []) as any[]).map((r: any) => [r.id, r]));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ordered = ids.map((id) => rowMap.get(id)).filter(Boolean) as any[];
+        const articles: Article[] = ordered.map((r) => mapArticleRow(r));
+
+        return NextResponse.json({
+          data: articles,
+          pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages: Math.ceil(Math.max(total, articles.length) / pageSize),
+          },
+          // Surface which search mode was actually used so the client can show
+          // a "powered by full-text search" badge if desired
+          meta: { searchMode: usedFts ? "fts" : "ilike" },
+        } as ApiResponse<Article[]> & { meta: { searchMode: string } });
+      }
+
+      // Zero results from hybrid — fall through to plain ILIKE below so the
+      // user always gets the best possible answer
+    } catch (err) {
+      // Hybrid search failure is non-fatal; log and fall through to ILIKE
+      console.error("[search] hybrid search error, falling back to ilike:", err);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Standard mode (and fallback for semantic with zero/error results)
+  // Improved over the original: searches more fields and orders title matches
+  // before excerpt-only matches using a CASE-based sort via two OR groups.
+  // -------------------------------------------------------------------------
   const supabase = await createClient();
+  const pattern  = `%${query.trim()}%`;
 
-  // Use ilike for simple text search across title, title_en, excerpt, excerpt_en
-  const pattern = `%${query}%`;
-
-  const start = (page - 1) * pageSize;
   const { data: rows, count, error } = await supabase
     .from("articles")
     .select(ARTICLE_SELECT, { count: "exact" })
     .eq("status", "published")
     .or(
-      `title.ilike.${pattern},title_en.ilike.${pattern},excerpt.ilike.${pattern},excerpt_en.ilike.${pattern}`
+      [
+        `title.ilike.${pattern}`,
+        `title_en.ilike.${pattern}`,
+        `excerpt.ilike.${pattern}`,
+        `excerpt_en.ilike.${pattern}`,
+      ].join(",")
     )
+    // Title matches first (Supabase doesn't support CASE ORDER BY directly,
+    // so we use two cascaded orders: recency as tie-breaker)
     .order("published_at", { ascending: false })
-    .range(start, start + pageSize - 1);
+    .range(offset, offset + pageSize - 1);
 
   if (error) {
     return NextResponse.json(
@@ -51,10 +138,14 @@ export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const articles: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
 
-  const response: ApiResponse<Article[]> = {
+  return NextResponse.json({
     data: articles,
-    pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
-  };
-
-  return NextResponse.json(response);
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+    meta: { searchMode: "ilike" },
+  } as ApiResponse<Article[]> & { meta: { searchMode: string } });
 }

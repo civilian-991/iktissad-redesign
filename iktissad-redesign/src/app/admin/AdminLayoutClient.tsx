@@ -45,6 +45,8 @@ import {
   BrainCircuit,
   Webhook,
   Zap,
+  Lightbulb,
+  Bot,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -89,6 +91,8 @@ const navigationConfig: NavItem[] = [
   { key: 'distribute',  href: '/admin/distribute',   icon: Share2 },
   { key: 'newsletters',         href: '/admin/newsletters',          icon: Mail },
   { key: 'contentIntelligence', href: '/admin/content-intelligence', icon: BrainCircuit },
+  { key: 'brief',    href: '/admin/brief',      icon: Lightbulb },
+  { key: 'aiAgent',  href: '/admin/ai-agent',   icon: Bot },
   { key: 'magazine',            href: '/admin/magazines',            icon: BookOpen },
   { key: 'users',       href: '/admin/users',        icon: Users },
   { key: 'media',       href: '/admin/media',        icon: Image },
@@ -169,6 +173,8 @@ export default function AdminLayoutClient({
       distribute:  'التوزيع الاجتماعي',
       newsletters:         'النشرات البريدية',
       contentIntelligence: 'ذكاء المحتوى',
+      brief:               'موجز المقال',
+      aiAgent:             'وكيل الذكاء الاصطناعي',
       magazine:            t('admin.common.magazine'),
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),

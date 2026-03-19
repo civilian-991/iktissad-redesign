@@ -48,6 +48,7 @@ import AISidebar from '@/components/admin/AISidebar';
 import AIBubbleMenu from '@/components/admin/AIBubbleMenu';
 import EditorialComments from '@/components/admin/EditorialComments';
 import SEOPanel from '@/components/admin/SEOPanel';
+import GEOPanel from '@/components/admin/GEOPanel';
 import SplitPreview from '@/components/admin/SplitPreview';
 import PaywallOptimizer from '@/components/admin/PaywallOptimizer';
 import AIPerformanceRecommendations from '@/components/admin/AIPerformanceRecommendations';
@@ -830,6 +831,17 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   toast.success(`تمت إضافة "${entity}" كوسم`);
                 }
               }}
+            />
+          </motion.div>
+
+          {/* GEO Panel — AI Search Readiness */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.37 }}>
+            <GEOPanel
+              articleId={id}
+              title={title}
+              content={contentText}
+              articleType={articleType ?? undefined}
+              keyword={seoKeyword || undefined}
             />
           </motion.div>
 
