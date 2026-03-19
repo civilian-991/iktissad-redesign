@@ -296,6 +296,46 @@ export interface ApiResponse<T> {
 }
 
 // =============================================================================
+// SOURCE & CONTACT CRM (Phase 10.1)
+// =============================================================================
+
+export interface Source {
+  id: string;
+  name: string;
+  nameEn?: string;
+  title?: string;
+  titleEn?: string;
+  organization?: string;
+  organizationEn?: string;
+  phone?: string;
+  email?: string;
+  countryId?: string;
+  sectorId?: string;
+  tags: string[];
+  reliabilityRating?: number; // 1-5
+  embargoUntil?: string;
+  privateNotes?: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  // joined
+  country?: { name: string; flag: string };
+  sector?: { name: string };
+  articleCount?: number;
+}
+
+export interface SourceArticleLink {
+  id: string;
+  sourceId: string;
+  articleId: string;
+  quoteExcerpt?: string;
+  linkedAt: string;
+  // joined
+  article?: { id: string; title: string; publishedAt?: string };
+  source?: { id: string; name: string };
+}
+
+// =============================================================================
 // MAGAZINE CONTENT MODEL (Phase 1A)
 // =============================================================================
 
@@ -775,4 +815,93 @@ export interface AutomationRule {
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// =============================================================================
+// PHASE 10.1 — ARTICLE SERIES / DOSSIERS
+// =============================================================================
+
+export interface ArticleSeries {
+  id: string;
+  slug: string;
+  title: string;
+  titleEn?: string;
+  description?: string;
+  descriptionEn?: string;
+  coverImage?: string;
+  status: 'active' | 'archived';
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  // joined
+  articleCount?: number;
+  articles?: Array<{
+    id: string;
+    title: string;
+    orderIndex: number;
+    publishedAt?: string;
+  }>;
+}
+
+export interface SeriesArticle {
+  id: string;
+  seriesId: string;
+  articleId: string;
+  orderIndex: number;
+  addedAt: string;
+  article?: {
+    id: string;
+    title: string;
+    slug: string;
+    publishedAt?: string;
+    excerpt?: string;
+  };
+}
+
+// =============================================================================
+// PHASE 10.2 — PUBLIC API KEYS
+// =============================================================================
+
+export type ApiKeyScope =
+  | 'read:articles'
+  | 'read:sections'
+  | 'read:sectors'
+  | 'read:countries'
+  | 'read:series'
+
+export interface ApiKey {
+  id: string
+  name: string
+  keyHash: string
+  keyPrefix: string   // shown in UI e.g. "ikt_a1b2"
+  scopes: ApiKeyScope[]
+  rateLimitPerMinute: number
+  createdBy?: string
+  lastUsedAt?: string
+  expiresAt?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ApiUsageLog {
+  id: string
+  apiKeyId: string
+  endpoint: string
+  method: string
+  statusCode?: number
+  responseTimeMs?: number
+  ipAddress?: string
+  userAgent?: string
+  requestedAt: string
+}
+
+export interface ApiKeyUsageStats {
+  totalRequests: number
+  requestsToday: number
+  requests7Days: number
+  requests30Days: number
+  errorRate: number
+  avgResponseTimeMs: number
+  topEndpoints: Array<{ endpoint: string; count: number }>
 }

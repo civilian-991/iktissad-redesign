@@ -47,6 +47,9 @@ import {
   Zap,
   Lightbulb,
   Bot,
+  Cpu,
+  Users2,
+  FolderOpen,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -94,6 +97,8 @@ const navigationConfig: NavItem[] = [
   { key: 'brief',    href: '/admin/brief',      icon: Lightbulb },
   { key: 'aiAgent',  href: '/admin/ai-agent',   icon: Bot },
   { key: 'magazine',            href: '/admin/magazines',            icon: BookOpen },
+  { key: 'series',              href: '/admin/series',               icon: FolderOpen },
+  { key: 'sources',     href: '/admin/sources',      icon: Users2 },
   { key: 'users',       href: '/admin/users',        icon: Users },
   { key: 'media',       href: '/admin/media',        icon: Image },
   { key: 'settings',    href: '/admin/settings',     icon: Settings },
@@ -121,6 +126,7 @@ const adsNavConfig: SubNavItem[] = [
 const settingsNavConfig: SubNavItem[] = [
   { key: 'webhooks',    href: '/admin/settings/webhooks',    icon: Webhook },
   { key: 'automations', href: '/admin/settings/automations', icon: Zap },
+  { key: 'mcp',         href: '/admin/settings/mcp',         icon: Cpu },
 ];
 
 const quickActionsConfig: QuickAction[] = [
@@ -176,6 +182,8 @@ export default function AdminLayoutClient({
       brief:               'موجز المقال',
       aiAgent:             'وكيل الذكاء الاصطناعي',
       magazine:            t('admin.common.magazine'),
+      series:              'الملفات التحريرية',
+      sources:             'المصادر',
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),
       settings:    t('admin.common.settings'),
@@ -197,6 +205,7 @@ export default function AdminLayoutClient({
       ads:              t('admin.common.ads'),
       webhooks:         'Webhooks الصادرة',
       automations:      'قواعد الأتمتة',
+      mcp:              'خادم MCP',
     };
     return subNavKeys[key] || key;
   };

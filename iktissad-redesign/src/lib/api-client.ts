@@ -1066,3 +1066,83 @@ export async function getPerformanceRecommendations(
     }
   );
 }
+
+// ─── Phase 10.1: Article Series / Dossiers ───────────────────────────────────
+
+import type { ArticleSeries, SeriesArticle } from '@/types';
+
+export interface SeriesListParams {
+  page?: number;
+  pageSize?: number;
+  status?: 'active' | 'archived';
+}
+
+export function seriesKey(params: SeriesListParams = {}): string {
+  return buildQuery('/api/series', params);
+}
+
+export function seriesDetailKey(slug: string): string {
+  return `/api/series/${slug}`;
+}
+
+export function seriesArticlesKey(slug: string): string {
+  return `/api/series/${slug}/articles`;
+}
+
+export async function createSeries(
+  data: Record<string, unknown>
+): Promise<ApiResponse<ArticleSeries>> {
+  return api<ArticleSeries>('/api/series', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateSeries(
+  slug: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<ArticleSeries>> {
+  return api<ArticleSeries>(`/api/series/${slug}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteSeries(
+  slug: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/series/${slug}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function addArticleToSeries(
+  slug: string,
+  articleId: string,
+  orderIndex?: number
+): Promise<ApiResponse<SeriesArticle>> {
+  return api<SeriesArticle>(`/api/series/${slug}/articles`, {
+    method: 'POST',
+    body: JSON.stringify({ articleId, orderIndex }),
+  });
+}
+
+export async function reorderSeriesArticles(
+  slug: string,
+  order: Array<{ id: string; orderIndex: number }>
+): Promise<ApiResponse<{ reordered: boolean }>> {
+  return api<{ reordered: boolean }>(`/api/series/${slug}/articles`, {
+    method: 'PATCH',
+    body: JSON.stringify({ order }),
+  });
+}
+
+export async function removeArticleFromSeries(
+  slug: string,
+  seriesArticleId: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(
+    `/api/series/${slug}/articles?seriesArticleId=${seriesArticleId}`,
+    { method: 'DELETE' }
+  );
+}

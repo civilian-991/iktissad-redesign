@@ -49,7 +49,7 @@ const agentRequestSchema = z.object({
 const searchArchiveTool = tool({
   description:
     'يبحث في أرشيف مقالات اقتصاد الداخلية عن محتوى ذي صلة بالموضوع المطلوب. استخدم هذه الأداة قبل كتابة أي مسودة لجمع السياق من المقالات السابقة.',
-  parameters: z.object({
+  inputSchema: z.object({
     query: z
       .string()
       .describe('نص البحث بالعربية أو الإنجليزية — موضوع، شركة، قطاع، أو كلمة مفتاحية'),

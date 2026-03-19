@@ -2,6 +2,148 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
+// =============================================================================
+// PUBLIC API KEY VALIDATION (Phase 10.2)
+// =============================================================================
+
+/**
+ * SHA-256 hash a string using the Web Crypto API (available in Node.js 18+ and Edge).
+ */
+async function sha256Hex(input: string): Promise<string> {
+  const encoded = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Validate a public API key from `Authorization: Bearer <key>` header.
+ *
+ * - Hashes the key, looks up in `api_keys` table
+ * - Checks: is_active, expiry, rate limit (last-minute window)
+ * - Logs the request to `api_usage_log`
+ * - Returns key details on success
+ */
+export async function validateApiKey(
+  request: Request,
+  opts?: { endpoint?: string; statusCode?: number; responseTimeMs?: number }
+): Promise<{
+  valid: boolean;
+  keyId?: string;
+  scopes?: string[];
+  rateLimitPerMinute?: number;
+  error?: string;
+}> {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return { valid: false, error: "Missing Authorization header" };
+  }
+
+  const rawKey = authHeader.slice(7).trim();
+  if (!rawKey) {
+    return { valid: false, error: "Empty API key" };
+  }
+
+  let keyHash: string;
+  try {
+    keyHash = await sha256Hex(rawKey);
+  } catch {
+    return { valid: false, error: "Key hashing failed" };
+  }
+
+  const admin = createAdminClient();
+
+  // Look up key
+  const { data: keyRow, error: lookupError } = await admin
+    .from("api_keys")
+    .select("id, is_active, expires_at, scopes, rate_limit_per_minute")
+    .eq("key_hash", keyHash)
+    .single();
+
+  if (lookupError || !keyRow) {
+    return { valid: false, error: "Invalid API key" };
+  }
+
+  const row = keyRow as unknown as {
+    id: string;
+    is_active: boolean;
+    expires_at: string | null;
+    scopes: string[];
+    rate_limit_per_minute: number;
+  };
+
+  if (!row.is_active) {
+    return { valid: false, error: "API key is inactive" };
+  }
+
+  if (row.expires_at && new Date(row.expires_at) < new Date()) {
+    return { valid: false, error: "API key has expired" };
+  }
+
+  // Rate limit check: count requests in last minute
+  const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+  const { count } = await admin
+    .from("api_usage_log")
+    .select("id", { count: "exact", head: true })
+    .eq("api_key_id", row.id)
+    .gte("requested_at", oneMinuteAgo);
+
+  if (count !== null && count >= row.rate_limit_per_minute) {
+    return { valid: false, error: "Rate limit exceeded" };
+  }
+
+  // Update last_used_at (fire-and-forget, don't block response)
+  void (admin as any)
+    .from("api_keys")
+    .update({ last_used_at: new Date().toISOString() })
+    .eq("id", row.id);
+
+  // Log usage
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    null;
+  const userAgent = request.headers.get("user-agent") ?? null;
+
+  void (admin as any).from("api_usage_log").insert({
+    api_key_id: row.id,
+    endpoint: opts?.endpoint ?? new URL(request.url).pathname,
+    method: request.method,
+    status_code: opts?.statusCode ?? null,
+    response_time_ms: opts?.responseTimeMs ?? null,
+    ip_address: ip,
+    user_agent: userAgent,
+  });
+
+  return {
+    valid: true,
+    keyId: row.id,
+    scopes: row.scopes,
+    rateLimitPerMinute: row.rate_limit_per_minute,
+  };
+}
+
+/**
+ * Return a standard 401 response for invalid API key requests.
+ */
+export function apiKeyUnauthorizedResponse(message = "Unauthorized") {
+  return NextResponse.json({ success: false, error: message }, { status: 401 });
+}
+
+/**
+ * Return a standard 429 response for rate-limited requests.
+ */
+export function apiKeyRateLimitResponse() {
+  return NextResponse.json(
+    { success: false, error: "Rate limit exceeded. Try again later." },
+    {
+      status: 429,
+      headers: { "Retry-After": "60" },
+    }
+  );
+}
+
 /**
  * Verify Supabase Auth session for protected API routes (server-side).
  *
