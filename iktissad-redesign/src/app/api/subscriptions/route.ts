@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { dispatchWebhook } from "@/lib/webhooks/dispatcher";
+import { runAutomations } from "@/lib/automations/engine";
 import type { ApiResponse } from "@/types";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -193,6 +195,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  // Fire webhooks + automations for new subscriber
+  void dispatchWebhook('subscriber.created', { subscriber_id: row.id, email: row.email, plan_id: row.plan_id ?? null });
+  void runAutomations('subscriber.created', { subscriber_id: row.id, email: row.email, plan_id: row.plan_id ?? null });
 
   const response: ApiResponse<Subscriber> = {
     data: mapSubscriberRow(row),

@@ -718,3 +718,61 @@ export type ArticlePerformanceRecommendations = {
   performanceSummaryAr: string;
   recommendations: PerformanceRecommendation[];
 };
+
+// =============================================================================
+// PHASE 8 — WEBHOOKS & AUTOMATION RULES
+// =============================================================================
+
+export type WebhookEventType =
+  | 'article.published'
+  | 'article.updated'
+  | 'article.review'
+  | 'article.high_views'
+  | 'subscriber.created'
+  | 'subscriber.churned'
+  | 'payment.received'
+  | 'payment.failed'
+  | 'comment.flagged';
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  secret: string;
+  events: WebhookEventType[];
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  webhookId: string;
+  event: string;
+  payload: Record<string, unknown>;
+  responseStatus: number | null;
+  responseBody: string | null;
+  attempt: number;
+  success: boolean;
+  deliveredAt: string;
+}
+
+export type AutomationActionType =
+  | 'post_telegram'
+  | 'send_welcome_email'
+  | 'notify_admin'
+  | 'add_to_featured'
+  | 'notify_editor';
+
+export interface AutomationRule {
+  id: string;
+  ruleKey: string;
+  name: string;
+  description: string | null;
+  triggerEvent: string;
+  actionType: AutomationActionType;
+  config: Record<string, unknown>;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -43,6 +43,8 @@ import {
   Share2,
   Mail,
   BrainCircuit,
+  Webhook,
+  Zap,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -110,6 +112,11 @@ const analyticsNavConfig: SubNavItem[] = [
 const adsNavConfig: SubNavItem[] = [
   { key: 'advertisers', href: '/admin/advertisers', icon: Building2 },
   { key: 'ads',         href: '/admin/ads',         icon: Megaphone },
+];
+
+const settingsNavConfig: SubNavItem[] = [
+  { key: 'webhooks',    href: '/admin/settings/webhooks',    icon: Webhook },
+  { key: 'automations', href: '/admin/settings/automations', icon: Zap },
 ];
 
 const quickActionsConfig: QuickAction[] = [
@@ -182,6 +189,8 @@ export default function AdminLayoutClient({
       notifications:    t('admin.common.notifications'),
       advertisers:      t('admin.common.advertisers'),
       ads:              t('admin.common.ads'),
+      webhooks:         'Webhooks الصادرة',
+      automations:      'قواعد الأتمتة',
     };
     return subNavKeys[key] || key;
   };
@@ -458,6 +467,60 @@ export default function AdminLayoutClient({
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicatorAds"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gold rounded-l"
+                    />
+                  )}
+                  <item.icon size={iconSizes.lg} className={isActive ? 'text-gold' : ''} />
+                  <AnimatePresence>
+                    {sidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className="font-[family-name:var(--font-display)] font-semibold text-sm whitespace-nowrap overflow-hidden"
+                      >
+                        {getSubNavName(item.key)}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Integrations & Automation Group */}
+          <div className="pt-4 mt-4 border-t border-gold/10">
+            <AnimatePresence>
+              {sidebarOpen && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`text-xs font-[family-name:var(--font-display)] font-semibold px-4 block mb-2 ${darkMode ? 'text-white/40' : 'text-graphite'}`}
+                >
+                  التكاملات والأتمتة
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {settingsNavConfig.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 relative ${
+                    isActive
+                      ? darkMode
+                        ? 'bg-gold/10 text-gold'
+                        : 'bg-gold/10 text-gold-muted'
+                      : darkMode
+                        ? 'text-white/60 hover:text-white hover:bg-white/5'
+                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicatorIntegrations"
                       className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gold rounded-l"
                     />
                   )}

@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyIndexNow } from "@/lib/indexnow";
+import { dispatchWebhook } from "@/lib/webhooks/dispatcher";
+import { runAutomations } from "@/lib/automations/engine";
 import type { ApiResponse } from "@/types";
 
 const VALID_STATUSES = [
@@ -93,9 +95,8 @@ export async function PUT(
     note: data.note ?? null,
   });
 
-  // Notify search engines when article transitions to published
+  // Notify search engines + fire webhooks/automations when article transitions to published
   if (data.status === 'published' && oldStatus !== 'published') {
-    // Fetch the slug for IndexNow (updated row only has id/status/updated_at)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: slugRow } = await (admin as any)
       .from('articles')
@@ -105,6 +106,14 @@ export async function PUT(
     if (slugRow?.slug) {
       void notifyIndexNow([slugRow.slug]);
     }
+    void dispatchWebhook('article.published', { article_id: id, slug: slugRow?.slug ?? null });
+    void runAutomations('article.published', { article_id: id, slug: slugRow?.slug ?? null });
+  }
+
+  // Fire webhooks/automations when article enters review
+  if (data.status === 'review' && oldStatus !== 'review') {
+    void dispatchWebhook('article.review', { article_id: id });
+    void runAutomations('article.review', { article_id: id });
   }
 
   // If assignee provided, upsert assignment

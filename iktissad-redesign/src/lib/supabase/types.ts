@@ -1443,6 +1443,121 @@ export type Database = {
           },
         ];
       };
+      webhooks: {
+        Row: {
+          id: string;
+          name: string;
+          url: string;
+          secret: string;
+          events: string[];
+          enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          url: string;
+          secret: string;
+          events?: string[];
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          url?: string;
+          secret?: string;
+          events?: string[];
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      webhook_deliveries: {
+        Row: {
+          id: string;
+          webhook_id: string;
+          event: string;
+          payload: Record<string, unknown>;
+          response_status: number | null;
+          response_body: string | null;
+          attempt: number;
+          success: boolean;
+          delivered_at: string;
+        };
+        Insert: {
+          id?: string;
+          webhook_id: string;
+          event: string;
+          payload: Record<string, unknown>;
+          response_status?: number | null;
+          response_body?: string | null;
+          attempt?: number;
+          success?: boolean;
+          delivered_at?: string;
+        };
+        Update: {
+          id?: string;
+          webhook_id?: string;
+          event?: string;
+          payload?: Record<string, unknown>;
+          response_status?: number | null;
+          response_body?: string | null;
+          attempt?: number;
+          success?: boolean;
+          delivered_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey";
+            columns: ["webhook_id"];
+            referencedRelation: "webhooks";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      automation_rules: {
+        Row: {
+          id: string;
+          rule_key: string;
+          name: string;
+          description: string | null;
+          trigger_event: string;
+          action_type: string;
+          config: Record<string, unknown>;
+          enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          rule_key: string;
+          name: string;
+          description?: string | null;
+          trigger_event: string;
+          action_type: string;
+          config?: Record<string, unknown>;
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          rule_key?: string;
+          name?: string;
+          description?: string | null;
+          trigger_event?: string;
+          action_type?: string;
+          config?: Record<string, unknown>;
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
