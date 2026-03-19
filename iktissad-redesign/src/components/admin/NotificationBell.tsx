@@ -21,6 +21,8 @@ import {
   FileText,
   Settings,
   X,
+  AtSign,
+  Eye,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -34,7 +36,9 @@ type NotificationType =
   | 'subscription_canceled'
   | 'comment_flagged'
   | 'article_published'
-  | 'manual_change';
+  | 'manual_change'
+  | 'editorial_mention'
+  | 'review_request';
 
 interface AdminNotification {
   id: string;
@@ -62,6 +66,10 @@ function getNotificationIcon(type: NotificationType) {
       return <FileText size={14} className="text-blue-400" />;
     case 'manual_change':
       return <Settings size={14} className="text-white/50" />;
+    case 'editorial_mention':
+      return <AtSign size={14} className="text-gold" />;
+    case 'review_request':
+      return <Eye size={14} className="text-blue-400" />;
     default:
       return <Bell size={14} className="text-white/50" />;
   }
@@ -81,6 +89,8 @@ function notificationRoute(type: NotificationType, resourceId: string | null): s
     case 'comment_flagged': return `/admin/comments`;
     case 'article_published': return `/admin/articles/${resourceId}`;
     case 'new_subscriber': return `/admin/subscribers/${resourceId}`;
+    case 'editorial_mention': return `/admin/articles/${resourceId}`;
+    case 'review_request': return `/admin/articles/${resourceId}`;
     default: return null;
   }
 }

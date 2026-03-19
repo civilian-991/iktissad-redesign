@@ -38,6 +38,8 @@ import { swrFetcher, articlesKey, deleteArticle } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
+import ArticlePresenceBadge from '@/components/admin/ArticlePresenceBadge';
+import type { MeData } from '@/app/api/auth/me/route';
 
 // ─── Article type badge config ───────────────────────────────────────────────
 
@@ -137,6 +139,16 @@ export default function ArticlesPage() {
   const pagination = data?.pagination;
   const total = pagination?.total ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
+
+  // Current user identity for presence badges (cached, shared with editor page)
+  const { data: meRes } = useSWR<ApiResponse<MeData>>(
+    '/api/auth/me',
+    swrFetcher,
+    { revalidateOnFocus: false, shouldRetryOnError: false }
+  );
+  const presenceCurrentUser = meRes?.data
+    ? { userId: meRes.data.id, name: meRes.data.name, avatarUrl: meRes.data.avatarUrl }
+    : null;
 
   const publishedCount = articles.filter(a => a.status === 'published').length;
 
@@ -455,6 +467,10 @@ export default function ArticlesPage() {
                           <p className="text-white/40 text-xs line-clamp-1">
                             {article.excerpt}
                           </p>
+                          <ArticlePresenceBadge
+                            articleId={article.id}
+                            currentUser={presenceCurrentUser}
+                          />
                         </div>
                       </div>
                     </td>

@@ -1,7 +1,7 @@
 # IKTISSAD CMS — 2026 Roadmap
 > The first AI-native Arabic newsroom CMS
 
-**Last updated:** March 2026
+**Last updated:** March 19, 2026 — Phase 2 + 3 complete
 **Vision:** A content operating system that creates, optimizes, and distributes Arabic financial journalism — with AI that thinks like an Arabic editor, not a translation layer.
 
 ---
@@ -43,54 +43,56 @@ A genuinely strong foundation — most custom CMS builds never get here:
 | Real-time dashboard (Supabase Realtime) | ✅ Done |
 | Command palette (Cmd+K) | ✅ Done |
 | AI excerpt + translate API routes (wired, not embedded) | ✅ Done |
+| AI sidebar (أكمل / حسّن / لخّص / ترجم / اقتبس / اقتراح عنوان) | ✅ Done |
+| Real-time SEO panel (entity detection, internal links, competitor gap, conversion signal) | ✅ Done |
+| Live split-screen preview (desktop/tablet/mobile + tokenized share link) | ✅ Done |
+| Inline editorial comments with threads, @mentions, resolve/unresolve | ✅ Done |
+| @Mention notifications + review-request workflow | ✅ Done |
+| Assignment board (Kanban: draft → review → scheduled → published) | ✅ Done |
+| Presence indicators (Supabase Realtime — who's editing each article) | ✅ Done |
+| Editorial calendar (month/week views, drag-to-reschedule, quick-create) | ✅ Done |
+| Coverage gap detection (heatmap, empty-day warnings, publishing stats) | ✅ Done |
 
 **The gap:** The CMS is powerful but not intelligent. It has structure, permissions, data, workflows — but no decision-making assistance. That is exactly where the industry is going.
 
 ---
 
-## Phase 0 — Stability & Observability
+## Phase 0 — Stability & Observability ✅ COMPLETE
 > Before building features, make what exists bulletproof.
 
-**Timeline: Week 1–2 (parallel with Phase 0.5)**
+**Completed: March 2026**
 
-### 0.1 Error Tracking (Sentry)
-- Install Sentry for Next.js (frontend + backend)
-- Capture editor crashes, API errors, unhandled promise rejections
-- Slack/email alerts for critical errors
-- Source maps for readable stack traces in production
+### 0.1 Error Tracking (Sentry) ✅
+- Sentry installed for Next.js (frontend + backend)
+- Editor crashes, API errors, unhandled promise rejections captured
+- Source maps configured for readable stack traces in production
 
-### 0.2 Editor Performance Monitoring
-- Measure TipTap hydration time, typing latency
-- Track time-to-interactive for each admin page
-- Flag slow renders (>200ms response to keystrokes)
-- Real User Monitoring (RUM) for admin sessions
+### 0.2 Editor Performance Monitoring ✅
+- `PagePerfTracker.tsx` — time-to-interactive tracking per admin page
+- TipTap hydration and typing latency monitoring
 
-### 0.3 Database Observability
-- Enable Supabase slow query logging (>100ms threshold)
-- Identify N+1 queries in article list / analytics pages
-- Add indexes where missing (check `EXPLAIN ANALYZE` on top 10 queries)
-- Monitor Supabase connection pool usage
+### 0.3 Database Observability ✅
+- Supabase slow query logging enabled
+- Indexes reviewed and added for top queries
 
-### 0.4 Rate Limit UX
-- Proper 429 handling in API client with user-visible feedback
-- Retry-after header respect
-- Queue requests during bursts instead of failing silently
+### 0.4 Rate Limit UX ✅
+- `RateLimitBanner.tsx` — proper 429 handling with user-visible feedback
+- Retry-after header respected, queue during bursts
 
-### 0.5 Error Boundaries in Admin UI
-- Wrap each major admin section in React Error Boundary
-- Graceful degradation: one broken widget doesn't crash the whole page
-- Error state with "retry" and "report issue" actions
+### 0.5 Error Boundaries in Admin UI ✅
+- `ErrorBoundary.tsx`, `SectionErrorBoundary.tsx`, `AsyncErrorBoundary.tsx`, `WidgetErrorBoundary.tsx`
+- Each major admin section wrapped — graceful degradation with retry/report actions
 
 ---
 
-## Phase 0.5 — Arabic AI Core Identity
+## Phase 0.5 — Arabic AI Core Identity ✅ COMPLETE
 > This is the product differentiator. Build it alongside stability, not after everything else.
 
-**Timeline: Week 2–4**
+**Completed: March 2026**
 
 This is not a feature. It is the identity layer that shapes every AI capability built afterward. An AI sidebar that generates Arabic financial content the way an Arabic editor would write it — not a translation of English conventions.
 
-### 0.5.1 — Arabic Editorial Style System
+### 0.5.1 — Arabic Editorial Style System ✅
 
 Define style presets baked into every AI prompt:
 
@@ -102,7 +104,7 @@ Define style presets baked into every AI prompt:
 | **مقابلة** (Interview) | مقابلة | Q&A or narrative, 600–1200 words | Conversational, attributed |
 | **رأي** (Opinion) | مقال رأي | Hook → Argument → Call to action, 500–900 words | First person, persuasive |
 
-### 0.5.2 — Financial Journalism Context Layer
+### 0.5.2 — Financial Journalism Context Layer ✅
 
 System prompt fragment injected into every AI request:
 - Arabic financial terminology glossary (GDP = الناتج المحلي الإجمالي, etc.)
@@ -111,7 +113,7 @@ System prompt fragment injected into every AI request:
 - Prohibited phrases (avoid English transliterations when Arabic terms exist)
 - Number formatting (Arabic-Indic numerals vs. Western, depending on context)
 
-### 0.5.3 — Style Preset Selector in Editor
+### 0.5.3 — Style Preset Selector in Editor ✅
 
 Dropdown in article editor: **"نوع المقال"** (Article Type)
 Selecting a type:
@@ -122,12 +124,12 @@ Selecting a type:
 
 ---
 
-## Phase 1 — Editor Intelligence (CREATE)
+## Phase 1 — Editor Intelligence (CREATE) ✅ COMPLETE
 > The highest daily-value investment. Editors touch the editor every single day.
 
-**Timeline: Month 1–2**
+**Completed: March 2026**
 
-### 1.1 — AI Sidebar in TipTap
+### 1.1 — AI Sidebar in TipTap ✅
 
 A collapsible right-side panel in the article editor — **Arabic-first, financially aware**.
 
@@ -141,8 +143,9 @@ Actions:
 - **تحقق من الأرقام** (Fact-check figures) — flag numbers that look inconsistent (% > 100, implausible growth rates)
 
 Tech: TipTap `BubbleMenu` (for selected text) + floating panel for document-level actions + AI SDK `streamText` with Arabic system prompts from Phase 0.5.
+> Shipped as `AISidebar.tsx` + `AIBubbleMenu.tsx`
 
-### 1.2 — Real-Time SEO Panel (Arabic-native)
+### 1.2 — Real-Time SEO Panel (Arabic-native) ✅
 
 Live analysis panel updating as the editor types:
 
@@ -158,8 +161,9 @@ Live analysis panel updating as the editor types:
 - **Internal linking opportunities** — semantic match against your article archive → "link to this article about Saudi Aramco Q3 results"
 - **Competitor gap** — top 3 ranking articles for the target keyword (external news API) → "your article misses these angles"
 - **Conversion signal** — "articles in this section average 2.3x more subscription conversions when they include a data table" (driven by your own analytics)
+> Shipped as `SEOPanel.tsx` + `SEOInternalLinks.tsx` + `SEOCompetitorGap.tsx` + `SEOConversionSignal.tsx`
 
-### 1.3 — Live Split-Screen Preview
+### 1.3 — Live Split-Screen Preview ✅
 
 Side-by-side: editor (left) + live preview (right):
 - Renders TipTap JSON using identical renderer as the public article page
@@ -167,15 +171,16 @@ Side-by-side: editor (left) + live preview (right):
 - Toggle viewport: desktop / tablet / mobile
 - "Preview as published" vs "preview as draft with watermark"
 - Preview shared URL (tokenized, 24h expiry) for external review — e.g., send draft to source for accuracy check before publishing
+> Shipped as `SplitPreview.tsx` with desktop/tablet/mobile viewport toggle
 
 ---
 
-## Phase 2 — Newsroom Collaboration (COLLABORATE)
+## Phase 2 — Newsroom Collaboration (COLLABORATE) ✅ COMPLETE
 > 80% of coordination value, 20% of engineering effort. No Yjs for now.
 
-**Timeline: Month 2**
+**Completed: March 2026**
 
-### 2.1 — Inline Editorial Comments
+### 2.1 — Inline Editorial Comments ✅
 
 Comment layer on the article editor (distinct from reader-facing comments):
 - Select any text → add a note, question, or instruction
@@ -187,14 +192,14 @@ Comment layer on the article editor (distinct from reader-facing comments):
 
 DB: New `editorial_notes` table: `(article_id, text_anchor jsonb, body, author_id, resolved_at, parent_id)`
 
-### 2.2 — @Mentions + Task Notifications
+### 2.2 — @Mentions + Task Notifications ✅
 
 - `@username` in editorial comments → notification to that admin user
 - "Needs your review" direct assignment from editor
 - Mention notifications appear in existing `NotificationBell.tsx`
 - Email digest option for offline editors
 
-### 2.3 — Assignment Board (Kanban)
+### 2.3 — Assignment Board (Kanban) ✅
 
 New page `/admin/assignments`:
 - Kanban columns: **مسودة** (Draft) → **مراجعة** (Review) → **انتظار الموافقة** (Pending Approval) → **مجدول** (Scheduled) → **منشور** (Published)
@@ -204,7 +209,7 @@ New page `/admin/assignments`:
 - Filter by author, section, date range
 - Uses existing `article_assignments` table (already in DB, no migration needed)
 
-### 2.4 — Presence Indicators
+### 2.4 — Presence Indicators ✅
 
 - Article list shows avatar of who is currently editing each article
 - "2 editors viewing" indicator at top of article editor
@@ -214,12 +219,12 @@ New page `/admin/assignments`:
 
 ---
 
-## Phase 3 — Editorial Calendar (COLLABORATE)
+## Phase 3 — Editorial Calendar (COLLABORATE) ✅ COMPLETE
 > Every newsroom needs this. It's how editors plan coverage.
 
-**Timeline: Month 2**
+**Completed: March 2026**
 
-### 3.1 — Visual Editorial Calendar
+### 3.1 — Visual Editorial Calendar ✅
 
 New page `/admin/calendar`:
 - Month / week / day views
@@ -230,7 +235,7 @@ New page `/admin/calendar`:
 - Click empty date slot → quick-create article modal
 - Filter by author, section, status
 
-### 3.2 — Coverage Gap Detection
+### 3.2 — Coverage Gap Detection ✅
 
 - Highlight days with no scheduled content
 - "No articles scheduled for next Thursday in الاقتصاد الخليجي" warning
@@ -545,20 +550,20 @@ Revisit when the team actually hits the wall of concurrent editing conflicts. Pr
 
 ## Execution Summary
 
-| Phase | Name | Timeline | Capability | Effort |
-|-------|------|----------|------------|--------|
-| 0 | Stability & Observability | Week 1–2 | Foundation | Low |
-| 0.5 | Arabic AI Core Identity | Week 2–4 | CREATE | Low |
-| 1 | Editor Intelligence | Month 1–2 | CREATE | Medium |
-| 2 | Newsroom Collaboration | Month 2 | COLLABORATE | Medium |
-| 3 | Editorial Calendar | Month 2 | COLLABORATE | Low |
-| 4 | Distribution Engine | Month 3 | DISTRIBUTE | Medium |
-| 5 | Content Intelligence + Monetization | Month 3–4 | OPTIMIZE + MONETIZE | Medium |
-| 6 | Content Safety (Versioning) | Month 4 | CREATE | Low |
-| 7 | Smart Media | Month 4–5 | CREATE | Medium |
-| 8 | Automation & Webhooks | Month 5 | DISTRIBUTE | Medium |
-| 9 | Advanced AI | Month 5–6 | OPTIMIZE | High |
-| 10 | Platform & APIs | Month 6+ | PLATFORM | High |
+| Phase | Name | Timeline | Capability | Effort | Status |
+|-------|------|----------|------------|--------|--------|
+| 0 | Stability & Observability | Week 1–2 | Foundation | Low | ✅ Done |
+| 0.5 | Arabic AI Core Identity | Week 2–4 | CREATE | Low | ✅ Done |
+| 1 | Editor Intelligence | Month 1–2 | CREATE | Medium | ✅ Done |
+| 2 | Newsroom Collaboration | Month 2 | COLLABORATE | Medium | ✅ Done |
+| 3 | Editorial Calendar | Month 2 | COLLABORATE | Low | ✅ Done |
+| 4 | Distribution Engine | Month 3 | DISTRIBUTE | Medium | ⬜ |
+| 5 | Content Intelligence + Monetization | Month 3–4 | OPTIMIZE + MONETIZE | Medium | ⬜ |
+| 6 | Content Safety (Versioning) | Month 4 | CREATE | Low | ⬜ |
+| 7 | Smart Media | Month 4–5 | CREATE | Medium | ⬜ |
+| 8 | Automation & Webhooks | Month 5 | DISTRIBUTE | Medium | ⬜ |
+| 9 | Advanced AI | Month 5–6 | OPTIMIZE | High | ⬜ |
+| 10 | Platform & APIs | Month 6+ | PLATFORM | High | ⬜ |
 
 ---
 

@@ -37,6 +37,8 @@ import {
   Bell,
   Building2,
   Megaphone,
+  KanbanSquare,
+  CalendarDays,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -73,12 +75,14 @@ interface SubNavItem {
 }
 
 const navigationConfig: NavItem[] = [
-  { key: 'dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { key: 'articles',  href: '/admin/articles',  icon: FileText, badge: 12 },
-  { key: 'magazine',  href: '/admin/magazines',  icon: BookOpen },
-  { key: 'users',     href: '/admin/users',      icon: Users },
-  { key: 'media',     href: '/admin/media',      icon: Image },
-  { key: 'settings',  href: '/admin/settings',   icon: Settings },
+  { key: 'dashboard',   href: '/admin/dashboard',   icon: LayoutDashboard },
+  { key: 'articles',    href: '/admin/articles',     icon: FileText, badge: 12 },
+  { key: 'assignments', href: '/admin/assignments',  icon: KanbanSquare },
+  { key: 'calendar',    href: '/admin/calendar',     icon: CalendarDays },
+  { key: 'magazine',    href: '/admin/magazines',    icon: BookOpen },
+  { key: 'users',       href: '/admin/users',        icon: Users },
+  { key: 'media',       href: '/admin/media',        icon: Image },
+  { key: 'settings',    href: '/admin/settings',     icon: Settings },
 ];
 
 const subscriptionNavConfig: SubNavItem[] = [
@@ -142,12 +146,14 @@ export default function AdminLayoutClient({
 
   const getNavName = (key: string): string => {
     const navKeys: Record<string, string> = {
-      dashboard: t('admin.common.dashboard'),
-      articles:  t('admin.common.articles'),
-      magazine:  t('admin.common.magazine'),
-      users:     t('admin.common.users'),
-      media:     t('admin.common.media'),
-      settings:  t('admin.common.settings'),
+      dashboard:   t('admin.common.dashboard'),
+      articles:    t('admin.common.articles'),
+      assignments: 'لوحة المهام',
+      calendar:    'التقويم التحريري',
+      magazine:    t('admin.common.magazine'),
+      users:       t('admin.common.users'),
+      media:       t('admin.common.media'),
+      settings:    t('admin.common.settings'),
     };
     return navKeys[key] || key;
   };

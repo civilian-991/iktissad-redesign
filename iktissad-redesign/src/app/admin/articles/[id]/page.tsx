@@ -32,6 +32,7 @@ import {
   Check,
   AlertCircle,
   RefreshCcw,
+  MessageSquare,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -43,6 +44,7 @@ import ArticleTypeSelector from '@/components/admin/ArticleTypeSelector';
 import ArticleOutlineModal from '@/components/admin/ArticleOutlineModal';
 import AISidebar from '@/components/admin/AISidebar';
 import AIBubbleMenu from '@/components/admin/AIBubbleMenu';
+import EditorialComments from '@/components/admin/EditorialComments';
 import SEOPanel from '@/components/admin/SEOPanel';
 import SplitPreview from '@/components/admin/SplitPreview';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
@@ -50,6 +52,9 @@ import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
 import type { ArticleTypeConfig } from '@/lib/ai/arabic-editorial';
+import { useArticlePresence } from '@/hooks/useArticlePresence';
+import PresenceAvatars from '@/components/admin/PresenceAvatars';
+import type { MeData } from '@/app/api/auth/me/route';
 
 /** Recursively extract plain text from TipTap JSONContent for SEO analysis */
 function extractText(node: JSONContent | null | undefined): string {
@@ -149,9 +154,25 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   // State mirror of editorRef for reactive rendering of AI components
   const [editorInstance, setEditorInstance] = useState<import('@tiptap/core').Editor | null>(null);
 
+  // ── Presence ──────────────────────────────────────────────────────────────
+  // Fetch current user identity via SWR (cached, deduplicated across the page).
+  const { data: meRes } = useSWR<ApiResponse<MeData>>(
+    '/api/auth/me',
+    swrFetcher,
+    { revalidateOnFocus: false, shouldRetryOnError: false }
+  );
+
+  const currentUser = meRes?.data
+    ? { userId: meRes.data.id, name: meRes.data.name, avatarUrl: meRes.data.avatarUrl }
+    : null;
+
+  const { presentUsers } = useArticlePresence({ articleId: id, currentUser });
+
   // Phase 1 — AI Sidebar, SEO Panel, Split Preview
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [showSplitPreview, setShowSplitPreview] = useState(false);
+  // Phase 2 — Editorial Comments panel
+  const [editorialCommentsOpen, setEditorialCommentsOpen] = useState(false);
   const [contentText, setContentText] = useState('');
   const [seoKeyword, setSeoKeyword] = useState('');
 
@@ -376,6 +397,20 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Presence indicator — other editors viewing this article */}
+          {presentUsers.length > 0 && (
+            <span className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-profit/10 border border-profit/20 rounded-xl">
+              <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-profit opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-profit" />
+              </span>
+              <span className="text-profit text-xs font-[family-name:var(--font-display)] whitespace-nowrap">
+                يشاهد هذا المقال:
+              </span>
+              <PresenceAvatars users={presentUsers} maxVisible={4} size={24} />
+            </span>
+          )}
+
           {/* Auto-save indicator */}
           {autoSaveStatus === 'saving' && (
             <span className="hidden sm:flex items-center gap-1.5 text-xs text-white/50 font-[family-name:var(--font-display)]">
@@ -413,6 +448,18 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           >
             <Eye size={16} />
             معاينة مباشرة
+          </button>
+          <button
+            onClick={() => setEditorialCommentsOpen((v) => !v)}
+            className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl transition-all font-[family-name:var(--font-display)] text-sm ${
+              editorialCommentsOpen
+                ? 'bg-gold/10 border-gold/30 text-gold'
+                : 'bg-white/5 border-gold/10 text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+            title="التعليقات التحريرية"
+          >
+            <MessageSquare size={16} />
+            تعليقات
           </button>
           <a
             href={`/news/${article.slug}`}
@@ -589,6 +636,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               articleType={articleType ?? undefined}
               isOpen={aiSidebarOpen}
               onToggle={() => setAiSidebarOpen((v) => !v)}
+            />
+            {/* Editorial Comments — collapsible right panel */}
+            <EditorialComments
+              articleId={id}
+              currentUserId={currentUser?.userId}
+              isOpen={editorialCommentsOpen}
+              onToggle={() => setEditorialCommentsOpen((v) => !v)}
             />
           </motion.div>
 
