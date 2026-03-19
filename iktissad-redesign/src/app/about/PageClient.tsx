@@ -6,12 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 
-const stats = [
-  { icon: Calendar, value: '1956', label: 'سنة التأسيس' },
-  { icon: Newspaper, value: '+50,000', label: 'مقال منشور' },
-  { icon: Users, value: '+2M', label: 'قارئ شهرياً' },
-  { icon: Globe, value: '22', label: 'دولة نغطيها' },
-];
+const statsIcons = [Calendar, Newspaper, Users, Globe];
+const statsValues = ['1956', '+50,000', '+2M', '22'];
 
 const team = [
   { name: 'رؤوف أبو زكي', role: 'رئيس التحرير', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop' },
@@ -20,16 +16,29 @@ const team = [
   { name: 'سارة العلي', role: 'رئيسة قسم التكنولوجيا', image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop' },
 ];
 
-const timeline = [
-  { year: '1956', title: 'تأسيس المجلة', description: 'إطلاق أول عدد من مجلة الإقتصاد والأعمال في بيروت' },
-  { year: '1975', title: 'التوسع الإقليمي', description: 'افتتاح مكاتب في دبي والرياض والقاهرة' },
-  { year: '2000', title: 'الانطلاقة الرقمية', description: 'إطلاق الموقع الإلكتروني iktissadonline.com' },
-  { year: '2015', title: 'التحول الرقمي', description: 'إعادة هيكلة شاملة والتركيز على المحتوى الرقمي' },
-  { year: '2024', title: 'الريادة المستمرة', description: 'تجاوز 2 مليون قارئ شهرياً' },
-];
+const timelineYears = ['1956', '1975', '2000', '2015', '2024'];
+const valuesIcons = [Award, Users, Globe];
 
 export default function AboutPageClient() {
   const { t } = useTranslation();
+
+  const stats = statsValues.map((value, i) => ({
+    icon: statsIcons[i],
+    value,
+    label: t(`pages.about.stats.${i}.label`),
+  }));
+
+  const timeline = timelineYears.map((year, i) => ({
+    year,
+    title: t(`pages.about.timeline.${i}.title`),
+    description: t(`pages.about.timeline.${i}.description`),
+  }));
+
+  const values = valuesIcons.map((icon, i) => ({
+    icon,
+    title: t(`pages.about.valuesList.${i}.title`),
+    desc: t(`pages.about.valuesList.${i}.desc`),
+  }));
 
   return (
     <>
@@ -50,7 +59,7 @@ export default function AboutPageClient() {
                 {t('pages.about.title')}
               </h1>
               <p className="text-xl text-white/80 leading-relaxed">
-                منذ عام 1956، نقدم للقارئ العربي أفضل التحليلات الاقتصادية والمالية، لنكون المصدر الأول والأكثر موثوقية للأخبار الاقتصادية في العالم العربي
+                {t('pages.about.heroSubtitle')}
               </p>
             </motion.div>
           </div>
@@ -62,7 +71,7 @@ export default function AboutPageClient() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => (
                 <motion.div
-                  key={stat.label}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -96,7 +105,7 @@ export default function AboutPageClient() {
                   {t('pages.about.mission')}
                 </h2>
                 <p className="text-charcoal leading-relaxed">
-                  نسعى لتقديم محتوى اقتصادي ومالي عالي الجودة يساعد القراء والمستثمرين وصناع القرار في فهم الأسواق واتخاذ قرارات مدروسة. نلتزم بأعلى معايير المهنية والدقة والموضوعية في كل ما ننشره.
+                  {t('pages.about.missionBody')}
                 </p>
               </motion.div>
 
@@ -113,7 +122,7 @@ export default function AboutPageClient() {
                   {t('pages.about.vision')}
                 </h2>
                 <p className="text-charcoal leading-relaxed">
-                  أن نكون المنصة الرائدة والأكثر تأثيراً في الإعلام الاقتصادي العربي، ومصدراً موثوقاً للمعلومات والتحليلات التي تشكل فهم العالم العربي للاقتصاد والأعمال.
+                  {t('pages.about.visionBody')}
                 </p>
               </motion.div>
             </div>
@@ -133,7 +142,7 @@ export default function AboutPageClient() {
                 {t('pages.about.history')}
               </h2>
               <p className="text-white/70">
-                أكثر من 65 عاماً من التميز في الإعلام الاقتصادي
+                {t('pages.about.historySubtitle')}
               </p>
             </motion.div>
 
@@ -184,7 +193,7 @@ export default function AboutPageClient() {
                 {t('pages.team.title')}
               </h2>
               <p className="text-slate">
-                نخبة من الصحفيين والمحللين الاقتصاديين
+                {t('pages.about.teamSubtitle')}
               </p>
             </motion.div>
 
@@ -230,13 +239,9 @@ export default function AboutPageClient() {
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { icon: Award, title: 'المصداقية', desc: 'نلتزم بأعلى معايير الدقة والموضوعية' },
-                { icon: Users, title: 'القارئ أولاً', desc: 'نضع احتياجات قرائنا في صميم كل ما نقدمه' },
-                { icon: Globe, title: 'الشمولية', desc: 'نغطي الأخبار من جميع أنحاء العالم العربي' },
-              ].map((value, index) => (
+              {values.map((value, index) => (
                 <motion.div
-                  key={value.title}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

@@ -3,64 +3,21 @@
 import { motion } from 'motion/react';
 import { Play, Eye, ArrowUpLeft } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-
-const videos = [
-  {
-    id: 1,
-    title: 'تحليل: تأثير فتح السوق السعودي على الاستثمارات الأجنبية',
-    thumbnail: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&h=450&fit=crop',
-    duration: '12:45',
-    views: '45K',
-    category: 'تحليلات',
-    featured: true
-  },
-  {
-    id: 2,
-    title: 'مقابلة حصرية مع وزير الاقتصاد الإماراتي',
-    thumbnail: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=450&fit=crop',
-    duration: '18:30',
-    views: '32K',
-    category: 'مقابلات',
-    featured: true
-  },
-  {
-    id: 3,
-    title: 'جولة داخل مصنع السيارات الكهربائية في السعودية',
-    thumbnail: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&h=450&fit=crop',
-    duration: '8:20',
-    views: '28K',
-    category: 'تقارير'
-  },
-  {
-    id: 4,
-    title: 'ملخص أسواق الأسبوع: ارتفاعات قياسية في البورصات الخليجية',
-    thumbnail: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop',
-    duration: '6:15',
-    views: '52K',
-    category: 'أسواق'
-  },
-  {
-    id: 5,
-    title: 'كيف تستثمر في العقارات خلال 2026؟',
-    thumbnail: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=450&fit=crop',
-    duration: '15:00',
-    views: '38K',
-    category: 'نصائح'
-  },
-  {
-    id: 6,
-    title: 'مستقبل الطاقة المتجددة في الشرق الأوسط',
-    thumbnail: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=450&fit=crop',
-    duration: '10:45',
-    views: '22K',
-    category: 'تقارير'
-  },
-];
+import useSWR from 'swr';
+import { swrFetcher, articlesKey } from '@/lib/api-client';
+import type { ApiResponse, Article } from '@/types';
 
 export default function VideoSection() {
   const { t } = useTranslation();
-  const featuredVideos = videos.filter(v => v.featured);
-  const regularVideos = videos.filter(v => !v.featured);
+
+  const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
+    articlesKey({ section: 'videos', status: 'published', pageSize: 6 }),
+    swrFetcher
+  );
+
+  const articles = data?.data ?? [];
+  const featuredVideos = articles.slice(0, 2);
+  const regularVideos = articles.slice(2);
 
   return (
     <section className="py-24 bg-gradient-to-br from-brand-darker via-brand-dark to-brand-darker relative overflow-hidden">
@@ -98,117 +55,159 @@ export default function VideoSection() {
           </a>
         </motion.div>
 
-        {/* Videos Grid */}
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Featured Videos - Large */}
-          <div className="lg:col-span-8 grid md:grid-cols-2 gap-6">
-            {featuredVideos.map((video, index) => (
-              <motion.a
-                key={video.id}
-                href={`/videos/${video.id}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group block"
-              >
-                <div className="relative aspect-video overflow-hidden bg-brand">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-sm group-hover:bg-white/10 transition-colors flex items-center justify-center">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className="w-16 h-16 bg-gold flex items-center justify-center"
-                    >
-                      <Play className="text-brand-darker fill-brand-darker" size={28} />
-                    </motion.div>
-                  </div>
-
-                  {/* Duration Badge */}
-                  <div className="absolute bottom-3 left-3 bg-white/10 backdrop-blur-sm border border-white/10 text-white text-xs px-2 py-1 font-[family-name:var(--font-display)]">
-                    {video.duration}
-                  </div>
-
-                  {/* Category Badge */}
-                  <div className="absolute top-3 right-3 bg-gold text-brand-darker text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
-                    {video.category}
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 grid md:grid-cols-2 gap-6">
+              {[0, 1].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-video bg-white/10" />
+                  <div className="mt-4 space-y-2">
+                    <div className="h-5 bg-white/10 rounded w-3/4" />
+                    <div className="h-4 bg-white/10 rounded w-1/3" />
                   </div>
                 </div>
-
-                <div className="mt-4">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
-                    {video.title}
-                  </h3>
-                  <div className="flex items-center gap-4 mt-2 text-white/70 text-sm">
-                    <span className="flex items-center gap-1">
-                      <Eye size={14} />
-                      {video.views} {t('components.videoSection.viewsLabel')}
-                    </span>
-                  </div>
-                </div>
-              </motion.a>
-            ))}
-          </div>
-
-          {/* Regular Videos - Sidebar List */}
-          <div className="lg:col-span-4 bg-white/5 backdrop-blur-sm border border-white/10">
-            <div className="p-4 border-b border-white/10">
-              <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
-                {t('components.videoSection.moreVideos')}
-              </h3>
+              ))}
             </div>
+            <div className="lg:col-span-4 bg-white/5 backdrop-blur-sm border border-white/10">
+              <div className="p-4 border-b border-white/10">
+                <div className="h-5 bg-white/10 rounded w-1/2 animate-pulse" />
+              </div>
+              <div className="divide-y divide-white/10">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-4 p-4 animate-pulse">
+                    <div className="w-32 flex-shrink-0 aspect-video bg-white/10" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-white/10 rounded w-1/3" />
+                      <div className="h-4 bg-white/10 rounded w-full" />
+                      <div className="h-3 bg-white/10 rounded w-1/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
-            <div className="divide-y divide-white/10">
-              {regularVideos.map((video, index) => (
+        {/* Empty State */}
+        {!isLoading && articles.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-white/50 gap-4">
+            <Play size={48} className="opacity-30" />
+            <p className="font-[family-name:var(--font-display)] text-lg">
+              {t('components.videoSection.noVideos')}
+            </p>
+          </div>
+        )}
+
+        {/* Videos Grid */}
+        {!isLoading && articles.length > 0 && (
+          <div className="grid lg:grid-cols-12 gap-6">
+            {/* Featured Videos - Large */}
+            <div className="lg:col-span-8 grid md:grid-cols-2 gap-6">
+              {featuredVideos.map((video, index) => (
                 <motion.a
                   key={video.id}
-                  href={`/videos/${video.id}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  href={`/${video.slug}`}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex gap-4 p-4 hover:bg-white/10 transition-all duration-300 group"
+                  transition={{ delay: index * 0.1 }}
+                  className="group block"
                 >
-                  {/* Thumbnail */}
-                  <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-brand-light">
+                  <div className="relative aspect-video overflow-hidden bg-brand">
                     <img
-                      src={video.thumbnail}
+                      src={video.featuredImage}
                       alt={video.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center">
-                      <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
-                        <Play className="text-brand-darker fill-brand-darker" size={14} />
+
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-sm group-hover:bg-white/10 transition-colors flex items-center justify-center">
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        className="w-16 h-16 bg-gold flex items-center justify-center"
+                      >
+                        <Play className="text-brand-darker fill-brand-darker" size={28} />
+                      </motion.div>
+                    </div>
+
+                    {/* Category Badge */}
+                    {video.section && (
+                      <div className="absolute top-3 right-3 bg-gold text-brand-darker text-xs px-2 py-1 font-[family-name:var(--font-display)] font-bold">
+                        {video.section}
                       </div>
-                    </div>
-                    <div className="absolute bottom-1 left-1 bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] px-1 py-0.5 font-[family-name:var(--font-display)]">
-                      {video.duration}
-                    </div>
+                    )}
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold">
-                      {video.category}
-                    </span>
-                    <h4 className="font-[family-name:var(--font-display)] font-semibold text-white text-sm leading-relaxed mt-1 group-hover:text-gold transition-colors line-clamp-2">
+                  <div className="mt-4">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg leading-relaxed group-hover:text-gold transition-colors line-clamp-2">
                       {video.title}
-                    </h4>
-                    <span className="text-white/60 text-xs mt-1 flex items-center gap-1">
-                      <Eye size={12} />
-                      {video.views}
-                    </span>
+                    </h3>
+                    <div className="flex items-center gap-4 mt-2 text-white/70 text-sm">
+                      <span className="flex items-center gap-1">
+                        <Eye size={14} />
+                        {video.views.toLocaleString()} {t('components.videoSection.viewsLabel')}
+                      </span>
+                    </div>
                   </div>
                 </motion.a>
               ))}
             </div>
+
+            {/* Regular Videos - Sidebar List */}
+            <div className="lg:col-span-4 bg-white/5 backdrop-blur-sm border border-white/10">
+              <div className="p-4 border-b border-white/10">
+                <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
+                  {t('components.videoSection.moreVideos')}
+                </h3>
+              </div>
+
+              <div className="divide-y divide-white/10">
+                {regularVideos.map((video, index) => (
+                  <motion.a
+                    key={video.id}
+                    href={`/${video.slug}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    className="flex gap-4 p-4 hover:bg-white/10 transition-all duration-300 group"
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative w-32 flex-shrink-0 aspect-video overflow-hidden bg-brand-light">
+                      <img
+                        src={video.featuredImage}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
+                          <Play className="text-brand-darker fill-brand-darker" size={14} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {video.section && (
+                        <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold">
+                          {video.section}
+                        </span>
+                      )}
+                      <h4 className="font-[family-name:var(--font-display)] font-semibold text-white text-sm leading-relaxed mt-1 group-hover:text-gold transition-colors line-clamp-2">
+                        {video.title}
+                      </h4>
+                      <span className="text-white/60 text-xs mt-1 flex items-center gap-1">
+                        <Eye size={12} />
+                        {video.views.toLocaleString()}
+                      </span>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

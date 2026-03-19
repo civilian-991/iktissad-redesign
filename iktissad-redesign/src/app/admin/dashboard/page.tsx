@@ -9,7 +9,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -28,6 +27,7 @@ import {
   Globe,
   Activity,
   Loader2,
+  BarChart2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -51,43 +51,6 @@ const statsConfig: StatConfig[] = [
   { key: 'totalMagazines', icon: Activity, color: 'from-emerald-500 to-teal' },
   { key: 'activeSubscribers', icon: Users, color: 'from-purple-500 to-indigo-600' },
   { key: 'activeUsers', icon: MessageSquare, color: 'from-rose-500 to-pink-600' },
-];
-
-// Chart data (mock - would need an analytics endpoint)
-const chartDataConfig = [
-  { dayKey: 'saturday', views: 4200, articles: 12 },
-  { dayKey: 'sunday', views: 5100, articles: 15 },
-  { dayKey: 'monday', views: 4800, articles: 18 },
-  { dayKey: 'tuesday', views: 6200, articles: 22 },
-  { dayKey: 'wednesday', views: 5800, articles: 20 },
-  { dayKey: 'thursday', views: 7100, articles: 25 },
-  { dayKey: 'friday', views: 6500, articles: 19 },
-];
-
-// Top countries (mock - would need an analytics endpoint)
-const topCountries = [
-  { nameKey: 'saudi', visitors: 8520, percentage: 35 },
-  { nameKey: 'uae', visitors: 5230, percentage: 22 },
-  { nameKey: 'egypt', visitors: 4100, percentage: 17 },
-  { nameKey: 'lebanon', visitors: 3200, percentage: 13 },
-  { nameKey: 'kuwait', visitors: 2100, percentage: 9 },
-];
-
-// Activity log (mock - would need an activity tracking table)
-interface ActivityItem {
-  type: 'article' | 'comment' | 'user';
-  user: string;
-  actionKey: string;
-  actionParams?: Record<string, number>;
-  timeKey: string;
-  timeValue: number;
-}
-
-const activities: ActivityItem[] = [
-  { type: 'article', user: 'أحمد المنصور', actionKey: 'publishedArticle', timeKey: 'minutesAgo', timeValue: 5 },
-  { type: 'comment', user: 'سارة العلي', actionKey: 'approvedComments', actionParams: { count: 3 }, timeKey: 'minutesAgo', timeValue: 15 },
-  { type: 'user', user: 'system', actionKey: 'newUserRegistered', timeKey: 'minutesAgo', timeValue: 30 },
-  { type: 'article', user: 'محمد الخالدي', actionKey: 'editedArticle', timeKey: 'hourAgo', timeValue: 1 },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -114,8 +77,6 @@ const quickActionsConfig: QuickAction[] = [
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month'>('week');
-  const maxViews = Math.max(...chartDataConfig.map(d => d.views));
 
   // Fetch real data from API
   const { data: articlesRes, isLoading: articlesLoading } = useSWR<ApiResponse<Article[]>>(
@@ -149,24 +110,11 @@ export default function DashboardPage() {
   // Build stats values from real data
   const statsValues: Record<string, { value: string; change: string; trend: 'up' | 'down' }> = {
     visitsToday: { value: '-', change: '-', trend: 'up' },
-    publishedArticles: { value: totalArticles.toLocaleString('ar'), change: '+3.2%', trend: 'up' },
+    publishedArticles: { value: totalArticles.toLocaleString('ar'), change: '-', trend: 'up' },
     activeUsers: { value: totalUsers.toLocaleString('ar'), change: '-', trend: 'up' },
     newComments: { value: '-', change: '-', trend: 'up' },
     totalMagazines: { value: totalMagazines.toLocaleString('ar'), change: '-', trend: 'up' },
     activeSubscribers: { value: activeSubscribers.toLocaleString('ar'), change: '-', trend: 'up' },
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'published':
-        return 'success';
-      case 'draft':
-        return 'default';
-      case 'review':
-        return 'warning';
-      default:
-        return 'default';
-    }
   };
 
   return (
@@ -180,21 +128,6 @@ export default function DashboardPage() {
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
             {t('admin.dashboard.welcome')}
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {(['day', 'week', 'month'] as const).map((period) => (
-            <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`px-4 py-2 rounded-lg font-[family-name:var(--font-display)] text-sm transition-all ${
-                selectedPeriod === period
-                  ? 'bg-gold text-obsidian font-semibold'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {t(`admin.dashboard.periods.${period === 'day' ? 'today' : period}`)}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -245,7 +178,7 @@ export default function DashboardPage() {
 
       {/* Main Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Chart Section */}
+        {/* Chart Section — Coming Soon */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -266,32 +199,23 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* Simple Bar Chart */}
-          <div className="h-64 flex items-end gap-3">
-            {chartDataConfig.map((data, index) => (
-              <div key={data.dayKey} className="flex-1 flex flex-col items-center gap-2">
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(data.views / maxViews) * 100}%` }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="w-full bg-gradient-to-t from-gold/80 to-gold/40 rounded-t-lg relative group cursor-pointer hover:from-gold hover:to-gold/60 transition-colors"
-                >
-                  {/* Tooltip */}
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-obsidian border border-gold/20 rounded-lg px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                    <span className="text-white text-sm font-[family-name:var(--font-display)]">
-                      {data.views.toLocaleString()} {t('admin.dashboard.charts.visit')}
-                    </span>
-                  </div>
-                </motion.div>
-                <span className="text-white/50 text-xs font-[family-name:var(--font-display)]">
-                  {t(`admin.dashboard.days.${data.dayKey}`)}
-                </span>
-              </div>
-            ))}
+          {/* Coming Soon Placeholder */}
+          <div className="h-64 flex flex-col items-center justify-center gap-4 rounded-xl border border-gold/10 bg-white/[0.02]">
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center">
+              <BarChart2 size={28} className="text-gold/60" />
+            </div>
+            <div className="text-center">
+              <p className="text-gold/80 font-[family-name:var(--font-display)] font-semibold text-base mb-1">
+                {t('admin.dashboard.charts.comingSoonTitle')}
+              </p>
+              <p className="text-white/30 font-[family-name:var(--font-display)] text-sm max-w-xs">
+                {t('admin.dashboard.charts.comingSoonDesc')}
+              </p>
+            </div>
           </div>
         </motion.div>
 
-        {/* Top Countries */}
+        {/* Top Countries — Coming Soon */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -307,32 +231,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            {topCountries.map((country, index) => (
-              <div key={country.nameKey} className="flex items-center gap-3">
-                <span className="w-6 text-center text-white/40 text-sm font-[family-name:var(--font-display)]">
-                  {index + 1}
-                </span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-white text-sm font-[family-name:var(--font-display)]">
-                      {t(`countries.${country.nameKey}`)}
-                    </span>
-                    <span className="text-white/50 text-xs">
-                      {country.visitors.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${country.percentage}%` }}
-                      transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                      className="h-full bg-gradient-to-r from-gold to-gold-muted rounded-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Coming Soon Placeholder */}
+          <div className="flex flex-col items-center justify-center gap-4 py-10 rounded-xl border border-gold/10 bg-white/[0.02]">
+            <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center">
+              <Globe size={22} className="text-gold/60" />
+            </div>
+            <div className="text-center">
+              <p className="text-white/30 font-[family-name:var(--font-display)] text-xs max-w-[180px]">
+                {t('admin.dashboard.topCountriesComingSoon')}
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -413,7 +321,7 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Activity Log */}
+        {/* Activity Log — Empty State */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -427,41 +335,15 @@ export default function DashboardPage() {
             </h2>
           </div>
 
-          <div className="space-y-4">
-            {activities.map((activity, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
-                className="flex items-start gap-3"
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  activity.type === 'article'
-                    ? 'bg-gold/10 text-gold'
-                    : activity.type === 'comment'
-                      ? 'bg-profit/10 text-profit'
-                      : 'bg-purple-500/10 text-purple-400'
-                }`}>
-                  {activity.type === 'article' ? <FileText size={iconSizes.sm} /> :
-                   activity.type === 'comment' ? <MessageSquare size={iconSizes.sm} /> :
-                   <Users size={iconSizes.sm} />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-[family-name:var(--font-display)]">
-                    <span className="text-gold">
-                      {activity.user === 'system' ? t('admin.dashboard.activity.system') : activity.user}
-                    </span>
-                    {' '}
-                    {t(`admin.dashboard.activity.${activity.actionKey}`)}
-                  </p>
-                  <span className="text-white/40 text-xs flex items-center gap-1">
-                    <Clock size={10} />
-                    {t(`common.time.${activity.timeKey}`, { count: activity.timeValue })}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+          <div className="flex flex-col items-center justify-center gap-4 py-10 rounded-xl border border-gold/10 bg-white/[0.02]">
+            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+              <Activity size={22} className="text-white/20" />
+            </div>
+            <div className="text-center">
+              <p className="text-white/40 font-[family-name:var(--font-display)] text-sm">
+                {t('admin.dashboard.noRecentActivity')}
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>

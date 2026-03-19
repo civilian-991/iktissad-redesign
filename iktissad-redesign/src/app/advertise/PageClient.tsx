@@ -6,50 +6,41 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 
-const stats = [
-  { icon: Users, value: '+2M', label: 'زائر شهرياً' },
-  { icon: Eye, value: '+10M', label: 'مشاهدة شهرياً' },
-  { icon: TrendingUp, value: '68%', label: 'نمو سنوي' },
-  { icon: Target, value: '85%', label: 'جمهور مستهدف' },
+const statsIcons = [Users, Eye, TrendingUp, Target];
+const statsValues = ['+2M', '+10M', '68%', '85%'];
+
+const adFormatIcons = [Monitor, Newspaper, Mail, Smartphone];
+
+// Features that are technical terms / kept as-is data (mixed Arabic/English per original)
+const adFormatsFeatures = [
+  ['Header Banner', 'Sidebar Ads', 'In-Article Ads', 'Footer Banner'],
+  null, // from i18n
+  null, // from i18n
+  ['Interstitial', 'Native Ads', 'Push Notifications', 'In-App Ads'],
 ];
 
-const adFormats = [
-  {
-    icon: Monitor,
-    title: 'إعلانات الموقع',
-    description: 'بانرات إعلانية بمختلف الأحجام في مواقع استراتيجية على الموقع',
-    features: ['Header Banner', 'Sidebar Ads', 'In-Article Ads', 'Footer Banner']
-  },
-  {
-    icon: Newspaper,
-    title: 'المحتوى المدعوم',
-    description: 'مقالات ومحتوى مخصص يتكامل مع محتوى الموقع',
-    features: ['مقالات مدعومة', 'تقارير خاصة', 'ملفات راعي', 'مقابلات حصرية']
-  },
-  {
-    icon: Mail,
-    title: 'النشرة البريدية',
-    description: 'إعلانات في نشرتنا البريدية اليومية والأسبوعية',
-    features: ['إعلان رئيسي', 'إعلان جانبي', 'نشرة مخصصة', 'رعاية كاملة']
-  },
-  {
-    icon: Smartphone,
-    title: 'إعلانات الجوال',
-    description: 'إعلانات محسّنة لتجربة الجوال',
-    features: ['Interstitial', 'Native Ads', 'Push Notifications', 'In-App Ads']
-  },
-];
-
-const audience = [
-  { label: 'رجال أعمال', percentage: 35 },
-  { label: 'مدراء تنفيذيون', percentage: 25 },
-  { label: 'مستثمرون', percentage: 20 },
-  { label: 'محللون ماليون', percentage: 12 },
-  { label: 'صناع قرار', percentage: 8 },
-];
+const audiencePercentages = [35, 25, 20, 12, 8];
 
 export default function AdvertisePageClient() {
   const { t } = useTranslation();
+
+  const stats = statsValues.map((value, i) => ({
+    icon: statsIcons[i],
+    value,
+    label: t(`pages.advertise.stats.${i}.label`),
+  }));
+
+  const adFormats = adFormatIcons.map((icon, i) => ({
+    icon,
+    title: t(`pages.advertise.adFormats.${i}.title`),
+    description: t(`pages.advertise.adFormats.${i}.description`),
+    features: [0, 1, 2, 3].map((j) => t(`pages.advertise.adFormats.${i}.features.${j}`)),
+  }));
+
+  const audience = audiencePercentages.map((percentage, i) => ({
+    label: t(`pages.advertise.audience.${i}.label`),
+    percentage,
+  }));
 
   return (
     <>
@@ -82,7 +73,7 @@ export default function AdvertisePageClient() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => (
                 <motion.div
-                  key={stat.label}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -109,63 +100,31 @@ export default function AdvertisePageClient() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                لماذا تعلن معنا؟
+                {t('pages.advertise.whyUsTitle')}
               </h2>
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                  <Award className="text-gold" size={28} />
-                </div>
-                <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
-                  مصداقية عالية
-                </h3>
-                <p className="text-slate">
-                  أكثر من 65 عاماً من التميز في الإعلام الاقتصادي تمنح علامتك مصداقية استثنائية
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                  <Target className="text-gold" size={28} />
-                </div>
-                <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
-                  جمهور مستهدف
-                </h3>
-                <p className="text-slate">
-                  وصول مباشر إلى صناع القرار والمستثمرين ورجال الأعمال في المنطقة
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="text-gold" size={28} />
-                </div>
-                <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
-                  نتائج قابلة للقياس
-                </h3>
-                <p className="text-slate">
-                  تقارير مفصلة وتحليلات دقيقة لقياس أداء حملاتك الإعلانية
-                </p>
-              </motion.div>
+              {[Award, Target, TrendingUp].map((Icon, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
+                    <Icon className="text-gold" size={28} />
+                  </div>
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
+                    {t(`pages.advertise.whyUs.${index}.title`)}
+                  </h3>
+                  <p className="text-slate">
+                    {t(`pages.advertise.whyUs.${index}.desc`)}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -180,14 +139,14 @@ export default function AdvertisePageClient() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                أشكال الإعلان
+                {t('pages.advertise.formatsTitle')}
               </h2>
             </motion.div>
 
             <div className="grid md:grid-cols-2 gap-6">
               {adFormats.map((format, index) => (
                 <motion.div
-                  key={format.title}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -227,10 +186,10 @@ export default function AdvertisePageClient() {
                 viewport={{ once: true }}
               >
                 <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                  جمهورنا
+                  {t('pages.advertise.audienceTitle')}
                 </h2>
                 <p className="text-charcoal leading-relaxed mb-8">
-                  يتكون جمهورنا من نخبة من صناع القرار والمستثمرين ورجال الأعمال الذين يبحثون عن معلومات موثوقة لاتخاذ قراراتهم الاستثمارية والتجارية.
+                  {t('pages.advertise.audienceDesc')}
                 </p>
 
                 <div className="space-y-4">
@@ -275,7 +234,7 @@ export default function AdvertisePageClient() {
                   </a>
                 </div>
                 <a href="/contact" className="btn-gold mt-8 inline-block">
-                  طلب عرض سعر
+                  {t('pages.advertise.requestQuote')}
                 </a>
               </motion.div>
             </div>

@@ -55,106 +55,6 @@ const folderSlugMap: Record<string, string> = {
 
 const fileTypes = ['الكل', 'image', 'video', 'document'];
 
-// Mock fallback data for when Supabase is not configured
-const mockMedia = [
-  {
-    name: 'hero-banner.jpg',
-    id: '1',
-    size: 2400000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-15',
-    publicUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop',
-    path: 'articles/hero-banner.jpg',
-    folder: 'مقالات',
-    uploadedBy: 'أحمد المنصور',
-  },
-  {
-    name: 'market-analysis.jpg',
-    id: '2',
-    size: 1800000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-14',
-    updatedAt: '2024-01-14',
-    publicUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=400&h=300&fit=crop',
-    path: 'markets/market-analysis.jpg',
-    folder: 'أسواق',
-    uploadedBy: 'سارة العلي',
-  },
-  {
-    name: 'tech-innovation.jpg',
-    id: '3',
-    size: 3100000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-13',
-    updatedAt: '2024-01-13',
-    publicUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-    path: 'tech/tech-innovation.jpg',
-    folder: 'تكنولوجيا',
-    uploadedBy: 'محمد الخالدي',
-  },
-  {
-    name: 'financial-report.pdf',
-    id: '4',
-    size: 856000,
-    type: 'application/pdf',
-    createdAt: '2024-01-12',
-    updatedAt: '2024-01-12',
-    publicUrl: '#',
-    path: 'reports/financial-report.pdf',
-    folder: 'تقارير',
-    uploadedBy: 'نور الدين',
-  },
-  {
-    name: 'investment-chart.jpg',
-    id: '5',
-    size: 1200000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-11',
-    updatedAt: '2024-01-11',
-    publicUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
-    path: 'articles/investment-chart.jpg',
-    folder: 'مقالات',
-    uploadedBy: 'فاطمة الزهراء',
-  },
-  {
-    name: 'summit-coverage.mp4',
-    id: '6',
-    size: 45200000,
-    type: 'video/mp4',
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-10',
-    publicUrl: 'https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&h=300&fit=crop',
-    path: 'video/summit-coverage.mp4',
-    folder: 'فيديو',
-    uploadedBy: 'عمر الشريف',
-  },
-  {
-    name: 'energy-sector.jpg',
-    id: '7',
-    size: 2100000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-09',
-    updatedAt: '2024-01-09',
-    publicUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=300&fit=crop',
-    path: 'energy/energy-sector.jpg',
-    folder: 'طاقة',
-    uploadedBy: 'أحمد المنصور',
-  },
-  {
-    name: 'profile-ceo.jpg',
-    id: '8',
-    size: 890000,
-    type: 'image/jpeg',
-    createdAt: '2024-01-08',
-    updatedAt: '2024-01-08',
-    publicUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop',
-    path: 'profiles/profile-ceo.jpg',
-    folder: 'شخصيات',
-    uploadedBy: 'سارة العلي',
-  },
-];
-
 interface MediaItem extends StorageFile {
   folder?: string;
   uploadedBy?: string;
@@ -176,7 +76,7 @@ function getMediaType(mimeType: string): string {
 }
 
 export default function MediaLibraryPage() {
-  const [media, setMedia] = useState<MediaItem[]>(mockMedia);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFolder, setSelectedFolder] = useState('الكل');
@@ -201,12 +101,9 @@ export default function MediaLibraryPage() {
     setLoading(true);
     try {
       const files = await listFiles('media');
-      if (files.length > 0) {
-        setMedia(files.map((f) => ({ ...f, folder: 'الكل' })));
-      }
-      // If empty, keep mock data
+      setMedia(files.map((f) => ({ ...f, folder: 'الكل' })));
     } catch {
-      // Supabase not configured - use mock data silently
+      // Supabase not configured — start with empty library
     } finally {
       setLoading(false);
     }
@@ -297,7 +194,7 @@ export default function MediaLibraryPage() {
       try {
         await deleteFile('media', path);
       } catch {
-        // If Supabase fails (e.g. mock data), just remove from state
+        // If Supabase fails, just remove from state
       }
       setMedia((prev) => prev.filter((m) => m.path !== path));
     }
@@ -503,8 +400,36 @@ export default function MediaLibraryPage() {
         </div>
       )}
 
+      {/* Empty State */}
+      {!loading && filteredMedia.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-20 text-center"
+        >
+          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-gold/10 flex items-center justify-center mb-6">
+            <Upload size={36} className="text-white/20" />
+          </div>
+          <h3 className="text-white/60 text-lg font-[family-name:var(--font-display)] font-semibold mb-2">
+            لا توجد ملفات
+          </h3>
+          <p className="text-white/30 text-sm font-[family-name:var(--font-display)] mb-6 max-w-xs">
+            {searchQuery || selectedFolder !== 'الكل' || selectedType !== 'الكل'
+              ? 'لا توجد ملفات تطابق معايير البحث الحالية'
+              : 'ابدأ برفع الصور والمستندات لاستخدامها في المقالات والمجلات'}
+          </p>
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
+          >
+            <Upload size={16} />
+            رفع ملفات
+          </button>
+        </motion.div>
+      )}
+
       {/* Media Grid/List */}
-      {!loading && viewMode === 'grid' ? (
+      {!loading && filteredMedia.length > 0 && viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMedia.map((item, index) => (
             <motion.div
@@ -586,7 +511,7 @@ export default function MediaLibraryPage() {
             </motion.div>
           ))}
         </div>
-      ) : !loading ? (
+      ) : !loading && filteredMedia.length > 0 ? (
         <div className="bg-midnight/50 border border-gold/10 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>

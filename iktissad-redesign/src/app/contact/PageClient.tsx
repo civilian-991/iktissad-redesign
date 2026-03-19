@@ -7,19 +7,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 
-const contactInfo = [
-  { icon: MapPin, title: 'العنوان', value: 'بيروت، لبنان - شارع الحمرا', subtitle: 'المقر الرئيسي' },
-  { icon: Phone, title: 'الهاتف', value: '+961 1 000 000', subtitle: 'متاح 24/7' },
-  { icon: Mail, title: 'البريد الإلكتروني', value: 'info@iktissadonline.com', subtitle: 'للاستفسارات العامة' },
-  { icon: Clock, title: 'ساعات العمل', value: 'الأحد - الخميس', subtitle: '9:00 ص - 6:00 م' },
-];
-
-const offices = [
-  { city: 'بيروت', country: 'لبنان', address: 'شارع الحمرا، بناية الإقتصاد', phone: '+961 1 000 000' },
-  { city: 'دبي', country: 'الإمارات', address: 'مركز دبي المالي العالمي', phone: '+971 4 000 0000' },
-  { city: 'الرياض', country: 'السعودية', address: 'حي الملقا، طريق الملك فهد', phone: '+966 11 000 0000' },
-  { city: 'القاهرة', country: 'مصر', address: 'وسط البلد، شارع طلعت حرب', phone: '+20 2 0000 0000' },
-];
+const contactCardIcons = [MapPin, Phone, Mail, Clock];
+const officePhones = ['+961 1 000 000', '+971 4 000 0000', '+966 11 000 0000', '+20 2 0000 0000'];
 
 export default function ContactPageClient() {
   const { t } = useTranslation();
@@ -39,6 +28,20 @@ export default function ContactPageClient() {
       setFormState({ name: '', email: '', subject: '', message: '' });
     }, 3000);
   };
+
+  const contactInfo = contactCardIcons.map((icon, i) => ({
+    icon,
+    title: t(`pages.contact.cards.${i}.title`),
+    value: t(`pages.contact.cards.${i}.value`),
+    subtitle: t(`pages.contact.cards.${i}.subtitle`),
+  }));
+
+  const offices = officePhones.map((phone, i) => ({
+    city: t(`pages.contact.offices.${i}.city`),
+    country: t(`pages.contact.offices.${i}.country`),
+    address: t(`pages.contact.offices.${i}.address`),
+    phone,
+  }));
 
   return (
     <>
@@ -70,7 +73,7 @@ export default function ContactPageClient() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {contactInfo.map((info, index) => (
                 <motion.div
-                  key={info.title}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -148,8 +151,8 @@ export default function ContactPageClient() {
                         <option value="">{t('pages.contact.form.subjectPlaceholder')}</option>
                         <option value="general">{t('pages.contact.form.subjectGeneral')}</option>
                         <option value="advertising">{t('pages.contact.form.subjectAdvertising')}</option>
-                        <option value="partnership">شراكات</option>
-                        <option value="press">استفسارات صحفية</option>
+                        <option value="partnership">{t('pages.contact.form.subjectPartnership')}</option>
+                        <option value="press">{t('pages.contact.form.subjectPress')}</option>
                         <option value="technical">{t('pages.contact.form.subjectTechnical')}</option>
                       </select>
                     </div>
@@ -209,7 +212,7 @@ export default function ContactPageClient() {
                 <div className="space-y-4">
                   {offices.map((office, index) => (
                     <motion.div
-                      key={office.city}
+                      key={index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -235,7 +238,7 @@ export default function ContactPageClient() {
                   <div className="text-center">
                     <MapPin className="mx-auto text-gold mb-2" size={40} />
                     <p className="text-slate font-[family-name:var(--font-display)]">
-                      خريطة المواقع
+                      {t('pages.contact.mapLabel')}
                     </p>
                   </div>
                 </div>

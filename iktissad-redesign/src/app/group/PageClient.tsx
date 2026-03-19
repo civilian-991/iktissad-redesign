@@ -6,75 +6,73 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 
-const publications = [
+const publicationsData = [
   {
     id: 'magazine',
-    name: 'مجلة الإقتصاد والأعمال',
-    description: 'المجلة الاقتصادية الأولى في العالم العربي منذ 1956',
     image: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop',
     url: '#',
-    stats: { issues: '+800', years: '68', readers: '+500K' }
+    stats: { issues: '+800', years: '68', readers: '+500K' },
   },
   {
     id: 'arab-markets',
-    name: 'مجلة أسواق العرب',
-    description: 'تغطية شاملة لأسواق المال والبورصات العربية',
     image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop',
     url: '#',
-    stats: { issues: '+200', years: '25', readers: '+300K' }
+    stats: { issues: '+200', years: '25', readers: '+300K' },
   },
   {
     id: 'banks',
-    name: 'مجلة البنوك والمصارف',
-    description: 'المرجع الأول للقطاع المصرفي العربي',
     image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop',
     url: '#',
-    stats: { issues: '+150', years: '20', readers: '+200K' }
+    stats: { issues: '+150', years: '20', readers: '+200K' },
   },
   {
     id: 'leaders',
-    name: 'دليل قادة الأعمال',
-    description: 'الموسوعة السنوية لقادة الأعمال في العالم العربي',
     image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=400&fit=crop',
     url: '#',
-    stats: { profiles: '+5000', years: '15', countries: '22' }
+    stats: { profiles: '+5000', years: '15', countries: '22' },
   },
 ];
 
-const services = [
-  {
-    icon: BookOpen,
-    title: 'النشر والتوزيع',
-    description: 'نصل إلى القراء في 22 دولة عربية عبر شبكة توزيع واسعة'
-  },
-  {
-    icon: Building,
-    title: 'المؤتمرات والفعاليات',
-    description: 'ننظم أكثر من 20 مؤتمراً وفعالية اقتصادية سنوياً'
-  },
-  {
-    icon: Users,
-    title: 'الاستشارات الإعلامية',
-    description: 'نقدم خدمات استشارية في مجال الإعلام الاقتصادي'
-  },
-  {
-    icon: Award,
-    title: 'الجوائز والتكريمات',
-    description: 'نمنح جوائز سنوية لأفضل الشركات والقادة في المنطقة'
-  },
-];
+const servicesIcons = [BookOpen, Building, Users, Award];
 
-const partners = [
-  'صندوق النقد الدولي',
-  'البنك الدولي',
-  'جامعة الدول العربية',
-  'مجلس التعاون الخليجي',
-  'الاتحاد العام لغرف التجارة العربية',
-  'اتحاد المصارف العربية',
-];
+const statsBarValues = ['68', '4', '22', '+2M'];
+
+const PARTNERS_COUNT = 6;
 
 export default function GroupPageClient() {
   const { t } = useTranslation();
+
+  const publications = publicationsData.map((pub, i) => ({
+    ...pub,
+    name: t(`pages.group.publicationsList.${i}.name`),
+    description: t(`pages.group.publicationsList.${i}.description`),
+  }));
+
+  const services = servicesIcons.map((icon, i) => ({
+    icon,
+    title: t(`pages.group.services.${i}.title`),
+    description: t(`pages.group.services.${i}.description`),
+  }));
+
+  const partners = Array.from({ length: PARTNERS_COUNT }, (_, i) =>
+    t(`pages.group.partnersList.${i}`)
+  );
+
+  const statsBar = statsBarValues.map((value, i) => ({
+    value,
+    label: t(`pages.group.statsBar.${i}.label`),
+  }));
+
+  const pubStatLabel = (key: string) => {
+    const map: Record<string, string> = {
+      issues: t('pages.group.pubStatIssues'),
+      years: t('pages.group.pubStatYears'),
+      readers: t('pages.group.pubStatReaders'),
+      profiles: t('pages.group.pubStatProfiles'),
+      countries: t('pages.group.pubStatCountries'),
+    };
+    return map[key] ?? key;
+  };
 
   return (
     <>
@@ -101,7 +99,7 @@ export default function GroupPageClient() {
                 {t('pages.group.title')}
               </h1>
               <p className="text-xl text-white/80 leading-relaxed">
-                أكبر مجموعة إعلامية متخصصة في الشأن الاقتصادي والمالي في العالم العربي
+                {t('pages.group.heroSubtitle')}
               </p>
             </motion.div>
           </div>
@@ -111,14 +109,9 @@ export default function GroupPageClient() {
         <section className="bg-gold py-8 -mt-1">
           <div className="container-luxury">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { value: '68', label: 'عاماً من التميز' },
-                { value: '4', label: 'إصدارات رئيسية' },
-                { value: '22', label: 'دولة نغطيها' },
-                { value: '+2M', label: 'قارئ شهرياً' },
-              ].map((stat, index) => (
+              {statsBar.map((stat, index) => (
                 <motion.div
-                  key={stat.label}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -146,7 +139,7 @@ export default function GroupPageClient() {
                 {t('pages.group.publications')}
               </h2>
               <p className="text-slate max-w-2xl mx-auto">
-                مجموعة متكاملة من المنشورات المتخصصة التي تغطي كافة جوانب الاقتصاد والأعمال
+                {t('pages.group.publicationsSubtitle')}
               </p>
             </motion.div>
 
@@ -183,14 +176,14 @@ export default function GroupPageClient() {
                             {value}
                           </div>
                           <div className="text-xs text-slate">
-                            {key === 'issues' ? 'عدد' : key === 'years' ? 'سنة' : key === 'readers' ? 'قارئ' : key === 'profiles' ? 'شخصية' : key === 'countries' ? 'دولة' : key}
+                            {pubStatLabel(key)}
                           </div>
                         </div>
                       ))}
                     </div>
                     <div className="flex items-center justify-end text-gold group-hover:gap-3 transition-all">
                       <span className="font-[family-name:var(--font-display)] font-semibold text-sm">
-                        زيارة الموقع
+                        {t('pages.group.visitSite')}
                       </span>
                       <ExternalLink size={16} className="mr-1" />
                     </div>
@@ -211,14 +204,14 @@ export default function GroupPageClient() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                خدماتنا
+                {t('pages.group.servicesTitle')}
               </h2>
             </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {services.map((service, index) => (
                 <motion.div
-                  key={service.title}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -251,14 +244,14 @@ export default function GroupPageClient() {
                 {t('pages.group.partners')}
               </h2>
               <p className="text-white/70">
-                نتعاون مع أبرز المؤسسات الاقتصادية والمالية في المنطقة
+                {t('pages.group.partnersSubtitle')}
               </p>
             </motion.div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {partners.map((partner, index) => (
                 <motion.div
-                  key={partner}
+                  key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -284,10 +277,10 @@ export default function GroupPageClient() {
               className="bg-gradient-to-br from-gold to-gold-dark rounded-2xl p-12 text-center"
             >
               <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-white mb-4">
-                هل ترغب في الشراكة معنا؟
+                {t('pages.group.ctaTitle')}
               </h2>
               <p className="text-white/80 mb-8 max-w-2xl mx-auto">
-                نرحب بالتعاون مع المؤسسات والشركات الراغبة في الوصول إلى جمهورنا المتميز
+                {t('pages.group.ctaDesc')}
               </p>
               <a
                 href="/contact"
