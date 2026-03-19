@@ -518,6 +518,44 @@ export interface Comment {
 }
 
 // =============================================================================
+// NEWSLETTER CONTENT BUILDER (Phase 4.3)
+// =============================================================================
+
+export type NewsletterBlockType =
+  | 'headline'
+  | 'article_card'
+  | 'text'
+  | 'quote'
+  | 'cta'
+  | 'divider'
+  | 'image'
+
+export interface NewsletterBlock {
+  id: string
+  type: NewsletterBlockType
+  data: Record<string, unknown>
+}
+
+export interface Newsletter {
+  id: string
+  title: string
+  subject: string
+  previewText: string | null
+  senderName: string
+  segment: 'all' | 'premium' | 'free'
+  status: 'draft' | 'scheduled' | 'sent' | 'cancelled'
+  blocks: NewsletterBlock[]
+  scheduledAt: string | null
+  sentAt: string | null
+  recipientCount: number | null
+  openCount: number
+  clickCount: number
+  createdBy: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+// =============================================================================
 // ADVERTISING (Phase 1A)
 // =============================================================================
 

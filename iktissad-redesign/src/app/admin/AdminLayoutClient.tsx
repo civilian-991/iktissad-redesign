@@ -39,6 +39,9 @@ import {
   Megaphone,
   KanbanSquare,
   CalendarDays,
+  FlaskConical,
+  Share2,
+  Mail,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -79,6 +82,9 @@ const navigationConfig: NavItem[] = [
   { key: 'articles',    href: '/admin/articles',     icon: FileText, badge: 12 },
   { key: 'assignments', href: '/admin/assignments',  icon: KanbanSquare },
   { key: 'calendar',    href: '/admin/calendar',     icon: CalendarDays },
+  { key: 'headlines',   href: '/admin/headlines',    icon: FlaskConical },
+  { key: 'distribute',  href: '/admin/distribute',   icon: Share2 },
+  { key: 'newsletters', href: '/admin/newsletters',  icon: Mail },
   { key: 'magazine',    href: '/admin/magazines',    icon: BookOpen },
   { key: 'users',       href: '/admin/users',        icon: Users },
   { key: 'media',       href: '/admin/media',        icon: Image },
@@ -150,6 +156,9 @@ export default function AdminLayoutClient({
       articles:    t('admin.common.articles'),
       assignments: 'لوحة المهام',
       calendar:    'التقويم التحريري',
+      headlines:   'مختبر A/B للعناوين',
+      distribute:  'التوزيع الاجتماعي',
+      newsletters: 'النشرات البريدية',
       magazine:    t('admin.common.magazine'),
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),

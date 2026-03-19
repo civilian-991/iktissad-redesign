@@ -28,6 +28,7 @@ import type {
   Country,
   MagazineSpread,
   SpreadRevision,
+  Newsletter,
 } from "@/types";
 
 // ─── Subscription domain types ───────────────────────────────────
@@ -942,5 +943,56 @@ export async function saveSpreadRevision(
   return api<SpreadRevision>(`/api/magazines/${issueId}/spreads/${spreadId}/revisions`, {
     method: "POST",
     body: JSON.stringify({ label }),
+  });
+}
+
+// ─── Newsletters (Phase 4.3) ──────────────────────────────────────
+
+export interface NewsletterListParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+}
+
+export function newslettersKey(params: NewsletterListParams = {}): string {
+  return buildQuery("/api/newsletters", params);
+}
+
+export function newsletterKey(id: string): string {
+  return `/api/newsletters/${id}`;
+}
+
+export async function createNewsletter(
+  data: Record<string, unknown>
+): Promise<ApiResponse<Newsletter>> {
+  return api<Newsletter>("/api/newsletters", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateNewsletter(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<Newsletter>> {
+  return api<Newsletter>(`/api/newsletters/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteNewsletter(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/newsletters/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function sendNewsletter(
+  id: string
+): Promise<ApiResponse<Newsletter>> {
+  return api<Newsletter>(`/api/newsletters/${id}/send`, {
+    method: "POST",
   });
 }

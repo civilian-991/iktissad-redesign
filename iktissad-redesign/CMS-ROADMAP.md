@@ -1,7 +1,7 @@
 # IKTISSAD CMS — 2026 Roadmap
 > The first AI-native Arabic newsroom CMS
 
-**Last updated:** March 19, 2026 — Phase 2 + 3 complete
+**Last updated:** March 19, 2026 — Phase 4 complete
 **Vision:** A content operating system that creates, optimizes, and distributes Arabic financial journalism — with AI that thinks like an Arabic editor, not a translation layer.
 
 ---
@@ -244,45 +244,42 @@ New page `/admin/calendar`:
 
 ---
 
-## Phase 4 — Distribution Engine (DISTRIBUTE)
+## Phase 4 — Distribution Engine (DISTRIBUTE) ✅ COMPLETE
 > Content without distribution is a library.
 
-**Timeline: Month 3**
+**Completed: March 2026**
 
-### 4.1 — Social Publishing Hub
+### 4.1 — Social Publishing Hub ✅
 
-New page `/admin/distribute` per article:
+`/admin/distribute` — hub listing all articles with distribute button.
+`/admin/distribute/[articleId]` — per-article hub with four tabs:
+- **تغريدة** (Tweet/X thread) — 5-tweet Arabic thread, numbers-first hook, per-tweet char counter
+- **لينكد إن** (LinkedIn post) — 150–200 word professional Arabic post
+- **تيليغرام** (Telegram) — formatted with emoji markers (📊 🔹 ⚡️)
+- **ملخص** (TL;DR) — 3-bullet Arabic summary
 
-Auto-generate platform-native content from article:
-- **تغريدة** (Tweet/X thread) — 5-tweet thread with Arabic + numbers-first hook
-- **لينكد إن** (LinkedIn post) — professional tone, 150–200 words, Arabic
-- **تيليغرام** (Telegram) — formatted for channel posting, with emoji markers
-- **ملخص** (TL;DR) — 3-bullet summary for any platform
+AI generation via `/api/ai/social-content` (streaming). Independent schedule per platform. OAuth connection status panel (connect flow is future milestone). Sidebar nav entry added.
 
-One-click post to connected accounts via OAuth:
-- Twitter/X API
-- LinkedIn API
-- Telegram Bot API (post to channel)
+### 4.2 — Headline A/B Lab ✅
 
-Schedule posts independently from article publish date.
+`/admin/headlines` — dedicated headline testing lab:
+- Searchable article selector
+- "توليد متغيرات" → 5 AI variants with angle labels + CTR score (1–100, gradient bar)
+- Set any variant as main headline via `PATCH /api/articles/[id]`
+- A/B test configurator: select challenger variant, set duration (6/12/24/48/72h), start test
+- Active test panel with A vs B traffic split visualization
 
-### 4.2 — Headline A/B Lab
+AI route: `/api/ai/headline-variants` — structured output via `Output.object()` + Zod. In-memory A/B test store at `/api/admin/ab-tests`.
 
-Before publishing, test headline variants:
-- Generate 5 headline variants via AI (different angles, hooks, emotional triggers)
-- Preview each variant with estimated CTR signal (based on your own historical data)
-- Optionally A/B test on the public site (split traffic for 24h, pick winner automatically)
+### 4.3 — Newsletter Content Builder ✅
 
-### 4.3 — Newsletter Content Builder
+`/admin/newsletters` — list with status, open rate, click count, send date.
+`/admin/newsletters/new` + `/admin/newsletters/[id]` — visual 3-panel builder:
+- **Block library** (left): headline, article_card, text, quote, CTA, image, divider
+- **Canvas** (center): sortable blocks with drag-to-reorder + arrow buttons, inline editing
+- **Settings** (right): subject, preview text, sender name, segment (all/premium/free), schedule
 
-New page `/admin/newsletters/new`:
-- Visual email builder (drag-drop blocks: headline, article card, quote, CTA, divider)
-- Pull articles from your CMS directly into newsletter layout
-- Bilingual sections (Arabic main + English summary, or vice versa)
-- Segment: send to all subscribers / premium only / free tier only / custom filter
-- Preview in dark + light mode
-- Track opens and clicks per issue
-- Connects to existing `newsletter_subscribers` table
+Article card block pulls from CMS via search modal. Save-draft + send flows. DB: `newsletters` table via migration `008_newsletters.sql`. Types added to `src/types/index.ts`. API client helpers added.
 
 ---
 
@@ -557,7 +554,7 @@ Revisit when the team actually hits the wall of concurrent editing conflicts. Pr
 | 1 | Editor Intelligence | Month 1–2 | CREATE | Medium | ✅ Done |
 | 2 | Newsroom Collaboration | Month 2 | COLLABORATE | Medium | ✅ Done |
 | 3 | Editorial Calendar | Month 2 | COLLABORATE | Low | ✅ Done |
-| 4 | Distribution Engine | Month 3 | DISTRIBUTE | Medium | ⬜ |
+| 4 | Distribution Engine | Month 3 | DISTRIBUTE | Medium | ✅ Done |
 | 5 | Content Intelligence + Monetization | Month 3–4 | OPTIMIZE + MONETIZE | Medium | ⬜ |
 | 6 | Content Safety (Versioning) | Month 4 | CREATE | Low | ⬜ |
 | 7 | Smart Media | Month 4–5 | CREATE | Medium | ⬜ |
