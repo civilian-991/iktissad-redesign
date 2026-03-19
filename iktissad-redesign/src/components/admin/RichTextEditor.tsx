@@ -12,11 +12,17 @@
 
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { useEditorPerformance } from '@/hooks/useEditorPerformance';
 import type { JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import { Collaboration } from '@tiptap/extension-collaboration';
+import * as Y from 'yjs';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
+import { SupabaseProvider } from '@/lib/collab/SupabaseProvider';
+import { useAwareness } from '@/lib/collab/useAwareness';
+import CollabStatusBar from '@/components/admin/CollabStatusBar';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -91,6 +97,19 @@ export interface RichTextEditorProps {
    * Legacy prop alias for string HTML value.
    */
   defaultValue?: JSONContent | string;
+  /**
+   * When provided, enables real-time collaborative editing via Supabase Realtime + Yjs.
+   * Multiple users editing the same articleId will see each other's changes in real-time.
+   */
+  collaborative?: {
+    articleId: string;
+    user: {
+      id: string;
+      name: string;
+      /** Hex color used for this user's presence indicator */
+      color: string;
+    };
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -199,6 +218,7 @@ export default function RichTextEditor({
   className = '',
   onEditorMount,
   defaultValue,
+  collaborative,
 }: RichTextEditorProps) {
   const [showLinkInput, setShowLinkInput] = useState(false);
 
@@ -206,8 +226,60 @@ export default function RichTextEditor({
   const { result: perfResult, onEditorReady, onEditorUpdate } = useEditorPerformance();
   const isSlowEditor = perfResult.isSlowEditor && process.env.NODE_ENV !== 'production';
 
+  // ── Collaborative editing setup ────────────────────────────────────────
+  // Y.Doc is created once and persists for the lifetime of this editor mount.
+  const ydoc = useMemo(() => (collaborative ? new Y.Doc() : null), [collaborative]);
+
+  // Provider stored in state so useAwareness receives a stable reference after mount.
+  // Also kept in a ref for disconnect on unmount (avoids closure staleness).
+  const [collabProvider, setCollabProvider] = useState<SupabaseProvider | null>(null);
+  const providerRef = useRef<SupabaseProvider | null>(null);
+
+  useEffect(() => {
+    if (!collaborative || !ydoc) return;
+
+    const supabase = createSupabaseClient();
+    const provider = new SupabaseProvider({
+      doc: ydoc,
+      articleId: collaborative.articleId,
+      supabaseClient: supabase,
+      user: collaborative.user,
+    });
+    providerRef.current = provider;
+    setCollabProvider(provider);
+    provider.connect();
+
+    return () => {
+      provider.disconnect();
+      providerRef.current = null;
+      setCollabProvider(null);
+    };
+    // Only run once per editor mount — collaborative config is treated as stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Track provider status for CollabStatusBar
+  const [collabStatus, setCollabStatus] = useState<'disconnected' | 'connecting' | 'connected'>(
+    'disconnected'
+  );
+
+  useEffect(() => {
+    if (!collaborative) return;
+    // Poll provider status — lightweight (no extra listeners needed)
+    const timer = setInterval(() => {
+      const provider = providerRef.current;
+      const s = provider?.status ?? 'disconnected';
+      setCollabStatus(s);
+    }, 500);
+    return () => clearInterval(timer);
+  }, [collaborative]);
+
+  // Awareness: other connected users
+  const awarenessUsers = useAwareness(collabProvider);
+
   // Resolve initial content — accept JSON or legacy HTML string
-  const resolvedValue = value ?? defaultValue ?? '';
+  // In collaborative mode, initial content is managed by Yjs — don't pass it to TipTap.
+  const resolvedValue = collaborative ? undefined : (value ?? defaultValue ?? '');
 
   const editor = useEditor({
     extensions: [
@@ -218,6 +290,8 @@ export default function RichTextEditor({
         codeBlock: {},
         bulletList: {},
         orderedList: {},
+        // Disable undo/redo in collaborative mode — Yjs provides undo/redo via yUndoPlugin
+        undoRedo: collaborative ? false : undefined,
       }),
       Underline,
       TextAlign.configure({
@@ -261,9 +335,12 @@ export default function RichTextEditor({
       // ── UX ───────────────────────────────────────────────
       CharacterCount,
       Focus.configure({ className: 'has-focus', mode: 'all' }),
+
+      // ── Collaboration (only when collaborative prop provided) ──────────
+      ...(ydoc ? [Collaboration.configure({ document: ydoc })] : []),
     ],
-    // Accept both JSON and HTML string as initial content
-    content: typeof resolvedValue === 'string' ? resolvedValue : resolvedValue,
+    // In collaborative mode, Yjs manages content — don't pass initial content.
+    content: collaborative ? undefined : (typeof resolvedValue === 'string' ? resolvedValue : resolvedValue),
     editorProps: {
       attributes: {
         class: `prose prose-invert max-w-none focus:outline-none font-[family-name:var(--font-body)] text-lg leading-relaxed text-white`,
@@ -509,6 +586,16 @@ export default function RichTextEditor({
               onCancel={() => setShowLinkInput(false)}
             />
           )}
+        </div>
+      )}
+
+      {/* ── Collaboration Status Bar (only in collab mode) ────── */}
+      {collaborative && (
+        <div className="px-3 py-2 border-b border-gold/10">
+          <CollabStatusBar
+            status={collabStatus}
+            connectedUsers={awarenessUsers}
+          />
         </div>
       )}
 

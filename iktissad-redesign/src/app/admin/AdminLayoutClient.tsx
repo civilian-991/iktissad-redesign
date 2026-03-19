@@ -50,6 +50,7 @@ import {
   Cpu,
   Users2,
   FolderOpen,
+  Braces,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -127,6 +128,7 @@ const settingsNavConfig: SubNavItem[] = [
   { key: 'webhooks',    href: '/admin/settings/webhooks',    icon: Webhook },
   { key: 'automations', href: '/admin/settings/automations', icon: Zap },
   { key: 'mcp',         href: '/admin/settings/mcp',         icon: Cpu },
+  { key: 'graphql',     href: '/admin/settings/graphql',     icon: Braces },
 ];
 
 const quickActionsConfig: QuickAction[] = [
@@ -206,6 +208,7 @@ export default function AdminLayoutClient({
       webhooks:         'Webhooks الصادرة',
       automations:      'قواعد الأتمتة',
       mcp:              'خادم MCP',
+      graphql:          'GraphQL API',
     };
     return subNavKeys[key] || key;
   };

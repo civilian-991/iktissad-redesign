@@ -63,6 +63,27 @@ import { useArticlePresence } from '@/hooks/useArticlePresence';
 import PresenceAvatars from '@/components/admin/PresenceAvatars';
 import type { MeData } from '@/app/api/auth/me/route';
 
+/**
+ * Generate a deterministic color from a userId string.
+ * Uses a simple hash → index into a curated palette.
+ */
+function generateUserColor(userId: string): string {
+  const colors = [
+    '#ef4444', // red
+    '#f97316', // orange
+    '#eab308', // yellow
+    '#22c55e', // green
+    '#06b6d4', // cyan
+    '#8b5cf6', // violet
+    '#ec4899', // pink
+    '#14b8a6', // teal
+    '#f59e0b', // amber
+    '#6366f1', // indigo
+  ];
+  const hash = userId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+}
+
 /** Recursively extract plain text from TipTap JSONContent for SEO analysis */
 function extractText(node: JSONContent | null | undefined): string {
   if (!node) return '';
@@ -670,6 +691,20 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 dir="rtl"
                 minHeight={400}
                 onImageInsert={() => setShowMediaPicker(true)}
+                // Real-time collaborative editing via Supabase Realtime + Yjs
+                // Only enabled when we have confirmed the current user's identity
+                collaborative={
+                  currentUser
+                    ? {
+                        articleId: id,
+                        user: {
+                          id: currentUser.userId,
+                          name: currentUser.name,
+                          color: generateUserColor(currentUser.userId),
+                        },
+                      }
+                    : undefined
+                }
               />
               {/* AI BubbleMenu — appears on text selection */}
               {editorInstance && (
