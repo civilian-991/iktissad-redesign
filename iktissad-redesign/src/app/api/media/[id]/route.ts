@@ -39,6 +39,8 @@ const updateMediaSchema = z.object({
   altEn: z.string().optional(),
   folder: z.string().optional(),
   filename: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  description: z.string().optional(),
 });
 
 export async function PUT(
@@ -77,6 +79,8 @@ export async function PUT(
   if (data.altEn !== undefined) updateData.alt_en = data.altEn;
   if (data.folder !== undefined) updateData.folder = data.folder;
   if (data.filename !== undefined) updateData.filename = data.filename;
+  if (data.tags !== undefined) updateData.tags = data.tags;
+  if (data.description !== undefined) updateData.description = data.description;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (admin.from("media") as any)

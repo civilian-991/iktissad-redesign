@@ -40,6 +40,7 @@ import { iconSizes } from '@/lib/design-tokens';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
+import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
 import ArticleAnalyticsPanel from '@/components/admin/ArticleAnalyticsPanel';
 import ArticleTypeSelector from '@/components/admin/ArticleTypeSelector';
 import ArticleOutlineModal from '@/components/admin/ArticleOutlineModal';
@@ -141,6 +142,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [section, setSection] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
+  const [focalX, setFocalX] = useState(0.5);
+  const [focalY, setFocalY] = useState(0.5);
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -211,13 +214,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         tags: selectedTags,
         featuredImage: featuredImage || '',
         status,
-      });
+        featuredImageFocalX: focalX,
+        featuredImageFocalY: focalY,
+      } as any);
       lastSavedHashRef.current = hash;
       setAutoSaveStatus('saved');
     } catch {
       setAutoSaveStatus('error');
     }
-  }, [id, title, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, getContentHash]);
+  }, [id, title, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, focalX, focalY, getContentHash]);
 
   // Trigger auto-save 30s after last change (only after initialization)
   useEffect(() => {
@@ -230,7 +235,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, excerpt, content, section, selectedTags, selectedCountry, featuredImage, initialized, performAutoSave]);
+  }, [title, excerpt, content, section, selectedTags, selectedCountry, featuredImage, focalX, focalY, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -251,6 +256,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       if ((article as any).articleType) {
         setArticleType((article as any).articleType as ArticleType);
       }
+      // Restore focal point if saved
+      if (article.featuredImageFocalX !== undefined) setFocalX(article.featuredImageFocalX);
+      if (article.featuredImageFocalY !== undefined) setFocalY(article.featuredImageFocalY);
       setInitialized(true);
     }
   }, [article, initialized]);
@@ -282,6 +290,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         status,
         // article_type is optional — only send if set
         ...(articleType ? { article_type: articleType } : {}),
+        featuredImageFocalX: focalX,
+        featuredImageFocalY: focalY,
       } as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
       // Fire-and-forget version snapshot on every manual save
@@ -722,6 +732,19 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               onUpload={(url) => setFeaturedImage(url)}
               onRemove={() => setFeaturedImage(null)}
             />
+            {featuredImage && (
+              <div className="mt-4">
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                  نقطة التركيز
+                </label>
+                <FocalPointSelector
+                  imageUrl={featuredImage}
+                  focalX={focalX}
+                  focalY={focalY}
+                  onChange={(x, y) => { setFocalX(x); setFocalY(y); }}
+                />
+              </div>
+            )}
           </motion.div>
 
           {/* Country / بلدان */}

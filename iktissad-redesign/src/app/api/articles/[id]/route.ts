@@ -78,6 +78,10 @@ const updateArticleSchema = z.object({
   publishedAt: z.string().nullable().optional(),
   /** Editorial article type — drives AI prompts and word count targets */
   article_type: z.enum(["news", "report", "analysis", "interview", "opinion"]).optional(),
+  /** Focal point X (0–1) for smart image cropping */
+  featuredImageFocalX: z.number().min(0).max(1).optional(),
+  /** Focal point Y (0–1) for smart image cropping */
+  featuredImageFocalY: z.number().min(0).max(1).optional(),
 });
 
 export async function PUT(
@@ -129,6 +133,8 @@ export async function PUT(
   if (data.deckEn !== undefined) updateData.deck_en = data.deckEn;
   if (data.accentColor !== undefined) updateData.accent_color = data.accentColor;
   if (data.article_type !== undefined) updateData.article_type = data.article_type;
+  if (data.featuredImageFocalX !== undefined) updateData.featured_image_focal_x = data.featuredImageFocalX;
+  if (data.featuredImageFocalY !== undefined) updateData.featured_image_focal_y = data.featuredImageFocalY;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {

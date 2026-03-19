@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
   const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
   const folder = searchParams.get("folder");
   const mimeType = searchParams.get("type");
+  const search = searchParams.get("search");
+  const tag = searchParams.get("tag");
 
   const admin = createAdminClient();
 
@@ -24,6 +26,8 @@ export async function GET(request: NextRequest) {
 
   if (folder) query = query.eq("folder", folder);
   if (mimeType) query = query.ilike("mime_type", `${mimeType}%`);
+  if (search) query = query.ilike("description", `%${search}%`);
+  if (tag) query = query.contains("tags", JSON.stringify([tag]));
 
   const start = (page - 1) * pageSize;
   const { data: rows, count, error } = await query
@@ -63,6 +67,8 @@ const createMediaSchema = z.object({
   altEn: z.string().optional().default(""),
   folder: z.string().optional().default(""),
   uploadedBy: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional().default([]),
+  description: z.string().optional().default(""),
 });
 
 export async function POST(request: NextRequest) {
@@ -103,6 +109,8 @@ export async function POST(request: NextRequest) {
       alt_en: data.altEn,
       folder: data.folder,
       uploaded_by: data.uploadedBy ?? null,
+      tags: data.tags,
+      description: data.description,
     })
     .select()
     .single();

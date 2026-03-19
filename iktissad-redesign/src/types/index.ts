@@ -155,6 +155,10 @@ export interface Article {
   /** Optional accent color (hex) for magazine layout theming */
   accentColor?: string;
   featuredImage: string;
+  /** Focal point X (0–1) for smart image cropping */
+  featuredImageFocalX?: number;
+  /** Focal point Y (0–1) for smart image cropping */
+  featuredImageFocalY?: number;
   section: string;
   sector: string;
   country: string;
@@ -232,6 +236,10 @@ export interface MediaItem {
   folder: string;
   uploadedBy: string;
   createdAt: string;
+  /** AI-generated tags for filtering and search */
+  tags: string[];
+  /** Human-readable description / caption */
+  description: string;
 }
 
 export interface Profile {

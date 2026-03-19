@@ -72,6 +72,8 @@ export function mapArticleRow(
     content: row.content,
     contentEn: row.content_en,
     featuredImage: row.featured_image,
+    featuredImageFocalX: (row.featured_image_focal_x as number | undefined) ?? 0.5,
+    featuredImageFocalY: (row.featured_image_focal_y as number | undefined) ?? 0.5,
     section: row.sections?.name ?? row.sections?.slug ?? "",
     sector: row.sectors?.name ?? row.sectors?.slug ?? "",
     country: row.countries?.name ?? row.countries?.slug ?? "",
@@ -152,6 +154,8 @@ export function mapMediaRow(row: MediaRow): MediaItem {
     folder: row.folder,
     uploadedBy: row.uploaded_by ?? "",
     createdAt: row.created_at,
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+    description: (row.description as string | undefined) ?? "",
   };
 }
 
