@@ -39,9 +39,26 @@ import RichTextEditor from '@/components/admin/RichTextEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
 import ArticleAnalyticsPanel from '@/components/admin/ArticleAnalyticsPanel';
+import ArticleTypeSelector from '@/components/admin/ArticleTypeSelector';
+import ArticleOutlineModal from '@/components/admin/ArticleOutlineModal';
+import AISidebar from '@/components/admin/AISidebar';
+import AIBubbleMenu from '@/components/admin/AIBubbleMenu';
+import SEOPanel from '@/components/admin/SEOPanel';
+import SplitPreview from '@/components/admin/SplitPreview';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
+import { ArticleType } from '@/lib/ai/arabic-editorial';
+import type { ArticleTypeConfig } from '@/lib/ai/arabic-editorial';
+
+/** Recursively extract plain text from TipTap JSONContent for SEO analysis */
+function extractText(node: JSONContent | null | undefined): string {
+  if (!node) return '';
+  if (node.type === 'text') return node.text ?? '';
+  if (!node.content?.length) return '';
+  const sep = node.type === 'paragraph' || node.type === 'heading' ? '\n' : ' ';
+  return node.content.map(extractText).join(sep);
+}
 
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
 type TagKey = typeof tagKeys[number];
@@ -124,6 +141,20 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
+  // Article type selector + outline modal
+  const [articleType, setArticleType] = useState<ArticleType | null>(null);
+  const [showOutlineModal, setShowOutlineModal] = useState(false);
+  // Ref to the TipTap editor instance (set via onEditorReady callback from RichTextEditor)
+  const editorRef = useRef<import('@tiptap/core').Editor | null>(null);
+  // State mirror of editorRef for reactive rendering of AI components
+  const [editorInstance, setEditorInstance] = useState<import('@tiptap/core').Editor | null>(null);
+
+  // Phase 1 — AI Sidebar, SEO Panel, Split Preview
+  const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [showSplitPreview, setShowSplitPreview] = useState(false);
+  const [contentText, setContentText] = useState('');
+  const [seoKeyword, setSeoKeyword] = useState('');
+
   // Auto-save state
   type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
@@ -186,6 +217,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         setSelectedCountry(article.country);
         setSelectedRegion(findRegionForCountry(article.country));
       }
+      // Restore article_type if the article has one saved
+      if ((article as any).articleType) {
+        setArticleType((article as any).articleType as ArticleType);
+      }
       setInitialized(true);
     }
   }, [article, initialized]);
@@ -215,7 +250,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         tags: selectedTags,
         featuredImage: featuredImage || '',
         status,
-      });
+        // article_type is optional — only send if set
+        ...(articleType ? { article_type: articleType } : {}),
+      } as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
     } catch (err: any) {
       toast.error(err.message || t('admin.common.error'));
@@ -223,6 +260,25 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       setIsSaving(false);
     }
   };
+
+  /** Called when ArticleTypeSelector changes. Shows outline prompt. */
+  const handleArticleTypeChange = useCallback(
+    (type: ArticleType, config: ArticleTypeConfig) => {
+      setArticleType(type);
+      toast.success(`تم تغيير نوع المقال إلى: ${config.arabicLabel}`);
+      setShowOutlineModal(true);
+    },
+    []
+  );
+
+  /** Insert the outline HTML into TipTap. Closes modal. */
+  const handleOutlineInsert = useCallback((html: string) => {
+    setShowOutlineModal(false);
+    if (editorRef.current) {
+      // emitUpdate: false suppresses the onChange event during outline insertion
+      editorRef.current.commands.setContent(html, { emitUpdate: false });
+    }
+  }, []);
 
   const handleDelete = async () => {
     try {
@@ -351,6 +407,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             <Trash2 size={16} />
             {t('admin.articles.actions.delete')}
           </button>
+          <button
+            onClick={() => setShowSplitPreview(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm"
+          >
+            <Eye size={16} />
+            معاينة مباشرة
+          </button>
           <a
             href={`/news/${article.slug}`}
             target="_blank"
@@ -409,6 +472,19 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Article Type Selector */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <ArticleTypeSelector
+              value={articleType}
+              onChange={handleArticleTypeChange}
+              showWordCount={true}
+            />
+          </motion.div>
+
           {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -476,21 +552,43 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             />
           </motion.div>
 
-          {/* Content Editor - TipTap */}
+          {/* Content Editor - TipTap + AI Sidebar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex gap-2 items-start"
           >
-            <RichTextEditor
-              value={content}
-              onChange={(json) => {
-                setEditorBody(json);
-              }}
-              placeholder={t('admin.articles.editor.contentPlaceholder')}
-              dir="rtl"
-              minHeight={400}
-              onImageInsert={() => setShowMediaPicker(true)}
+            <div className="flex-1 min-w-0">
+              <RichTextEditor
+                value={content}
+                onChange={(json) => {
+                  setEditorBody(json);
+                  setContentText(extractText(json));
+                }}
+                onEditorMount={(editor) => {
+                  editorRef.current = editor;
+                  setEditorInstance(editor);
+                }}
+                placeholder={t('admin.articles.editor.contentPlaceholder')}
+                dir="rtl"
+                minHeight={400}
+                onImageInsert={() => setShowMediaPicker(true)}
+              />
+              {/* AI BubbleMenu — appears on text selection */}
+              {editorInstance && (
+                <AIBubbleMenu
+                  editor={editorInstance}
+                  articleType={articleType ?? undefined}
+                />
+              )}
+            </div>
+            {/* AI Sidebar — collapsible right panel */}
+            <AISidebar
+              editor={editorInstance}
+              articleType={articleType ?? undefined}
+              isOpen={aiSidebarOpen}
+              onToggle={() => setAiSidebarOpen((v) => !v)}
             />
           </motion.div>
 
@@ -587,6 +685,29 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             </div>
           </motion.div>
 
+          {/* SEO Panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <SEOPanel
+              content={contentText}
+              title={title}
+              excerpt={excerpt}
+              targetKeyword={seoKeyword}
+              articleType={articleType ?? undefined}
+              sectionSlug={section || undefined}
+              onTargetKeywordChange={setSeoKeyword}
+              onEntityClick={(entity) => {
+                if (!selectedTags.includes(entity)) {
+                  setSelectedTags((prev) => [...prev, entity]);
+                  toast.success(`تمت إضافة "${entity}" كوسم`);
+                }
+              }}
+            />
+          </motion.div>
+
           {/* Status */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -629,6 +750,28 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           </motion.div>
         </div>
       </div>
+
+      {/* Split Preview Overlay */}
+      <SplitPreview
+        content={editorBody}
+        title={title}
+        excerpt={excerpt}
+        featuredImageUrl={featuredImage ?? undefined}
+        articleType={articleType ?? undefined}
+        isOpen={showSplitPreview}
+        onClose={() => setShowSplitPreview(false)}
+        articleId={id}
+      />
+
+      {/* Article Outline Modal */}
+      {showOutlineModal && articleType && (
+        <ArticleOutlineModal
+          open={showOutlineModal}
+          articleType={articleType}
+          onInsert={handleOutlineInsert}
+          onCancel={() => setShowOutlineModal(false)}
+        />
+      )}
 
       {/* Media Picker Modal */}
       <MediaPicker

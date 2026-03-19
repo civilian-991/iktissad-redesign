@@ -3,6 +3,7 @@ import { Tajawal, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import CookieConsent from "@/components/CookieConsent";
+import SentryUserIdentification from "@/components/SentryUserIdentification";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -49,7 +50,10 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${tajawal.variable} ${playfair.variable}`}>
       <body className="antialiased min-h-screen bg-cream">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <SentryUserIdentification />
+        </Providers>
         <CookieConsent />
       </body>
     </html>

@@ -45,6 +45,9 @@ import { Badge } from '@/components/ui';
 import { Toaster } from 'sonner';
 import NotificationBell from '@/components/admin/NotificationBell';
 import CommandPalette from '@/components/admin/CommandPalette';
+import PagePerfTracker from '@/components/admin/PagePerfTracker';
+import RateLimitBanner from '@/components/admin/RateLimitBanner';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION CONFIGURATION
@@ -674,9 +677,14 @@ export default function AdminLayoutClient({
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Rate-limit banner — appears below the sticky header when any request is throttled */}
+        <RateLimitBanner />
+
+        {/* Page Content — wrapped in error boundary so the sidebar/nav always work */}
         <main className="p-6">
-          {children}
+          <SectionErrorBoundary section="admin-layout">
+            {children}
+          </SectionErrorBoundary>
         </main>
       </div>
 
@@ -698,6 +706,9 @@ export default function AdminLayoutClient({
         open={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
       />
+
+      {/* Performance tracker — zero UI, measures TTI per page */}
+      <PagePerfTracker />
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>

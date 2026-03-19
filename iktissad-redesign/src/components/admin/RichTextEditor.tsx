@@ -14,6 +14,7 @@
 
 import { useCallback, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditorPerformance } from '@/hooks/useEditorPerformance';
 import type { JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -80,6 +81,11 @@ export interface RichTextEditorProps {
   onImageInsert?: () => void;
   /** Additional className for the editor wrapper */
   className?: string;
+  /**
+   * Called once the TipTap editor instance is ready.
+   * The parent can store this ref to call commands (e.g. setContent for outline insertion).
+   */
+  onEditorMount?: (editor: import('@tiptap/core').Editor) => void;
   /**
    * @deprecated Pass JSONContent to value instead.
    * Legacy prop alias for string HTML value.
@@ -191,9 +197,14 @@ export default function RichTextEditor({
   showToolbar = true,
   onImageInsert,
   className = '',
+  onEditorMount,
   defaultValue,
 }: RichTextEditorProps) {
   const [showLinkInput, setShowLinkInput] = useState(false);
+
+  // Performance monitoring
+  const { result: perfResult, onEditorReady, onEditorUpdate } = useEditorPerformance();
+  const isSlowEditor = perfResult.isSlowEditor && process.env.NODE_ENV !== 'production';
 
   // Resolve initial content — accept JSON or legacy HTML string
   const resolvedValue = value ?? defaultValue ?? '';
@@ -260,7 +271,12 @@ export default function RichTextEditor({
         style: `min-height: ${minHeight}px`,
       },
     },
+    onCreate: ({ editor: ed }) => {
+      onEditorReady();
+      onEditorMount?.(ed);
+    },
     onUpdate: ({ editor: ed }) => {
+      onEditorUpdate();
       // Output TipTap JSON (not HTML)
       onChange?.(ed.getJSON());
     },
@@ -474,6 +490,16 @@ export default function RichTextEditor({
             title="تبديل اتجاه الفقرة (RTL / LTR)"
             label={dir === 'rtl' ? 'RTL' : 'LTR'}
           />
+
+          {/* Performance warning badge — visible in dev/staging only */}
+          {isSlowEditor && (
+            <span
+              title={`محرر بطيء — وقت التحميل: ${perfResult.editorMountTime ?? '?'}ms${perfResult.avgKeystrokeLatency !== null ? ` | كمون الإدخال: ${perfResult.avgKeystrokeLatency}ms` : ''}`}
+              className="ms-auto flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/15 text-amber-400 text-xs font-semibold border border-amber-500/30 cursor-help"
+            >
+              ⚠ بطيء
+            </span>
+          )}
 
           {/* Link Input Popover */}
           {showLinkInput && (

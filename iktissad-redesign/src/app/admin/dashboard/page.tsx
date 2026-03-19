@@ -35,6 +35,8 @@ import { Badge, StatusBadge } from '@/components/ui';
 import { swrFetcher, articlesKey, usersKey, magazinesKey, subscribersKey } from '@/lib/api-client';
 import type { Article, AdminUser, MagazineIssue, ApiResponse } from '@/types';
 import type { Subscriber } from '@/lib/api-client';
+import WidgetErrorBoundary from '@/components/admin/WidgetErrorBoundary';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 // ═══════════════════════════════════════════════════════════════
 // STATS CONFIGURATION
@@ -136,6 +138,7 @@ export default function DashboardPage() {
         {statsConfig.map((stat, index) => {
           const sv = statsValues[stat.key];
           return (
+            <WidgetErrorBoundary key={stat.key} label={stat.key}>
             <motion.div
               key={stat.key}
               initial={{ opacity: 0, y: 20 }}
@@ -172,6 +175,7 @@ export default function DashboardPage() {
                 </p>
               </div>
             </motion.div>
+            </WidgetErrorBoundary>
           );
         })}
       </div>
@@ -179,6 +183,7 @@ export default function DashboardPage() {
       {/* Main Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Chart Section — Coming Soon */}
+        <WidgetErrorBoundary label="visits-chart">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -214,8 +219,10 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.div>
+        </WidgetErrorBoundary>
 
         {/* Top Countries — Coming Soon */}
+        <WidgetErrorBoundary label="top-countries">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -243,11 +250,13 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.div>
+        </WidgetErrorBoundary>
       </div>
 
       {/* Second Row */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent Articles - from real API */}
+        <SectionErrorBoundary section="recent-articles">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -320,8 +329,10 @@ export default function DashboardPage() {
             )}
           </div>
         </motion.div>
+        </SectionErrorBoundary>
 
         {/* Activity Log — Empty State */}
+        <WidgetErrorBoundary label="activity-log">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -346,6 +357,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.div>
+        </WidgetErrorBoundary>
       </div>
 
       {/* Quick Actions */}

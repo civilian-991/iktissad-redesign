@@ -36,6 +36,18 @@ import { iconSizes } from '@/lib/design-tokens';
 import { Button, Badge, StatusBadge } from '@/components/ui';
 import { swrFetcher, articlesKey, deleteArticle } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
+import { ArticleType } from '@/lib/ai/arabic-editorial';
+
+// ─── Article type badge config ───────────────────────────────────────────────
+
+const ARTICLE_TYPE_BADGE: Record<string, { label: string; className: string }> = {
+  news:      { label: 'خبر',    className: 'text-zinc-300  bg-zinc-700/40  border border-zinc-600/40' },
+  report:    { label: 'تقرير',  className: 'text-blue-300  bg-blue-700/20  border border-blue-600/30' },
+  analysis:  { label: 'تحليل',  className: 'text-purple-300 bg-purple-700/20 border border-purple-600/30' },
+  interview: { label: 'مقابلة', className: 'text-amber-300 bg-amber-700/20  border border-amber-600/30' },
+  opinion:   { label: 'رأي',    className: 'text-green-300  bg-green-700/20  border border-green-600/30' },
+};
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -347,6 +359,7 @@ export default function ArticlesPage() {
       </AnimatePresence>
 
       {/* Articles Table */}
+      <SectionErrorBoundary section="articles-table">
       <div className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden">
         {isLoading && articles.length === 0 ? (
           <div className="flex justify-center py-16">
@@ -424,12 +437,21 @@ export default function ArticlesPage() {
                           />
                         )}
                         <div className="min-w-0">
-                          <Link
-                            href={`/admin/articles/${article.id}`}
-                            className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1"
-                          >
-                            {article.title}
-                          </Link>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <Link
+                              href={`/admin/articles/${article.id}`}
+                              className="text-white hover:text-gold transition-colors font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1"
+                            >
+                              {article.title}
+                            </Link>
+                            {(article as any).articleType && ARTICLE_TYPE_BADGE[(article as any).articleType] && (
+                              <span
+                                className={`flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded font-[family-name:var(--font-display)] font-semibold ${ARTICLE_TYPE_BADGE[(article as any).articleType].className}`}
+                              >
+                                {ARTICLE_TYPE_BADGE[(article as any).articleType].label}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-white/40 text-xs line-clamp-1">
                             {article.excerpt}
                           </p>
@@ -565,6 +587,7 @@ export default function ArticlesPage() {
           </div>
         )}
       </div>
+      </SectionErrorBoundary>
     </div>
   );
 }

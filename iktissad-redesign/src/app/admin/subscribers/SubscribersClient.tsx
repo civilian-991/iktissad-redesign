@@ -41,6 +41,7 @@ import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import { swrFetcher, subscribersKey, updateSubscriber } from '@/lib/api-client';
 import type { Subscriber, SubscriptionPlan, ApiResponse } from '@/lib/api-client';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
@@ -559,6 +560,7 @@ export default function SubscribersClient() {
       )}
 
       {/* Table Container */}
+      <SectionErrorBoundary section="subscribers-table">
       <div className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden">
         {/* Sticky Header */}
         <div className="overflow-x-auto">
@@ -663,6 +665,7 @@ export default function SubscribersClient() {
           </div>
         )}
       </div>
+      </SectionErrorBoundary>
     </div>
   );
 }

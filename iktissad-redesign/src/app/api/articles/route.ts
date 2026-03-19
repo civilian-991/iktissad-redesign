@@ -7,6 +7,28 @@ import { mapArticleRow } from "@/lib/supabase/mappers";
 import { notifyIndexNow } from "@/lib/indexnow";
 import type { ApiResponse, Article } from "@/types";
 
+// ─── Rate-limit headers helper ───────────────────────────────────
+// Values are stubbed for now. Replace with a real counter (e.g. Redis /
+// Supabase Edge Functions) once you have per-user tracking in place.
+
+const RATE_LIMIT = 100; // requests per 60-second window
+
+function rateLimitHeaders(): HeadersInit {
+  // Window resets at the top of the next minute
+  const now = Math.floor(Date.now() / 1000);
+  const windowSeconds = 60;
+  const resetAt = Math.ceil(now / windowSeconds) * windowSeconds;
+
+  // Stub: assume all slots are still available (replace with real counter)
+  const remaining = RATE_LIMIT;
+
+  return {
+    "X-RateLimit-Limit": String(RATE_LIMIT),
+    "X-RateLimit-Remaining": String(remaining),
+    "X-RateLimit-Reset": String(resetAt),
+  };
+}
+
 const ARTICLE_SELECT = `
   *,
   users:author_id ( name, avatar ),
@@ -16,7 +38,7 @@ const ARTICLE_SELECT = `
 `;
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
   const section = searchParams.get("section");
@@ -28,35 +50,35 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient();
 
+  // Resolve all slug → ID lookups in parallel instead of sequentially.
+  // Previously each slug fired a separate sequential query; now all run
+  // concurrently and we wait for all results before building the article query.
+  const [sectionResult, countryResult, sectorResult] = await Promise.all([
+    section
+      ? supabase.from("sections").select("id").eq("slug", section).single()
+      : Promise.resolve({ data: null }),
+    country
+      ? supabase.from("countries").select("id").eq("slug", country).single()
+      : Promise.resolve({ data: null }),
+    sector
+      ? supabase.from("sectors").select("id").eq("slug", sector).single()
+      : Promise.resolve({ data: null }),
+  ]);
+
   let query = supabase
     .from("articles")
     .select(ARTICLE_SELECT, { count: "exact" });
 
-  if (section) {
-    const { data: sec } = await supabase
-      .from("sections")
-      .select("id")
-      .eq("slug", section)
-      .single();
-    if (sec) query = query.eq("section_id", (sec as { id: string }).id);
+  if (section && sectionResult.data) {
+    query = query.eq("section_id", (sectionResult.data as { id: string }).id);
   }
 
-  if (country) {
-    const { data: c } = await supabase
-      .from("countries")
-      .select("id")
-      .eq("slug", country)
-      .single();
-    if (c) query = query.eq("country_id", (c as { id: string }).id);
+  if (country && countryResult.data) {
+    query = query.eq("country_id", (countryResult.data as { id: string }).id);
   }
 
-  if (sector) {
-    const { data: s } = await supabase
-      .from("sectors")
-      .select("id")
-      .eq("slug", sector)
-      .single();
-    if (s) query = query.eq("sector_id", (s as { id: string }).id);
+  if (sector && sectorResult.data) {
+    query = query.eq("sector_id", (sectorResult.data as { id: string }).id);
   }
 
   if (status) {
@@ -98,7 +120,7 @@ export async function GET(request: NextRequest) {
     },
   };
 
-  return NextResponse.json(response);
+  return NextResponse.json(response, { headers: rateLimitHeaders() });
 }
 
 const createArticleSchema = z.object({
@@ -201,5 +223,5 @@ export async function POST(request: NextRequest) {
   }
 
   const response: ApiResponse<Article> = { data: article };
-  return NextResponse.json(response, { status: 201 });
+  return NextResponse.json(response, { status: 201, headers: rateLimitHeaders() });
 }

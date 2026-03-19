@@ -76,6 +76,8 @@ const updateArticleSchema = z.object({
   tags: z.array(z.string()).optional(),
   status: z.enum(["published", "draft", "review", "scheduled"]).optional(),
   publishedAt: z.string().nullable().optional(),
+  /** Editorial article type — drives AI prompts and word count targets */
+  article_type: z.enum(["news", "report", "analysis", "interview", "opinion"]).optional(),
 });
 
 export async function PUT(
@@ -126,6 +128,7 @@ export async function PUT(
   if (data.deck !== undefined) updateData.deck = data.deck;
   if (data.deckEn !== undefined) updateData.deck_en = data.deckEn;
   if (data.accentColor !== undefined) updateData.accent_color = data.accentColor;
+  if (data.article_type !== undefined) updateData.article_type = data.article_type;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {

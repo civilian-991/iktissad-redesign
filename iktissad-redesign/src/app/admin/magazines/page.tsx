@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { swrFetcher, magazinesKey, deleteMagazine } from '@/lib/api-client';
 import type { MagazineIssue, ApiResponse } from '@/types';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 // Kept as fallback for when API returns no data
 const magazinesFallback: any[] = [
@@ -361,6 +362,7 @@ export default function MagazinesPage() {
       </div>
 
       {/* Magazines Grid/List */}
+      <SectionErrorBoundary section="magazines-list">
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMagazines.map((magazine, index) => (
@@ -597,6 +599,7 @@ export default function MagazinesPage() {
           </Link>
         </div>
       )}
+      </SectionErrorBoundary>
 
       {/* Delete Modal */}
       <AnimatePresence>

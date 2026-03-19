@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -54,7 +55,7 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
-  async headers() {
+  headers() {
     return [
       {
         source: "/(.*)",
@@ -73,4 +74,19 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Source map upload auth token
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload a larger set of source maps to improve stack trace fidelity
+  widenClientFileUpload: true,
+
+  // Route Sentry requests through Next.js to avoid ad-blockers
+  tunnelRoute: "/monitoring",
+
+  // Suppress Sentry CLI output outside of CI
+  silent: !process.env.CI,
+});

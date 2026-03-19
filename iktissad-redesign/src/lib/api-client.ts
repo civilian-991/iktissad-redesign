@@ -3,7 +3,19 @@
  *
  * Wraps fetch() with JSON parsing, error handling, and typed responses
  * matching the ApiResponse<T> shape returned by our API routes.
+ *
+ * Features:
+ *  - Typed ApiError with status, message, retryAfter fields
+ *  - 429 rate-limit detection: reads Retry-After header (seconds or HTTP date)
+ *  - Automatic retry with exact Retry-After wait (max 3 retries)
+ *  - Exponential back-off when no Retry-After header: 1s → 2s → 4s
+ *  - In-memory request queue (max 20) paused during rate-limit window
+ *  - Sonner toast on first 429 (debounced), error toast when retries exhausted
+ *  - 30-second request timeout via AbortController
+ *  - AbortController signal threading through retry loop
  */
+
+import { toast } from "sonner";
 
 import type {
   ApiResponse,
@@ -91,24 +103,228 @@ export interface PromoCode {
 // Re-export ApiResponse for consumers that need it
 export type { ApiResponse } from "@/types";
 
-// ─── Base fetcher ───────────────────────────────────────────────
+// ─── Typed error ────────────────────────────────────────────────
 
-async function api<T>(
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+    public readonly retryAfter?: number
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+// ─── Rate-limit queue & state ────────────────────────────────────
+
+const MAX_QUEUE_SIZE = 20;
+const MAX_RETRIES = 3;
+const DEFAULT_TIMEOUT_MS = 30_000;
+const BACKOFF_SEQUENCE_MS = [1_000, 2_000, 4_000];
+
+// Global pause state – when a 429 is received, all queued requests wait here.
+let rateLimitResumeAt: number | null = null; // epoch ms when queue can resume
+
+// Pending queue entries: each entry is a thunk that resolves when executed.
+type QueueEntry = {
+  run: () => void;
+  reject: (err: unknown) => void;
+};
+const requestQueue: QueueEntry[] = [];
+
+// Toast deduplication – only one "rate limited" toast per burst window.
+let rateLimitToastActive = false;
+
+/**
+ * Parse the Retry-After header value.
+ * Supports both integer-seconds ("30") and HTTP-date formats.
+ * Returns seconds to wait, or null if unparseable.
+ */
+function parseRetryAfter(value: string | null): number | null {
+  if (!value) return null;
+  const seconds = parseInt(value, 10);
+  if (!isNaN(seconds) && seconds >= 0) return seconds;
+  // Try HTTP-date
+  const date = new Date(value);
+  if (!isNaN(date.getTime())) {
+    const diff = Math.ceil((date.getTime() - Date.now()) / 1000);
+    return Math.max(0, diff);
+  }
+  return null;
+}
+
+/**
+ * Show a single debounced "rate limited" toast.
+ * Clears the dedup flag after the wait window expires.
+ */
+function showRateLimitToast(waitSeconds: number | null): void {
+  if (rateLimitToastActive) return;
+  rateLimitToastActive = true;
+
+  const message =
+    waitSeconds !== null
+      ? `جارٍ الانتظار ${waitSeconds} ثانية قبل إعادة المحاولة…`
+      : "جارٍ الانتظار قبل إعادة المحاولة…";
+
+  toast.loading(message, { id: "rate-limit", duration: (waitSeconds ?? 5) * 1_000 });
+
+  const clearAfter = ((waitSeconds ?? 5) + 1) * 1_000;
+  setTimeout(() => {
+    rateLimitToastActive = false;
+  }, clearAfter);
+}
+
+/**
+ * Drain the request queue after a rate-limit window expires.
+ * Each entry's `run()` re-invokes the fetch; errors surface to the original caller.
+ */
+function drainQueue(): void {
+  const now = Date.now();
+  if (rateLimitResumeAt !== null && now < rateLimitResumeAt) {
+    // Still in the window – schedule another drain attempt
+    setTimeout(drainQueue, rateLimitResumeAt - now + 50);
+    return;
+  }
+  rateLimitResumeAt = null;
+  // Drain all pending entries (they will self-retry from inside api())
+  while (requestQueue.length > 0) {
+    const entry = requestQueue.shift()!;
+    entry.run();
+  }
+}
+
+/**
+ * Enqueue a deferred request. If the queue is full, reject the oldest entry
+ * to avoid unbounded memory growth.
+ */
+function enqueue(entry: QueueEntry): void {
+  if (requestQueue.length >= MAX_QUEUE_SIZE) {
+    // Reject the oldest (front) item
+    const oldest = requestQueue.shift()!;
+    oldest.reject(
+      new ApiError(429, "تم تجاوز الحد الأقصى لقائمة الانتظار — حاول مجدداً لاحقاً", 0)
+    );
+  }
+  requestQueue.push(entry);
+}
+
+// ─── Core fetch with retry ───────────────────────────────────────
+
+/**
+ * Internal fetch wrapper that handles:
+ * - 30-second timeout
+ * - 429 detection with Retry-After parsing
+ * - Exponential backoff (up to MAX_RETRIES)
+ * - Propagation of AbortController signal
+ */
+async function fetchWithRetry<T>(
   path: string,
-  init?: RequestInit
+  init: RequestInit & { signal?: AbortSignal },
+  attempt = 0
 ): Promise<ApiResponse<T>> {
-  const res = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...init?.headers },
-    ...init,
-  });
+  // If we are in a rate-limit window and this is a fresh attempt (not a retry
+  // inside the wait), queue the request and wait.
+  if (rateLimitResumeAt !== null && Date.now() < rateLimitResumeAt && attempt === 0) {
+    return new Promise<ApiResponse<T>>((resolve, reject) => {
+      enqueue({
+        run: () => fetchWithRetry<T>(path, init, 0).then(resolve).catch(reject),
+        reject,
+      });
+    });
+  }
 
-  const json: ApiResponse<T> = await res.json();
+  // Combine caller signal with a per-request timeout signal
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(
+    () => timeoutController.abort(new DOMException("Request timed out", "TimeoutError")),
+    DEFAULT_TIMEOUT_MS
+  );
+
+  // Merge signals: abort if either the caller or timeout fires
+  let combinedSignal: AbortSignal;
+  if (init.signal) {
+    // AbortSignal.any is widely available in modern environments
+    try {
+      combinedSignal = AbortSignal.any
+        ? AbortSignal.any([init.signal, timeoutController.signal])
+        : timeoutController.signal;
+    } catch {
+      combinedSignal = timeoutController.signal;
+    }
+  } else {
+    combinedSignal = timeoutController.signal;
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      headers: { "Content-Type": "application/json", ...init.headers },
+      ...init,
+      signal: combinedSignal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  // ── 429 handling ──────────────────────────────────────────────
+  if (res.status === 429) {
+    const retryAfterHeader = res.headers.get("Retry-After");
+    const waitSeconds = parseRetryAfter(retryAfterHeader);
+
+    // Compute actual wait in ms
+    const waitMs =
+      waitSeconds !== null
+        ? waitSeconds * 1_000
+        : BACKOFF_SEQUENCE_MS[Math.min(attempt, BACKOFF_SEQUENCE_MS.length - 1)];
+
+    // Show toast (debounced)
+    showRateLimitToast(waitSeconds ?? Math.round(waitMs / 1_000));
+
+    if (attempt >= MAX_RETRIES) {
+      toast.error("تعذّر إتمام الطلب — حاول مجدداً لاحقاً", { id: "rate-limit-exhausted" });
+      throw new ApiError(429, "تعذّر إتمام الطلب — تجاوزت حد إعادة المحاولة", waitSeconds ?? undefined);
+    }
+
+    // Record the global resume time so concurrent requests queue up
+    rateLimitResumeAt = Date.now() + waitMs;
+
+    // Wait, then retry (but only if the caller hasn't aborted)
+    await new Promise<void>((resolve, reject) => {
+      const tid = setTimeout(resolve, waitMs);
+      if (init.signal) {
+        init.signal.addEventListener("abort", () => {
+          clearTimeout(tid);
+          reject(init.signal!.reason ?? new DOMException("Aborted", "AbortError"));
+        });
+      }
+    });
+
+    return fetchWithRetry<T>(path, init, attempt + 1);
+  }
+
+  // ── Non-429 error ─────────────────────────────────────────────
+  let json: ApiResponse<T>;
+  try {
+    json = (await res.json()) as ApiResponse<T>;
+  } catch {
+    throw new ApiError(res.status, `HTTP ${res.status}: response is not JSON`);
+  }
 
   if (!res.ok) {
-    throw new Error(json.error ?? `Request failed (${res.status})`);
+    throw new ApiError(res.status, json.error ?? `Request failed (${res.status})`);
   }
 
   return json;
+}
+
+// ─── Public base fetcher ─────────────────────────────────────────
+
+async function api<T>(
+  path: string,
+  init?: RequestInit & { signal?: AbortSignal }
+): Promise<ApiResponse<T>> {
+  return fetchWithRetry<T>(path, init ?? {});
 }
 
 /**
@@ -116,6 +332,25 @@ async function api<T>(
  */
 export async function swrFetcher<T>(url: string): Promise<ApiResponse<T>> {
   return api<T>(url);
+}
+
+// ─── Rate-limit state accessor (for hooks/banners) ───────────────
+
+/**
+ * Returns the number of seconds remaining in the current rate-limit window,
+ * or 0 if not currently rate-limited.
+ */
+export function getRateLimitSecondsRemaining(): number {
+  if (rateLimitResumeAt === null) return 0;
+  const remaining = Math.ceil((rateLimitResumeAt - Date.now()) / 1_000);
+  return Math.max(0, remaining);
+}
+
+/**
+ * Returns true if requests are currently paused due to a 429 window.
+ */
+export function isRateLimited(): boolean {
+  return rateLimitResumeAt !== null && Date.now() < rateLimitResumeAt;
 }
 
 // ─── Articles ───────────────────────────────────────────────────

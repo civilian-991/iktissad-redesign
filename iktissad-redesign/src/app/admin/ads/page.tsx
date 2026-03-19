@@ -30,6 +30,7 @@ import type { ApiResponse } from '@/types';
 import type { AdCampaign } from '@/app/api/ad-campaigns/route';
 import type { Ad } from '@/app/api/ads/route';
 import type { Advertiser } from '@/app/api/advertisers/route';
+import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -870,7 +871,9 @@ export default function AdsPage() {
 
       {/* Tab content */}
       <div className="bg-midnight/50 border border-gold/10 rounded-2xl p-6">
-        {tab === 'campaigns' ? <CampaignsTab /> : <AdsTab />}
+        <SectionErrorBoundary section="ads-campaigns-table">
+          {tab === 'campaigns' ? <CampaignsTab /> : <AdsTab />}
+        </SectionErrorBoundary>
       </div>
     </div>
   );
