@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import type {
   ApiResponse,
   Article,
+  ArticleVersion,
   MagazineIssue,
   AdminUser,
   MediaItem,
@@ -994,6 +995,46 @@ export async function sendNewsletter(
 ): Promise<ApiResponse<Newsletter>> {
   return api<Newsletter>(`/api/newsletters/${id}/send`, {
     method: "POST",
+  });
+}
+
+// ─── Article Versions (Phase 6.1) ────────────────────────────────────────────
+
+export async function fetchArticleVersions(
+  articleId: string
+): Promise<ApiResponse<ArticleVersion[]>> {
+  return api<ArticleVersion[]>(`/api/articles/${articleId}/versions`);
+}
+
+export async function createArticleVersion(
+  articleId: string,
+  summary?: string
+): Promise<ApiResponse<ArticleVersion>> {
+  return api<ArticleVersion>(`/api/articles/${articleId}/versions`, {
+    method: "POST",
+    body: JSON.stringify({ summary }),
+  });
+}
+
+export async function restoreArticleVersion(
+  articleId: string,
+  versionId: string
+): Promise<ApiResponse<{ success: boolean; restoredVersionNumber: number }>> {
+  return api<{ success: boolean; restoredVersionNumber: number }>(
+    `/api/articles/${articleId}/versions/${versionId}/restore`,
+    { method: "POST" }
+  );
+}
+
+export async function generateVersionSummary(
+  previousContent: string,
+  currentContent: string,
+  previousTitle?: string,
+  currentTitle?: string
+): Promise<ApiResponse<{ summary: string }>> {
+  return api<{ summary: string }>("/api/ai/version-summary", {
+    method: "POST",
+    body: JSON.stringify({ previousContent, currentContent, previousTitle, currentTitle }),
   });
 }
 

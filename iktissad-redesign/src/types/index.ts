@@ -172,6 +172,22 @@ export interface Article {
   updatedAt: string;
 }
 
+export interface ArticleVersion {
+  id: string;
+  articleId: string;
+  versionNumber: number;
+  title: string;
+  titleEn: string;
+  excerpt: string;
+  content: string;
+  body?: import('@tiptap/core').JSONContent | null;
+  changedBy: string | null;
+  changedByName?: string | null;
+  changedByAvatar?: string | null;
+  summary?: string | null;
+  createdAt: string;
+}
+
 export interface MagazineIssue {
   id: string;
   issueNumber: number;

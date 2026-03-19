@@ -33,6 +33,7 @@ import {
   AlertCircle,
   RefreshCcw,
   MessageSquare,
+  Share2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -49,7 +50,9 @@ import SEOPanel from '@/components/admin/SEOPanel';
 import SplitPreview from '@/components/admin/SplitPreview';
 import PaywallOptimizer from '@/components/admin/PaywallOptimizer';
 import AIPerformanceRecommendations from '@/components/admin/AIPerformanceRecommendations';
-import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
+import ArticleVersionPanel from '@/components/admin/ArticleVersionPanel';
+import SharePreviewModal from '@/components/admin/SharePreviewModal';
+import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
@@ -178,6 +181,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [contentText, setContentText] = useState('');
   const [seoKeyword, setSeoKeyword] = useState('');
 
+  // Phase 6 — Version history + share preview
+  const [versionPanelOpen, setVersionPanelOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
   // Auto-save state
   type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
@@ -277,6 +284,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         ...(articleType ? { article_type: articleType } : {}),
       } as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
+      // Fire-and-forget version snapshot on every manual save
+      void createArticleVersion(id).catch(() => {/* silent — versioning is best-effort */});
     } catch (err: any) {
       toast.error(err.message || t('admin.common.error'));
     } finally {
@@ -312,6 +321,11 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       toast.error(err.message || t('admin.common.error'));
     }
   };
+
+  const handleVersionRestore = useCallback(() => {
+    toast.success('تم استرجاع الإصدار بنجاح');
+    router.refresh();
+  }, [router]);
 
   // Handle image selection from MediaPicker for inline editor insertion
   const handleMediaSelect = useCallback((url: string) => {
@@ -437,6 +451,28 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             </span>
           )}
 
+          {/* Share for review */}
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm"
+            title="مشاركة للمراجعة"
+          >
+            <Share2 size={16} />
+            مشاركة
+          </button>
+          {/* Version history */}
+          <button
+            onClick={() => setVersionPanelOpen((v) => !v)}
+            className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl transition-all font-[family-name:var(--font-display)] text-sm ${
+              versionPanelOpen
+                ? 'bg-gold/10 border-gold/30 text-gold'
+                : 'bg-white/5 border-gold/10 text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+            title="سجل الإصدارات"
+          >
+            <History size={16} />
+            إصدارات
+          </button>
           <button
             onClick={() => setShowDeleteModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-loss/10 border border-loss/20 rounded-xl text-loss hover:bg-loss/20 transition-all font-[family-name:var(--font-display)] text-sm"
@@ -646,6 +682,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               isOpen={editorialCommentsOpen}
               onToggle={() => setEditorialCommentsOpen((v) => !v)}
             />
+            {/* Version History Panel */}
+            <ArticleVersionPanel
+              articleId={id}
+              isOpen={versionPanelOpen}
+              onToggle={() => setVersionPanelOpen((v) => !v)}
+              currentTitle={title}
+              currentContent={content}
+              onRestoreComplete={handleVersionRestore}
+            />
           </motion.div>
 
           {/* Article Analytics — collapsible */}
@@ -817,6 +862,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           </motion.div>
         </div>
       </div>
+
+      {/* Share Preview Modal */}
+      <SharePreviewModal
+        articleId={id}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
 
       {/* Split Preview Overlay */}
       <SplitPreview
