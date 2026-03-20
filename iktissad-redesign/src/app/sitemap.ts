@@ -132,11 +132,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Supabase not configured — skip dynamic issue pages
   }
 
+  // ── Dynamic article pages (paginated to handle >1000 articles) ────────────
+  let articlePages: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    const BATCH = 1000;
+    let from = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: rows, error } = await (supabase as any)
+        .from("articles")
+        .select("slug, updated_at")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .range(from, from + BATCH - 1);
+
+      if (error || !rows || rows.length === 0) break;
+
+      const batch = (rows as Array<{ slug: string; updated_at: string | null }>).map(
+        (row) => ({
+          url: `${BASE_URL}/${row.slug}`,
+          lastModified: row.updated_at ?? undefined,
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        }),
+      );
+
+      articlePages = articlePages.concat(batch);
+      hasMore = rows.length === BATCH;
+      from += BATCH;
+    }
+  } catch {
+    // Supabase not configured — skip dynamic article pages
+  }
+
   return [
     ...staticPages,
     ...sectionPages,
     ...sectorPages,
     ...countryPages,
     ...issuePages,
+    ...articlePages,
   ];
 }

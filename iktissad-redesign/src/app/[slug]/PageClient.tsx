@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import NextImage from 'next/image';
 import {
   Clock,
   Eye,
@@ -16,19 +17,54 @@ import {
   ArrowLeft,
   Loader2,
   ChevronLeft,
+  Printer,
+  Sparkles,
 } from 'lucide-react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
+import BookmarkButton from '@/components/BookmarkButton';
+import PaywallModal from '@/components/magazine/PaywallModal';
+import TipTapRenderer from '@/components/admin/TipTapRenderer';
+import ArticleComments from '@/components/ArticleComments';
+import type { JSONContent } from '@tiptap/core';
 
-export default function ArticlePageClient({ params }: { params: Promise<{ slug: string }> }) {
+// ── Paywall constants ──────────────────────────────────────────────────────────
+const FREE_ARTICLE_LIMIT = 3;
+
+// ── Helper: truncate HTML string to first N closing </p> tags ─────────────────
+function truncateHtmlToParagraphs(html: string, maxParagraphs = 3): string {
+  let count = 0;
+  let idx = 0;
+  while (count < maxParagraphs) {
+    const next = html.indexOf('</p>', idx);
+    if (next === -1) break;
+    idx = next + 4;
+    count++;
+  }
+  return count > 0 ? html.slice(0, idx) : html.slice(0, 500);
+}
+
+interface ArticlePageClientProps {
+  params: Promise<{ slug: string }>;
+  subscriptionTier?: 'free' | 'premium' | 'digital';
+  freeArticlesReadThisMonth?: number;
+}
+
+export default function ArticlePageClient({
+  params,
+  subscriptionTier = 'free',
+  freeArticlesReadThisMonth = 0,
+}: ArticlePageClientProps) {
   const { t } = useTranslation();
   const { slug } = use(params);
   const [copied, setCopied] = useState(false);
   const [readTime, setReadTime] = useState(0);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const { data, error, isLoading } = useSWR<ApiResponse<Article>>(
     slug ? `/api/articles/${slug}` : null,
@@ -37,17 +73,65 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
 
   const article = data?.data;
 
-  const { data: relatedData } = useSWR<ApiResponse<Article[]>>(
-    article?.section
+  // F2.5 — Semantic "More Like This": try pgvector similar endpoint first,
+  // fall back to same-section articles if the semantic result is empty/errors.
+  const { data: similarData, error: similarError } = useSWR<ApiResponse<Article[]>>(
+    article?.id ? `/api/search/similar?articleId=${article.id}&limit=4` : null,
+    swrFetcher
+  );
+  const hasSimilar = !similarError && (similarData?.data?.length ?? 0) > 0;
+
+  const { data: sectionData } = useSWR<ApiResponse<Article[]>>(
+    !hasSimilar && article?.section
       ? `/api/articles?section=${article.section}&status=published&pageSize=5`
       : null,
     swrFetcher
   );
-  const relatedArticles = (relatedData?.data ?? []).filter(a => a.id !== article?.id).slice(0, 4);
+
+  const relatedArticles: Article[] = hasSimilar
+    ? (similarData!.data as unknown as Article[]).filter((a) => a.id !== article?.id).slice(0, 4)
+    : (sectionData?.data ?? []).filter((a) => a.id !== article?.id).slice(0, 4);
+
+  const relatedIsAi = hasSimilar;
+
+  // ── Paywall gate logic ─────────────────────────────────────────────────────
+  // NOTE: `article.paywalled` requires an `is_paywalled` boolean column in the
+  // articles table (mapped to `paywalled` in camelCase via mappers.ts).
+  const isPaywalled =
+    (article as any)?.paywalled === true &&
+    subscriptionTier === 'free' &&
+    freeArticlesReadThisMonth >= FREE_ARTICLE_LIMIT;
+
+  // Determine content format: TipTap JSON or legacy HTML string
+  const rawContent = article?.content ?? '';
+  const isJsonContent =
+    typeof rawContent === 'object' ||
+    (typeof rawContent === 'string' && rawContent.trim().startsWith('{'));
+
+  // For paywall: parse/truncate to ~3 paragraphs
+  const truncatedHtml = isPaywalled && !isJsonContent
+    ? truncateHtmlToParagraphs(rawContent as string, 3)
+    : null;
+
+  // For paywall + JSON content: truncate to first 3 paragraph nodes
+  const truncatedJson: JSONContent | null = (() => {
+    if (!isPaywalled || !isJsonContent) return null;
+    try {
+      const parsed: JSONContent =
+        typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent as JSONContent;
+      const paragraphs = (parsed.content ?? [])
+        .filter((n: JSONContent) => n.type === 'paragraph')
+        .slice(0, 3);
+      return { type: 'doc', content: paragraphs };
+    } catch {
+      return null;
+    }
+  })();
 
   useEffect(() => {
     if (article?.content) {
-      const words = article.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+      const words = (typeof article.content === 'string' ? article.content : JSON.stringify(article.content))
+        .replace(/<[^>]*>/g, '').split(/\s+/).length;
       setReadTime(Math.ceil(words / 200));
     }
   }, [article?.content]);
@@ -143,6 +227,16 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
+              {/* Print-only header (hidden on screen) */}
+              <div className="print-header">
+                <div style={{ borderBottom: '1px solid #ccc', paddingBottom: '8px', marginBottom: '16px' }}>
+                  <strong>الإقتصاد والأعمال</strong> — iktissad.com
+                </div>
+                <div style={{ fontSize: '10pt', color: '#666', marginBottom: '8px' }}>
+                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA')} · URL: {typeof window !== 'undefined' ? window.location.href : ''}
+                </div>
+              </div>
+
               {/* Category pill */}
               <div className="mb-4">
                 {article.sector && (
@@ -201,7 +295,17 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                   >
                     {copied ? <Check size={12} /> : <Link2 size={12} />}
                   </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="no-print w-8 h-8 rounded-full border border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-obsidian flex items-center justify-center transition-all"
+                    title={t('article.print')}
+                    aria-label={t('article.print')}
+                  >
+                    <Printer size={12} />
+                  </button>
                 </div>
+                {/* Bookmark button */}
+                <BookmarkButton articleId={article.id} />
                 {readTime > 0 && (
                   <span className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
                     <BookOpen size={11} className="text-gold/60" />
@@ -218,50 +322,93 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                   transition={{ delay: 0.1, duration: 0.5 }}
                   className="mb-6"
                 >
-                  <div className="overflow-hidden border border-sand/50">
-                    <img
+                  <div className="relative overflow-hidden border border-sand/50" style={{ maxHeight: '480px', minHeight: '240px' }}>
+                    <NextImage
                       src={article.featuredImage}
                       alt={article.title}
-                      className="w-full object-cover"
-                      style={{ maxHeight: '480px' }}
+                      fill
+                      className="object-cover"
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
                     />
                   </div>
                 </motion.figure>
               )}
 
-              {/* Author block */}
+              {/* Author block — F8.2: clickable author link */}
               <div className="flex items-center gap-3 mb-8 pb-7 border-b border-sand/60">
-                {/* Avatar circle */}
-                <div className="w-10 h-10 rounded-full bg-obsidian flex items-center justify-center flex-shrink-0">
-                  {authorInitials ? (
-                    <span className="text-gold text-sm font-[family-name:var(--font-display)] font-bold">
-                      {authorInitials}
-                    </span>
-                  ) : (
-                    <User size={14} className="text-gold" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  {article.author?.name && (
-                    <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-tight">
-                      {article.author.name}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-3 mt-0.5">
-                    {publishedDate && (
-                      <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
-                        <Clock size={10} className="text-gold/60" />
-                        {publishedDate}
-                      </span>
-                    )}
-                    {article.views > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
-                        <Eye size={10} className="text-gold/60" />
-                        {article.views.toLocaleString('ar-SA')}
-                      </span>
-                    )}
+                {article.author?.id ? (
+                  <Link
+                    href={`/profiles/${article.author.id}`}
+                    className="flex items-center gap-3 group flex-1 min-w-0"
+                  >
+                    {/* Avatar circle */}
+                    <div className="w-10 h-10 rounded-full bg-obsidian flex items-center justify-center flex-shrink-0 group-hover:ring-2 group-hover:ring-gold/40 transition-all">
+                      {authorInitials ? (
+                        <span className="text-gold text-sm font-[family-name:var(--font-display)] font-bold">
+                          {authorInitials}
+                        </span>
+                      ) : (
+                        <User size={14} className="text-gold" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {article.author?.name && (
+                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-tight group-hover:text-gold transition-colors">
+                          {article.author.name}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-3 mt-0.5">
+                        {publishedDate && (
+                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <Clock size={10} className="text-gold/60" />
+                            {publishedDate}
+                          </span>
+                        )}
+                        {article.views > 0 && (
+                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <Eye size={10} className="text-gold/60" />
+                            {article.views.toLocaleString('ar-SA')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {/* Avatar circle (no link) */}
+                    <div className="w-10 h-10 rounded-full bg-obsidian flex items-center justify-center flex-shrink-0">
+                      {authorInitials ? (
+                        <span className="text-gold text-sm font-[family-name:var(--font-display)] font-bold">
+                          {authorInitials}
+                        </span>
+                      ) : (
+                        <User size={14} className="text-gold" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {article.author?.name && (
+                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-tight">
+                          {article.author.name}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-3 mt-0.5">
+                        {publishedDate && (
+                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <Clock size={10} className="text-gold/60" />
+                            {publishedDate}
+                          </span>
+                        )}
+                        {article.views > 0 && (
+                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <Eye size={10} className="text-gold/60" />
+                            {article.views.toLocaleString('ar-SA')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Excerpt */}
@@ -275,7 +422,75 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
               )}
 
               {/* Article body */}
-              <div className="article-body-slug" dangerouslySetInnerHTML={{ __html: article.content ?? '' }} />
+              {isPaywalled ? (
+                /* ── Paywalled: show truncated preview + fade + modal ── */
+                <div className="relative">
+                  {/* Truncated content */}
+                  {isJsonContent ? (
+                    <div className="article-body-slug">
+                      <TipTapRenderer
+                        content={truncatedJson ?? { type: 'doc', content: [] }}
+                        className="article-body-slug-tiptap"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="article-body-slug"
+                      dangerouslySetInnerHTML={{ __html: truncatedHtml ?? '' }}
+                    />
+                  )}
+
+                  {/* Fade-out gradient overlay */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(to bottom, transparent, var(--color-paper, #F5EEDC))',
+                    }}
+                  />
+
+                  {/* Paywall teaser label */}
+                  <p className="mt-6 text-center text-[13px] font-[family-name:var(--font-display)] font-semibold text-charcoal/50 italic">
+                    {t('article.paywalled_teaser')}
+                  </p>
+
+                  {/* Trigger paywall modal */}
+                  <button
+                    onClick={() => setPaywallOpen(true)}
+                    className="block mx-auto mt-4 px-8 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-black text-obsidian bg-gold hover:bg-gold-bright transition-colors rounded-sm tracking-wide"
+                  >
+                    اشترك الآن
+                  </button>
+
+                  <PaywallModal
+                    isOpen={paywallOpen}
+                    onClose={() => setPaywallOpen(false)}
+                    articleCount={freeArticlesReadThisMonth}
+                    maxFreeArticles={FREE_ARTICLE_LIMIT}
+                    reason="article_limit"
+                  />
+                </div>
+              ) : (
+                /* ── Full content: TipTap JSON or legacy HTML ── */
+                isJsonContent ? (
+                  <div className="article-body-slug">
+                    <TipTapRenderer
+                      content={
+                        typeof rawContent === 'string'
+                          ? ((): JSONContent | null => {
+                              try { return JSON.parse(rawContent); } catch { return null; }
+                            })() ?? rawContent
+                          : rawContent as JSONContent
+                      }
+                      className="article-body-slug-tiptap"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="article-body-slug"
+                    dangerouslySetInnerHTML={{ __html: rawContent as string }}
+                  />
+                )
+              )}
 
               {/* Tags */}
               {article.tags?.length > 0 && (
@@ -286,7 +501,7 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                   {article.tags.map((tag) => (
                     <a
                       key={tag}
-                      href={`/search?q=${encodeURIComponent(tag)}`}
+                      href={`/tags/${encodeURIComponent(tag)}`}
                       className="px-3 py-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand rounded-full hover:border-gold/50 hover:text-gold transition-all"
                     >
                       {tag}
@@ -323,6 +538,9 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                   </button>
                 </div>
               </div>
+
+              {/* F2.2 — Comments section */}
+              <ArticleComments articleId={article.id} />
             </motion.article>
 
             {/* ── Sidebar ── */}
@@ -333,14 +551,17 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
             >
               <div className="sticky top-6 space-y-6">
 
-                {/* Related articles */}
+                {/* Related articles — F2.5: semantic similar with AI indicator */}
                 {relatedArticles.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2.5 mb-4">
                       <div className="w-[3px] h-5 bg-gold flex-shrink-0" />
                       <h3 className="text-[13px] font-[family-name:var(--font-display)] font-black text-obsidian tracking-wide">
-                        قد يهمك أيضاً
+                        {t('article.related_ai')}
                       </h3>
+                      {relatedIsAi && (
+                        <Sparkles size={11} className="text-gold/60 flex-shrink-0" aria-label="AI-powered" />
+                      )}
                     </div>
                     <div className="space-y-0 divide-y divide-sand/50 border border-sand/60">
                       {relatedArticles.map((related) => (
@@ -350,11 +571,13 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
                           className="flex gap-3 p-3.5 hover:bg-cream/60 transition-colors group"
                         >
                           {related.featuredImage ? (
-                            <div className="w-[68px] h-[54px] flex-shrink-0 overflow-hidden">
-                              <img
+                            <div className="relative w-[68px] h-[54px] flex-shrink-0 overflow-hidden">
+                              <NextImage
                                 src={related.featuredImage}
                                 alt={related.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                sizes="68px"
                               />
                             </div>
                           ) : (
@@ -435,6 +658,35 @@ export default function ArticlePageClient({ params }: { params: Promise<{ slug: 
           font-size: 1.05rem;
           line-height: 2.05;
           color: #1E4A60;
+        }
+        /* Override TipTapRenderer dark-mode defaults for article reading context */
+        .article-body-slug .article-body-slug-tiptap,
+        .article-body-slug .article-body-slug-tiptap p,
+        .article-body-slug .article-body-slug-tiptap li {
+          color: #1E4A60;
+        }
+        .article-body-slug .article-body-slug-tiptap h1,
+        .article-body-slug .article-body-slug-tiptap h2,
+        .article-body-slug .article-body-slug-tiptap h3 {
+          color: #0C1E2A;
+          font-family: var(--font-display), system-ui, sans-serif;
+        }
+        .article-body-slug .article-body-slug-tiptap a {
+          color: #C49240;
+        }
+        .article-body-slug .article-body-slug-tiptap a:hover {
+          color: #DDA853;
+        }
+        .article-body-slug .article-body-slug-tiptap blockquote {
+          border-right: 3px solid #DDA853;
+          border-top: 1px solid rgba(221,168,83,0.15);
+          border-bottom: 1px solid rgba(221,168,83,0.15);
+          border-left: none;
+          background: rgba(221,168,83,0.03);
+          color: #183B4E;
+        }
+        .article-body-slug .article-body-slug-tiptap img {
+          border: 1px solid #E8E0D0;
         }
         .article-body-slug > p:first-of-type::first-letter {
           font-family: var(--font-display), system-ui, sans-serif;

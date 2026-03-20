@@ -36,6 +36,8 @@ export const ar = {
       register: 'تسجيل',
       continue: 'متابعة',
       loading: 'جاري التحميل...',
+      loadMore: 'تحميل المزيد',
+      loadingMore: 'جارٍ التحميل...',
       retry: 'إعادة المحاولة',
       backToTop: 'العودة للأعلى',
       backToSite: 'العودة للموقع',
@@ -179,7 +181,11 @@ export const ar = {
     subtitle: 'احصل على آخر الأخبار الاقتصادية والتحليلات المالية مباشرة في بريدك الإلكتروني',
     placeholder: 'أدخل بريدك الإلكتروني',
     button: 'اشترك الآن',
-    success: 'تم الاشتراك',
+    success: 'تم الاشتراك بنجاح!',
+    alreadySubscribed: 'أنت مشترك بالفعل',
+    invalidEmail: 'البريد الإلكتروني غير صالح',
+    error: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+    loading: 'جاري الإرسال...',
     features: {
       exclusive: 'محتوى حصري',
       weekly: 'تحليلات أسبوعية',
@@ -989,6 +995,7 @@ export const ar = {
         sending: 'جاري الإرسال...',
         successMessage: 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.',
         errorMessage: 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.',
+        rateLimited: 'لقد أرسلت رسالة مؤخراً. يرجى الانتظار ساعة قبل إرسال رسالة أخرى.',
       },
       info: {
         title: 'معلومات الاتصال',
@@ -1073,8 +1080,66 @@ export const ar = {
         title: 'مقارنة الباقات',
         feature: 'الميزة',
       },
+      // Checkout flow
+      checkout: {
+        redirecting: 'جاري التوجيه لبوابة الدفع...',
+        processing: 'جاري المعالجة...',
+        errorGeneral: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+        promoPlaceholder: 'رمز الخصم (اختياري)',
+        promoApply: 'تطبيق',
+        promoValid: 'رمز الخصم صالح',
+        promoInvalid: 'رمز الخصم غير صالح أو منتهي الصلاحية',
+        promoChecking: 'جاري التحقق...',
+      },
+      // Success / onboarding page
+      success: {
+        heading: 'مرحباً بك في إقتصاد Premium',
+        subheading: 'اشتراكك فعّال الآن — استمتع بوصول كامل لكل المحتوى',
+        planLabel: 'خطتك',
+        benefits: {
+          title: 'ما الذي تملكه الآن',
+          articles: 'مقالات غير محدودة بدون حدود شهرية',
+          magazine: 'وصول كامل لأرشيف المجلة (65+ سنة)',
+          pdf: 'تحميل PDF لجميع الأعداد',
+          earlyAccess: 'وصول مبكر للأعداد الجديدة',
+          alerts: 'تنبيهات فورية لأحدث الأخبار',
+        },
+        onboarding: {
+          title: 'خصّص تجربتك',
+          subtitle: 'اختر القطاعات التي تهمك لنوصي لك بالمحتوى المناسب',
+          sectors: {
+            energy: 'طاقة وبيئة',
+            banking: 'مال ومصارف',
+            realEstate: 'عقار',
+            technology: 'تكنولوجيا',
+            industry: 'صناعة',
+            trade: 'تجارة',
+          },
+          saveBtn: 'حفظ التفضيلات',
+          saving: 'جاري الحفظ...',
+          saved: 'تم حفظ التفضيلات',
+          skip: 'تخطي',
+        },
+        ctaStart: 'ابدأ القراءة',
+        ctaAccount: 'إدارة اشتراكي',
+      },
     },
     account: {
+      dashboard: {
+        title: 'حسابي',
+        subtitle: 'مرحباً بك في لوحة حسابك',
+        quickLinks: 'روابط سريعة',
+        recentSaved: 'آخر المقالات المحفوظة',
+        viewAllSaved: 'عرض كل المحفوظات',
+        noSaved: 'لا توجد مقالات محفوظة بعد',
+        noHistory: 'لا يوجد سجل قراءة بعد',
+        recentHistory: 'آخر المقروءة',
+        viewAllHistory: 'عرض سجل القراءة كاملاً',
+      },
+      saved_articles: 'المقالات المحفوظة',
+      reading_history: 'سجل القراءة',
+      readOn: 'قُرئ في',
+      removeBookmark: 'إزالة من المحفوظات',
       subscription: {
         title: 'اشتراكي',
         noSubscription: 'ليس لديك اشتراك نشط',
@@ -1086,6 +1151,13 @@ export const ar = {
         paymentHistory: 'سجل المدفوعات',
         managePayment: 'إدارة طريقة الدفع',
       },
+    },
+    bookmark: {
+      save: 'حفظ المقال',
+      saved: 'محفوظ',
+      removed: 'تم الحذف',
+      loginRequired: 'سجّل دخولك لحفظ المقالات',
+      saving: 'جاري الحفظ...',
     },
     tiers: {
       free: 'مجاني',
@@ -1351,6 +1423,8 @@ export const ar = {
       recentSearches: 'عمليات البحث الأخيرة',
       clearRecent: 'مسح السجل',
       trending: 'الأكثر بحثاً',
+      no_results: 'لم نجد نتائج لـ',
+      try_instead: 'جرّب البحث عن',
     },
     sections: {
       title: 'الأبواب',
@@ -1647,6 +1721,74 @@ export const ar = {
     switchTo: 'التبديل إلى {language}',
     currentLanguage: 'اللغة الحالية',
     selectLanguage: 'اختر اللغة',
+  },
+  auth: {
+    google_login: 'المتابعة عبر Google',
+    or_divider: 'أو',
+    forgot_password: 'نسيت كلمة المرور؟',
+    reset_sent: 'تم إرسال رابط إعادة تعيين كلمة المرور',
+    magic_link_tab: 'تسجيل الدخول برابط سريع',
+    magic_link_sent: 'تم إرسال رابط تسجيل الدخول',
+    new_password: 'كلمة المرور الجديدة',
+    confirm_password: 'تأكيد كلمة المرور',
+    update_password: 'تحديث كلمة المرور',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // BREAKING NEWS TICKER / شريط الأخبار العاجلة
+  // ═══════════════════════════════════════════════════════════════
+  breaking: {
+    label: 'عاجل',
+    dismiss: 'إغلاق',
+    liveIndicator: 'مباشر',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TAGS / TOPIC PAGES / صفحات الوسوم
+  // ═══════════════════════════════════════════════════════════════
+  tags: {
+    heading: 'موضوع',
+    articleCount: '{count} مقال',
+    empty: 'لا توجد مقالات بهذا الموضوع',
+    loadMore: 'تحميل المزيد',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // SERIES / سلاسل المقالات
+  // ═══════════════════════════════════════════════════════════════
+  series: {
+    episodes: 'الحلقات',
+    part: 'الجزء',
+    subscribe_cta: 'اشترك لقراءة السلسلة كاملة',
+    locked: 'مقال مدفوع',
+    noEpisodes: 'لا توجد حلقات في هذه السلسلة حتى الآن.',
+    errorLoad: 'تعذّر تحميل السلسلة. حاول مجدداً.',
+  },
+  article: {
+    paywalled_teaser: 'اقرأ المقال كاملاً مع اشتراك اقتصاد بريميوم',
+    related_ai: 'مقالات ذات صلة',
+    print: 'طباعة المقال',
+  },
+  magazine: {
+    teaser_heading: 'اقرأ هذا العدد كاملاً',
+    teaser_subheading: 'اشترك في اقتصاد للوصول إلى أرشيف كامل من المجلات',
+    teaser_subscribe: 'اشترك الآن',
+    teaser_login: 'تسجيل الدخول',
+    teaser_toc_heading: 'في هذا العدد',
+    teaser_preview_label: 'معاينة العدد',
+  },
+  comments: {
+    title: 'التعليقات',
+    login_prompt: 'سجّل دخولك للتعليق',
+    placeholder: 'اكتب تعليقك...',
+    submit: 'إرسال',
+    reply: 'رد',
+    load_more: 'تحميل المزيد التعليقات',
+    empty: 'كن أول من يعلق',
+    pending: 'تعليقك قيد المراجعة',
+  },
+  profile: {
+    articles_by: 'مقالات',
   },
 } as const;
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
 import ArticlePageClient from './PageClient';
 
 const BASE_URL = 'https://www.iktissadonline.com';
@@ -68,7 +69,42 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const article = await getArticle(slug);
 
-  const jsonLd = article
+  // ── Resolve subscription tier server-side ──────────────────────────────────
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let subscriptionTier: 'free' | 'premium' | 'digital' = 'free';
+  let freeArticlesReadThisMonth = 0;
+
+  if (user) {
+    // Query subscribers table for active subscription with plan tier
+    const { data: subscriber } = await supabase
+      .from('subscribers')
+      .select('plan_id, status, plans(tier)')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single() as any;
+
+    if (subscriber) {
+      subscriptionTier = (subscriber.plans as any)?.tier ?? 'free';
+    }
+
+    // Count articles read this month from reading_sessions
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const { count } = await supabase
+      .from('reading_sessions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('started_at', startOfMonth.toISOString()) as any;
+
+    freeArticlesReadThisMonth = count ?? 0;
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const newsArticleJsonLd = article
     ? {
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
@@ -98,15 +134,61 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       }
     : null;
 
+  const breadcrumbJsonLd = article
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'الرئيسية',
+            item: BASE_URL,
+          },
+          ...(article.section
+            ? [
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: article.section?.name ?? article.section,
+                  item: `${BASE_URL}/sections/${article.section?.slug ?? article.section}`,
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: article.title,
+                },
+              ]
+            : [
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: article.title,
+                },
+              ]),
+        ],
+      }
+    : null;
+
   return (
     <>
-      {jsonLd && (
+      {newsArticleJsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticleJsonLd) }}
         />
       )}
-      <ArticlePageClient params={params} />
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
+      )}
+      <ArticlePageClient
+        params={params}
+        subscriptionTier={subscriptionTier}
+        freeArticlesReadThisMonth={freeArticlesReadThisMonth}
+      />
     </>
   );
 }

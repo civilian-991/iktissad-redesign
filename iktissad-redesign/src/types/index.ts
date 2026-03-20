@@ -163,6 +163,7 @@ export interface Article {
   sector: string;
   country: string;
   author: {
+    id?: string;
     name: string;
     avatar: string;
   };

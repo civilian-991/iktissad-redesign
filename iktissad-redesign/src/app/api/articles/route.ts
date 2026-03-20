@@ -47,6 +47,11 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status");
   const featured = searchParams.get("featured");
   const editorChoice = searchParams.get("editorChoice");
+  // NOTE: `is_breaking` column must exist on the articles table.
+  // If it does not yet exist, run: ALTER TABLE articles ADD COLUMN is_breaking BOOLEAN NOT NULL DEFAULT FALSE;
+  const breaking = searchParams.get("breaking");
+  const tag = searchParams.get("tag");
+  const authorId = searchParams.get("authorId");
 
   const supabase = await createClient();
 
@@ -91,6 +96,20 @@ export async function GET(request: NextRequest) {
 
   if (editorChoice !== null) {
     query = query.eq("editor_choice", editorChoice === "true");
+  }
+
+  if (breaking !== null) {
+    query = query.eq("is_breaking", breaking === "true");
+  }
+
+  if (tag) {
+    // Filter articles whose tags array contains the given tag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = (query as any).contains("tags", [tag]);
+  }
+
+  if (authorId) {
+    query = query.eq("author_id", authorId);
   }
 
   const start = (page - 1) * pageSize;

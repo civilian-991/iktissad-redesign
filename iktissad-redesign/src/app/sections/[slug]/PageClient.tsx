@@ -2,29 +2,55 @@
 
 import { use } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
+import { Calendar, ArrowUpLeft, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
-import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, Section, ApiResponse } from '@/types';
 
-type SectionWithArticles = Section & { articles: Article[] };
+const PAGE_SIZE = 12;
+
+type SectionPage = Section & { articles: Article[] };
 
 export default function SectionPageClient({ params }: { params: Promise<{ slug: string }> }) {
   const { t } = useTranslation();
   const { slug } = use(params);
 
-  const { data, error, isLoading } = useSWR<ApiResponse<SectionWithArticles>>(
-    `/api/sections/${slug}`,
+  function getKey(pageIndex: number, previousPageData: ApiResponse<SectionPage> | null) {
+    if (previousPageData && !previousPageData.pagination) return null;
+    if (
+      previousPageData?.pagination &&
+      pageIndex + 1 > previousPageData.pagination.totalPages
+    ) {
+      return null;
+    }
+    return `/api/sections/${slug}?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
+  }
+
+  const { data, size, setSize, isLoading, isValidating, error } = useSWRInfinite<ApiResponse<SectionPage>>(
+    getKey,
     swrFetcher
   );
 
-  const section = data?.data;
-  const articles = section?.articles ?? [];
-  const featuredArticle = articles[0];
-  const restArticles = articles.slice(1);
+  const pages = data ?? [];
+  // Section metadata comes from any page (same for all)
+  const sectionMeta = pages[0]?.data;
+
+  // Flatten all articles across pages, then split featured / rest
+  const allArticles: Article[] = pages.flatMap((p) => p.data?.articles ?? []);
+  const featuredArticle = allArticles[0];
+  const restArticles = allArticles.slice(1);
+
+  const lastPage = pages[pages.length - 1];
+  const hasMore =
+    lastPage?.pagination
+      ? lastPage.pagination.page < lastPage.pagination.totalPages
+      : false;
+
+  const isLoadingMore = isValidating && size > 1;
+  const isInitialLoading = isLoading && size === 1;
 
   return (
     <>
@@ -45,11 +71,11 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                 {t('pages.sections.title')}
               </a>
               <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4">
-                {isLoading ? '...' : section?.name ?? slug}
+                {isInitialLoading ? '...' : sectionMeta?.name ?? slug}
               </h1>
-              {section?.description && (
+              {sectionMeta?.description && (
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {section.description}
+                  {sectionMeta.description}
                 </p>
               )}
             </motion.div>
@@ -59,7 +85,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
         {/* Articles Grid */}
         <section className="py-16">
           <div className="container-luxury">
-            {isLoading && (
+            {isInitialLoading && (
               <div className="flex items-center justify-center py-24">
                 <Loader2 className="text-gold animate-spin" size={40} />
               </div>
@@ -71,13 +97,13 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {!isLoading && !error && articles.length === 0 && (
+            {!isInitialLoading && !error && allArticles.length === 0 && (
               <div className="text-center py-24">
                 <p className="text-charcoal text-lg">لا توجد مقالات في هذا القسم حتى الآن.</p>
               </div>
             )}
 
-            {/* Featured Article */}
+            {/* Featured Article — only on first load */}
             {featuredArticle && (
               <motion.a
                 href={`/${featuredArticle.slug}`}
@@ -130,7 +156,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                     href={`/${article.slug}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: Math.min(index % PAGE_SIZE, 11) * 0.05 }}
                     className="group"
                   >
                     <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -164,6 +190,26 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                     </div>
                   </motion.a>
                 ))}
+              </div>
+            )}
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => setSize(size + 1)}
+                  disabled={isLoadingMore}
+                  className="flex items-center gap-2 px-8 py-3 bg-navy text-white font-[family-name:var(--font-display)] font-semibold rounded-lg hover:bg-navy-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      {t('common.actions.loadingMore')}
+                    </>
+                  ) : (
+                    t('common.actions.loadMore')
+                  )}
+                </button>
               </div>
             )}
           </div>

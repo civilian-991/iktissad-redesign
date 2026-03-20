@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import NextImage from 'next/image';
 import { Mail } from 'lucide-react';
 import useSWR from 'swr';
 import Header from '@/components/Header';
@@ -137,12 +138,14 @@ export default function TeamPageClient() {
                     className="bg-white rounded-2xl p-8 shadow-lg"
                   >
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-gold/20 bg-navy/10">
+                      <div className="relative w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-gold/20 bg-navy/10">
                         {member.avatar ? (
-                          <img
+                          <NextImage
                             src={member.avatar}
                             alt={member.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="128px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-navy/40 text-4xl font-bold">
@@ -211,12 +214,14 @@ export default function TeamPageClient() {
                     transition={{ delay: index * 0.05 }}
                     className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gold/20 bg-navy/10">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gold/20 bg-navy/10">
                       {editor.avatar ? (
-                        <img
+                        <NextImage
                           src={editor.avatar}
                           alt={editor.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="80px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-navy/40 text-2xl font-bold">

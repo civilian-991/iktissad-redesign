@@ -36,6 +36,8 @@ export const en = {
       register: 'Register',
       continue: 'Continue',
       loading: 'Loading...',
+      loadMore: 'Load More',
+      loadingMore: 'Loading...',
       retry: 'Retry',
       backToTop: 'Back to Top',
       backToSite: 'Back to Site',
@@ -179,7 +181,11 @@ export const en = {
     subtitle: 'Get the latest economic news and financial analysis directly to your inbox',
     placeholder: 'Enter your email',
     button: 'Subscribe Now',
-    success: 'Subscribed',
+    success: 'Successfully Subscribed!',
+    alreadySubscribed: 'You are already subscribed',
+    invalidEmail: 'Invalid email address',
+    error: 'An error occurred. Please try again.',
+    loading: 'Sending...',
     features: {
       exclusive: 'Exclusive Content',
       weekly: 'Weekly Analysis',
@@ -989,6 +995,7 @@ export const en = {
         sending: 'Sending...',
         successMessage: 'Your message has been sent successfully. We will get back to you soon.',
         errorMessage: 'An error occurred while sending your message. Please try again.',
+        rateLimited: 'You have recently sent a message. Please wait an hour before sending another.',
       },
       info: {
         title: 'Contact Information',
@@ -1073,8 +1080,66 @@ export const en = {
         title: 'Plan Comparison',
         feature: 'Feature',
       },
+      // Checkout flow
+      checkout: {
+        redirecting: 'Redirecting to payment gateway...',
+        processing: 'Processing...',
+        errorGeneral: 'An error occurred. Please try again.',
+        promoPlaceholder: 'Promo code (optional)',
+        promoApply: 'Apply',
+        promoValid: 'Promo code applied',
+        promoInvalid: 'Invalid or expired promo code',
+        promoChecking: 'Checking...',
+      },
+      // Success / onboarding page
+      success: {
+        heading: 'Welcome to Iktissad Premium',
+        subheading: 'Your subscription is now active — enjoy full access to all content',
+        planLabel: 'Your plan',
+        benefits: {
+          title: 'What you now have access to',
+          articles: 'Unlimited articles with no monthly cap',
+          magazine: 'Full magazine archive access (65+ years)',
+          pdf: 'PDF download for all issues',
+          earlyAccess: 'Early access to new issues',
+          alerts: 'Instant alerts for breaking news',
+        },
+        onboarding: {
+          title: 'Customize Your Experience',
+          subtitle: 'Choose the sectors you care about so we can recommend relevant content',
+          sectors: {
+            energy: 'Energy & Environment',
+            banking: 'Finance & Banking',
+            realEstate: 'Real Estate',
+            technology: 'Technology',
+            industry: 'Industry',
+            trade: 'Trade',
+          },
+          saveBtn: 'Save Preferences',
+          saving: 'Saving...',
+          saved: 'Preferences saved',
+          skip: 'Skip',
+        },
+        ctaStart: 'Start Reading',
+        ctaAccount: 'Manage My Subscription',
+      },
     },
     account: {
+      dashboard: {
+        title: 'My Account',
+        subtitle: 'Welcome to your account dashboard',
+        quickLinks: 'Quick Links',
+        recentSaved: 'Recently Saved Articles',
+        viewAllSaved: 'View All Saved',
+        noSaved: 'No saved articles yet',
+        noHistory: 'No reading history yet',
+        recentHistory: 'Recently Read',
+        viewAllHistory: 'View Full Reading History',
+      },
+      saved_articles: 'Saved Articles',
+      reading_history: 'Reading History',
+      readOn: 'Read on',
+      removeBookmark: 'Remove from saved',
       subscription: {
         title: 'My Subscription',
         noSubscription: 'You have no active subscription',
@@ -1086,6 +1151,13 @@ export const en = {
         paymentHistory: 'Payment History',
         managePayment: 'Manage Payment Method',
       },
+    },
+    bookmark: {
+      save: 'Save article',
+      saved: 'Saved',
+      removed: 'Removed',
+      loginRequired: 'Sign in to save articles',
+      saving: 'Saving...',
     },
     tiers: {
       free: 'Free',
@@ -1351,6 +1423,8 @@ export const en = {
       recentSearches: 'Recent Searches',
       clearRecent: 'Clear History',
       trending: 'Trending Searches',
+      no_results: 'No results for',
+      try_instead: 'Try searching for',
     },
     sections: {
       title: 'Sections',
@@ -1647,6 +1721,74 @@ export const en = {
     switchTo: 'Switch to {language}',
     currentLanguage: 'Current Language',
     selectLanguage: 'Select Language',
+  },
+  auth: {
+    google_login: 'Continue with Google',
+    or_divider: 'or',
+    forgot_password: 'Forgot password?',
+    reset_sent: 'Password reset link sent',
+    magic_link_tab: 'Sign in with magic link',
+    magic_link_sent: 'Magic link sent',
+    new_password: 'New password',
+    confirm_password: 'Confirm password',
+    update_password: 'Update password',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // BREAKING NEWS TICKER
+  // ═══════════════════════════════════════════════════════════════
+  breaking: {
+    label: 'Breaking',
+    dismiss: 'Close',
+    liveIndicator: 'Live',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TAGS / TOPIC PAGES
+  // ═══════════════════════════════════════════════════════════════
+  tags: {
+    heading: 'Topic',
+    articleCount: '{count} articles',
+    empty: 'No articles found for this topic.',
+    loadMore: 'Load More',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // SERIES
+  // ═══════════════════════════════════════════════════════════════
+  series: {
+    episodes: 'Episodes',
+    part: 'Part',
+    subscribe_cta: 'Subscribe to read the full series',
+    locked: 'Paid article',
+    noEpisodes: 'No episodes in this series yet.',
+    errorLoad: 'Failed to load series. Please try again.',
+  },
+  article: {
+    paywalled_teaser: 'Read the full article with Iktissad Premium',
+    related_ai: 'Related Articles',
+    print: 'Print article',
+  },
+  magazine: {
+    teaser_heading: 'Read This Issue in Full',
+    teaser_subheading: 'Subscribe to Iktissad to access a complete archive of magazines',
+    teaser_subscribe: 'Subscribe Now',
+    teaser_login: 'Log In',
+    teaser_toc_heading: 'In This Issue',
+    teaser_preview_label: 'Issue Preview',
+  },
+  comments: {
+    title: 'Comments',
+    login_prompt: 'Sign in to comment',
+    placeholder: 'Write your comment...',
+    submit: 'Submit',
+    reply: 'Reply',
+    load_more: 'Load more comments',
+    empty: 'Be the first to comment',
+    pending: 'Your comment is pending review',
+  },
+  profile: {
+    articles_by: 'Articles by',
   },
 } as const;
 

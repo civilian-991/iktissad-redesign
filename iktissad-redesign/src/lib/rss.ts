@@ -62,7 +62,7 @@ export function buildRssFeed(
   const items = (rows ?? []).map(buildItem).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xml:lang="ar" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${escapeXml(title)}</title>
     <link>${BASE_URL}</link>

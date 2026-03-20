@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Check, X, Crown, Star, Zap, Shield, CreditCard } from 'lucide-react';
+import { Check, X, Crown, Star, Zap, Shield, CreditCard, Tag, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -128,6 +128,14 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
   const router = useRouter();
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
   const [selectedTier, setSelectedTier] = useState('premium');
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoStatus, setPromoStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [promoMessage, setPromoMessage] = useState('');
+  const promoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Calculate annual discount % for a tier
   function discountPercent(monthly: number, annual: number | null): number {
@@ -144,17 +152,92 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
     return dbPlan?.id ?? null;
   }
 
-  function handleChoose(tierSlug: string) {
+  async function validatePromoCode(code: string) {
+    if (!code.trim()) {
+      setPromoStatus('idle');
+      setPromoMessage('');
+      return;
+    }
+    setPromoStatus('checking');
+    try {
+      const res = await fetch(
+        `/api/promo-codes/validate?code=${encodeURIComponent(code.trim())}`
+      );
+      const json = await res.json();
+      const result = json?.data;
+      if (result?.valid) {
+        setPromoStatus('valid');
+        setPromoMessage(result.message ?? t('pages.subscribe.checkout.promoValid'));
+      } else {
+        setPromoStatus('invalid');
+        setPromoMessage(result?.message ?? t('pages.subscribe.checkout.promoInvalid'));
+      }
+    } catch {
+      setPromoStatus('invalid');
+      setPromoMessage(t('pages.subscribe.checkout.promoInvalid'));
+    }
+  }
+
+  function handlePromoChange(value: string) {
+    setPromoCode(value);
+    setPromoStatus('idle');
+    setPromoMessage('');
+    if (promoDebounceRef.current) clearTimeout(promoDebounceRef.current);
+    if (value.trim().length >= 3) {
+      promoDebounceRef.current = setTimeout(() => validatePromoCode(value), 600);
+    }
+  }
+
+  async function handleChoose(tierSlug: string) {
     if (tierSlug === 'free') {
       router.push('/');
       return;
     }
+
+    setLoadingTier(tierSlug);
+    setCheckoutError(null);
+
     const planId = getPlanId(tierSlug) ?? tierSlug;
-    const url = new URL('/checkout', window.location.origin);
-    url.searchParams.set('plan', planId);
-    url.searchParams.set('billing', billing);
-    if (redirectTo) url.searchParams.set('redirect', redirectTo);
-    router.push(url.pathname + url.search);
+
+    try {
+      const res = await fetch('/api/checkout/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId,
+          interval: billing,
+          promoCode: promoStatus === 'valid' ? promoCode.trim() : undefined,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || json.error) {
+        setCheckoutError(json.error ?? t('pages.subscribe.checkout.errorGeneral'));
+        setLoadingTier(null);
+        return;
+      }
+
+      const { sessionId, payUrl } = json.data ?? {};
+
+      if (sessionId && payUrl) {
+        // MPGS Hosted Checkout: redirect to the gateway pay page with the session
+        const gatewayUrl = `${payUrl}?sessionId=${encodeURIComponent(sessionId)}`;
+        window.location.href = gatewayUrl;
+      } else {
+        // Fallback (e.g. test / mock mode): use any paymentUrl returned
+        const fallback = json.data?.paymentUrl;
+        if (fallback) {
+          window.location.href = fallback;
+        } else {
+          setCheckoutError(t('pages.subscribe.checkout.errorGeneral'));
+          setLoadingTier(null);
+        }
+      }
+    } catch {
+      setCheckoutError(t('pages.subscribe.checkout.errorGeneral'));
+      setLoadingTier(null);
+    }
   }
 
   return (
@@ -230,6 +313,53 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
             </button>
           </div>
         </section>
+
+        {/* ── Promo Code ───────────────────────────────────────────────── */}
+        <section className="py-6 bg-paper">
+          <div className="container-luxury max-w-sm mx-auto">
+            <div className="flex gap-2 items-center">
+              <div className="relative flex-1">
+                <Tag size={16} className="absolute top-1/2 -translate-y-1/2 start-3 text-pewter pointer-events-none" />
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => handlePromoChange(e.target.value)}
+                  onBlur={() => promoCode.trim() && validatePromoCode(promoCode)}
+                  placeholder={t('pages.subscribe.checkout.promoPlaceholder')}
+                  className="w-full ps-9 pe-3 py-2.5 rounded-xl border border-sand text-sm bg-white text-charcoal placeholder-pewter focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+                  dir="ltr"
+                />
+              </div>
+              <button
+                onClick={() => validatePromoCode(promoCode)}
+                disabled={promoStatus === 'checking' || !promoCode.trim()}
+                className="px-4 py-2.5 rounded-xl bg-obsidian text-white text-sm font-[family-name:var(--font-display)] font-semibold disabled:opacity-50 hover:bg-navy-light transition-colors"
+              >
+                {promoStatus === 'checking'
+                  ? t('pages.subscribe.checkout.promoChecking')
+                  : t('pages.subscribe.checkout.promoApply')}
+              </button>
+            </div>
+            {promoMessage && (
+              <p
+                className={`mt-2 text-xs text-center ${
+                  promoStatus === 'valid' ? 'text-profit' : 'text-loss'
+                }`}
+              >
+                {promoMessage}
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* ── Checkout error ────────────────────────────────────────────── */}
+        {checkoutError && (
+          <div className="container-luxury max-w-lg mx-auto -mb-6">
+            <p className="text-center text-sm text-loss bg-loss/10 rounded-xl py-3 px-4">
+              {checkoutError}
+            </p>
+          </div>
+        )}
 
         {/* ── Pricing Cards ────────────────────────────────────────────── */}
         <section className="py-14">
@@ -326,7 +456,8 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
                         e.stopPropagation();
                         handleChoose(tier.id);
                       }}
-                      className={`w-full py-3 rounded-xl font-[family-name:var(--font-display)] font-bold transition-all duration-200 ${
+                      disabled={loadingTier !== null}
+                      className={`w-full py-3 rounded-xl font-[family-name:var(--font-display)] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${
                         tier.id === 'free'
                           ? 'bg-ivory text-obsidian hover:bg-sand'
                           : isSelected
@@ -334,7 +465,12 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
                           : 'bg-obsidian text-white hover:bg-navy-light'
                       }`}
                     >
-                      {tier.id === 'free'
+                      {loadingTier === tier.id && (
+                        <Loader2 size={16} className="animate-spin" />
+                      )}
+                      {loadingTier === tier.id
+                        ? t('pages.subscribe.checkout.processing')
+                        : tier.id === 'free'
                         ? t('pages.subscribe.choose')
                         : t('pages.subscribe.startTrial')}
                     </button>

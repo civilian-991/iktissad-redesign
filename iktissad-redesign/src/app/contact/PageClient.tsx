@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle, MessageSquare, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle, MessageSquare, Building2, Loader2, AlertCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -19,14 +19,40 @@ export default function ContactPageClient() {
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState),
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          // Rate limited — reuse the error message key
+          setError(t('pages.contact.form.rateLimited'));
+        } else {
+          setError(t('pages.contact.form.errorMessage'));
+        }
+        return;
+      }
+
+      setIsSubmitted(true);
       setFormState({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+    } catch {
+      setError(t('pages.contact.form.errorMessage'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const contactInfo = contactCardIcons.map((icon, i) => ({
@@ -170,14 +196,24 @@ export default function ContactPageClient() {
                       />
                     </div>
 
+                    {/* Inline error */}
+                    {error && (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
+                        <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                        <span>{error}</span>
+                      </div>
+                    )}
+
                     <motion.button
                       type="submit"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      disabled={isSubmitted}
+                      disabled={isSubmitted || isLoading}
                       className={`w-full py-4 rounded-lg font-[family-name:var(--font-display)] font-bold flex items-center justify-center gap-2 transition-all ${
                         isSubmitted
-                          ? 'bg-green-500 text-white'
+                          ? 'bg-green-500 text-white cursor-default'
+                          : isLoading
+                          ? 'bg-gold/70 text-white cursor-wait'
                           : 'bg-gold text-white hover:bg-gold-dark'
                       }`}
                     >
@@ -185,6 +221,11 @@ export default function ContactPageClient() {
                         <>
                           <CheckCircle size={20} />
                           {t('pages.contact.form.successMessage')}
+                        </>
+                      ) : isLoading ? (
+                        <>
+                          <Loader2 size={20} className="animate-spin" />
+                          {t('pages.contact.form.sending')}
                         </>
                       ) : (
                         <>

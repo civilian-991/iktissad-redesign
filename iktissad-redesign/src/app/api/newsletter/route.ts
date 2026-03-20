@@ -34,7 +34,21 @@ export async function POST(request: NextRequest) {
   const { email } = parsed.data;
   const admin = createAdminClient();
 
-  // Upsert: if already subscribed, update status to active
+  // Check if already actively subscribed
+  const { data: existing } = await admin
+    .from("newsletter_subscribers")
+    .select("email, status")
+    .eq("email", email)
+    .maybeSingle() as { data: { email: string; status: string } | null };
+
+  if (existing && existing.status === "active") {
+    return NextResponse.json(
+      { error: "already_subscribed" } satisfies ApiResponse<never>,
+      { status: 409 }
+    );
+  }
+
+  // Insert or reactivate (upsert)
   const { data: row, error } = await admin
     .from("newsletter_subscribers")
     .upsert(

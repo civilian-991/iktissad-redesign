@@ -1,19 +1,22 @@
 'use client';
 
 import { motion } from 'motion/react';
+import NextImage from 'next/image';
 import { Target, Eye, Award, Users, Newspaper, Globe, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import useSWR from 'swr';
+import { swrFetcher } from '@/lib/api-client';
+import type { ApiResponse, AdminUser } from '@/types';
+import { siteStats } from '@/lib/site-config';
 
 const statsIcons = [Calendar, Newspaper, Users, Globe];
-const statsValues = ['1956', '+50,000', '+2M', '22'];
-
-const team = [
-  { name: 'رؤوف أبو زكي', role: 'رئيس التحرير', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop' },
-  { name: 'ليلى الحاج', role: 'مديرة التحرير', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop' },
-  { name: 'أحمد المنصور', role: 'رئيس قسم الاقتصاد', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop' },
-  { name: 'سارة العلي', role: 'رئيسة قسم التكنولوجيا', image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop' },
+const statsValues = [
+  String(siteStats.foundingYear),
+  siteStats.monthlyReaders,
+  siteStats.totalArticles,
+  String(siteStats.correspondentCountries),
 ];
 
 const timelineYears = ['1956', '1975', '2000', '2015', '2024'];
@@ -21,6 +24,14 @@ const valuesIcons = [Award, Users, Globe];
 
 export default function AboutPageClient() {
   const { t } = useTranslation();
+
+  const { data: profilesData, isLoading: profilesLoading } = useSWR<ApiResponse<AdminUser[]>>(
+    '/api/users?status=active&pageSize=8',
+    swrFetcher
+  );
+  const featuredTeam = (profilesData?.data ?? []).filter(
+    (u) => u.role === 'admin' || u.role === 'editor'
+  ).slice(0, 4);
 
   const stats = statsValues.map((value, i) => ({
     icon: statsIcons[i],
@@ -198,28 +209,46 @@ export default function AboutPageClient() {
             </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {team.map((member, index) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gold/20">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
+              {profilesLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-white rounded-2xl p-6 text-center shadow-lg">
+                    <div className="w-24 h-24 rounded-full bg-navy/10 animate-pulse mx-auto mb-4" />
+                    <div className="h-5 bg-navy/10 animate-pulse rounded w-3/4 mx-auto mb-2" />
+                    <div className="h-4 bg-navy/10 animate-pulse rounded w-1/2 mx-auto" />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
-                    {member.name}
-                  </h3>
-                  <p className="text-slate text-sm">{member.role}</p>
-                </motion.div>
-              ))}
+                ))
+              ) : featuredTeam.length > 0 ? (
+                featuredTeam.map((member, index) => (
+                  <motion.div
+                    key={member.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gold/20 bg-navy/10">
+                      {member.avatar ? (
+                        <NextImage
+                          src={member.avatar}
+                          alt={member.name}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-navy/40 text-2xl font-bold">
+                          {member.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
+                      {member.name}
+                    </h3>
+                    <p className="text-slate text-sm">{member.department || member.role}</p>
+                  </motion.div>
+                ))
+              ) : null}
             </div>
           </div>
         </section>

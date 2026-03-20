@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import ReaderClient from './ReaderClient';
+import MagazineTeaserClient from './MagazineTeaserClient';
 import type { MagazineIssue, MagazineSpread, MagazineSection } from '@/types';
 
 interface PageProps {
@@ -46,22 +47,19 @@ export default async function ReaderPage({ params }: PageProps) {
 
   // ── Authentication check ────────────────────────────────────────────────
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect(`/login?redirect=/magazine/${issueId}/reader`);
-  }
+  const isLoggedIn = !!user;
 
   // ── Subscription check ──────────────────────────────────────────────────
-  // Query subscribers table for active or trialing status
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: subscriber } = await (supabase as any)
-    .from('subscribers')
-    .select('id, status')
-    .eq('user_id', user.id)
-    .in('status', ['active', 'trialing'])
-    .maybeSingle();
-
-  if (!subscriber) {
-    redirect(`/subscribe?redirect=/magazine/${issueId}/reader`);
+  let hasSubscription = false;
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: subscriber } = await (supabase as any)
+      .from('subscribers')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle();
+    hasSubscription = !!subscriber;
   }
 
   // ── Fetch magazine issue ────────────────────────────────────────────────
@@ -138,6 +136,17 @@ export default async function ReaderPage({ params }: PageProps) {
     coverImage: (r.cover_image as string) ?? '',
     createdAt: (r.created_at as string) ?? '',
   }));
+
+  // ── Non-subscriber: show teaser instead of redirect ─────────────────────
+  if (!hasSubscription) {
+    return (
+      <MagazineTeaserClient
+        issue={issue}
+        sections={sections}
+        isLoggedIn={isLoggedIn}
+      />
+    );
+  }
 
   return (
     <ReaderClient

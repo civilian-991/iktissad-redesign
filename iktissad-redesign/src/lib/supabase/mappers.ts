@@ -78,6 +78,7 @@ export function mapArticleRow(
     sector: row.sectors?.name ?? row.sectors?.slug ?? "",
     country: row.countries?.name ?? row.countries?.slug ?? "",
     author: {
+      id: row.author_id ?? undefined,
       name: row.users?.name ?? "",
       avatar: row.users?.avatar ?? "",
     },
@@ -85,6 +86,8 @@ export function mapArticleRow(
     status: row.status,
     featured: row.featured ?? false,
     editorChoice: row.editor_choice ?? false,
+    paywalled: (row as any).is_paywalled ?? false,
+    isBreaking: (row as any).is_breaking ?? false,
     views: row.views,
     publishedAt: row.published_at ?? "",
     createdAt: row.created_at,

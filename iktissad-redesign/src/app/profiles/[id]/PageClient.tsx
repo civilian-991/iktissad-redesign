@@ -1,10 +1,14 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { Quote, MapPin, Briefcase, Award, ArrowUpLeft, Clock, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Quote, MapPin, Briefcase, Award, ArrowUpLeft, Clock, Share2, Facebook, Twitter, Linkedin, BookOpen, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import useSWR from 'swr';
+import { swrFetcher } from '@/lib/api-client';
+import type { Article, ApiResponse } from '@/types';
 
 const profile = {
   id: 1,
@@ -33,14 +37,18 @@ const profile = {
   ]
 };
 
-const relatedArticles = [
-  { id: 1, slug: 'pif-acquires-stake-global-company', title: 'صندوق الاستثمارات العامة يستحوذ على حصة في شركة عالمية', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop', date: '7 يناير 2026' },
-  { id: 2, slug: 'al-rumayyan-targets-worlds-largest-fund', title: 'الرميان: نستهدف أن يصبح الصندوق الأكبر في العالم', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop', date: '5 يناير 2026' },
-  { id: 3, slug: 'saudi-investments-technology-sector', title: 'استثمارات سعودية جديدة في قطاع التكنولوجيا', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop', date: '3 يناير 2026' },
-];
 
 export default function ProfileDetailPageClient() {
   const { t } = useTranslation();
+  const params = useParams<{ id: string }>();
+  const authorId = params?.id;
+
+  // F8.2 — Load articles by this author from the real API
+  const { data: articlesData, isLoading: articlesLoading } = useSWR<ApiResponse<Article[]>>(
+    authorId ? `/api/articles?authorId=${authorId}&status=published&pageSize=10` : null,
+    swrFetcher
+  );
+  const authorArticles = articlesData?.data ?? [];
 
   return (
     <>
@@ -196,7 +204,7 @@ export default function ProfileDetailPageClient() {
                 </motion.div>
               </div>
 
-              {/* Sidebar */}
+              {/* Sidebar — F8.2: real articles by this author */}
               <aside className="lg:col-span-1">
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -204,34 +212,64 @@ export default function ProfileDetailPageClient() {
                   className="bg-white rounded-2xl shadow-lg p-6 sticky top-24"
                 >
                   <h3 className="font-[family-name:var(--font-display)] font-bold text-xl text-navy mb-6 pb-4 border-b border-sand">
-                    {t('pages.news.relatedArticles')}
+                    {t('profile.articles_by')}
                   </h3>
-                  <div className="space-y-4">
-                    {relatedArticles.map((article) => (
-                      <a
-                        key={article.id}
-                        href={`/${article.slug}`}
-                        className="flex gap-4 group"
-                      >
-                        <div className="w-20 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={article.image}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-[family-name:var(--font-display)] font-semibold text-sm text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors">
-                            {article.title}
-                          </h4>
-                          <span className="text-xs text-slate mt-1 flex items-center gap-1">
-                            <Clock size={10} />
-                            {article.date}
-                          </span>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
+
+                  {articlesLoading && (
+                    <div className="flex justify-center py-8">
+                      <Loader2 size={22} className="animate-spin text-gold/60" />
+                    </div>
+                  )}
+
+                  {!articlesLoading && authorArticles.length === 0 && (
+                    <div className="flex flex-col items-center gap-2 py-8 text-center">
+                      <BookOpen size={24} className="text-charcoal/20" />
+                      <p className="text-sm text-charcoal/40 font-[family-name:var(--font-display)]">
+                        لا توجد مقالات منشورة
+                      </p>
+                    </div>
+                  )}
+
+                  {!articlesLoading && authorArticles.length > 0 && (
+                    <div className="space-y-4">
+                      {authorArticles.map((article) => (
+                        <a
+                          key={article.id}
+                          href={`/${article.slug ?? article.id}`}
+                          className="flex gap-4 group"
+                        >
+                          {article.featuredImage ? (
+                            <div className="w-20 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                              <img
+                                src={article.featuredImage}
+                                alt={article.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-16 rounded-lg bg-sand/30 flex items-center justify-center flex-shrink-0">
+                              <BookOpen size={16} className="text-charcoal/20" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-[family-name:var(--font-display)] font-semibold text-sm text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                              {article.title}
+                            </h4>
+                            {article.publishedAt && (
+                              <span className="text-xs text-slate mt-1 flex items-center gap-1">
+                                <Clock size={10} />
+                                {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
 
                   <a
                     href="/profiles"

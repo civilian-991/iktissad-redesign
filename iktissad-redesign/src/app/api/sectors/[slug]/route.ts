@@ -12,10 +12,14 @@ const ARTICLE_SELECT = `
 `;
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const { searchParams } = new URL(request.url);
+  const page     = Math.max(1, parseInt(searchParams.get("page")     || "1",  10));
+  const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "12", 10)));
+
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,28 +36,42 @@ export async function GET(
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count } = await supabase
-    .from("articles")
-    .select("id", { count: "exact", head: true })
-    .eq("sector_id", row.id)
-    .eq("status", "published" as const) as { count: number | null };
+  const offset = (page - 1) * pageSize;
+
+  // Fetch article count and paginated articles in parallel
+  const [countResult, articlesResult] = await Promise.all([
+    supabase
+      .from("articles")
+      .select("id", { count: "exact", head: true })
+      .eq("sector_id", row.id)
+      .eq("status", "published" as const),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from("articles")
+      .select(ARTICLE_SELECT, { count: "exact" })
+      .eq("sector_id", row.id)
+      .eq("status", "published")
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .range(offset, offset + pageSize - 1),
+  ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: articleRows } = await supabase
-    .from("articles")
-    .select(ARTICLE_SELECT)
-    .eq("sector_id", row.id)
-    .eq("status", "published")
-    .order("published_at", { ascending: false })
-    .limit(10) as { data: any[] | null };
-
-  const sector = mapSectorRow(row, count ?? 0);
+  const totalCount = (countResult as any).count ?? 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articles = (articleRows ?? []).map((r: any) => mapArticleRow(r));
+  const articleRows = (articlesResult.data ?? []) as any[];
+
+  const sector = mapSectorRow(row, totalCount);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles = articleRows.map((r: any) => mapArticleRow(r));
 
   const response: ApiResponse<Sector & { articles: typeof articles }> = {
     data: { ...sector, articles },
+    pagination: {
+      page,
+      pageSize,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+    },
   };
   return NextResponse.json(response);
 }

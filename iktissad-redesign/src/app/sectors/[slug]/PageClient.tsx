@@ -3,35 +3,53 @@
 import { use } from 'react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { TrendingUp, Clock, ChevronLeft, ChevronRight, Filter, Grid3X3, List, Loader2 } from 'lucide-react';
+import { TrendingUp, Clock, Grid3X3, List, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
-import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, Sector, ApiResponse } from '@/types';
 
-type SectorWithArticles = Sector & { articles: Article[] };
+const PAGE_SIZE = 12;
 
-const PAGE_SIZE = 7; // 1 featured + 6 grid
+type SectorPage = Sector & { articles: Article[] };
 
 export default function SectorPageClient({ params }: { params: Promise<{ slug: string }> }) {
   const { t } = useTranslation();
   const { slug } = use(params);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, error, isLoading } = useSWR<ApiResponse<SectorWithArticles>>(
-    `/api/sectors/${slug}`,
+  function getKey(pageIndex: number, previousPageData: ApiResponse<SectorPage> | null) {
+    if (previousPageData && !previousPageData.pagination) return null;
+    if (
+      previousPageData?.pagination &&
+      pageIndex + 1 > previousPageData.pagination.totalPages
+    ) {
+      return null;
+    }
+    return `/api/sectors/${slug}?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
+  }
+
+  const { data, size, setSize, isLoading, isValidating, error } = useSWRInfinite<ApiResponse<SectorPage>>(
+    getKey,
     swrFetcher
   );
 
-  const sector = data?.data;
-  const articles = sector?.articles ?? [];
-  const featuredArticle = articles[0];
-  const regularArticles = articles.slice(1);
+  const pages = data ?? [];
+  const sectorMeta = pages[0]?.data;
+  const allArticles: Article[] = pages.flatMap((p) => p.data?.articles ?? []);
+  const featuredArticle = allArticles[0];
+  const regularArticles = allArticles.slice(1);
 
-  const totalPages = Math.ceil(regularArticles.length / (PAGE_SIZE - 1)) || 1;
+  const lastPage = pages[pages.length - 1];
+  const hasMore =
+    lastPage?.pagination
+      ? lastPage.pagination.page < lastPage.pagination.totalPages
+      : false;
+
+  const isLoadingMore = isValidating && size > 1;
+  const isInitialLoading = isLoading && size === 1;
 
   return (
     <>
@@ -56,10 +74,10 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
               </div>
               <div>
                 <h1 className="text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-2">
-                  {isLoading ? '...' : sector?.name ?? slug}
+                  {isInitialLoading ? '...' : sectorMeta?.name ?? slug}
                 </h1>
-                {sector?.description && (
-                  <p className="text-white/80 text-lg">{sector.description}</p>
+                {sectorMeta?.description && (
+                  <p className="text-white/80 text-lg">{sectorMeta.description}</p>
                 )}
               </div>
             </motion.div>
@@ -69,7 +87,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
         {/* Content */}
         <section className="py-12">
           <div className="container-luxury">
-            {isLoading && (
+            {isInitialLoading && (
               <div className="flex items-center justify-center py-24">
                 <Loader2 className="text-gold animate-spin" size={40} />
               </div>
@@ -81,7 +99,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            {!isLoading && !error && articles.length === 0 && (
+            {!isInitialLoading && !error && allArticles.length === 0 && (
               <div className="text-center py-24">
                 <p className="text-charcoal text-lg">لا توجد مقالات في هذا القطاع حتى الآن.</p>
               </div>
@@ -132,7 +150,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <span className="text-slate text-sm">
-                    {articles.length} مقال
+                    {allArticles.length} مقال
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm">
@@ -160,7 +178,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                   href={`/${article.slug}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: Math.min(index % PAGE_SIZE, 11) * 0.05 }}
                   className={`group ${viewMode === 'list' ? 'flex gap-6 bg-white rounded-xl p-4 shadow-sm hover:shadow-lg transition-shadow' : ''}`}
                 >
                   {viewMode === 'grid' ? (
@@ -220,33 +238,22 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-12">
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex justify-center mt-12">
                 <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-navy hover:bg-gold hover:text-white transition-colors"
+                  onClick={() => setSize(size + 1)}
+                  disabled={isLoadingMore}
+                  className="flex items-center gap-2 px-8 py-3 bg-navy text-white font-[family-name:var(--font-display)] font-semibold rounded-lg hover:bg-navy-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <ChevronRight size={20} />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-lg font-[family-name:var(--font-display)] font-semibold transition-colors ${
-                      currentPage === page
-                        ? 'bg-gold text-white'
-                        : 'bg-white shadow-sm text-navy hover:bg-gold hover:text-white'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-navy hover:bg-gold hover:text-white transition-colors"
-                >
-                  <ChevronLeft size={20} />
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      {t('common.actions.loadingMore')}
+                    </>
+                  ) : (
+                    t('common.actions.loadMore')
+                  )}
                 </button>
               </div>
             )}

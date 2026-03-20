@@ -126,7 +126,14 @@ function PriceWidget({ data, arabic = false }: PriceWidgetProps) {
     >
       <BarChart3 size={16} style={{ color: '#DDA853', flexShrink: 0 }} />
       <div className="flex flex-col gap-0.5">
-        <span className="text-xs text-white/50 leading-none">{data.nameAr}</span>
+        <span className="text-xs text-white/50 leading-none">
+          {data.nameAr}
+          {data.isStale && (
+            <span className="mr-1 text-white/30 italic">
+              {arabic ? ' (بيانات قديمة)' : ' (stale)'}
+            </span>
+          )}
+        </span>
         <span className="text-base font-bold text-white leading-none tabular-nums">
           {formatPrice(data.price, data.currency, arabic)}
         </span>
@@ -183,9 +190,19 @@ function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
             <ChangeIndicator change={data.change} changePercent={data.changePercent} arabic={arabic} />
           </div>
         </div>
-        <div className="text-xs text-white/30 flex items-center gap-1 mt-1 flex-shrink-0">
-          <RefreshCw size={10} />
-          <span>{arabic ? 'مباشر' : 'Live'}</span>
+        <div className="flex flex-col items-end gap-0.5 mt-1 flex-shrink-0">
+          <div className="text-xs text-white/30 flex items-center gap-1">
+            <RefreshCw size={10} />
+            <span>
+              {arabic ? 'آخر تحديث: ' : 'Updated: '}
+              {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+          {data.isStale && (
+            <span className="text-xs text-white/25 italic">
+              {arabic ? '(بيانات قديمة)' : '(stale)'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -239,9 +256,17 @@ function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
       {/* Footer */}
       <div className="px-5 py-2 border-t flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
         <span className="text-xs text-white/30">{data.market}</span>
-        <span className="text-xs text-white/25">
-          {arabic ? 'بيانات توضيحية' : 'Demo data'}
-        </span>
+        <div className="flex items-center gap-2">
+          {data.isStale && (
+            <span className="text-xs text-white/30 italic">
+              {arabic ? '(بيانات قديمة)' : '(stale)'}
+            </span>
+          )}
+          <span className="text-xs text-white/25">
+            {arabic ? 'آخر تحديث: ' : 'Updated: '}
+            {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -317,14 +342,18 @@ function FullWidget({ data, arabic = false }: FullWidgetProps) {
 
       {/* Footer */}
       <div
-        className="px-5 py-2 flex items-center justify-between"
+        className="px-5 py-2 flex items-center justify-between gap-3"
         style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
       >
         <span className="text-xs text-white/25">
           {arabic ? 'آخر تحديث: ' : 'Updated: '}
           {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
         </span>
-        <span className="text-xs text-white/20">{arabic ? 'بيانات توضيحية' : 'Demo data'}</span>
+        {data.isStale && (
+          <span className="text-xs text-white/30 italic">
+            {arabic ? '(بيانات قديمة)' : '(stale)'}
+          </span>
+        )}
       </div>
     </div>
   )

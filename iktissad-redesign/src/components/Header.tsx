@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
+import BreakingNewsTicker from '@/components/BreakingNewsTicker';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION DATA
@@ -353,6 +354,9 @@ export default function Header() {
           </div>
         </div>
       </motion.header>
+
+      {/* Breaking News Ticker — sits immediately below the sticky header */}
+      <BreakingNewsTicker />
 
       {/* Search Modal */}
       <AnimatePresence>

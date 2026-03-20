@@ -32,10 +32,12 @@ const ARTICLE_SELECT = `
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
-  const query    = searchParams.get("q") || "";
-  const page     = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "10", 10)));
-  const semantic = searchParams.get("semantic") === "true";
+  const query       = searchParams.get("q") || "";
+  const page        = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const pageSize    = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "10", 10)));
+  const semantic    = searchParams.get("semantic") === "true";
+  const sectionSlug = searchParams.get("sectionSlug") || "";
+  const dateRange   = searchParams.get("dateRange") || "all"; // week | month | year | all
 
   if (!query.trim()) {
     return NextResponse.json(
@@ -45,6 +47,22 @@ export async function GET(request: NextRequest) {
   }
 
   const offset = (page - 1) * pageSize;
+
+  // Compute date filter boundary
+  let dateFrom: string | null = null;
+  if (dateRange === "week") {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    dateFrom = d.toISOString();
+  } else if (dateRange === "month") {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    dateFrom = d.toISOString();
+  } else if (dateRange === "year") {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1);
+    dateFrom = d.toISOString();
+  }
 
   // -------------------------------------------------------------------------
   // Semantic / hybrid mode — uses Postgres tsvector full-text search
@@ -110,7 +128,8 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const pattern  = `%${query.trim()}%`;
 
-  const { data: rows, count, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let qb = (supabase as any)
     .from("articles")
     .select(ARTICLE_SELECT, { count: "exact" })
     .eq("status", "published")
@@ -121,11 +140,23 @@ export async function GET(request: NextRequest) {
         `excerpt.ilike.${pattern}`,
         `excerpt_en.ilike.${pattern}`,
       ].join(",")
-    )
-    // Title matches first (Supabase doesn't support CASE ORDER BY directly,
-    // so we use two cascaded orders: recency as tie-breaker)
-    .order("published_at", { ascending: false })
-    .range(offset, offset + pageSize - 1);
+    );
+
+  // Apply section filter by joining through sections relation slug
+  if (sectionSlug) {
+    qb = qb.eq("sections.slug", sectionSlug);
+  }
+
+  // Apply date range filter
+  if (dateFrom) {
+    qb = qb.gte("published_at", dateFrom);
+  }
+
+  // Title matches first (Supabase doesn't support CASE ORDER BY directly,
+  // so we use two cascaded orders: recency as tie-breaker)
+  qb = qb.order("published_at", { ascending: false }).range(offset, offset + pageSize - 1);
+
+  const { data: rows, count, error } = await qb;
 
   if (error) {
     return NextResponse.json(
