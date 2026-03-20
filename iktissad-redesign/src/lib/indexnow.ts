@@ -29,16 +29,8 @@ export async function notifyIndexNow(slugs: string[]): Promise<void> {
     console.error('[IndexNow] ping failed for slugs:', slugs);
   }
 
-  // ── Google Indexing API (for news content) ─────────────────────────────────
-  // TODO: Implement Google Indexing API with service account auth.
-  // Requires GOOGLE_INDEXING_SA_KEY env var (service account JSON as string).
-  //
-  // For each URL:
-  //   POST https://indexing.googleapis.com/v3/urlNotifications:publish
-  //   Authorization: Bearer <oauth2_token_from_service_account>
-  //   Body: { "url": "<articleUrl>", "type": "URL_UPDATED" }
-  //
-  // Use the `google-auth-library` package to obtain a short-lived OAuth2 token
-  // from the service account JSON before making the request.
-  // ──────────────────────────────────────────────────────────────────────────
+  // Note: Google Indexing API is NOT applicable here — it only supports
+  // JobPosting and BroadcastEvent/VideoObject content types, not news articles.
+  // News indexing speed is covered by: IndexNow (above), the news sitemap,
+  // the RSS feed, and NewsArticle JSON-LD structured data on each article page.
 }
