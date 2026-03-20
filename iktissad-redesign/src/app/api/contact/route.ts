@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
 
   // Simple rate limiting: reject if same email submitted within the last hour
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { data: recent } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any;
+  const { data: recent } = await db
     .from("contact_submissions")
     .select("id")
     .eq("email", email)
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ??
     null;
 
-  const { error } = await admin.from("contact_submissions").insert({
+  const { error } = await db.from("contact_submissions").insert({
     name,
     email,
     subject,

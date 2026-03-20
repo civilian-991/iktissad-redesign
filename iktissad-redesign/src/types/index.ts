@@ -171,6 +171,8 @@ export interface Article {
   status: "published" | "draft" | "review" | "scheduled";
   featured: boolean;
   editorChoice: boolean;
+  paywalled: boolean;
+  isBreaking: boolean;
   views: number;
   publishedAt: string;
   createdAt: string;
