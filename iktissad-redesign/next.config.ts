@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Drupal date-prefixed URLs: /news/YYYY/MM/DD/slug → /slug
+      {
+        source: '/news/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+      // Drupal simple news URLs: /news/slug → /slug
       {
         source: '/news/:slug',
         destination: '/:slug',
@@ -55,7 +62,7 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
-  headers() {
+  async headers() {
     return [
       {
         source: "/(.*)",
