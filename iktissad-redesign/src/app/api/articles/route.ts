@@ -113,10 +113,15 @@ export async function GET(request: NextRequest) {
   }
 
   const start = (page - 1) * pageSize;
+  const sortFeaturedFirst = searchParams.get("sortFeaturedFirst") === "true";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows, count, error } = await (query as any)
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .range(start, start + pageSize - 1);
+  let orderedQuery = (query as any).order("published_at", { ascending: false, nullsFirst: false });
+  if (sortFeaturedFirst) {
+    orderedQuery = (query as any)
+      .order("featured", { ascending: false })
+      .order("published_at", { ascending: false, nullsFirst: false });
+  }
+  const { data: rows, count, error } = await orderedQuery.range(start, start + pageSize - 1);
 
   if (error) {
     return NextResponse.json(

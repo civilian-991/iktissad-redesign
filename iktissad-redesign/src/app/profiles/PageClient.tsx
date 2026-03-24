@@ -18,7 +18,7 @@ export default function ProfilesPageClient() {
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
-    `/api/articles?tag=profile&status=published&pageSize=${PAGE_SIZE}&page=${page}`,
+    `/api/articles?tag=profile&status=published&sortFeaturedFirst=true&pageSize=${PAGE_SIZE}&page=${page}`,
     swrFetcher
   );
 
