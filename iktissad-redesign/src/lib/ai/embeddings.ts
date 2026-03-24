@@ -21,6 +21,7 @@ export interface SimilarArticle {
   title: string;
   excerpt: string;
   slug: string;
+  featuredImage: string;
   publishedAt: string;
   /** Composite similarity score (0–1). Higher = more similar. */
   similarity: number;
@@ -118,7 +119,7 @@ export async function findSimilarArticles(
 
   const { data: rows, error: rowsError } = await supabase
     .from("articles")
-    .select("id, title, excerpt, slug, published_at, section_id, sector_id")
+    .select("id, title, excerpt, slug, featured_image, published_at, section_id, sector_id")
     .eq("status", "published")
     .neq("id", articleId)
     .or(orParts.join(","))
@@ -135,6 +136,7 @@ export async function findSimilarArticles(
       title: row.title,
       excerpt: (row.excerpt as string) ?? "",
       slug: row.slug,
+      featuredImage: (row.featured_image as string) ?? "",
       publishedAt: (row.published_at as string) ?? "",
       similarity: sectionScore + sectorScore,
     };
