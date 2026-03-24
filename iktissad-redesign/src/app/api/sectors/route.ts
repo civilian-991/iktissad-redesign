@@ -18,7 +18,8 @@ export async function GET() {
       .from("articles")
       .select("sector_id")
       .eq("status", "published" as const)
-      .not("sector_id", "is", null),
+      .not("sector_id", "is", null)
+      .limit(50000),
   ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,9 +39,9 @@ export async function GET() {
     if (r.sector_id) countMap[r.sector_id] = (countMap[r.sector_id] ?? 0) + 1;
   }
 
-  const sectors: Sector[] = (rows ?? []).map((row) =>
-    mapSectorRow(row, countMap[row.id] ?? 0)
-  );
+  const sectors: Sector[] = (rows ?? [])
+    .map((row) => mapSectorRow(row, countMap[row.id] ?? 0))
+    .sort((a, b) => (b.articleCount ?? 0) - (a.articleCount ?? 0));
 
   const response: ApiResponse<Sector[]> = {
     data: sectors,

@@ -4,43 +4,40 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '@/lib/i18n';
 import {
-  Factory, Building2, Plane, Cpu, Car, Leaf, Wheat, ShoppingBag,
+  Factory, Building2, Plane, Car, Leaf, Wheat, ShoppingBag,
   TrendingUp, Shield, Home, Truck, GraduationCap, HeartPulse,
   Lightbulb, Gem, Coins, ArrowUpLeft, Clock, ChevronLeft, ChevronRight,
-  Loader2, Briefcase, Globe
+  Loader2,
 } from 'lucide-react';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 
-// Map Arabic sector names to icons
+// Map sector slugs to icons (matches m14 taxonomy slugs)
 const SECTOR_ICONS: Record<string, React.ElementType> = {
-  'مال ومصارف': Building2,
-  'تكنولوجيا': Cpu,
-  'طاقة': Lightbulb,
-  'طاقة متجددة': Leaf,
-  'نفط وغاز': Factory,
-  'كهرباء': Lightbulb,
-  'عقار وإنشاءات': Home,
-  'سيارات ومحركات': Car,
-  'سياحة وطيران': Plane,
-  'منتجات الرفاهية': Gem,
-  'ساعات ورفاهية': Gem,
-  'اقتصاد عام': TrendingUp,
-  'النقل واللوجستيات': Truck,
-  'شركات': Briefcase,
-  'رجال وأعمال': Briefcase,
-  'مجتمع': Globe,
-  'صحة': HeartPulse,
-  'تعليم': GraduationCap,
-  'بيئة': Leaf,
+  'industry':              Factory,
+  'agriculture':           Wheat,
+  'trade':                 ShoppingBag,
+  'finance':               Building2,
+  'investment':            TrendingUp,
+  'insurance':             Shield,
+  'real-estate':           Home,
+  'transport':             Truck,
+  'automotive':            Car,
+  'tourism-entertainment': Plane,
+  'education':             GraduationCap,
+  'health':                HeartPulse,
+  'energy-environment':    Leaf,
+  'entrepreneurship':      Lightbulb,
+  'luxury':                Gem,
+  'wealth':                Coins,
 };
 
 interface Sector { id: string; name: string; slug: string; }
 
 function SectorCard({ sector }: { sector: Sector }) {
   const { t } = useTranslation();
-  const Icon = SECTOR_ICONS[sector.name] ?? TrendingUp;
+  const Icon = SECTOR_ICONS[sector.slug] ?? TrendingUp;
 
   const { data } = useSWR<ApiResponse<Article[]>>(
     `/api/articles?sector=${sector.slug}&status=published&pageSize=4`,
