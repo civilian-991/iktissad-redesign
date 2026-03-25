@@ -29,7 +29,7 @@ const MagazinePage = forwardRef<HTMLDivElement, PageProps>(({ url, num, locked }
     <div
       ref={ref}
       className="relative overflow-hidden bg-[#f5f0e8] select-none"
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '100%', transform: 'scaleX(-1)' }}
     >
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#f0ebe0]">
@@ -43,10 +43,10 @@ const MagazinePage = forwardRef<HTMLDivElement, PageProps>(({ url, num, locked }
         draggable={false}
         onLoad={() => setLoaded(true)}
       />
-      {/* Inner edge shadow */}
-      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/25 to-transparent pointer-events-none" />
-      {/* Page number */}
-      <div className="absolute bottom-3 right-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
+      {/* Inner edge shadow — right-0 so it appears on the left (binding side) after page counter-flip */}
+      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/25 to-transparent pointer-events-none" />
+      {/* Page number — left-3 so it appears bottom-right after counter-flip */}
+      <div className="absolute bottom-3 left-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
 
       {/* Lock overlay for paywalled pages */}
       {locked && (
@@ -427,9 +427,10 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
           <ChevronLeft size={22} />
         </motion.button>
 
-        {/* The image flipbook — must be dir=ltr so react-pageflip renders page order correctly */}
+        {/* dir=ltr isolates react-pageflip from RTL layout; scaleX(-1) mirrors the spread
+            so the cover (page 0) appears on the RIGHT — correct for Arabic books. */}
         {HTMLFlipBook && pages.length > 0 && (
-          <div dir="ltr">
+          <div dir="ltr" style={{ transform: 'scaleX(-1)' }}>
           <HTMLFlipBook
             ref={flipBookRef}
             width={dims.w}
@@ -489,7 +490,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
               className="flex-1 h-px bg-white/10 relative cursor-pointer group"
               onClick={e => {
                 const r = e.currentTarget.getBoundingClientRect();
-                const ratio = (e.clientX - r.left) / r.width;
+                const ratio = 1 - (e.clientX - r.left) / r.width;
                 const target = Math.round(ratio * (total - 1));
                 if (!isSubscriber && target >= FREE_PAGES) {
                   setPaywallOpen(true);
@@ -500,14 +501,14 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             >
               <div className="absolute inset-y-0 -top-2 -bottom-2 inset-x-0" />
               <motion.div
-                className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-700 to-gold"
+                className="absolute right-0 top-0 h-full bg-gradient-to-l from-amber-700 to-gold"
                 animate={{ width: `${readingProgress}%` }}
                 transition={{ ease: 'easeOut' }}
               />
               <motion.div
                 className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-gold rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                animate={{ left: `${readingProgress}%` }}
-                style={{ marginLeft: '-4px' }}
+                animate={{ right: `${readingProgress}%` }}
+                style={{ marginRight: '-4px' }}
               />
             </div>
             <span className="text-white/30 text-[11px] font-mono w-6 tabular-nums">{total}</span>
