@@ -26,37 +26,43 @@ const MagazinePage = forwardRef<HTMLDivElement, PageProps>(({ url, num, locked }
   const [loaded, setLoaded] = useState(false);
 
   return (
+    {/* react-pageflip owns the ref div and overrides its transform during animations.
+        Counter-flip lives in an inner wrapper so it's never clobbered. */}
     <div
       ref={ref}
-      className="relative overflow-hidden bg-[#f5f0e8] select-none"
-      style={{ width: '100%', height: '100%', transform: 'scaleX(-1)' }}
+      style={{ width: '100%', height: '100%' }}
     >
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#f0ebe0]">
-          <Loader2 size={20} className="text-stone-400 animate-spin" />
-        </div>
-      )}
-      <img
-        src={url}
-        alt={`صفحة ${num}`}
-        className={`w-full h-full object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        draggable={false}
-        onLoad={() => setLoaded(true)}
-      />
-      {/* Inner edge shadow — right-0 so it appears on the left (binding side) after page counter-flip */}
-      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/25 to-transparent pointer-events-none" />
-      {/* Page number — left-3 so it appears bottom-right after counter-flip */}
-      <div className="absolute bottom-3 left-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
+      <div
+        className="relative overflow-hidden bg-[#f5f0e8] select-none w-full h-full"
+        style={{ transform: 'scaleX(-1)' }}
+      >
+        {!loaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#f0ebe0]">
+            <Loader2 size={20} className="text-stone-400 animate-spin" />
+          </div>
+        )}
+        <img
+          src={url}
+          alt={`صفحة ${num}`}
+          className={`w-full h-full object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          draggable={false}
+          onLoad={() => setLoaded(true)}
+        />
+        {/* Inner edge shadow */}
+        <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/25 to-transparent pointer-events-none" />
+        {/* Page number */}
+        <div className="absolute bottom-3 right-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
 
-      {/* Lock overlay for paywalled pages */}
-      {locked && (
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/85 flex flex-col items-center justify-end pb-8 gap-2">
-          <Lock size={22} className="text-gold" />
-          <p className="text-white/70 text-xs font-[family-name:var(--font-display)] text-center px-4">
-            اشترك للوصول الكامل
-          </p>
-        </div>
-      )}
+        {/* Lock overlay for paywalled pages */}
+        {locked && (
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/85 flex flex-col items-center justify-end pb-8 gap-2">
+            <Lock size={22} className="text-gold" />
+            <p className="text-white/70 text-xs font-[family-name:var(--font-display)] text-center px-4">
+              اشترك للوصول الكامل
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 });
