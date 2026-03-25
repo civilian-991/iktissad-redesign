@@ -133,6 +133,11 @@ function PriceWidget({ data, arabic = false }: PriceWidgetProps) {
               {arabic ? ' (بيانات قديمة)' : ' (stale)'}
             </span>
           )}
+          {data.isMock && (
+            <span className="mr-1 text-amber-400/60 italic">
+              {arabic ? ' (توضيحي)' : ' (sample)'}
+            </span>
+          )}
         </span>
         <span className="text-base font-bold text-white leading-none tabular-nums">
           {formatPrice(data.price, data.currency, arabic)}
@@ -262,6 +267,11 @@ function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
               {arabic ? '(بيانات قديمة)' : '(stale)'}
             </span>
           )}
+          {data.isMock && (
+            <span className="text-xs text-amber-400/50 italic">
+              {arabic ? '(بيانات توضيحية)' : '(sample data)'}
+            </span>
+          )}
           <span className="text-xs text-white/25">
             {arabic ? 'آخر تحديث: ' : 'Updated: '}
             {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -352,6 +362,11 @@ function FullWidget({ data, arabic = false }: FullWidgetProps) {
         {data.isStale && (
           <span className="text-xs text-white/30 italic">
             {arabic ? '(بيانات قديمة)' : '(stale)'}
+          </span>
+        )}
+        {data.isMock && (
+          <span className="text-xs text-amber-400/50 italic">
+            {arabic ? '(بيانات توضيحية)' : '(sample data)'}
           </span>
         )}
       </div>

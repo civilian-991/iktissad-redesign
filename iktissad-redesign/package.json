@@ -17,6 +17,7 @@
     "@fontsource/ibm-plex-sans-arabic": "^5.2.8",
     "@gsap/react": "^2.1.2",
     "@rive-app/react-canvas": "^4.27.0",
+    "@sendgrid/mail": "^8.1.6",
     "@sentry/nextjs": "^10",
     "@sparticuz/chromium-min": "^143.0.4",
     "@supabase/ssr": "^0.8.0",

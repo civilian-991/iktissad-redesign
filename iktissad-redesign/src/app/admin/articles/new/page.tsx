@@ -9,6 +9,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import useSWR from 'swr';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,7 +36,7 @@ import { Button } from '@/components/ui';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
-import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt } from '@/lib/api-client';
+import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -48,46 +49,6 @@ type CategoryKey = typeof categoryKeys[number];
 type TagKey = typeof tagKeys[number];
 type ArticleStatus = 'draft' | 'review' | 'scheduled' | 'published';
 
-const COUNTRY_REGIONS = [
-  {
-    id: 'gulf', name: 'الخليج',
-    countries: [
-      { id: 'saudi', name: 'السعودية' },
-      { id: 'uae', name: 'الإمارات' },
-      { id: 'qatar', name: 'قطر' },
-      { id: 'kuwait', name: 'الكويت' },
-      { id: 'bahrain', name: 'البحرين' },
-      { id: 'oman', name: 'عُمان' },
-    ],
-  },
-  {
-    id: 'mashreq', name: 'المشرق العربي',
-    countries: [
-      { id: 'lebanon', name: 'لبنان' },
-      { id: 'syria', name: 'سوريا' },
-      { id: 'jordan', name: 'الأردن' },
-      { id: 'iraq', name: 'العراق' },
-    ],
-  },
-  {
-    id: 'northafrica', name: 'شمال أفريقيا',
-    countries: [
-      { id: 'egypt', name: 'مصر' },
-      { id: 'morocco', name: 'المغرب' },
-      { id: 'algeria', name: 'الجزائر' },
-      { id: 'tunisia', name: 'تونس' },
-    ],
-  },
-  {
-    id: 'world', name: 'العالم',
-    countries: [
-      { id: 'usa', name: 'أمريكا' },
-      { id: 'china', name: 'الصين' },
-      { id: 'europe', name: 'أوروبا' },
-      { id: 'india', name: 'الهند' },
-    ],
-  },
-] as const;
 
 // ═══════════════════════════════════════════════════════════════
 // COMPONENT
@@ -105,8 +66,11 @@ export default function NewArticlePage() {
   const [status, setStatus] = useState<ArticleStatus>('draft');
   const [scheduledDate, setScheduledDate] = useState('');
   const [titleEn, setTitleEn] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
+  const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
@@ -518,30 +482,16 @@ export default function NewArticlePage() {
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
               بلدان
             </label>
-            {/* Region */}
             <select
-              value={selectedRegion}
-              onChange={(e) => { setSelectedRegion(e.target.value); setSelectedCountry(''); }}
-              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors mb-3"
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">-- اختر المنطقة --</option>
-              {COUNTRY_REGIONS.map((r) => (
-                <option key={r.id} value={r.id} className="bg-midnight">{r.name}</option>
+              <option value="" className="bg-midnight">-- اختر البلد --</option>
+              {countries.map((c) => (
+                <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
               ))}
             </select>
-            {/* Country */}
-            {selectedRegion && (
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
-              >
-                <option value="" className="bg-midnight">-- اختر البلد --</option>
-                {COUNTRY_REGIONS.find((r) => r.id === selectedRegion)?.countries.map((c) => (
-                  <option key={c.id} value={c.id} className="bg-midnight">{c.name}</option>
-                ))}
-              </select>
-            )}
           </motion.div>
 
           {/* Tags */}

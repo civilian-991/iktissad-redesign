@@ -96,50 +96,6 @@ function extractText(node: JSONContent | null | undefined): string {
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
 type TagKey = typeof tagKeys[number];
 
-const COUNTRY_REGIONS = [
-  {
-    id: 'gulf', name: 'الخليج',
-    countries: [
-      { id: 'saudi', name: 'السعودية' },
-      { id: 'uae', name: 'الإمارات' },
-      { id: 'qatar', name: 'قطر' },
-      { id: 'kuwait', name: 'الكويت' },
-      { id: 'bahrain', name: 'البحرين' },
-      { id: 'oman', name: 'عُمان' },
-    ],
-  },
-  {
-    id: 'mashreq', name: 'المشرق العربي',
-    countries: [
-      { id: 'lebanon', name: 'لبنان' },
-      { id: 'syria', name: 'سوريا' },
-      { id: 'jordan', name: 'الأردن' },
-      { id: 'iraq', name: 'العراق' },
-    ],
-  },
-  {
-    id: 'northafrica', name: 'شمال أفريقيا',
-    countries: [
-      { id: 'egypt', name: 'مصر' },
-      { id: 'morocco', name: 'المغرب' },
-      { id: 'algeria', name: 'الجزائر' },
-      { id: 'tunisia', name: 'تونس' },
-    ],
-  },
-  {
-    id: 'world', name: 'العالم',
-    countries: [
-      { id: 'usa', name: 'أمريكا' },
-      { id: 'china', name: 'الصين' },
-      { id: 'europe', name: 'أوروبا' },
-      { id: 'india', name: 'الهند' },
-    ],
-  },
-] as const;
-
-function findRegionForCountry(countryId: string): string {
-  return COUNTRY_REGIONS.find((r) => r.countries.some((c) => c.id === countryId))?.id ?? '';
-}
 
 export default function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -167,8 +123,11 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [focalX, setFocalX] = useState(0.5);
   const [focalY, setFocalY] = useState(0.5);
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
-  const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
+  const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
@@ -272,7 +231,6 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       setStatus(article.status);
       if (article.country) {
         setSelectedCountry(article.country);
-        setSelectedRegion(findRegionForCountry(article.country));
       }
       // Restore article_type if the article has one saved
       if ((article as any).articleType) {
@@ -794,27 +752,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               بلدان
             </label>
             <select
-              value={selectedRegion}
-              onChange={(e) => { setSelectedRegion(e.target.value); setSelectedCountry(''); }}
-              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors mb-3"
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">-- اختر المنطقة --</option>
-              {COUNTRY_REGIONS.map((r) => (
-                <option key={r.id} value={r.id} className="bg-midnight">{r.name}</option>
+              <option value="" className="bg-midnight">-- اختر البلد --</option>
+              {countries.map((c) => (
+                <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
               ))}
             </select>
-            {selectedRegion && (
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
-              >
-                <option value="" className="bg-midnight">-- اختر البلد --</option>
-                {COUNTRY_REGIONS.find((r) => r.id === selectedRegion)?.countries.map((c) => (
-                  <option key={c.id} value={c.id} className="bg-midnight">{c.name}</option>
-                ))}
-              </select>
-            )}
           </motion.div>
 
           {/* Tags */}

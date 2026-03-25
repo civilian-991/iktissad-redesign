@@ -60,46 +60,6 @@ const statusKeys = ['all', 'published', 'draft', 'review', 'scheduled'] as const
 type StatusKey = typeof statusKeys[number];
 type ArticleStatus = 'published' | 'draft' | 'review' | 'scheduled';
 
-const COUNTRY_REGIONS = [
-  {
-    id: 'gulf', name: 'الخليج',
-    countries: [
-      { id: 'saudi', name: 'السعودية' },
-      { id: 'uae', name: 'الإمارات' },
-      { id: 'qatar', name: 'قطر' },
-      { id: 'kuwait', name: 'الكويت' },
-      { id: 'bahrain', name: 'البحرين' },
-      { id: 'oman', name: 'عُمان' },
-    ],
-  },
-  {
-    id: 'mashreq', name: 'المشرق العربي',
-    countries: [
-      { id: 'lebanon', name: 'لبنان' },
-      { id: 'syria', name: 'سوريا' },
-      { id: 'jordan', name: 'الأردن' },
-      { id: 'iraq', name: 'العراق' },
-    ],
-  },
-  {
-    id: 'northafrica', name: 'شمال أفريقيا',
-    countries: [
-      { id: 'egypt', name: 'مصر' },
-      { id: 'morocco', name: 'المغرب' },
-      { id: 'algeria', name: 'الجزائر' },
-      { id: 'tunisia', name: 'تونس' },
-    ],
-  },
-  {
-    id: 'world', name: 'العالم',
-    countries: [
-      { id: 'usa', name: 'أمريكا' },
-      { id: 'china', name: 'الصين' },
-      { id: 'europe', name: 'أوروبا' },
-      { id: 'india', name: 'الهند' },
-    ],
-  },
-] as const;
 
 // ═══════════════════════════════════════════════════════════════
 // COMPONENT
@@ -113,7 +73,6 @@ export default function ArticlesPage() {
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'views' | 'title'>('date');
-  const [filterRegion, setFilterRegion] = useState('');
   const [filterCountry, setFilterCountry] = useState('');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -128,6 +87,10 @@ export default function ArticlesPage() {
     search: searchQuery || undefined,
     country: filterCountry || undefined,
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
+  const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
 
   const { data, isLoading, mutate } = useSWR<ApiResponse<Article[]>>(
     swrKey,
@@ -290,23 +253,6 @@ export default function ArticlesPage() {
                   </select>
                 </div>
 
-                {/* Region Filter */}
-                <div>
-                  <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
-                    المنطقة
-                  </label>
-                  <select
-                    value={filterRegion}
-                    onChange={(e) => { setFilterRegion(e.target.value); setFilterCountry(''); setPage(1); }}
-                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
-                  >
-                    <option value="" className="bg-midnight">كل المناطق</option>
-                    {COUNTRY_REGIONS.map((r) => (
-                      <option key={r.id} value={r.id} className="bg-midnight">{r.name}</option>
-                    ))}
-                  </select>
-                </div>
-
                 {/* Country Filter */}
                 <div>
                   <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
@@ -315,12 +261,11 @@ export default function ArticlesPage() {
                   <select
                     value={filterCountry}
                     onChange={(e) => { setFilterCountry(e.target.value); setPage(1); }}
-                    disabled={!filterRegion}
-                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30 disabled:opacity-40"
+                    className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
                     <option value="" className="bg-midnight">كل البلدان</option>
-                    {filterRegion && COUNTRY_REGIONS.find((r) => r.id === filterRegion)?.countries.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-midnight">{c.name}</option>
+                    {countries.map((c) => (
+                      <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
                     ))}
                   </select>
                 </div>

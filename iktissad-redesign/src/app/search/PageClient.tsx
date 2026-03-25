@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Search, Clock, X, Loader2, SlidersHorizontal, TrendingUp } from 'lucide-react';
+import { Search, Clock, X, Loader2, SlidersHorizontal } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -69,13 +69,6 @@ export default function SearchPageClient() {
   );
   const sections: Section[] = sectionsData?.data ?? [];
 
-  // Fetch trending searches (shown when query is empty)
-  const { data: trendingData } = useSWR<ApiResponse<string[]>>(
-    '/api/search/trending',
-    swrFetcher
-  );
-  const trendingTerms: string[] = trendingData?.data ?? [];
-
   function buildSearchUrl(pageIndex: number) {
     const params = new URLSearchParams({
       q: debouncedQuery.trim(),
@@ -137,11 +130,6 @@ export default function SearchPageClient() {
     setDateRange('all');
   }, []);
 
-  const handleTrendingClick = (term: string) => {
-    setQuery(term);
-    setDebouncedQuery(term);
-  };
-
   return (
     <>
       <Header />
@@ -185,33 +173,6 @@ export default function SearchPageClient() {
         {/* Results */}
         <section className="py-12">
           <div className="container-luxury">
-
-            {/* ── Trending Searches (empty state) ── */}
-            {!debouncedQuery && trendingTerms.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-10"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp size={18} className="text-gold" />
-                  <h2 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
-                    {t('pages.search.trending')}
-                  </h2>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {trendingTerms.map((term) => (
-                    <button
-                      key={term}
-                      onClick={() => handleTrendingClick(term)}
-                      className="px-4 py-2 bg-white border border-navy/10 text-navy font-[family-name:var(--font-display)] text-sm rounded-full hover:bg-navy hover:text-white hover:border-navy transition-all shadow-sm"
-                    >
-                      {term}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
 
             {/* ── Results Header + Filters ── */}
             {debouncedQuery && (
@@ -368,10 +329,10 @@ export default function SearchPageClient() {
                     {t('pages.search.try_instead')}:
                   </span>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {(trendingTerms.length > 0 ? trendingTerms.slice(0, 3) : FALLBACK_SUGGESTIONS).map((term) => (
+                    {FALLBACK_SUGGESTIONS.map((term) => (
                       <button
                         key={term}
-                        onClick={() => handleTrendingClick(term)}
+                        onClick={() => { setQuery(term); setDebouncedQuery(term); }}
                         className="px-4 py-2 bg-white border border-navy/10 text-navy font-[family-name:var(--font-display)] text-sm rounded-full hover:bg-navy hover:text-white hover:border-navy transition-all shadow-sm"
                       >
                         {term}

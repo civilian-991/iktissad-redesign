@@ -32,99 +32,6 @@ import { swrFetcher, magazinesKey, deleteMagazine } from '@/lib/api-client';
 import type { MagazineIssue, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
-// Kept as fallback for when API returns no data
-const magazinesFallback: any[] = [
-  {
-    id: 'AR0542',
-    title: 'العدد 542',
-    subtitle: 'يناير 2026',
-    cover: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=560&fit=crop',
-    year: 2026,
-    month: 'يناير',
-    pages: 84,
-    views: 12500,
-    downloads: 3200,
-    featured: true,
-    status: 'published',
-    publishDate: '2026-01-01',
-    highlights: ['توقعات الاقتصاد العربي 2026', 'مقابلة حصرية مع وزير المالية السعودي', 'ملف خاص: مستقبل التقنية المالية']
-  },
-  {
-    id: 'AR0541',
-    title: 'العدد 541',
-    subtitle: 'ديسمبر 2025',
-    cover: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=560&fit=crop',
-    year: 2025,
-    month: 'ديسمبر',
-    pages: 78,
-    views: 15200,
-    downloads: 4100,
-    featured: false,
-    status: 'published',
-    publishDate: '2025-12-01',
-    highlights: ['أفضل 100 شركة عربية', 'قمة المناخ وتأثيرها على الاقتصاد']
-  },
-  {
-    id: 'AR0540',
-    title: 'العدد 540',
-    subtitle: 'نوفمبر 2025',
-    cover: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=560&fit=crop',
-    year: 2025,
-    month: 'نوفمبر',
-    pages: 72,
-    views: 11800,
-    downloads: 2900,
-    featured: false,
-    status: 'published',
-    publishDate: '2025-11-01',
-    highlights: ['الاستثمار في العقارات', 'أسواق الخليج']
-  },
-  {
-    id: 'AR0539',
-    title: 'العدد 539',
-    subtitle: 'أكتوبر 2025',
-    cover: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=560&fit=crop',
-    year: 2025,
-    month: 'أكتوبر',
-    pages: 80,
-    views: 13400,
-    downloads: 3500,
-    featured: false,
-    status: 'published',
-    publishDate: '2025-10-01',
-    highlights: ['مؤتمر صندوق النقد الدولي', 'البنوك المركزية العربية']
-  },
-  {
-    id: 'AR0538',
-    title: 'العدد 538',
-    subtitle: 'سبتمبر 2025',
-    cover: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=560&fit=crop',
-    year: 2025,
-    month: 'سبتمبر',
-    pages: 76,
-    views: 10200,
-    downloads: 2600,
-    featured: false,
-    status: 'published',
-    publishDate: '2025-09-01',
-    highlights: ['الطاقة المتجددة', 'رؤية 2030']
-  },
-  {
-    id: 'AR0543',
-    title: 'العدد 543',
-    subtitle: 'فبراير 2026',
-    cover: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=560&fit=crop',
-    year: 2026,
-    month: 'فبراير',
-    pages: 80,
-    views: 0,
-    downloads: 0,
-    featured: false,
-    status: 'draft',
-    publishDate: '2026-02-01',
-    highlights: ['قمة دافوس 2026', 'الذكاء الاصطناعي في الاقتصاد']
-  },
-];
 
 const years = [2026, 2025, 2024, 2023];
 const statuses = [
@@ -146,7 +53,7 @@ export default function MagazinesPage() {
   const [magazineToDelete, setMagazineToDelete] = useState<string | null>(null);
 
   // Fetch from API
-  const { data, isLoading, mutate } = useSWR<ApiResponse<MagazineIssue[]>>(
+  const { data, isLoading, error, mutate } = useSWR<ApiResponse<MagazineIssue[]>>(
     magazinesKey({ status: selectedStatus !== 'all' ? selectedStatus : undefined }),
     swrFetcher,
     { revalidateOnFocus: false, keepPreviousData: true }
@@ -363,7 +270,37 @@ export default function MagazinesPage() {
 
       {/* Magazines Grid/List */}
       <SectionErrorBoundary section="magazines-list">
-      {viewMode === 'grid' ? (
+
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-gold" />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !isLoading && (
+        <div className="text-center py-16">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-loss/10 mb-4">
+            <X size={24} className="text-loss" />
+          </div>
+          <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-white mb-2">
+            تعذّر تحميل الأعداد
+          </h3>
+          <p className="text-white/50 mb-6 text-sm">
+            {error?.message ?? 'حدث خطأ أثناء الاتصال بقاعدة البيانات'}
+          </p>
+          <button
+            onClick={() => mutate()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 text-white font-[family-name:var(--font-display)] rounded-xl hover:bg-white/10 transition-colors"
+          >
+            <Loader2 size={16} />
+            إعادة المحاولة
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !error && (viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMagazines.map((magazine, index) => (
             <motion.div
@@ -578,10 +515,10 @@ export default function MagazinesPage() {
             </motion.div>
           ))}
         </div>
-      )}
+      ))}
 
       {/* Empty State */}
-      {filteredMagazines.length === 0 && (
+      {!isLoading && !error && filteredMagazines.length === 0 && (
         <div className="text-center py-16">
           <BookOpen size={48} className="mx-auto text-white/20 mb-4" />
           <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-white mb-2">

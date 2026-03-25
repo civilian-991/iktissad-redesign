@@ -41,6 +41,7 @@ export interface MarketDataResponse {
   currency: string
   lastUpdated: string   // ISO timestamp
   isStale: boolean      // true when data is outside trading hours or cache is stale
+  isMock?: boolean      // true when returning sample/placeholder data (no real API key)
   history: MarketDataPoint[]
 }
 
@@ -418,15 +419,20 @@ export async function GET(request: NextRequest) {
   let responseData: Omit<MarketDataResponse, 'isStale'>
   let isStale = false
 
+  let isMock = false
+
   if (provider === 'alpha_vantage') {
     const result = await fetchAlphaVantage(symbol, market, mockData)
     responseData = result.data
     isStale = result.isStale
+    // If alpha_vantage fell back to mock (no API key), mark as mock
+    isMock = !process.env.ALPHA_VANTAGE_API_KEY
   } else {
     // Default: mock provider
+    isMock = true
     if (!mockData) {
       const placeholder = buildPlaceholder(symbol, market)
-      const response: MarketDataResponse = { ...placeholder, isStale: false }
+      const response: MarketDataResponse = { ...placeholder, isStale: false, isMock: true }
       return NextResponse.json(response, {
         status: 200,
         headers: { 'Cache-Control': 'no-store' },
@@ -437,7 +443,7 @@ export async function GET(request: NextRequest) {
     isStale = false
   }
 
-  const response: MarketDataResponse = { ...responseData, isStale }
+  const response: MarketDataResponse = { ...responseData, isStale, isMock }
 
   return NextResponse.json(response, {
     status: 200,
