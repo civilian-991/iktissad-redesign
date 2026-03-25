@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
-import BreakingNewsTicker from '@/components/BreakingNewsTicker';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION DATA
@@ -232,17 +231,6 @@ export default function Header() {
         <div className={`flex items-center justify-center transition-all duration-500 ${
           isScrolled ? 'py-2 border-b border-sand/60' : 'py-5 border-b border-sand'
         }`}>
-          {/* Mobile Menu Button — absolute left so it doesn't displace logo */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden absolute start-4 w-10 h-10 bg-obsidian text-gold flex items-center justify-center"
-            aria-label={t('a11y.openMenu')}
-          >
-            <Menu size={iconSizes.lg} />
-          </motion.button>
-
           <Link href="/" className="flex items-center group">
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -265,6 +253,27 @@ export default function Header() {
         {/* Nav Row — menu + actions */}
         <div className="container-editorial">
           <div className="flex items-center justify-between py-1.5">
+            {/* Hamburger — mobile only, inline-start = right in RTL */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden w-9 h-9 bg-obsidian text-gold flex items-center justify-center"
+              aria-label={isMobileMenuOpen ? t('header.menu.close') : t('a11y.openMenu')}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isMobileMenuOpen ? (
+                  <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                    <X size={iconSizes.lg} />
+                  </motion.span>
+                ) : (
+                  <motion.span key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                    <Menu size={iconSizes.lg} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
               {navigationConfig.map((item) => (
@@ -353,10 +362,86 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </motion.header>
 
-      {/* Breaking News Ticker — sits immediately below the sticky header */}
-      <BreakingNewsTicker />
+        {/* Mobile Nav Dropdown — collapses below the logo row */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="lg:hidden overflow-hidden border-t border-sand"
+            >
+              <nav className="overflow-y-auto max-h-[70vh] py-4 bg-paper">
+                {navigationConfig.map((item, index) => (
+                  <motion.div
+                    key={item.key}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * config.stagger.fast }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-between px-6 py-3.5 font-[family-name:var(--font-display)] font-semibold text-obsidian hover:bg-cream hover:text-gold transition-colors"
+                    >
+                      <span>{getNavName(item.key)}</span>
+                      {item.submenu && <ChevronDown size={iconSizes.sm} className="text-gold/50" />}
+                    </Link>
+                    {item.submenu && (
+                      <div className="bg-cream/50 border-r-2 border-gold/20 mr-4">
+                        {item.submenu.slice(0, 6).map((subItem) => (
+                          <Link
+                            key={subItem.key}
+                            href={subItem.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block px-8 py-2.5 text-sm text-charcoal hover:text-gold transition-colors"
+                          >
+                            {getSubmenuName(item.key, subItem.key)}
+                          </Link>
+                        ))}
+                        {item.submenu.length > 6 && (
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block px-8 py-2.5 text-sm text-gold font-semibold"
+                          >
+                            {t('common.actions.viewAll')} ({item.submenu.length})
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </nav>
+              <div className="bg-paper px-5 py-4 border-t border-sand">
+                <Link
+                  href="/subscribe"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full btn-gold text-center mb-4"
+                >
+                  <span>{t('common.actions.subscribe')}</span>
+                </Link>
+                <div className="flex items-center justify-center gap-5">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-graphite hover:text-gold transition-colors"
+                      aria-label={social.label}
+                    >
+                      <social.icon size={iconSizes.md} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
 
       {/* Search Modal */}
       <AnimatePresence>
@@ -424,113 +509,6 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-obsidian/60 z-[90] lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-            <motion.div
-              initial={{ x: locale === 'ar' ? '100%' : '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: locale === 'ar' ? '100%' : '-100%' }}
-              transition={{ type: "spring", damping: 25 }}
-              className={`fixed top-0 ${locale === 'ar' ? 'right-0' : 'left-0'} bottom-0 bg-paper z-[95] lg:hidden shadow-dramatic`}
-              style={{ width: config.mobileMenu.width }}
-            >
-              <div className="flex flex-col h-full">
-                {/* Mobile Menu Header */}
-                <div className="flex items-center justify-between p-5 border-b border-sand">
-                  <span className="font-[family-name:var(--font-display)] font-bold text-obsidian">
-                    {t('header.menu.label')}
-                  </span>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-10 h-10 border border-sand text-graphite flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
-                    aria-label={t('header.menu.close')}
-                  >
-                    <X size={iconSizes.lg} />
-                  </button>
-                </div>
-
-                {/* Mobile Menu Items */}
-                <nav className="flex-1 overflow-y-auto py-4">
-                  {navigationConfig.map((item, index) => (
-                    <motion.div
-                      key={item.key}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * config.stagger.fast }}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between px-6 py-3.5 font-[family-name:var(--font-display)] font-semibold text-obsidian hover:bg-cream hover:text-gold transition-colors"
-                      >
-                        <span>{getNavName(item.key)}</span>
-                        {item.submenu && <ChevronDown size={iconSizes.sm} className="text-gold/50" />}
-                      </Link>
-                      {item.submenu && (
-                        <div className="bg-cream/50 border-r-2 border-gold/20 mr-4">
-                          {item.submenu.slice(0, 6).map((subItem) => (
-                            <Link
-                              key={subItem.key}
-                              href={subItem.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block px-8 py-2.5 text-sm text-charcoal hover:text-gold transition-colors"
-                            >
-                              {getSubmenuName(item.key, subItem.key)}
-                            </Link>
-                          ))}
-                          {item.submenu.length > 6 && (
-                            <Link
-                              href={item.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block px-8 py-2.5 text-sm text-gold font-semibold"
-                            >
-                              {t('common.actions.viewAll')} ({item.submenu.length})
-                            </Link>
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </nav>
-
-                {/* Mobile Menu Footer */}
-                <div className="p-5 border-t border-sand">
-                  <Link
-                    href="/subscribe"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block w-full btn-gold text-center mb-5"
-                  >
-                    <span>{t('common.actions.subscribe')}</span>
-                  </Link>
-                  <div className="flex items-center justify-center gap-5">
-                    {socialLinks.map((social) => (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-graphite hover:text-gold transition-colors"
-                        aria-label={social.label}
-                      >
-                        <social.icon size={iconSizes.md} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </>
   );
 }
