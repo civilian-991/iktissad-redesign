@@ -78,6 +78,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   const [showUI, setShowUI] = useState(true);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [HTMLFlipBook, setHTMLFlipBook] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const uiTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const flipBookRef = useRef<any>(null);
 
@@ -100,12 +101,14 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
       });
   }, [currentPage, pages, total, isSubscriber]);
 
-  // Auto-hide UI on idle
+  // Auto-hide UI on idle — on mobile keep UI always visible
   const kickUiTimer = useCallback(() => {
     setShowUI(true);
     clearTimeout(uiTimerRef.current);
-    uiTimerRef.current = setTimeout(() => setShowUI(false), 4000);
-  }, []);
+    if (!isMobile) {
+      uiTimerRef.current = setTimeout(() => setShowUI(false), 4000);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     window.addEventListener('mousemove', kickUiTimer);
@@ -162,8 +165,16 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
     function calc() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const w = Math.round(Math.min(vw / 2.2, 520) * zoom);
-      const h = Math.round(Math.min(vh * 0.82, w * 1.42) * zoom);
+      const mobile = vw < 768;
+      setIsMobile(mobile);
+      // Mobile: single-page portrait — use ~86% of viewport width
+      // Desktop: two-page spread — each page is ~45% of viewport width
+      const baseW = mobile
+        ? Math.min(vw * 0.86, 480)
+        : Math.min(vw / 2.2, 520);
+      const w = Math.round(baseW * zoom);
+      const maxH = mobile ? vh * 0.72 : vh * 0.82; // leave room for header on mobile
+      const h = Math.round(Math.min(maxH, w * 1.42) * zoom);
       setDims({ w, h });
     }
     calc();
@@ -329,20 +340,24 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             </div>
 
             <div className="flex items-center gap-0.5 ms-auto md:ms-0">
-              <button
-                onClick={() => setZoom(z => Math.min(1.5, parseFloat((z + 0.1).toFixed(1))))}
-                className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
-                title="تكبير"
-              >
-                <ZoomIn size={17} />
-              </button>
-              <button
-                onClick={() => setZoom(z => Math.max(0.5, parseFloat((z - 0.1).toFixed(1))))}
-                className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
-                title="تصغير"
-              >
-                <ZoomOut size={17} />
-              </button>
+              {!isMobile && (
+                <>
+                  <button
+                    onClick={() => setZoom(z => Math.min(1.5, parseFloat((z + 0.1).toFixed(1))))}
+                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
+                    title="تكبير"
+                  >
+                    <ZoomIn size={17} />
+                  </button>
+                  <button
+                    onClick={() => setZoom(z => Math.max(0.5, parseFloat((z - 0.1).toFixed(1))))}
+                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
+                    title="تصغير"
+                  >
+                    <ZoomOut size={17} />
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => setShowThumbs(v => !v)}
                 className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
@@ -350,13 +365,15 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
               >
                 <Grid3X3 size={17} />
               </button>
-              <button
-                onClick={toggleFs}
-                className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
-                title="ملء الشاشة"
-              >
-                {isFullscreen ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
-              </button>
+              {!isMobile && (
+                <button
+                  onClick={toggleFs}
+                  className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
+                  title="ملء الشاشة"
+                >
+                  {isFullscreen ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+                </button>
+              )}
               {isSubscriber && issue.pdfUrl && (
                 <a
                   href={issue.pdfUrl}
@@ -424,7 +441,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             maxHeight={900}
             drawShadow={true}
             flippingTime={750}
-            usePortrait={true}
+            usePortrait={isMobile}
             startZIndex={20}
             autoSize={false}
             maxShadowOpacity={0.7}
