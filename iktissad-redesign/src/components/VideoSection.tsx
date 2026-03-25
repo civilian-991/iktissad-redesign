@@ -122,7 +122,7 @@ export default function VideoSection() {
                     />
 
                     {/* Play Button Overlay */}
-                    <div className="absolute inset-0 bg-white/5 backdrop-blur-sm group-hover:bg-white/10 transition-colors flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         className="w-16 h-16 bg-gold flex items-center justify-center"
@@ -180,7 +180,7 @@ export default function VideoSection() {
                         alt={video.title}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                         <div className="w-8 h-8 bg-gold/90 flex items-center justify-center">
                           <Play className="text-brand-darker fill-brand-darker" size={14} />
                         </div>

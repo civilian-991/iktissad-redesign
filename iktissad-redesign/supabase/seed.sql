@@ -13,7 +13,9 @@ INSERT INTO sections (id, slug, name, name_en, description, description_en) VALU
   ('a0000000-0000-0000-0000-000000000003', 'investment', 'استثمار',     'Investment',  'فرص الاستثمار والتحليلات المالية وأخبار الأسواق والبورصات',                'Investment opportunities, financial analysis, and stock market news'),
   ('a0000000-0000-0000-0000-000000000004', 'markets',    'أسواق',      'Markets',     'تغطية شاملة لأسواق المال والبورصات العربية والعالمية',                     'Comprehensive coverage of Arab and global financial markets'),
   ('a0000000-0000-0000-0000-000000000005', 'companies',  'شركات',      'Companies',   'أخبار الشركات والمؤسسات الاقتصادية الكبرى في المنطقة العربية',             'News about major companies and economic institutions in the Arab region'),
-  ('a0000000-0000-0000-0000-000000000006', 'energy',     'طاقة',       'Energy',      'أخبار وتحليلات قطاع الطاقة والنفط والغاز والطاقة المتجددة',              'Energy, oil, gas, and renewable energy news and analysis');
+  ('a0000000-0000-0000-0000-000000000006', 'energy',     'طاقة',       'Energy',      'أخبار وتحليلات قطاع الطاقة والنفط والغاز والطاقة المتجددة',              'Energy, oil, gas, and renewable energy news and analysis'),
+  ('a0000000-0000-0000-0000-000000000007', 'videos',     'فيديو',      'Videos',      'مقاطع الفيديو والمحتوى المرئي الاقتصادي والمالي',                          'Economic and financial video content'),
+  ('a0000000-0000-0000-0000-000000000008', 'opinion',    'رأي',        'Opinion',     'مقالات الرأي والتحليلات من كبار الكتاب والمحللين الاقتصاديين',             'Opinion articles and analysis from leading economic writers and analysts');
 
 -- ──────────────────────────────────────────────────────────────
 -- SECTORS

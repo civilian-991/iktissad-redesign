@@ -41,6 +41,9 @@ const sectorBySlug = new Map(sectors?.map(s => [s.slug, s.id]) || []);
 const { data: countries } = await supabase.from('countries').select('id, name, slug');
 const countryBySlug = new Map(countries?.map(c => [c.slug, c.id]) || []);
 
+const { data: sections } = await supabase.from('sections').select('id, slug');
+const sectionBySlug = new Map(sections?.map(s => [s.slug, s.id]) || []);
+
 const { data: users } = await supabase.from('users').select('id, name');
 const userByName = new Map(users?.map(u => [u.name, u.id]) || []);
 
@@ -71,7 +74,7 @@ function categorizeId(id) {
   if (cat.parentId === SECTOR_PARENT_ID) return { type: 'sector', slug: makeSlug(cat.title) };
   if (cat.parentId === COUNTRY_PARENT_ID) return { type: 'country', slug: makeSlug(cat.title) };
   if (OPINION_IDS.has(String(id))) return { type: 'section', slug: 'opinion' };
-  if (VIDEO_IDS.has(String(id))) return { type: 'content_type', value: 'video' };
+  if (VIDEO_IDS.has(String(id))) return { type: 'section', slug: 'videos' };
   if (BREAKING_IDS.has(String(id))) return { type: 'breaking' };
   return null;
 }
@@ -147,16 +150,15 @@ for (let i = 0; i < toProcess.length; i += BATCH) {
     if (!slug) slug = `awalan-${a.id}`;
 
     // Map categories
-    let sectorId = null, countryId = null, contentType = 'article', isBreaking = false;
+    let sectorId = null, countryId = null, sectionId = null, isBreaking = false;
     if (a.category_ids) {
       for (const catId of a.category_ids.split(',')) {
         const result = categorizeId(catId.trim());
         if (!result) continue;
         if (result.type === 'sector' && !sectorId) sectorId = sectorBySlug.get(result.slug) || null;
         if (result.type === 'country' && !countryId) countryId = countryBySlug.get(result.slug) || null;
-        if (result.type === 'content_type') contentType = result.value;
+        if (result.type === 'section' && !sectionId) sectionId = sectionBySlug.get(result.slug) || null;
         if (result.type === 'breaking') isBreaking = true;
-        if (result.type === 'section' && result.slug === 'opinion') contentType = 'opinion';
       }
     }
 
@@ -187,6 +189,7 @@ for (let i = 0; i < toProcess.length; i += BATCH) {
       published_at: a.published_at && a.published_at !== 'NULL' ? a.published_at : null,
       created_at: (a.created_at && a.created_at !== 'NULL' ? a.created_at : null) || (a.published_at && a.published_at !== 'NULL' ? a.published_at : null) || new Date().toISOString(),
       updated_at: (a.updated_at && a.updated_at !== 'NULL' ? a.updated_at : null) || (a.created_at && a.created_at !== 'NULL' ? a.created_at : null) || new Date().toISOString(),
+      section_id: sectionId,
       sector_id: sectorId,
       country_id: countryId,
       author_id: authorId,
