@@ -234,7 +234,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
     <div
       className="h-screen overflow-hidden flex flex-col"
       style={{ background: 'radial-gradient(ellipse at center top, #2c1a0a 0%, #120a04 60%, #0a0603 100%)' }}
-      dir="ltr"
+      dir="rtl"
     >
       {/* ── Loading overlay (while react-pageflip hydrates) ─────────────────── */}
       <AnimatePresence>
@@ -328,7 +328,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
               )}
             </div>
 
-            <div className="flex items-center gap-0.5 mr-auto md:mr-0">
+            <div className="flex items-center gap-0.5 ms-auto md:ms-0">
               <button
                 onClick={() => setZoom(z => Math.min(1.5, parseFloat((z + 0.1).toFixed(1))))}
                 className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
@@ -410,8 +410,9 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
           <ChevronLeft size={22} />
         </motion.button>
 
-        {/* The image flipbook */}
+        {/* The image flipbook — must be dir=ltr so react-pageflip renders page order correctly */}
         {HTMLFlipBook && pages.length > 0 && (
+          <div dir="ltr">
           <HTMLFlipBook
             ref={flipBookRef}
             width={dims.w}
@@ -449,6 +450,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
               />
             ))}
           </HTMLFlipBook>
+          </div>
         )}
       </div>
 
@@ -512,7 +514,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             >
               <h2 className="text-white font-[family-name:var(--font-display)] font-bold">
                 {issue.title}
-                <span className="text-white/30 font-normal text-sm mr-3">{total} صفحة</span>
+                <span className="text-white/30 font-normal text-sm ms-3">{total} صفحة</span>
               </h2>
               <button
                 onClick={() => setShowThumbs(false)}
