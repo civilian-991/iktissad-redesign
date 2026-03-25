@@ -40,7 +40,7 @@ export async function GET(
   const { data: links } = await supabase
     .from("magazine_articles")
     .select("article_id")
-    .eq("magazine_id", id)
+    .eq("magazine_issue_id", id)
     .order("sort_order", { ascending: true }) as { data: Array<{ article_id: string }> | null };
 
   let articles: Article[] = [];
@@ -72,6 +72,8 @@ const updateMagazineSchema = z.object({
   featured: z.boolean().optional(),
   status: z.enum(["published", "draft", "scheduled"]).optional(),
   highlights: z.array(z.string()).optional(),
+  pagesImages: z.array(z.string()).optional(),
+  pagesReady: z.boolean().optional(),
 });
 
 export async function PUT(
@@ -117,6 +119,8 @@ export async function PUT(
   if (data.featured !== undefined) updateData.featured = data.featured;
   if (data.status !== undefined) updateData.status = data.status;
   if (data.highlights !== undefined) updateData.highlights = data.highlights;
+  if (data.pagesImages !== undefined) updateData.pages_images = data.pagesImages;
+  if (data.pagesReady !== undefined) updateData.pages_ready = data.pagesReady;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (admin.from("magazine_issues") as any)

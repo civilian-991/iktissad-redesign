@@ -211,6 +211,8 @@ export interface MagazineIssue {
   featured: boolean;
   status: "published" | "draft" | "scheduled";
   highlights: string[];
+  pagesImages: string[];
+  pagesReady: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

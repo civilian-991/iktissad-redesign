@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: plan, error: planError } = await (admin as any)
     .from("subscription_plans")
-    .select("id, name, monthly_price_cents, annual_price_cents")
+    .select("id, name, price_monthly, price_annual")
     .eq("id", planId)
     .eq("is_active", true)
     .single();
@@ -54,8 +54,10 @@ export async function POST(request: NextRequest) {
   }
 
   // ── 2. Determine base amount ────────────────────────────────────
-  let amountCents: number =
-    interval === "annual" ? (plan.annual_price_cents ?? 0) : (plan.monthly_price_cents ?? 0);
+  // price_monthly / price_annual are decimal (e.g. 49.00); convert to cents for MPGS
+  const priceDecimal: number =
+    interval === "annual" ? (Number(plan.price_annual) || 0) : (Number(plan.price_monthly) || 0);
+  let amountCents: number = Math.round(priceDecimal * 100);
 
   if (amountCents <= 0) {
     return NextResponse.json<ApiResponse<never>>(
@@ -71,13 +73,13 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: promo } = await (admin as any)
       .from("promo_codes")
-      .select("id, discount_type, discount_value, max_uses, uses_count, expires_at, is_active")
+      .select("id, discount_type, discount_value, max_uses, uses_count, valid_until, is_active")
       .eq("code", promoCode.toUpperCase())
       .single();
 
     if (promo && promo.is_active) {
       const now = new Date();
-      const expired = promo.expires_at && new Date(promo.expires_at) < now;
+      const expired = promo.valid_until && new Date(promo.valid_until) < now;
       const exhausted =
         promo.max_uses !== null && promo.uses_count >= promo.max_uses;
 
@@ -134,14 +136,13 @@ export async function POST(request: NextRequest) {
   const { error: insertError } = await (admin as any).from("payments").insert({
     subscriber_id: auth.userId,
     plan_id: planId,
-    amount_cents: amountCents,
+    amount: amountCents / 100,
     currency: "USD",
     status: "pending",
     gateway_payment_id: sessionId,
     description: orderId,
     promo_code_id: promoCodeId ?? null,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   });
 
   if (insertError) {

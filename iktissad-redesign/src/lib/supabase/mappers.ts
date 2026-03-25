@@ -119,6 +119,8 @@ export function mapMagazineIssueRow(
     featured: row.featured,
     status: row.status,
     highlights: row.highlights,
+    pagesImages: row.pages_images ?? [],
+    pagesReady: row.pages_ready ?? false,
   };
 }
 

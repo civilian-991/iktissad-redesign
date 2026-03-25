@@ -93,6 +93,8 @@ export default async function ReaderPage({ params }: PageProps) {
     featured: issueRow.featured ?? false,
     status: issueRow.status,
     highlights: (issueRow.highlights as string[]) ?? [],
+    pagesImages: (issueRow.pages_images as string[]) ?? [],
+    pagesReady: issueRow.pages_ready ?? false,
     createdAt: issueRow.created_at ?? '',
     updatedAt: issueRow.updated_at ?? '',
   };

@@ -92,6 +92,7 @@ export async function findSimilarArticles(
       slug: string;
       published_at: string;
       similarity: number;
+      featured_image?: string | null;
     }) => ({
       id: row.id,
       title: row.title,
@@ -99,6 +100,7 @@ export async function findSimilarArticles(
       slug: row.slug,
       publishedAt: row.published_at ?? "",
       similarity: row.similarity ?? 0,
+      featuredImage: row.featured_image ?? "",
     }));
   }
 

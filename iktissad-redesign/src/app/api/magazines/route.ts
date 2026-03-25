@@ -70,6 +70,8 @@ const createMagazineSchema = z.object({
   featured: z.boolean().optional().default(false),
   status: z.enum(["published", "draft", "scheduled"]).optional().default("draft"),
   highlights: z.array(z.string()).optional().default([]),
+  pagesImages: z.array(z.string()).optional().default([]),
+  pagesReady: z.boolean().optional().default(false),
 });
 
 export async function POST(request: NextRequest) {
@@ -113,6 +115,8 @@ export async function POST(request: NextRequest) {
       featured: data.featured,
       status: data.status,
       highlights: data.highlights,
+      pages_images: data.pagesImages,
+      pages_ready: data.pagesReady,
     })
     .select()
     .single();

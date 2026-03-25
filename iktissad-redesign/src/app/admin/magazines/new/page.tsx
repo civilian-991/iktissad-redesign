@@ -18,15 +18,20 @@ import {
   Plus,
   Trash2,
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
-import { createMagazine } from '@/lib/api-client';
+import { createMagazine, updateMagazine } from '@/lib/api-client';
 import { uploadFile } from '@/lib/supabase/storage';
+import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
   'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
 ];
+
+type ConversionStep = 'idle' | 'creating' | 'uploading-pdf' | 'converting' | 'done' | 'error';
 
 export default function NewMagazinePage() {
   const router = useRouter();
@@ -38,24 +43,25 @@ export default function NewMagazinePage() {
   const [status, setStatus] = useState('draft');
   const [featured, setFeatured] = useState(false);
   const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [pdfFile, setPdfFile] = useState<string | null>(null);
-  const [highlights, setHighlights] = useState<string[]>(['']);
-  const [isSaving, setIsSaving] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
-  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [highlights, setHighlights] = useState<string[]>(['']);
 
-  const addHighlight = () => {
-    setHighlights([...highlights, '']);
-  };
+  // PDF: stored locally until save — not uploaded pre-emptively
+  const [pdfFileObj, setPdfFileObj] = useState<File | null>(null);
 
-  const removeHighlight = (index: number) => {
-    setHighlights(highlights.filter((_, i) => i !== index));
-  };
+  // Multi-step conversion state
+  const [conversionStep, setConversionStep] = useState<ConversionStep>('idle');
+  const [conversionProgress, setConversionProgress] = useState({ current: 0, total: 0 });
+  const [conversionError, setConversionError] = useState<string | null>(null);
 
+  const isBusy = conversionStep !== 'idle' && conversionStep !== 'done' && conversionStep !== 'error';
+
+  const addHighlight = () => setHighlights([...highlights, '']);
+  const removeHighlight = (index: number) => setHighlights(highlights.filter((_, i) => i !== index));
   const updateHighlight = (index: number, value: string) => {
-    const newHighlights = [...highlights];
-    newHighlights[index] = value;
-    setHighlights(newHighlights);
+    const next = [...highlights];
+    next[index] = value;
+    setHighlights(next);
   };
 
   const handleSave = async (saveStatus?: string) => {
@@ -63,32 +69,73 @@ export default function NewMagazinePage() {
       toast.error('يرجى إدخال رقم العدد');
       return;
     }
-    setIsSaving(true);
+
+    setConversionError(null);
+
     try {
-      const title = `العدد ${issueNumber}`;
+      // ── Step 1: Create magazine record (get the ID) ──────────────────────────
+      setConversionStep('creating');
       const res = await createMagazine({
-        title,
+        title: `العدد ${issueNumber}`,
         titleEn: `Issue ${issueNumber}`,
         issueNumber: Number(issueNumber),
         coverImage: coverImage || '',
-        pdfUrl: pdfFile || '',
+        pdfUrl: '',
         publishDate: publishDate || undefined,
         status: saveStatus || status,
         featured,
         pages: pages ? Number(pages) : undefined,
         highlights: highlights.filter(h => h.trim()),
       });
-      toast.success('تم حفظ العدد بنجاح');
-      if (res.data?.id) {
-        router.push(`/admin/magazines/${res.data.id}`);
-      } else {
-        router.push('/admin/magazines');
+
+      const issueId = res.data?.id;
+      if (!issueId) throw new Error('لم يتم استلام معرّف العدد من الخادم');
+
+      // ── Step 2: Upload original PDF (for download button) ───────────────────
+      let pdfUrl = '';
+      if (pdfFileObj) {
+        setConversionStep('uploading-pdf');
+        const { publicUrl } = await uploadFile('magazines', pdfFileObj, 'pdfs');
+        pdfUrl = publicUrl;
+
+        // ── Step 3: Convert pages to WebP images ──────────────────────────────
+        setConversionStep('converting');
+        setConversionProgress({ current: 0, total: 0 });
+
+        const pageUrls = await convertPdfToImages(
+          pdfFileObj,
+          issueId,
+          (current, total) => setConversionProgress({ current, total })
+        );
+
+        // ── Step 4: Update magazine with PDF URL + page images ────────────────
+        await updateMagazine(issueId, {
+          pdfUrl,
+          pagesImages: pageUrls,
+          pagesReady: true,
+          pages: pageUrls.length,
+        });
       }
+
+      setConversionStep('done');
+      toast.success('تم حفظ العدد وتحويل الصفحات بنجاح');
+      router.push(`/admin/magazines/${issueId}`);
     } catch (err: any) {
+      setConversionStep('error');
+      setConversionError(err.message || 'حدث خطأ أثناء الحفظ');
       toast.error(err.message || 'حدث خطأ أثناء الحفظ');
-    } finally {
-      setIsSaving(false);
     }
+  };
+
+  const stepLabel: Record<ConversionStep, string> = {
+    idle: '',
+    creating: 'جاري حفظ العدد...',
+    'uploading-pdf': 'جاري رفع ملف PDF...',
+    converting: conversionProgress.total > 0
+      ? `جاري التحويل... ${conversionProgress.current} / ${conversionProgress.total} صفحة`
+      : 'جاري التهيئة...',
+    done: 'تم بنجاح',
+    error: 'حدث خطأ',
   };
 
   return (
@@ -119,10 +166,10 @@ export default function NewMagazinePage() {
           </button>
           <button
             onClick={() => handleSave()}
-            disabled={isSaving}
+            disabled={isBusy}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-70"
           >
-            {isSaving ? (
+            {isBusy ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <Save size={18} />
@@ -131,6 +178,44 @@ export default function NewMagazinePage() {
           </button>
         </div>
       </div>
+
+      {/* Conversion progress bar */}
+      {(isBusy || conversionStep === 'error') && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`rounded-xl p-4 border ${
+            conversionStep === 'error'
+              ? 'bg-loss/10 border-loss/30'
+              : 'bg-gold/10 border-gold/30'
+          }`}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            {conversionStep === 'error' ? (
+              <AlertCircle size={18} className="text-loss shrink-0" />
+            ) : (
+              <Loader2 size={18} className="text-gold animate-spin shrink-0" />
+            )}
+            <span className="text-white font-[family-name:var(--font-display)] font-semibold">
+              {stepLabel[conversionStep]}
+            </span>
+          </div>
+          {conversionStep === 'converting' && conversionProgress.total > 0 && (
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gold rounded-full"
+                animate={{ width: `${(conversionProgress.current / conversionProgress.total) * 100}%` }}
+                transition={{ ease: 'linear', duration: 0.3 }}
+              />
+            </div>
+          )}
+          {conversionError && (
+            <p className="text-loss/80 text-sm mt-2 font-[family-name:var(--font-display)]">
+              {conversionError}
+            </p>
+          )}
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
@@ -147,7 +232,6 @@ export default function NewMagazinePage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Issue Number */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                   رقم العدد
@@ -161,7 +245,6 @@ export default function NewMagazinePage() {
                 />
               </div>
 
-              {/* Year */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                   السنة
@@ -177,7 +260,6 @@ export default function NewMagazinePage() {
                 </select>
               </div>
 
-              {/* Month */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                   الشهر
@@ -193,7 +275,6 @@ export default function NewMagazinePage() {
                 </select>
               </div>
 
-              {/* Pages */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                   عدد الصفحات
@@ -202,7 +283,7 @@ export default function NewMagazinePage() {
                   type="number"
                   value={pages}
                   onChange={(e) => setPages(e.target.value)}
-                  placeholder="مثال: 84"
+                  placeholder="يُحسب تلقائياً عند التحويل"
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
@@ -237,9 +318,13 @@ export default function NewMagazinePage() {
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
-                <Upload size={32} className="text-gold/50 mb-3" />
+                {isUploadingCover ? (
+                  <Loader2 size={32} className="text-gold animate-spin mb-3" />
+                ) : (
+                  <Upload size={32} className="text-gold/50 mb-3" />
+                )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  اضغط لرفع صورة الغلاف
+                  {isUploadingCover ? 'جاري الرفع...' : 'اضغط لرفع صورة الغلاف'}
                 </span>
                 <span className="text-white/40 text-sm mt-1">
                   PNG, JPG أو WebP (الحجم الموصى به: 400×560)
@@ -267,29 +352,36 @@ export default function NewMagazinePage() {
             )}
           </motion.div>
 
-          {/* PDF File */}
+          {/* PDF File — local selection only, conversion happens on save */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
-            <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
+            <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-2 flex items-center gap-2">
               <FileText size={20} className="text-gold" />
               ملف PDF
             </h2>
+            <p className="text-white/40 text-sm font-[family-name:var(--font-display)] mb-6">
+              سيتم تحويل الصفحات تلقائياً إلى صور عند الحفظ
+            </p>
 
-            {pdfFile ? (
+            {pdfFileObj ? (
               <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
-                <FileText size={32} className="text-gold" />
+                <div className="w-10 h-10 bg-gold/20 rounded-lg flex items-center justify-center shrink-0">
+                  <FileText size={20} className="text-gold" />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-[family-name:var(--font-display)] font-semibold truncate">
-                    {pdfFile.split('/').pop() ?? 'ملف PDF'}
+                    {pdfFileObj.name}
                   </p>
-                  <p className="text-white/50 text-sm">ملف PDF جاهز للقراءة</p>
+                  <p className="text-white/50 text-sm">
+                    {(pdfFileObj.size / (1024 * 1024)).toFixed(1)} MB — سيتم تحويله عند الحفظ
+                  </p>
                 </div>
                 <button
-                  onClick={() => setPdfFile(null)}
+                  onClick={() => setPdfFileObj(null)}
                   className="p-2 text-loss hover:bg-loss/10 rounded-lg transition-colors"
                 >
                   <Trash2 size={18} />
@@ -297,31 +389,17 @@ export default function NewMagazinePage() {
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
-                {isUploadingPdf ? (
-                  <Loader2 size={24} className="text-gold animate-spin mb-2" />
-                ) : (
-                  <Upload size={24} className="text-gold/50 mb-2" />
-                )}
+                <Upload size={24} className="text-gold/50 mb-2" />
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  {isUploadingPdf ? 'جاري الرفع...' : 'اضغط لرفع ملف PDF'}
+                  اضغط لاختيار ملف PDF
                 </span>
                 <input
                   type="file"
                   accept=".pdf"
                   className="hidden"
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (!file) return;
-                    setIsUploadingPdf(true);
-                    try {
-                      const { publicUrl } = await uploadFile('magazines', file, 'pdfs');
-                      setPdfFile(publicUrl);
-                      toast.success('تم رفع ملف PDF');
-                    } catch (err: any) {
-                      toast.error(err.message || 'فشل رفع الملف');
-                    } finally {
-                      setIsUploadingPdf(false);
-                    }
+                    if (file) setPdfFileObj(file);
                   }}
                 />
               </label>
@@ -389,7 +467,6 @@ export default function NewMagazinePage() {
               إعدادات النشر
             </h2>
 
-            {/* Status */}
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                 الحالة
@@ -405,7 +482,6 @@ export default function NewMagazinePage() {
               </select>
             </div>
 
-            {/* Publish Date */}
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                 تاريخ النشر
@@ -421,7 +497,6 @@ export default function NewMagazinePage() {
               </div>
             </div>
 
-            {/* Featured Toggle */}
             <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
               <div className="flex items-center gap-3">
                 <Star size={20} className={featured ? 'text-gold fill-gold' : 'text-white/40'} />
@@ -436,9 +511,7 @@ export default function NewMagazinePage() {
               </div>
               <button
                 onClick={() => setFeatured(!featured)}
-                className={`w-12 h-7 rounded-full transition-all ${
-                  featured ? 'bg-gold' : 'bg-white/20'
-                }`}
+                className={`w-12 h-7 rounded-full transition-all ${featured ? 'bg-gold' : 'bg-white/20'}`}
               >
                 <motion.div
                   animate={{ x: featured ? 20 : 2 }}
@@ -462,11 +535,7 @@ export default function NewMagazinePage() {
             <div className="bg-gradient-to-br from-navy to-navy-light rounded-xl p-4">
               <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-obsidian/50 mb-4">
                 {coverImage ? (
-                  <img
-                    src={coverImage}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={coverImage} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <BookOpen size={48} className="text-white/20" />
@@ -481,9 +550,13 @@ export default function NewMagazinePage() {
               <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
                 العدد {issueNumber || '---'}
               </h3>
-              <p className="text-gold text-sm">
-                {month} {year}
-              </p>
+              <p className="text-gold text-sm">{month} {year}</p>
+              {pdfFileObj && (
+                <div className="mt-2 flex items-center gap-1.5 text-white/50 text-xs">
+                  <CheckCircle2 size={12} className="text-profit" />
+                  <span>PDF جاهز للتحويل</span>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -499,16 +572,12 @@ export default function NewMagazinePage() {
             </h2>
 
             <div className="space-y-2">
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                <Eye size={18} />
-                <span className="font-[family-name:var(--font-display)]">معاينة على الموقع</span>
-              </button>
               <button
                 onClick={() => handleSave('draft')}
-                disabled={isSaving}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors"
+                disabled={isBusy}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors disabled:opacity-50"
               >
-                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                 <span className="font-[family-name:var(--font-display)]">حفظ كمسودة</span>
               </button>
             </div>

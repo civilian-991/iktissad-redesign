@@ -24,11 +24,18 @@ import {
   BarChart3,
   Download,
   History,
-  ExternalLink
+  ExternalLink,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Images,
 } from 'lucide-react';
 import type { ApiResponse, MagazineIssue } from '@/types';
 import { swrFetcher, updateMagazine, deleteMagazine } from '@/lib/api-client';
 import { uploadFile } from '@/lib/supabase/storage';
+import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
+
+type ConversionStep = 'idle' | 'uploading-pdf' | 'converting' | 'done' | 'error';
 
 const months = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -62,6 +69,13 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [initialized, setInitialized] = useState(false);
+
+  // PDF conversion states
+  const [newPdfFileObj, setNewPdfFileObj] = useState<File | null>(null);
+  const [conversionStep, setConversionStep] = useState<ConversionStep>('idle');
+  const [conversionProgress, setConversionProgress] = useState({ current: 0, total: 0 });
+  const [conversionError, setConversionError] = useState<string | null>(null);
+  const isConverting = conversionStep === 'uploading-pdf' || conversionStep === 'converting';
 
   // Populate form fields when data loads
   useEffect(() => {
@@ -128,6 +142,52 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
     } catch (err: any) {
       toast.error(err.message || 'حدث خطأ أثناء الحذف');
       setShowDeleteModal(false);
+    }
+  };
+
+  const handleConvert = async () => {
+    const source = newPdfFileObj ?? pdfFile;
+    if (!source) {
+      toast.error('لا يوجد ملف PDF للتحويل');
+      return;
+    }
+
+    setConversionError(null);
+    setConversionProgress({ current: 0, total: 0 });
+
+    try {
+      let pdfUrl = pdfFile;
+
+      // If admin selected a new PDF file, upload it first
+      if (newPdfFileObj) {
+        setConversionStep('uploading-pdf');
+        const { publicUrl } = await uploadFile('magazines', newPdfFileObj, 'pdfs');
+        pdfUrl = publicUrl;
+        setPdfFile(publicUrl);
+      }
+
+      setConversionStep('converting');
+      const pageUrls = await convertPdfToImages(
+        source,
+        id,
+        (current, total) => setConversionProgress({ current, total })
+      );
+
+      await updateMagazine(id, {
+        pdfUrl: pdfUrl || '',
+        pagesImages: pageUrls,
+        pagesReady: true,
+        pages: pageUrls.length,
+      });
+
+      setPages(String(pageUrls.length));
+      setNewPdfFileObj(null);
+      setConversionStep('done');
+      toast.success(`تم تحويل ${pageUrls.length} صفحة بنجاح`);
+    } catch (err: any) {
+      setConversionStep('error');
+      setConversionError(err.message || 'حدث خطأ أثناء التحويل');
+      toast.error(err.message || 'حدث خطأ أثناء التحويل');
     }
   };
 
@@ -460,6 +520,132 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 />
               </label>
             )}
+          </motion.div>
+
+          {/* Pages / Conversion Panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white flex items-center gap-2">
+                <Images size={20} className="text-gold" />
+                صفحات المجلة
+              </h2>
+              {/* Status badge */}
+              {magazine?.pagesReady ? (
+                <span className="flex items-center gap-1.5 px-3 py-1 bg-profit/15 text-profit text-xs font-semibold rounded-full">
+                  <CheckCircle2 size={12} />
+                  {(magazine.pagesImages?.length ?? 0)} صفحة جاهزة
+                </span>
+              ) : (
+                <span className="px-3 py-1 bg-white/10 text-white/50 text-xs rounded-full">
+                  غير محوّل
+                </span>
+              )}
+            </div>
+
+            {/* Thumbnail strip for already-converted issues */}
+            {magazine?.pagesReady && magazine.pagesImages?.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-thin">
+                {magazine.pagesImages.slice(0, 8).map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`صفحة ${i + 1}`}
+                    className="h-24 w-auto rounded-lg shrink-0 object-cover border border-gold/10"
+                  />
+                ))}
+                {magazine.pagesImages.length > 8 && (
+                  <div className="h-24 w-16 rounded-lg shrink-0 bg-white/5 border border-gold/10 flex items-center justify-center text-white/40 text-xs font-[family-name:var(--font-display)]">
+                    +{magazine.pagesImages.length - 8}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Conversion progress */}
+            {isConverting && (
+              <div className="mb-4 p-4 bg-gold/10 border border-gold/20 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Loader2 size={16} className="text-gold animate-spin" />
+                  <span className="text-white text-sm font-[family-name:var(--font-display)]">
+                    {conversionStep === 'uploading-pdf'
+                      ? 'جاري رفع ملف PDF...'
+                      : conversionProgress.total > 0
+                        ? `جاري التحويل... ${conversionProgress.current} / ${conversionProgress.total} صفحة`
+                        : 'جاري التهيئة...'}
+                  </span>
+                </div>
+                {conversionStep === 'converting' && conversionProgress.total > 0 && (
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gold rounded-full"
+                      animate={{ width: `${(conversionProgress.current / conversionProgress.total) * 100}%` }}
+                      transition={{ ease: 'linear', duration: 0.3 }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {conversionStep === 'error' && conversionError && (
+              <div className="mb-4 p-3 bg-loss/10 border border-loss/20 rounded-xl flex items-start gap-2">
+                <AlertCircle size={16} className="text-loss mt-0.5 shrink-0" />
+                <p className="text-loss/80 text-sm font-[family-name:var(--font-display)]">{conversionError}</p>
+              </div>
+            )}
+
+            {/* Upload new PDF + convert */}
+            <div className="space-y-3">
+              {newPdfFileObj ? (
+                <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                  <FileText size={18} className="text-gold shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-[family-name:var(--font-display)] truncate">{newPdfFileObj.name}</p>
+                    <p className="text-white/40 text-xs">{(newPdfFileObj.size / (1024 * 1024)).toFixed(1)} MB</p>
+                  </div>
+                  <button
+                    onClick={() => setNewPdfFileObj(null)}
+                    className="p-1.5 text-white/40 hover:text-loss transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center gap-3 px-4 py-3 border border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors text-white/50 hover:text-white/70">
+                  <Upload size={16} />
+                  <span className="text-sm font-[family-name:var(--font-display)]">رفع PDF جديد للتحويل</span>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setNewPdfFileObj(file);
+                        setConversionStep('idle');
+                      }
+                    }}
+                  />
+                </label>
+              )}
+
+              <button
+                onClick={handleConvert}
+                disabled={isConverting || (!newPdfFileObj && !pdfFile)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)] font-semibold"
+              >
+                {isConverting ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <RefreshCw size={18} />
+                )}
+                {newPdfFileObj ? 'رفع وتحويل الصفحات' : 'إعادة تحويل الصفحات'}
+              </button>
+            </div>
           </motion.div>
 
           {/* Highlights */}

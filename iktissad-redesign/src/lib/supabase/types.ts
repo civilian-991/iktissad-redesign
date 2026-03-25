@@ -1608,7 +1608,10 @@ export type ArticleRow    = Tables["articles"]["Row"] & {
 export type ArticleInsert = Tables["articles"]["Insert"];
 export type ArticleUpdate = Tables["articles"]["Update"];
 
-export type MagazineIssueRow    = Tables["magazine_issues"]["Row"];
+export type MagazineIssueRow    = Tables["magazine_issues"]["Row"] & {
+  pages_images: string[];
+  pages_ready: boolean;
+};
 export type MagazineIssueInsert = Tables["magazine_issues"]["Insert"];
 export type MagazineIssueUpdate = Tables["magazine_issues"]["Update"];
 
