@@ -106,7 +106,7 @@ for (const link of links) {
 
   const { error } = await supabase
     .from('magazine_articles')
-    .upsert({ magazine_issue_id: issueId, article_id: artData.id }, { onConflict: 'magazine_issue_id,article_id' });
+    .upsert({ magazine_id: issueId, article_id: artData.id }, { onConflict: 'magazine_id,article_id' });
 
   if (error) linkedFail++;
   else linkedOk++;

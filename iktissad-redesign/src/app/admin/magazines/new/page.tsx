@@ -254,7 +254,7 @@ export default function NewMagazinePage() {
                   onChange={(e) => setYear(Number(e.target.value))}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
                 >
-                  {[2026, 2025, 2024, 2023].map(y => (
+                  {Array.from({ length: new Date().getFullYear() - 1955 }, (_, i) => new Date().getFullYear() - i).map(y => (
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>

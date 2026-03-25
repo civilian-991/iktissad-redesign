@@ -40,7 +40,7 @@ export async function GET(
   const { data: links } = await supabase
     .from("magazine_articles")
     .select("article_id")
-    .eq("magazine_issue_id", id)
+    .eq("magazine_id", id)
     .order("sort_order", { ascending: true }) as { data: Array<{ article_id: string }> | null };
 
   let articles: Article[] = [];
