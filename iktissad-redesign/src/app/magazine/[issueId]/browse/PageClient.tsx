@@ -25,9 +25,9 @@ interface PageProps {
 const MagazinePage = forwardRef<HTMLDivElement, PageProps>(({ url, num, locked }, ref) => {
   const [loaded, setLoaded] = useState(false);
 
+  // react-pageflip owns the ref div and overrides its transform during animations.
+  // Counter-flip lives in an inner wrapper so it's never clobbered.
   return (
-    {/* react-pageflip owns the ref div and overrides its transform during animations.
-        Counter-flip lives in an inner wrapper so it's never clobbered. */}
     <div
       ref={ref}
       style={{ width: '100%', height: '100%' }}
