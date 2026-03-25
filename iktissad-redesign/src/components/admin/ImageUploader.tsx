@@ -326,7 +326,7 @@ export default function ImageUploader({
                 dir="ltr"
                 value={altText.altEn}
                 onChange={(e) => setAltText((prev) => ({ ...prev, altEn: e.target.value, saved: false }))}
-                placeholder="Brief image description in English..."
+                placeholder="وصف مختصر للصورة بالإنجليزية..."
                 className="w-full bg-white/5 border border-gold/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors"
               />
             </div>

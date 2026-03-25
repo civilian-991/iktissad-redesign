@@ -99,8 +99,8 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
         <div className="absolute bottom-0 left-0 right-0 bg-white/5 backdrop-blur-md border-t border-white/10 p-6 lg:p-8">
           <div className="flex items-center gap-2 mb-3">
             <img src={country.flag} alt={country.name} className="w-8 h-5 object-cover rounded-sm" />
-            <span className="text-white/70 font-[family-name:var(--font-display)] text-xs">{regionName}</span>
-            <span className="text-white/30 text-xs">/</span>
+            <span className="text-white/70 font-[family-name:var(--font-display)] text-sm">{regionName}</span>
+            <span className="text-white/30 text-sm">/</span>
             <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">{country.name}</span>
           </div>
           <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold leading-tight mb-4 text-gold-light">

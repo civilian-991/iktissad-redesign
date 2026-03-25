@@ -65,6 +65,22 @@ export default function ArticlePageClient({
   const [copied, setCopied] = useState(false);
   const [readTime, setReadTime] = useState(0);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  // 0 = small, 1 = medium (default), 2 = large
+  const [fontSizeIdx, setFontSizeIdx] = useState<number>(() => {
+    if (typeof window === 'undefined') return 1;
+    const saved = localStorage.getItem('article-font-size');
+    return saved !== null ? parseInt(saved, 10) : 1;
+  });
+  const FONT_SIZES = ['0.92rem', '1.05rem', '1.22rem'];
+  const articleFontSize = FONT_SIZES[fontSizeIdx];
+
+  const changeFontSize = (delta: number) => {
+    setFontSizeIdx((prev) => {
+      const next = Math.max(0, Math.min(2, prev + delta));
+      localStorage.setItem('article-font-size', String(next));
+      return next;
+    });
+  };
 
   const { data, error, isLoading } = useSWR<ApiResponse<Article>>(
     slug ? `/api/articles/${slug}` : null,
@@ -199,7 +215,7 @@ export default function ArticlePageClient({
 
           {/* ── Breadcrumb ── */}
           <div className="py-3 border-b border-sand/60">
-            <nav className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+            <nav className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
               <a href="/" className="hover:text-gold transition-colors flex items-center gap-1">
                 الرئيسية
               </a>
@@ -242,7 +258,7 @@ export default function ArticlePageClient({
                 {article.sector && (
                   <a
                     href={`/sectors/${article.sector}`}
-                    className="inline-block text-[11px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
+                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
                   >
                     {article.sector}
                   </a>
@@ -250,7 +266,7 @@ export default function ArticlePageClient({
                 {!article.sector && article.section && (
                   <a
                     href={`/sections/${article.section}`}
-                    className="inline-block text-[11px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
+                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
                   >
                     {article.section}
                   </a>
@@ -267,7 +283,7 @@ export default function ArticlePageClient({
 
               {/* Share row */}
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-sand/60">
-                <span className="text-[11px] font-[family-name:var(--font-display)] text-charcoal/35 flex items-center gap-1.5 ml-1">
+                <span className="text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 flex items-center gap-1.5 ml-1">
                   مشاركة
                 </span>
                 <div className="flex items-center gap-2 flex-1">
@@ -303,11 +319,31 @@ export default function ArticlePageClient({
                   >
                     <Printer size={12} />
                   </button>
+
+                  {/* Font size controls */}
+                  <div className="no-print flex items-center border border-sand rounded-full overflow-hidden mr-1">
+                    <button
+                      onClick={() => changeFontSize(-1)}
+                      disabled={fontSizeIdx === 0}
+                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-obsidian hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
+                      aria-label="تصغير الخط"
+                    >
+                      أ-
+                    </button>
+                    <button
+                      onClick={() => changeFontSize(1)}
+                      disabled={fontSizeIdx === 2}
+                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-obsidian hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
+                      aria-label="تكبير الخط"
+                    >
+                      أ+
+                    </button>
+                  </div>
                 </div>
                 {/* Bookmark button */}
                 <BookmarkButton articleId={article.id} />
                 {readTime > 0 && (
-                  <span className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
+                  <span className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
                     <BookOpen size={11} className="text-gold/60" />
                     {readTime} دقائق
                   </span>
@@ -360,13 +396,13 @@ export default function ArticlePageClient({
                       )}
                       <div className="flex items-center gap-3 mt-0.5">
                         {publishedDate && (
-                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Clock size={10} className="text-gold/60" />
                             {publishedDate}
                           </span>
                         )}
                         {article.views > 0 && (
-                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Eye size={10} className="text-gold/60" />
                             {article.views.toLocaleString('ar-SA')}
                           </span>
@@ -394,13 +430,13 @@ export default function ArticlePageClient({
                       )}
                       <div className="flex items-center gap-3 mt-0.5">
                         {publishedDate && (
-                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Clock size={10} className="text-gold/60" />
                             {publishedDate}
                           </span>
                         )}
                         {article.views > 0 && (
-                          <span className="flex items-center gap-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/40">
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Eye size={10} className="text-gold/60" />
                             {article.views.toLocaleString('ar-SA')}
                           </span>
@@ -427,7 +463,7 @@ export default function ArticlePageClient({
                 <div className="relative">
                   {/* Truncated content */}
                   {isJsonContent ? (
-                    <div className="article-body-slug">
+                    <div className="article-body-slug" style={{ '--article-font-size': articleFontSize } as React.CSSProperties}>
                       <TipTapRenderer
                         content={truncatedJson ?? { type: 'doc', content: [] }}
                         className="article-body-slug-tiptap"
@@ -436,6 +472,7 @@ export default function ArticlePageClient({
                   ) : (
                     <div
                       className="article-body-slug"
+                      style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
                       dangerouslySetInnerHTML={{ __html: truncatedHtml ?? '' }}
                     />
                   )}
@@ -472,7 +509,7 @@ export default function ArticlePageClient({
               ) : (
                 /* ── Full content: TipTap JSON or legacy HTML ── */
                 isJsonContent ? (
-                  <div className="article-body-slug">
+                  <div className="article-body-slug" style={{ '--article-font-size': articleFontSize } as React.CSSProperties}>
                     <TipTapRenderer
                       content={
                         typeof rawContent === 'string'
@@ -487,6 +524,7 @@ export default function ArticlePageClient({
                 ) : (
                   <div
                     className="article-body-slug"
+                    style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
                     dangerouslySetInnerHTML={{ __html: rawContent as string }}
                   />
                 )
@@ -495,14 +533,14 @@ export default function ArticlePageClient({
               {/* Tags */}
               {article.tags?.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 mt-12 pt-8 border-t border-sand/60">
-                  <span className="flex items-center gap-1.5 text-[9.5px] font-[family-name:var(--font-display)] font-black text-charcoal/30 uppercase tracking-widest ml-2">
+                  <span className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] font-black text-charcoal/30 uppercase tracking-widest ml-2">
                     <Tag size={10} /> الوسوم
                   </span>
                   {article.tags.map((tag) => (
                     <a
                       key={tag}
                       href={`/tags/${encodeURIComponent(tag)}`}
-                      className="px-3 py-1 text-[11px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand rounded-full hover:border-gold/50 hover:text-gold transition-all"
+                      className="px-3 py-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/50 border border-sand rounded-full hover:border-gold/50 hover:text-gold transition-all"
                     >
                       {tag}
                     </a>
@@ -512,7 +550,7 @@ export default function ArticlePageClient({
 
               {/* Bottom share */}
               <div className="flex items-center gap-3 mt-8 pt-6 border-t border-sand/60">
-                <span className="text-[11px] font-[family-name:var(--font-display)] text-charcoal/30">مشاركة المقال</span>
+                <span className="text-[13px] font-[family-name:var(--font-display)] text-charcoal/30">مشاركة المقال</span>
                 <div className="flex items-center gap-2">
                   {[
                     { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2' },
@@ -560,7 +598,7 @@ export default function ArticlePageClient({
                         {t('article.related_ai')}
                       </h3>
                       {relatedIsAi && (
-                        <Sparkles size={11} className="text-gold/60 flex-shrink-0" aria-label="AI-powered" />
+                        <Sparkles size={11} className="text-gold/60 flex-shrink-0" aria-label="مدعوم بالذكاء الاصطناعي" />
                       )}
                     </div>
                     <div className="space-y-0 divide-y divide-sand/50 border border-sand/60">
@@ -608,7 +646,7 @@ export default function ArticlePageClient({
                     {article.sector && (
                       <a
                         href={`/sectors/${article.sector}`}
-                        className="flex items-center justify-center gap-2 w-full mt-3 py-2.5 text-[11px] font-[family-name:var(--font-display)] font-bold text-charcoal/50 border border-sand/80 hover:border-gold hover:text-gold transition-all group rounded-sm"
+                        className="flex items-center justify-center gap-2 w-full mt-3 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/50 border border-sand/80 hover:border-gold hover:text-gold transition-all group rounded-sm"
                       >
                         المزيد من {article.sector}
                         <ArrowLeft size={10} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -637,7 +675,7 @@ export default function ArticlePageClient({
                       dir="ltr"
                       className="w-full bg-white/[0.06] border border-white/10 text-paper placeholder:text-paper/20 px-3 py-2 text-[12px] font-[family-name:var(--font-display)] mb-2.5 focus:outline-none focus:border-gold/40 transition-colors"
                     />
-                    <button className="w-full bg-gold text-obsidian py-2 text-[11px] font-[family-name:var(--font-display)] font-black tracking-wide hover:bg-gold-bright transition-colors">
+                    <button className="w-full bg-gold text-obsidian py-2 text-[13px] font-[family-name:var(--font-display)] font-black tracking-wide hover:bg-gold-bright transition-colors">
                       اشتراك
                     </button>
                   </div>
@@ -655,7 +693,7 @@ export default function ArticlePageClient({
       <style>{`
         .article-body-slug {
           font-family: var(--font-body), system-ui, sans-serif;
-          font-size: 1.05rem;
+          font-size: var(--article-font-size, 1.05rem);
           line-height: 2.05;
           color: #1E4A60;
         }

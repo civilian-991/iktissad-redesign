@@ -239,7 +239,7 @@ export function Modal({
                       variant="ghost"
                       size="sm"
                       onClick={onClose}
-                      aria-label="Close modal"
+                      aria-label="إغلاق"
                       className="flex-shrink-0 -mt-1 -ml-1"
                     />
                   )}
@@ -504,7 +504,7 @@ export function Sheet({
                     variant="ghost"
                     size="sm"
                     onClick={onClose}
-                    aria-label="Close"
+                    aria-label="إغلاق"
                   />
                 )}
               </div>

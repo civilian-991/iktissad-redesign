@@ -353,7 +353,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
               type="button"
               onClick={onClear}
               className="text-slate-400 hover:text-slate-600 transition-colors"
-              aria-label="Clear search"
+              aria-label="مسح البحث"
             >
               <X size={18} />
             </button>

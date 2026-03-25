@@ -92,7 +92,7 @@ export default function LatestNews() {
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       {article.sector && (
-                        <span className="text-gold text-xs font-bold font-[family-name:var(--font-display)] block mb-1">
+                        <span className="text-gold text-sm font-bold font-[family-name:var(--font-display)] block mb-1">
                           {article.sector}
                         </span>
                       )}
@@ -101,7 +101,7 @@ export default function LatestNews() {
                       </h3>
                     </div>
                     {article.publishedAt && (
-                      <span className="text-charcoal/40 text-xs flex items-center gap-1 mt-2">
+                      <span className="text-charcoal/40 text-sm flex items-center gap-1 mt-2">
                         <Clock size={10} />
                         {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
                           year: 'numeric', month: 'short', day: 'numeric',

@@ -104,12 +104,12 @@ export default function Hero() {
                   <div className="p-5 lg:p-6">
                     <div className="flex items-center gap-3 mb-3">
                       {main.sector && (
-                        <span className="bg-gold/15 text-gold-dark px-2.5 py-0.5 text-xs font-bold font-[family-name:var(--font-display)] uppercase">
+                        <span className="bg-gold/15 text-gold-dark px-2.5 py-0.5 text-sm font-bold font-[family-name:var(--font-display)] uppercase">
                           {main.sector}
                         </span>
                       )}
                       {main.publishedAt && (
-                        <span className="text-charcoal/50 text-xs flex items-center gap-1">
+                        <span className="text-charcoal/50 text-sm flex items-center gap-1">
                           <Clock size={11} />
                           {new Date(main.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
                             month: 'short', day: 'numeric',
@@ -133,7 +133,7 @@ export default function Hero() {
             {/* All 5 articles list — active one highlighted */}
             <div className="lg:col-span-5 flex flex-col bg-paper">
               <div className="bg-obsidian px-4 py-3 flex items-center justify-end">
-                <a href="/search" className="text-gold text-xs flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
+                <a href="/search" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
                   {t('common.actions.viewMore')}
                   <ArrowUpLeft size={11} />
                 </a>
@@ -169,12 +169,12 @@ export default function Hero() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           {article.sector && (
-                            <span className={`text-xs font-bold font-[family-name:var(--font-display)] ${i === active ? 'text-gold' : 'text-gold/70'}`}>
+                            <span className={`text-sm font-bold font-[family-name:var(--font-display)] ${i === active ? 'text-gold' : 'text-gold/70'}`}>
                               {article.sector}
                             </span>
                           )}
                           {article.views > 1000 && (
-                            <span className="flex items-center gap-0.5 text-profit text-xs font-semibold">
+                            <span className="flex items-center gap-0.5 text-profit text-sm font-semibold">
                               <TrendingUp size={10} />
                               {t('common.labels.trending')}
                             </span>
@@ -187,7 +187,7 @@ export default function Hero() {
                         </h3>
                       </div>
                       {article.publishedAt && (
-                        <span className="text-charcoal/40 text-xs flex items-center gap-1 mt-1">
+                        <span className="text-charcoal/40 text-sm flex items-center gap-1 mt-1">
                           <Clock size={10} />
                           {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
                             month: 'short', day: 'numeric',

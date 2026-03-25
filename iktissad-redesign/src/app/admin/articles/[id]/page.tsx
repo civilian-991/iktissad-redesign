@@ -582,7 +582,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 type="text"
                 value={titleEn}
                 onChange={(e) => setTitleEn(e.target.value)}
-                placeholder="English title (EN)"
+                placeholder="العنوان بالإنجليزية (EN)"
                 className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
               />
               <button

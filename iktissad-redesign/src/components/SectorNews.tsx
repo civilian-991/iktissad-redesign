@@ -61,7 +61,7 @@ function SectorCard({ sector }: { sector: Sector }) {
         </div>
         <a
           href={`/sectors/${sector.slug}`}
-          className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-xs font-[family-name:var(--font-display)]"
+          className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-sm font-[family-name:var(--font-display)]"
         >
           {t('common.actions.viewMore')}
           <ArrowUpLeft size={14} />
@@ -89,7 +89,7 @@ function SectorCard({ sector }: { sector: Sector }) {
               {featured.title}
             </h4>
             {featured.publishedAt && (
-              <span className="text-white/60 text-xs flex items-center gap-1.5">
+              <span className="text-white/60 text-sm flex items-center gap-1.5">
                 <Clock size={12} />
                 {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
               </span>
@@ -118,7 +118,7 @@ function SectorCard({ sector }: { sector: Sector }) {
                 {article.title}
               </h5>
               {article.publishedAt && (
-                <span className="text-graphite text-xs mt-1.5 flex items-center gap-1">
+                <span className="text-graphite text-sm mt-1.5 flex items-center gap-1">
                   <Clock size={10} />
                   {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                 </span>

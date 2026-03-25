@@ -159,7 +159,7 @@ function SeriesFormModal({ onClose, onCreated }: SeriesFormModalProps) {
               type="text"
               value={titleEn}
               onChange={e => setTitleEn(e.target.value)}
-              placeholder="e.g. Energy Economy Dossier"
+              placeholder="مثال: ملف الاقتصاد والطاقة"
               dir="ltr"
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
             />

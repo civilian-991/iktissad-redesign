@@ -133,7 +133,7 @@ export default function PlanFormClient({ plan }: Props) {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             dir="ltr"
             className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30"
-            placeholder="e.g. Premium"
+            placeholder="مثال: بريميوم"
           />
         </div>
 

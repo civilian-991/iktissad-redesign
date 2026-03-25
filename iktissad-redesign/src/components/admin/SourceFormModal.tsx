@@ -233,7 +233,7 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
                 type="text"
                 value={form.nameEn}
                 onChange={set('nameEn')}
-                placeholder="e.g. Mohammed Al-Abdullah"
+                placeholder="مثال: محمد عبدالله"
                 dir="ltr"
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/25 focus:outline-none focus:border-gold/30 transition-colors text-sm"
               />
@@ -262,7 +262,7 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
                 type="text"
                 value={form.titleEn}
                 onChange={set('titleEn')}
-                placeholder="e.g. Chief Executive Officer"
+                placeholder="مثال: الرئيس التنفيذي"
                 dir="ltr"
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/25 focus:outline-none focus:border-gold/30 transition-colors text-sm"
               />
@@ -291,7 +291,7 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
                 type="text"
                 value={form.organizationEn}
                 onChange={set('organizationEn')}
-                placeholder="e.g. Public Investment Fund"
+                placeholder="مثال: صندوق الاستثمارات العامة"
                 dir="ltr"
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/25 focus:outline-none focus:border-gold/30 transition-colors text-sm"
               />

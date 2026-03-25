@@ -511,7 +511,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                         autoComplete="email"
                         value={magicEmail}
                         onChange={(e) => { setMagicEmail(e.target.value); setError(''); }}
-                        placeholder="you@example.com"
+                        placeholder="بريدك@مثال.com"
                         dir="ltr"
                         className="w-full px-4 py-3 rounded-xl bg-white/5 border border-gold/10 text-white placeholder:text-white/30 font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/40 transition-colors"
                       />
@@ -584,7 +584,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                         autoComplete="email"
                         value={forgotEmail}
                         onChange={(e) => { setForgotEmail(e.target.value); setError(''); }}
-                        placeholder="you@example.com"
+                        placeholder="بريدك@مثال.com"
                         dir="ltr"
                         className="w-full px-4 py-3 rounded-xl bg-white/5 border border-gold/10 text-white placeholder:text-white/30 font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/40 transition-colors"
                       />

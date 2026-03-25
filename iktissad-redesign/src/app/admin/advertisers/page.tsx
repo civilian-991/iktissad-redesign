@@ -151,7 +151,7 @@ function SlidePanel({ open, onClose, title, form, onChange, onSubmit, saving }: 
               type="text"
               value={form.nameEn}
               onChange={(e) => onChange('nameEn', e.target.value)}
-              placeholder="Advertiser name in English"
+              placeholder="اسم المُعلن بالإنجليزية"
               className={inputCls}
               dir="ltr"
             />

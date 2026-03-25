@@ -154,7 +154,7 @@ function LinkInput({
         <button
           onClick={() => onSubmit('')}
           className="p-1.5 text-loss hover:bg-loss/10 rounded-lg transition-colors"
-          title="Remove link"
+          title="إزالة الرابط"
         >
           <Unlink size={14} />
         </button>
@@ -501,36 +501,36 @@ export default function RichTextEditor({
       {showToolbar && (
         <div className="relative flex flex-wrap items-center gap-1 p-3 border-b border-gold/10 bg-white/5">
           {/* Formatting */}
-          <ToolbarButton icon={Bold}           onClick={() => handleAction('bold')}         active={isActive('bold')}         title="Bold" />
-          <ToolbarButton icon={Italic}         onClick={() => handleAction('italic')}       active={isActive('italic')}       title="Italic" />
-          <ToolbarButton icon={UnderlineIcon}  onClick={() => handleAction('underline')}    active={isActive('underline')}    title="Underline" />
+          <ToolbarButton icon={Bold}           onClick={() => handleAction('bold')}         active={isActive('bold')}         title="غامق" />
+          <ToolbarButton icon={Italic}         onClick={() => handleAction('italic')}       active={isActive('italic')}       title="مائل" />
+          <ToolbarButton icon={UnderlineIcon}  onClick={() => handleAction('underline')}    active={isActive('underline')}    title="تحته خط" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 
           {/* Headings */}
-          <ToolbarButton icon={Heading1} onClick={() => handleAction('heading1')} active={isActive('heading1')} title="Heading 1" />
-          <ToolbarButton icon={Heading2} onClick={() => handleAction('heading2')} active={isActive('heading2')} title="Heading 2" />
+          <ToolbarButton icon={Heading1} onClick={() => handleAction('heading1')} active={isActive('heading1')} title="عنوان 1" />
+          <ToolbarButton icon={Heading2} onClick={() => handleAction('heading2')} active={isActive('heading2')} title="عنوان 2" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 
           {/* Lists */}
-          <ToolbarButton icon={List}         onClick={() => handleAction('bulletList')}  active={isActive('bulletList')}  title="Bullet List" />
-          <ToolbarButton icon={ListOrdered}  onClick={() => handleAction('orderedList')} active={isActive('orderedList')} title="Ordered List" />
+          <ToolbarButton icon={List}         onClick={() => handleAction('bulletList')}  active={isActive('bulletList')}  title="قائمة نقطية" />
+          <ToolbarButton icon={ListOrdered}  onClick={() => handleAction('orderedList')} active={isActive('orderedList')} title="قائمة مرقمة" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 
           {/* Alignment */}
-          <ToolbarButton icon={AlignRight}  onClick={() => handleAction('alignRight')}  active={isActive('alignRight')}  title="Align Right (RTL)" />
-          <ToolbarButton icon={AlignCenter} onClick={() => handleAction('alignCenter')} active={isActive('alignCenter')} title="Align Center" />
-          <ToolbarButton icon={AlignLeft}   onClick={() => handleAction('alignLeft')}   active={isActive('alignLeft')}   title="Align Left (LTR)" />
+          <ToolbarButton icon={AlignRight}  onClick={() => handleAction('alignRight')}  active={isActive('alignRight')}  title="محاذاة يمين" />
+          <ToolbarButton icon={AlignCenter} onClick={() => handleAction('alignCenter')} active={isActive('alignCenter')} title="توسيط" />
+          <ToolbarButton icon={AlignLeft}   onClick={() => handleAction('alignLeft')}   active={isActive('alignLeft')}   title="محاذاة يسار" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 
           {/* Link / Quote / Code / Image */}
-          <ToolbarButton icon={Link2}     onClick={() => handleAction('link')}       active={isActive('link')}       title="Link" />
-          <ToolbarButton icon={Quote}     onClick={() => handleAction('blockquote')} active={isActive('blockquote')} title="Blockquote" />
-          <ToolbarButton icon={Code}      onClick={() => handleAction('codeBlock')}  active={isActive('codeBlock')}  title="Code Block" />
-          <ToolbarButton icon={ImageIcon} onClick={() => handleAction('image')}      title="Insert Image" />
+          <ToolbarButton icon={Link2}     onClick={() => handleAction('link')}       active={isActive('link')}       title="رابط" />
+          <ToolbarButton icon={Quote}     onClick={() => handleAction('blockquote')} active={isActive('blockquote')} title="اقتباس" />
+          <ToolbarButton icon={Code}      onClick={() => handleAction('codeBlock')}  active={isActive('codeBlock')}  title="كتلة كود" />
+          <ToolbarButton icon={ImageIcon} onClick={() => handleAction('image')}      title="إدراج صورة" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 
