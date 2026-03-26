@@ -8,8 +8,8 @@ import type { ApiResponse, Profile } from "@/types";
 
 const PROFILE_SELECT = `
   *,
-  sectors:sector_id ( slug ),
-  countries:country_id ( slug )
+  sectors:sector_id ( slug, name ),
+  countries:country_id ( slug, name )
 `;
 
 export async function GET(request: NextRequest) {
