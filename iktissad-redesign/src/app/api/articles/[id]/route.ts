@@ -39,11 +39,9 @@ export async function GET(
 
   // Increment view count (fire-and-forget)
   const admin = createAdminClient();
-  admin
-    .from("articles")
-    .update({ views: (row.views ?? 0) + 1 })
-    .eq("id", row.id)
-    .then();
+  void Promise.resolve(
+    admin.from("articles").update({ views: (row.views ?? 0) + 1 }).eq("id", row.id)
+  ).catch(console.error);
 
   const response: ApiResponse<Article> = { data: mapArticleRow(row) };
   return NextResponse.json(response);

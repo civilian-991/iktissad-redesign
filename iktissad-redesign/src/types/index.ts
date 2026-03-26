@@ -155,9 +155,9 @@ export interface Article {
   /** Optional accent color (hex) for magazine layout theming */
   accentColor?: string;
   featuredImage: string;
-  /** Focal point X (0–1) for smart image cropping */
+  /** Focal point X 0–1 for hero crop (Phase 1A — not yet in DB, defaults to 0.5) */
   featuredImageFocalX?: number;
-  /** Focal point Y (0–1) for smart image cropping */
+  /** Focal point Y 0–1 for hero crop (Phase 1A — not yet in DB, defaults to 0.5) */
   featuredImageFocalY?: number;
   section: string;
   sector: string;
@@ -171,8 +171,10 @@ export interface Article {
   status: "published" | "draft" | "review" | "scheduled";
   featured: boolean;
   editorChoice: boolean;
-  paywalled: boolean;
-  isBreaking: boolean;
+  /** Paywall flag (Phase 1A — not yet in DB) */
+  paywalled?: boolean;
+  /** Breaking news flag (Phase 1A — not yet in DB) */
+  isBreaking?: boolean;
   views: number;
   publishedAt: string;
   createdAt: string;
@@ -211,8 +213,10 @@ export interface MagazineIssue {
   featured: boolean;
   status: "published" | "draft" | "scheduled";
   highlights: string[];
-  pagesImages: string[];
-  pagesReady: boolean;
+  /** Spread page images for in-browser reader (Phase 1A — not yet in DB) */
+  pagesImages?: string[];
+  /** Whether spread pages are processed and ready (Phase 1A — not yet in DB) */
+  pagesReady?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -238,13 +242,11 @@ export interface MediaItem {
   size: number;
   alt: string;
   altEn: string;
+  /** Optional description for media search (not yet in DB) */
+  description?: string;
   folder: string;
   uploadedBy: string;
   createdAt: string;
-  /** AI-generated tags for filtering and search */
-  tags: string[];
-  /** Human-readable description / caption */
-  description: string;
 }
 
 export interface Profile {
@@ -259,6 +261,9 @@ export interface Profile {
   website: string;
   founded: string;
   type: string;
+  quote?: string | null;
+  image?: string | null;
+  category?: string | null;
 }
 
 export interface Country {

@@ -42,6 +42,8 @@ import type {
   Comment,
   AuditLogEntry,
   AdminNotification,
+  Newsletter,
+  NewsletterBlock,
 } from "@/types";
 
 // ──────────────────────────────────────────────────────────────
@@ -72,8 +74,6 @@ export function mapArticleRow(
     content: row.content,
     contentEn: row.content_en,
     featuredImage: row.featured_image,
-    featuredImageFocalX: (row.featured_image_focal_x as number | undefined) ?? 0.5,
-    featuredImageFocalY: (row.featured_image_focal_y as number | undefined) ?? 0.5,
     section: row.sections?.name ?? row.sections?.slug ?? "",
     sector: row.sectors?.name ?? row.sectors?.slug ?? "",
     country: row.countries?.name ?? row.countries?.slug ?? "",
@@ -86,8 +86,6 @@ export function mapArticleRow(
     status: row.status,
     featured: row.featured ?? false,
     editorChoice: row.editor_choice ?? false,
-    paywalled: (row as any).is_paywalled ?? false,
-    isBreaking: (row as any).is_breaking ?? false,
     views: row.views,
     publishedAt: row.published_at ?? "",
     createdAt: row.created_at,
@@ -119,8 +117,6 @@ export function mapMagazineIssueRow(
     featured: row.featured,
     status: row.status,
     highlights: row.highlights,
-    pagesImages: row.pages_images ?? [],
-    pagesReady: row.pages_ready ?? false,
   };
 }
 
@@ -159,8 +155,6 @@ export function mapMediaRow(row: MediaRow): MediaItem {
     folder: row.folder,
     uploadedBy: row.uploaded_by ?? "",
     createdAt: row.created_at,
-    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
-    description: (row.description as string | undefined) ?? "",
   };
 }
 
@@ -186,6 +180,9 @@ export function mapProfileRow(
     website: row.website,
     founded: row.founded,
     type: row.type,
+    quote: row.quote ?? null,
+    image: row.image ?? null,
+    category: row.category ?? null,
   };
 }
 
@@ -419,5 +416,31 @@ export function mapAdminNotification(row: AdminNotificationRow): AdminNotificati
     isRead: row.is_read,
     readBy: row.read_by,
     createdAt: row.created_at,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────
+// Newsletters
+// ──────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapNewsletterRow(row: any): Newsletter {
+  return {
+    id: row.id,
+    title: row.title,
+    subject: row.subject,
+    previewText: row.preview_text ?? null,
+    senderName: row.sender_name ?? "إكتساد",
+    segment: row.segment,
+    status: row.status,
+    blocks: (row.blocks ?? []) as NewsletterBlock[],
+    scheduledAt: row.scheduled_at ?? null,
+    sentAt: row.sent_at ?? null,
+    recipientCount: row.recipient_count ?? null,
+    openCount: row.open_count ?? 0,
+    clickCount: row.click_count ?? 0,
+    createdBy: row.created_by ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }

@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { requireAuthFromRequest } from '@/lib/api-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createAdminNotification } from '@/lib/notifications';
-import type { ApiResponse } from '@/types';
+import { mapComment } from '@/lib/supabase/mappers';
+import type { ApiResponse, Comment } from '@/types';
 
 const COMMENT_SELECT = `
   *,
@@ -51,8 +52,8 @@ export async function GET(request: NextRequest) {
 
   const total = count ?? 0;
 
-  const response: ApiResponse<unknown[]> = {
-    data: rows ?? [],
+  const response: ApiResponse<Comment[]> = {
+    data: (rows ?? []).map(mapComment),
     pagination: {
       page,
       pageSize,

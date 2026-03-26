@@ -1600,18 +1600,11 @@ export type UserRow    = Tables["users"]["Row"];
 export type UserInsert = Tables["users"]["Insert"];
 export type UserUpdate = Tables["users"]["Update"];
 
-// Phase 7: add focal point fields (new migration columns not yet in generated types)
-export type ArticleRow    = Tables["articles"]["Row"] & {
-  featured_image_focal_x: number;
-  featured_image_focal_y: number;
-};
+export type ArticleRow    = Tables["articles"]["Row"];
 export type ArticleInsert = Tables["articles"]["Insert"];
 export type ArticleUpdate = Tables["articles"]["Update"];
 
-export type MagazineIssueRow    = Tables["magazine_issues"]["Row"] & {
-  pages_images: string[];
-  pages_ready: boolean;
-};
+export type MagazineIssueRow    = Tables["magazine_issues"]["Row"];
 export type MagazineIssueInsert = Tables["magazine_issues"]["Insert"];
 export type MagazineIssueUpdate = Tables["magazine_issues"]["Update"];
 
@@ -1623,11 +1616,7 @@ export type ProfileRow    = Tables["profiles"]["Row"];
 export type ProfileInsert = Tables["profiles"]["Insert"];
 export type ProfileUpdate = Tables["profiles"]["Update"];
 
-// Phase 7: add tags and description fields (new migration columns not yet in generated types)
-export type MediaRow    = Tables["media"]["Row"] & {
-  tags: unknown;
-  description: string;
-};
+export type MediaRow    = Tables["media"]["Row"];
 export type MediaInsert = Tables["media"]["Insert"];
 export type MediaUpdate = Tables["media"]["Update"];
 

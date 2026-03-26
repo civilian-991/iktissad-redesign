@@ -3,31 +3,8 @@ import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ApiResponse, Newsletter, NewsletterBlock } from "@/types";
-
-// ─── Row → Frontend mapper ───────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapNewsletterRow(row: any): Newsletter {
-  return {
-    id: row.id,
-    title: row.title,
-    subject: row.subject,
-    previewText: row.preview_text ?? null,
-    senderName: row.sender_name ?? "إكتساد",
-    segment: row.segment,
-    status: row.status,
-    blocks: (row.blocks ?? []) as NewsletterBlock[],
-    scheduledAt: row.scheduled_at ?? null,
-    sentAt: row.sent_at ?? null,
-    recipientCount: row.recipient_count ?? null,
-    openCount: row.open_count ?? 0,
-    clickCount: row.click_count ?? 0,
-    createdBy: row.created_by ?? null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
+import { mapNewsletterRow } from "@/lib/supabase/mappers";
+import type { ApiResponse, Newsletter } from "@/types";
 
 // ─── GET /api/newsletters ────────────────────────────────────────
 

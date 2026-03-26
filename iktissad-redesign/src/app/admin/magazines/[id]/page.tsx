@@ -548,9 +548,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* Thumbnail strip for already-converted issues */}
-            {magazine?.pagesReady && magazine.pagesImages?.length > 0 && (
+            {magazine?.pagesReady && (magazine.pagesImages?.length ?? 0) > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-thin">
-                {magazine.pagesImages.slice(0, 8).map((url, i) => (
+                {(magazine.pagesImages ?? []).slice(0, 8).map((url, i) => (
                   <img
                     key={i}
                     src={url}
@@ -558,9 +558,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                     className="h-24 w-auto rounded-lg shrink-0 object-cover border border-gold/10"
                   />
                 ))}
-                {magazine.pagesImages.length > 8 && (
+                {(magazine.pagesImages ?? []).length > 8 && (
                   <div className="h-24 w-16 rounded-lg shrink-0 bg-white/5 border border-gold/10 flex items-center justify-center text-white/40 text-xs font-[family-name:var(--font-display)]">
-                    +{magazine.pagesImages.length - 8}
+                    +{(magazine.pagesImages ?? []).length - 8}
                   </div>
                 )}
               </div>

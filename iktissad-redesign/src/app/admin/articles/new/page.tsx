@@ -104,8 +104,8 @@ export default function NewArticlePage() {
         // Update existing draft
         await updateArticle(savedArticleIdRef.current, {
           title, titleEn, excerpt, content,
-          section: category || undefined,
-          country: selectedCountry || undefined,
+          sectionSlug: category || undefined,
+          countrySlug: selectedCountry || undefined,
           tags: selectedTags,
           featuredImage: featuredImage || '',
           status: 'draft',
@@ -115,8 +115,8 @@ export default function NewArticlePage() {
         const slug = title.trim().replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
         const res = await createArticle({
           title, titleEn, slug, excerpt, content,
-          section: category || undefined,
-          country: selectedCountry || undefined,
+          sectionSlug: category || undefined,
+          countrySlug: selectedCountry || undefined,
           tags: selectedTags,
           featuredImage: featuredImage || '',
           status: 'draft',
@@ -169,8 +169,8 @@ export default function NewArticlePage() {
         slug,
         excerpt,
         content,
-        section: category || undefined,
-        country: selectedCountry || undefined,
+        sectionSlug: category || undefined,
+        countrySlug: selectedCountry || undefined,
         tags: selectedTags,
         featuredImage: featuredImage || '',
         status: saveStatus,

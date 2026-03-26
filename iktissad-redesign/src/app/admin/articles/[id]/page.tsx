@@ -190,8 +190,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         title, titleEn: '', excerpt, content,
         // Pass TipTap JSON body if available (new format)
         ...(editorBody ? { body: editorBody } : {}),
-        section: section || undefined,
-        country: selectedCountry || undefined,
+        sectionSlug: section || undefined,
+        countrySlug: selectedCountry || undefined,
         tags: selectedTags,
         featuredImage: featuredImage || '',
         status,
@@ -263,8 +263,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         content,
         // Pass TipTap JSON body if editor has produced output
         ...(editorBody ? { body: editorBody } : {}),
-        section: section || undefined,
-        country: selectedCountry || undefined,
+        sectionSlug: section || undefined,
+        countrySlug: selectedCountry || undefined,
         tags: selectedTags,
         featuredImage: featuredImage || '',
         status,

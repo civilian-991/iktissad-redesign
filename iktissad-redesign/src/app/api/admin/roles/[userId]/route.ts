@@ -34,6 +34,20 @@ interface AdminRoleRow {
   updatedAt: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapRoleRow(r: any): AdminRoleRow {
+  return {
+    userId: r.user_id,
+    role: r.role,
+    permissions: r.permissions ?? {},
+    invitedBy: r.invited_by,
+    twoFaEnabled: r.two_fa_enabled,
+    lastLogin: r.last_login,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
 export async function GET(
@@ -68,18 +82,7 @@ export async function GET(
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const r = row as any;
-  const mapped: AdminRoleRow = {
-    userId: r.user_id,
-    role: r.role,
-    permissions: r.permissions ?? {},
-    invitedBy: r.invited_by,
-    twoFaEnabled: r.two_fa_enabled,
-    lastLogin: r.last_login,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  };
+  const mapped: AdminRoleRow = mapRoleRow(row);
 
   const response: ApiResponse<AdminRoleRow> = { data: mapped };
   return NextResponse.json(response);
@@ -149,18 +152,7 @@ export async function PUT(
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const r = row as any;
-  const mapped: AdminRoleRow = {
-    userId: r.user_id,
-    role: r.role,
-    permissions: r.permissions ?? {},
-    invitedBy: r.invited_by,
-    twoFaEnabled: r.two_fa_enabled,
-    lastLogin: r.last_login,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  };
+  const mapped: AdminRoleRow = mapRoleRow(row);
 
   const response: ApiResponse<AdminRoleRow> = { data: mapped };
   return NextResponse.json(response);

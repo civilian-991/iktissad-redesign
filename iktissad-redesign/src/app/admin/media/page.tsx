@@ -2,15 +2,17 @@
  * Admin Media Library Page
  * IKTISSAD Design System
  *
- * Media library with Supabase Storage integration for uploads,
- * file browsing, deletion, and URL copying.
+ * Media library with REST API (SWR) for listing/deleting,
+ * and Supabase Storage for uploads.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import NextImage from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
+import useSWR from 'swr';
+import { toast } from 'sonner';
 import {
   Upload,
   Search,
@@ -34,12 +36,11 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import {
-  listFiles,
   uploadFile,
-  deleteFile,
   validateFile,
-  type StorageFile,
 } from '@/lib/supabase/storage';
+import { swrFetcher, mediaKey, deleteMedia } from '@/lib/api-client';
+import type { MediaItem, ApiResponse } from '@/types';
 
 // Folders map to storage subfolders within the 'media' bucket
 const folders = ['الكل', 'مقالات', 'أسواق', 'تكنولوجيا', 'طاقة', 'شخصيات', 'تقارير', 'فيديو'];
@@ -55,10 +56,7 @@ const folderSlugMap: Record<string, string> = {
 
 const fileTypes = ['الكل', 'image', 'video', 'document'];
 
-interface MediaItem extends StorageFile {
-  folder?: string;
-  uploadedBy?: string;
-}
+const PAGE_SIZE = 20;
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -76,8 +74,6 @@ function getMediaType(mimeType: string): string {
 }
 
 export default function MediaLibraryPage() {
-  const [media, setMedia] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFolder, setSelectedFolder] = useState('الكل');
   const [selectedType, setSelectedType] = useState('الكل');
@@ -91,35 +87,40 @@ export default function MediaLibraryPage() {
   const [uploadError, setUploadError] = useState('');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [uploadFolder, setUploadFolder] = useState('مقالات');
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
 
-  // Try to load files from Supabase on mount
-  useEffect(() => {
-    loadFromStorage();
-  }, []);
-
-  const loadFromStorage = async () => {
-    setLoading(true);
-    try {
-      const files = await listFiles('media');
-      setMedia(files.map((f) => ({ ...f, folder: 'الكل' })));
-    } catch {
-      // Supabase not configured — start with empty library
-    } finally {
-      setLoading(false);
-    }
+  // Build SWR key from filters
+  const swrKeyParams = {
+    page,
+    pageSize: PAGE_SIZE,
+    folder: selectedFolder !== 'الكل' ? (folderSlugMap[selectedFolder] ?? selectedFolder) : undefined,
+    mimeType: selectedType !== 'الكل' ? selectedType : undefined,
   };
+  const swrKeyValue = mediaKey(swrKeyParams);
 
-  const filteredMedia = media.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFolder = selectedFolder === 'الكل' || item.folder === selectedFolder;
-    const itemType = getMediaType(item.type);
-    const matchesType = selectedType === 'الكل' || itemType === selectedType;
-    return matchesSearch && matchesFolder && matchesType;
-  });
+  const { data, isLoading, mutate } = useSWR<ApiResponse<MediaItem[]>>(
+    swrKeyValue,
+    swrFetcher,
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
 
-  const toggleSelectItem = (path: string) => {
+  const media = data?.data ?? [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages ?? 1;
+  const totalCount = pagination?.total ?? 0;
+
+  // Client-side search filter (filename contains query)
+  const filteredMedia = searchQuery
+    ? media.filter((item) =>
+        item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : media;
+
+  const toggleSelectItem = (id: string) => {
     setSelectedItems((prev) =>
-      prev.includes(path) ? prev.filter((i) => i !== path) : [...prev, path]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
@@ -147,7 +148,7 @@ export default function MediaLibraryPage() {
     }
   };
 
-  // Handle file upload
+  // Handle file upload (still uses Supabase Storage directly)
   const handleUpload = useCallback(async (files: FileList | File[]) => {
     setUploading(true);
     setUploadError('');
@@ -163,43 +164,43 @@ export default function MediaLibraryPage() {
       }
 
       try {
-        const result = await uploadFile('media', file, folder);
-        // Add to local state
-        const newItem: MediaItem = {
-          name: file.name,
-          id: null,
-          size: file.size,
-          type: file.type,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          publicUrl: result.publicUrl,
-          path: result.path,
-          folder: uploadFolder,
-        };
-        setMedia((prev) => [newItem, ...prev]);
-      } catch (err: any) {
-        setUploadError(err.message ?? 'Upload failed');
+        await uploadFile('media', file, folder);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Upload failed';
+        setUploadError(message);
       }
     }
 
     setUploading(false);
     if (!uploadError) {
       setShowUploadModal(false);
+      mutate(); // Refresh list from API
     }
-  }, [uploadFolder, uploadError]);
+  }, [uploadFolder, uploadError, mutate]);
 
-  // Handle file deletion
-  const handleDelete = useCallback(async (paths: string[]) => {
-    for (const path of paths) {
+  // Handle deletion via REST API
+  const handleDelete = useCallback(async (ids: string[]) => {
+    setDeletingIds((prev) => [...prev, ...ids]);
+    let anyError = false;
+
+    for (const id of ids) {
       try {
-        await deleteFile('media', path);
+        await deleteMedia(id);
       } catch {
-        // If Supabase fails, just remove from state
+        anyError = true;
+        toast.error('فشل حذف الملف');
       }
-      setMedia((prev) => prev.filter((m) => m.path !== path));
     }
-    setSelectedItems([]);
-  }, []);
+
+    setDeletingIds((prev) => prev.filter((i) => !ids.includes(i)));
+    setSelectedItems((prev) => prev.filter((i) => !ids.includes(i)));
+
+    if (!anyError) {
+      toast.success(ids.length === 1 ? 'تم حذف الملف' : `تم حذف ${ids.length} ملفات`);
+    }
+
+    mutate();
+  }, [mutate]);
 
   // Copy URL to clipboard
   const handleCopyUrl = useCallback((url: string) => {
@@ -219,7 +220,7 @@ export default function MediaLibraryPage() {
             مكتبة الوسائط
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {media.length} ملف • {formatFileSize(totalSize)} إجمالي
+            {totalCount} ملف • {formatFileSize(totalSize)} إجمالي
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -240,9 +241,9 @@ export default function MediaLibraryPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'الصور', count: media.filter(m => getMediaType(m.type) === 'image').length, icon: ImageIcon, color: 'from-teal to-emerald-600' },
-          { label: 'الفيديوهات', count: media.filter(m => getMediaType(m.type) === 'video').length, icon: Video, color: 'from-loss to-rose-600' },
-          { label: 'المستندات', count: media.filter(m => getMediaType(m.type) === 'document').length, icon: FileText, color: 'from-gold to-bronze' },
+          { label: 'الصور', count: media.filter(m => getMediaType(m.mimeType) === 'image').length, icon: ImageIcon, color: 'from-teal to-emerald-600' },
+          { label: 'الفيديوهات', count: media.filter(m => getMediaType(m.mimeType) === 'video').length, icon: Video, color: 'from-loss to-rose-600' },
+          { label: 'المستندات', count: media.filter(m => getMediaType(m.mimeType) === 'document').length, icon: FileText, color: 'from-gold to-bronze' },
           { label: 'المجلدات', count: folders.length - 1, icon: Folder, color: 'from-purple-500 to-indigo-600' },
         ].map((stat) => (
           <motion.div
@@ -326,7 +327,7 @@ export default function MediaLibraryPage() {
                   </label>
                   <select
                     value={selectedFolder}
-                    onChange={(e) => setSelectedFolder(e.target.value)}
+                    onChange={(e) => { setSelectedFolder(e.target.value); setPage(1); }}
                     className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
                     {folders.map((folder) => (
@@ -342,7 +343,7 @@ export default function MediaLibraryPage() {
                   </label>
                   <select
                     value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
+                    onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
                     className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
                     {fileTypes.map((type) => (
@@ -377,9 +378,14 @@ export default function MediaLibraryPage() {
               </button>
               <button
                 onClick={() => handleDelete(selectedItems)}
-                className="px-4 py-2 bg-loss/10 text-loss rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-loss/20 transition-colors flex items-center gap-2"
+                disabled={deletingIds.some((id) => selectedItems.includes(id))}
+                className="px-4 py-2 bg-loss/10 text-loss rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-loss/20 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Trash2 size={14} />
+                {deletingIds.some((id) => selectedItems.includes(id)) ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Trash2 size={14} />
+                )}
                 حذف
               </button>
               <button
@@ -394,14 +400,14 @@ export default function MediaLibraryPage() {
       </AnimatePresence>
 
       {/* Loading */}
-      {loading && (
+      {isLoading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 size={32} className="text-gold animate-spin" />
         </div>
       )}
 
       {/* Empty State */}
-      {!loading && filteredMedia.length === 0 && (
+      {!isLoading && filteredMedia.length === 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -429,45 +435,45 @@ export default function MediaLibraryPage() {
       )}
 
       {/* Media Grid/List */}
-      {!loading && filteredMedia.length > 0 && viewMode === 'grid' ? (
+      {!isLoading && filteredMedia.length > 0 && viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMedia.map((item, index) => (
             <motion.div
-              key={item.path}
+              key={item.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.03 }}
               className={`group relative bg-midnight/50 border rounded-xl overflow-hidden cursor-pointer transition-all ${
-                selectedItems.includes(item.path)
+                selectedItems.includes(item.id)
                   ? 'border-gold ring-2 ring-gold/20'
                   : 'border-gold/10 hover:border-gold/30'
               }`}
-              onClick={() => toggleSelectItem(item.path)}
+              onClick={() => toggleSelectItem(item.id)}
             >
               <div className="aspect-square bg-white/5 relative">
-                {getMediaType(item.type) === 'image' || getMediaType(item.type) === 'video' ? (
+                {getMediaType(item.mimeType) === 'image' || getMediaType(item.mimeType) === 'video' ? (
                   <NextImage
-                    src={item.publicUrl}
-                    alt={item.name}
+                    src={item.url}
+                    alt={item.alt || item.filename}
                     fill
                     className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    {getTypeIcon(item.type)}
+                    {getTypeIcon(item.mimeType)}
                   </div>
                 )}
 
                 <div className="absolute top-2 right-2 p-1.5 bg-obsidian/80 rounded-lg">
-                  {getTypeIcon(item.type)}
+                  {getTypeIcon(item.mimeType)}
                 </div>
 
                 <div className={`absolute top-2 left-2 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                  selectedItems.includes(item.path)
+                  selectedItems.includes(item.id)
                     ? 'bg-gold border-gold'
                     : 'border-white/30 bg-obsidian/50 opacity-0 group-hover:opacity-100'
                 }`}>
-                  {selectedItems.includes(item.path) && (
+                  {selectedItems.includes(item.id) && (
                     <Check size={14} className="text-obsidian" />
                   )}
                 </div>
@@ -486,11 +492,11 @@ export default function MediaLibraryPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCopyUrl(item.publicUrl);
+                        handleCopyUrl(item.url);
                       }}
                       className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
                     >
-                      {copiedUrl === item.publicUrl ? (
+                      {copiedUrl === item.url ? (
                         <CheckCircle size={14} className="text-profit" />
                       ) : (
                         <Copy size={14} className="text-white" />
@@ -502,7 +508,7 @@ export default function MediaLibraryPage() {
 
               <div className="p-3">
                 <p className="text-white text-sm font-[family-name:var(--font-display)] truncate">
-                  {item.name}
+                  {item.filename}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
                   {formatFileSize(item.size)}
@@ -511,7 +517,7 @@ export default function MediaLibraryPage() {
             </motion.div>
           ))}
         </div>
-      ) : !loading && filteredMedia.length > 0 ? (
+      ) : !isLoading && filteredMedia.length > 0 ? (
         <div className="bg-midnight/50 border border-gold/10 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -539,47 +545,47 @@ export default function MediaLibraryPage() {
             <tbody>
               {filteredMedia.map((item, index) => (
                 <motion.tr
-                  key={item.path}
+                  key={item.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
                   className={`border-b border-gold/5 hover:bg-white/5 transition-colors ${
-                    selectedItems.includes(item.path) ? 'bg-gold/5' : ''
+                    selectedItems.includes(item.id) ? 'bg-gold/5' : ''
                   }`}
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
-                        checked={selectedItems.includes(item.path)}
-                        onChange={() => toggleSelectItem(item.path)}
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() => toggleSelectItem(item.id)}
                         className="w-4 h-4 rounded border-gold/30 bg-transparent checked:bg-gold"
                       />
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 relative">
-                        {getMediaType(item.type) === 'image' || getMediaType(item.type) === 'video' ? (
-                          <NextImage src={item.publicUrl} alt={item.name} fill className="object-cover" />
+                        {getMediaType(item.mimeType) === 'image' || getMediaType(item.mimeType) === 'video' ? (
+                          <NextImage src={item.url} alt={item.alt || item.filename} fill className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            {getTypeIcon(item.type)}
+                            {getTypeIcon(item.mimeType)}
                           </div>
                         )}
                       </div>
                       <span className="text-white text-sm font-[family-name:var(--font-display)]">
-                        {item.name}
+                        {item.filename}
                       </span>
                     </div>
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-white/5 text-white/70 font-[family-name:var(--font-display)]">
-                      {getTypeIcon(item.type)}
-                      {getTypeLabel(item.type)}
+                      {getTypeIcon(item.mimeType)}
+                      {getTypeLabel(item.mimeType)}
                     </span>
                   </td>
                   <td className="p-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
                     {formatFileSize(item.size)}
                   </td>
                   <td className="p-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                    {item.folder ?? '-'}
+                    {item.folder || '-'}
                   </td>
                   <td className="p-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
                     {item.createdAt ? new Date(item.createdAt).toLocaleDateString('ar-SA-u-ca-gregory') : '-'}
@@ -593,20 +599,25 @@ export default function MediaLibraryPage() {
                         <Eye size={14} />
                       </button>
                       <button
-                        onClick={() => handleCopyUrl(item.publicUrl)}
+                        onClick={() => handleCopyUrl(item.url)}
                         className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
-                        {copiedUrl === item.publicUrl ? (
+                        {copiedUrl === item.url ? (
                           <CheckCircle size={14} className="text-profit" />
                         ) : (
                           <Copy size={14} />
                         )}
                       </button>
                       <button
-                        onClick={() => handleDelete([item.path])}
-                        className="p-2 text-white/40 hover:text-loss hover:bg-loss/10 rounded-lg transition-colors"
+                        onClick={() => handleDelete([item.id])}
+                        disabled={deletingIds.includes(item.id)}
+                        className="p-2 text-white/40 hover:text-loss hover:bg-loss/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Trash2 size={14} />
+                        {deletingIds.includes(item.id) ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
                       </button>
                     </div>
                   </td>
@@ -616,6 +627,29 @@ export default function MediaLibraryPage() {
           </table>
         </div>
       ) : null}
+
+      {/* Pagination */}
+      {!isLoading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-white/5 border border-gold/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm transition-all"
+          >
+            السابق
+          </button>
+          <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
+            {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-white/5 border border-gold/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm transition-all"
+          >
+            التالي
+          </button>
+        </div>
+      )}
 
       {/* Upload Modal */}
       <AnimatePresence>
@@ -747,9 +781,9 @@ export default function MediaLibraryPage() {
             >
               <div className="flex items-center justify-between p-4 border-b border-gold/10">
                 <div className="flex items-center gap-3">
-                  {getTypeIcon(previewItem.type)}
+                  {getTypeIcon(previewItem.mimeType)}
                   <span className="text-white font-[family-name:var(--font-display)]">
-                    {previewItem.name}
+                    {previewItem.filename}
                   </span>
                 </div>
                 <button
@@ -761,19 +795,19 @@ export default function MediaLibraryPage() {
               </div>
 
               <div className="p-4">
-                {getMediaType(previewItem.type) === 'image' && (
+                {getMediaType(previewItem.mimeType) === 'image' && (
                   <img
-                    src={previewItem.publicUrl}
-                    alt={previewItem.name}
+                    src={previewItem.url}
+                    alt={previewItem.alt || previewItem.filename}
                     className="w-full max-h-[60vh] object-contain rounded-xl"
                   />
                 )}
-                {getMediaType(previewItem.type) === 'video' && (
+                {getMediaType(previewItem.mimeType) === 'video' && (
                   <div className="w-full aspect-video bg-white/5 rounded-xl flex items-center justify-center">
                     <Video size={48} className="text-white/30" />
                   </div>
                 )}
-                {getMediaType(previewItem.type) === 'document' && (
+                {getMediaType(previewItem.mimeType) === 'document' && (
                   <div className="w-full aspect-video bg-white/5 rounded-xl flex items-center justify-center">
                     <FileText size={48} className="text-white/30" />
                   </div>
@@ -782,25 +816,30 @@ export default function MediaLibraryPage() {
 
               <div className="p-4 border-t border-gold/10 flex items-center justify-between">
                 <div className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-                  {formatFileSize(previewItem.size)} • {previewItem.folder ?? ''}
+                  {formatFileSize(previewItem.size)} • {previewItem.folder || ''}
                   {previewItem.uploadedBy ? ` • رفع بواسطة ${previewItem.uploadedBy}` : ''}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleCopyUrl(previewItem.publicUrl)}
+                    onClick={() => handleCopyUrl(previewItem.url)}
                     className="px-4 py-2 bg-white/10 text-white rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center gap-2"
                   >
-                    {copiedUrl === previewItem.publicUrl ? (
+                    {copiedUrl === previewItem.url ? (
                       <><CheckCircle size={14} className="text-profit" /> تم النسخ</>
                     ) : (
                       <><Copy size={14} /> نسخ الرابط</>
                     )}
                   </button>
                   <button
-                    onClick={() => { handleDelete([previewItem.path]); setPreviewItem(null); }}
-                    className="px-4 py-2 bg-loss/10 text-loss rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-loss/20 transition-colors flex items-center gap-2"
+                    onClick={() => { handleDelete([previewItem.id]); setPreviewItem(null); }}
+                    disabled={deletingIds.includes(previewItem.id)}
+                    className="px-4 py-2 bg-loss/10 text-loss rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-loss/20 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 size={14} />
+                    {deletingIds.includes(previewItem.id) ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
                     حذف
                   </button>
                 </div>

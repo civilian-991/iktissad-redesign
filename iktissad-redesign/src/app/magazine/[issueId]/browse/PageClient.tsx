@@ -88,7 +88,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   const uiTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const flipBookRef = useRef<any>(null);
 
-  const pages = issue.pagesImages;
+  const pages = issue.pagesImages ?? [];
   const total = pages.length;
 
   // Lazy-import react-pageflip (not SSR-safe)

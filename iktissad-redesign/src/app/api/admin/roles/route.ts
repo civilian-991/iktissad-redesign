@@ -29,6 +29,23 @@ export interface AdminRoleRow {
   };
 }
 
+// ─── Helper: map DB row -> AdminRoleRow ──────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapRoleRow(r: any): AdminRoleRow {
+  return {
+    userId: r.user_id,
+    role: r.role,
+    permissions: r.permissions ?? {},
+    invitedBy: r.invited_by,
+    twoFaEnabled: r.two_fa_enabled,
+    lastLogin: r.last_login,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+    user: r.users ?? undefined,
+  };
+}
+
 // ─── Helper: fetch caller's role ────────────────────────────────────────────
 
 async function getCallerRole(userId: string): Promise<string | null> {
@@ -79,18 +96,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapped: AdminRoleRow[] = (rows ?? []).map((r: any) => ({
-    userId: r.user_id,
-    role: r.role,
-    permissions: r.permissions ?? {},
-    invitedBy: r.invited_by,
-    twoFaEnabled: r.two_fa_enabled,
-    lastLogin: r.last_login,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-    user: r.users ?? undefined,
-  }));
+  const mapped: AdminRoleRow[] = (rows ?? []).map(mapRoleRow);
 
   const response: ApiResponse<AdminRoleRow[]> = { data: mapped };
   return NextResponse.json(response);
@@ -159,17 +165,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapped: AdminRoleRow = {
-    userId: (row as any).user_id,
-    role: (row as any).role,
-    permissions: (row as any).permissions ?? {},
-    invitedBy: (row as any).invited_by,
-    twoFaEnabled: (row as any).two_fa_enabled,
-    lastLogin: (row as any).last_login,
-    createdAt: (row as any).created_at,
-    updatedAt: (row as any).updated_at,
-  };
+  const mapped: AdminRoleRow = mapRoleRow(row);
 
   const response: ApiResponse<AdminRoleRow> = { data: mapped };
   return NextResponse.json(response, { status: 201 });
