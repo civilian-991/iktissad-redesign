@@ -57,9 +57,9 @@ const AD_TYPE_LABELS: Record<string, string> = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatSAR(cents: number | null) {
+function formatUSD(cents: number | null) {
   if (cents == null) return '—';
-  return (cents / 100).toLocaleString('ar-SA-u-ca-gregory') + ' ر.س';
+  return '$' + (cents / 100).toLocaleString('en-US');
 }
 
 function formatDate(dateStr: string | null) {
@@ -555,7 +555,7 @@ function CampaignsTab() {
                     {formatDate(c.startDate)}
                     {c.endDate ? <> — {formatDate(c.endDate)}</> : null}
                   </td>
-                  <td className="px-4 py-3 text-white/70">{formatSAR(c.budgetCents)}</td>
+                  <td className="px-4 py-3 text-white/70">{formatUSD(c.budgetCents)}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[c.status] ?? STATUS_COLORS.draft}`}>
                       {STATUS_LABELS[c.status] ?? c.status}

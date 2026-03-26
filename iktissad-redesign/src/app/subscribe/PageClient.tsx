@@ -418,10 +418,10 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
                         </span>
                       ) : (
                         <>
+                          <span className="text-pewter text-sm ms-1">$</span>
                           <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
-                            {price.toLocaleString('ar-SA-u-ca-gregory')}
+                            {price.toLocaleString('en-US')}
                           </span>
-                          <span className="text-pewter text-sm me-1"> ر.س</span>
                           <span className="text-pewter text-xs">
                             /{billing === 'annual' ? 'سنوياً' : 'شهرياً'}
                           </span>

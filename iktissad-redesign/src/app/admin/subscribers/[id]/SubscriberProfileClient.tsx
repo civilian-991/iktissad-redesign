@@ -306,7 +306,7 @@ export default function SubscriberProfileClient({ id }: Props) {
                         {p.status === 'paid' ? t('admin.subscribers.profile.paid') : p.status === 'failed' ? t('admin.subscribers.profile.failed') : p.status}
                       </span>
                       <span className="text-gold font-[family-name:var(--font-display)] text-sm font-bold">
-                        {p.amount.toLocaleString('ar-SA-u-ca-gregory')} {t('admin.subscribers.profile.currency')}
+                        ${p.amount.toLocaleString('en-US')}
                       </span>
                     </div>
                   </div>

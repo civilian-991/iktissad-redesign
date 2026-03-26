@@ -278,7 +278,7 @@ export default function SubscribersClient() {
           return (
             <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">
               {amount > 0
-                ? `${amount.toLocaleString('ar-SA-u-ca-gregory')} ${t('admin.subscribers.profile.currency')}`
+                ? `$${amount.toLocaleString('en-US')}`
                 : '—'}
             </span>
           );

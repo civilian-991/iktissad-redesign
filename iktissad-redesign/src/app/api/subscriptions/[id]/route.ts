@@ -74,7 +74,7 @@ function mapPaymentRow(row: any): Payment {
     subscriberId: row.subscriber_id,
     planId: row.plan_id ?? null,
     amount: Number(row.amount),
-    currency: row.currency ?? "SAR",
+    currency: row.currency ?? "USD",
     status: row.status,
     gatewayPaymentId: row.gateway_payment_id ?? null,
     description: row.description ?? null,

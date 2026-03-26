@@ -47,8 +47,8 @@ const CREAM = '#F5EEDC';
 const PIE_COLORS = [NAVY, GOLD, '#6B7280', '#10B981', '#8B5CF6'];
 
 // ─── Formatters ─────────────────────────────────────────────────
-function formatSAR(value: number) {
-  return value.toLocaleString('ar-SA-u-ca-gregory') + ' ر.س';
+function formatUSD(value: number) {
+  return '$' + value.toLocaleString('en-US');
 }
 
 function formatMonth(month: string) {
@@ -201,14 +201,14 @@ export default function RevenueClient() {
           <>
             <KpiCard
               label={t('admin.revenue.mrr')}
-              value={formatSAR(d?.mrr ?? 0)}
+              value={formatUSD(d?.mrr ?? 0)}
               icon={DollarSign}
               iconColor="bg-gradient-to-br from-gold to-amber-600"
               trend="up"
             />
             <KpiCard
               label={t('admin.revenue.arpu')}
-              value={formatSAR(d?.arpu ?? 0)}
+              value={formatUSD(d?.arpu ?? 0)}
               icon={TrendingUp}
               iconColor="bg-gradient-to-br from-blue-500 to-navy"
               trend="neutral"
@@ -280,7 +280,7 @@ export default function RevenueClient() {
                   tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
                 />
                 <Tooltip
-                  content={<ArabicTooltip valueFormatter={formatSAR} />}
+                  content={<ArabicTooltip valueFormatter={formatUSD} />}
                 />
                 <Line
                   type="monotone"
@@ -398,7 +398,7 @@ export default function RevenueClient() {
                   tickLine={false}
                   tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
                 />
-                <Tooltip content={<ArabicTooltip valueFormatter={formatSAR} />} />
+                <Tooltip content={<ArabicTooltip valueFormatter={formatUSD} />} />
                 <Area
                   type="monotone"
                   dataKey="value"
@@ -448,7 +448,7 @@ export default function RevenueClient() {
                   tickLine={false}
                   tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
                 />
-                <Tooltip content={<ArabicTooltip valueFormatter={formatSAR} />} />
+                <Tooltip content={<ArabicTooltip valueFormatter={formatUSD} />} />
                 <Bar dataKey="revenue" fill={NAVY} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

@@ -91,9 +91,9 @@ export default function PlansPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                      <span>{plan.priceMonthly.toLocaleString('ar-SA-u-ca-gregory')} ر.س / شهر</span>
+                      <span>{plan.priceMonthly.toLocaleString('ar-SA-u-ca-gregory')} $ / شهر</span>
                       {plan.priceAnnual && (
-                        <span>{plan.priceAnnual.toLocaleString('ar-SA-u-ca-gregory')} ر.س / سنة</span>
+                        <span>{plan.priceAnnual.toLocaleString('ar-SA-u-ca-gregory')} $ / سنة</span>
                       )}
                     </div>
                     {plan.descriptionAr && (
