@@ -47,8 +47,8 @@ export const colors = {
     400: '#8FB0B8',
     300: '#B5CCD2',
     200: '#D8E3E0',
-    100: '#EDE8DA',
-    50: '#F5EEDC',
+    100: '#EFEFEF',
+    50: '#FFFFFF',
   },
 
   // Semantic Colors
@@ -92,10 +92,10 @@ export const colors = {
 
   // Paper/Background
   paper: {
-    DEFAULT: '#F5EEDC',
-    warm: '#F2EACD',
-    cream: '#EDE5D0',
-    ivory: '#E5DCCA',
+    DEFAULT: '#FFFFFF',
+    warm: '#FAFAFA',
+    cream: '#F7F7F7',
+    ivory: '#EFEFEF',
   },
 
   // Text Colors

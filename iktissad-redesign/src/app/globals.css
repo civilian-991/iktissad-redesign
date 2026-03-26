@@ -67,15 +67,15 @@
   --color-slate-400: #8FB0B8;
   --color-slate-300: #B5CCD2;
   --color-slate-200: #D8E3E0;
-  --color-slate-100: #EDE8DA;
-  --color-slate-50: #F5EEDC;
+  --color-slate-100: #EFEFEF;
+  --color-slate-50: #FFFFFF;
 
   /* Paper/Background aliases */
-  --color-paper: #F5EEDC;
-  --color-paper-warm: #F2EACD;
-  --color-cream: #EDE5D0;
-  --color-ivory: #E5DCCA;
-  --color-sand: #D8CDB8;
+  --color-paper: #FFFFFF;
+  --color-paper-warm: #FAFAFA;
+  --color-cream: #F7F7F7;
+  --color-ivory: #EFEFEF;
+  --color-sand: #E0DAD0;
   --color-stone: #8FB0B8;
   --color-taupe: #6E98A2;
 
