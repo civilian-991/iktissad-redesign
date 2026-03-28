@@ -222,7 +222,7 @@ export default function ArticlePageClient({
               {article.section && (
                 <>
                   <ChevronLeft size={9} />
-                  <a href={`/sections/${article.section}`} className="hover:text-gold transition-colors">{article.section}</a>
+                  <a href={`/topics/${article.section}`} className="hover:text-gold transition-colors">{article.section}</a>
                 </>
               )}
               {article.sector && (
@@ -257,7 +257,7 @@ export default function ArticlePageClient({
               <div className="mb-4">
                 {article.sector && (
                   <a
-                    href={`/sectors/${article.sector}`}
+                    href={`/industries/${article.sector}`}
                     className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
                   >
                     {article.sector}
@@ -265,7 +265,7 @@ export default function ArticlePageClient({
                 )}
                 {!article.sector && article.section && (
                   <a
-                    href={`/sections/${article.section}`}
+                    href={`/topics/${article.section}`}
                     className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
                   >
                     {article.section}
@@ -358,7 +358,7 @@ export default function ArticlePageClient({
                   transition={{ delay: 0.1, duration: 0.5 }}
                   className="mb-6"
                 >
-                  <div className="relative overflow-hidden border border-sand/50" style={{ maxHeight: '480px', minHeight: '240px' }}>
+                  <div className="relative overflow-hidden border border-sand/50 aspect-[1200/630]">
                     <NextImage
                       src={article.featuredImage}
                       alt={article.title}
@@ -645,7 +645,7 @@ export default function ArticlePageClient({
 
                     {article.sector && (
                       <a
-                        href={`/sectors/${article.sector}`}
+                        href={`/industries/${article.sector}`}
                         className="flex items-center justify-center gap-2 w-full mt-3 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/50 border border-sand/80 hover:border-gold hover:text-gold transition-all group rounded-sm"
                       >
                         المزيد من {article.sector}

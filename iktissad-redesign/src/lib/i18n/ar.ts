@@ -348,6 +348,8 @@ export const ar = {
         imageFormats: 'PNG, JPG أو WebP',
         sectionLabel: 'القسم',
         selectSection: 'اختر القسم',
+        countryLabel: 'الدولة',
+        selectCountry: 'اختر الدولة',
         tagsLabel: 'الوسوم',
         scheduleLabel: 'جدولة النشر',
         scheduleHint: 'اتركه فارغاً للنشر الفوري',

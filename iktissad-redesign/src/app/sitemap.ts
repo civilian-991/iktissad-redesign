@@ -89,13 +89,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const sectionPages: MetadataRoute.Sitemap = sectionSlugs.map((slug) => ({
-    url: `${BASE_URL}/sections/${slug}`,
+    url: `${BASE_URL}/topics/${slug}`,
     changeFrequency: "daily",
     priority: 0.7,
   }));
 
   const sectorPages: MetadataRoute.Sitemap = sectorSlugs.map((slug) => ({
-    url: `${BASE_URL}/sectors/${slug}`,
+    url: `${BASE_URL}/industries/${slug}`,
     changeFrequency: "daily",
     priority: 0.7,
   }));

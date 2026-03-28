@@ -60,7 +60,7 @@ function SectorCard({ sector }: { sector: Sector }) {
           </h3>
         </div>
         <a
-          href={`/sectors/${sector.slug}`}
+          href={`/industries/${sector.slug}`}
           className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-sm font-[family-name:var(--font-display)]"
         >
           {t('common.actions.viewMore')}
@@ -191,7 +191,7 @@ export default function SectorNews() {
                 </motion.button>
               </div>
             )}
-            <a href="/sectors" className="btn-outline inline-flex items-center gap-2">
+            <a href="/industries" className="btn-outline inline-flex items-center gap-2">
               <span>{t('components.sectorNews.allSectors')}</span>
               <ArrowUpLeft size={16} />
             </a>

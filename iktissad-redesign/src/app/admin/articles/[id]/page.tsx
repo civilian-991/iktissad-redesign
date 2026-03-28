@@ -128,6 +128,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
   const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: sectionsRes } = useSWR<any>('/api/sections', swrFetcher, { revalidateOnFocus: false });
+  const sections: { slug: string; name: string }[] = sectionsRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
@@ -176,8 +179,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getContentHash = useCallback(() =>
-    JSON.stringify({ title, excerpt, content, section, selectedTags, selectedCountry }),
-    [title, excerpt, content, section, selectedTags, selectedCountry]
+    JSON.stringify({ title, titleEn, excerpt, content, section, selectedTags, selectedCountry }),
+    [title, titleEn, excerpt, content, section, selectedTags, selectedCountry]
   );
 
   const performAutoSave = useCallback(async () => {
@@ -187,7 +190,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     setAutoSaveStatus('saving');
     try {
       await updateArticle(id, {
-        title, titleEn: '', excerpt, content,
+        title, titleEn, excerpt, content,
         // Pass TipTap JSON body if available (new format)
         ...(editorBody ? { body: editorBody } : {}),
         sectionSlug: section || undefined,
@@ -203,7 +206,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     } catch {
       setAutoSaveStatus('error');
     }
-  }, [id, title, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, focalX, focalY, getContentHash]);
+  }, [id, title, titleEn, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, focalX, focalY, getContentHash]);
 
   // Trigger auto-save 30s after last change (only after initialization)
   useEffect(() => {
@@ -225,12 +228,12 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       setTitleEn(article.titleEn || '');
       setExcerpt(article.excerpt);
       setContent(article.content);
-      setSection(article.section || '');
+      setSection(article.sectionSlug || '');
       setSelectedTags(article.tags || []);
       setFeaturedImage(article.featuredImage || null);
       setStatus(article.status);
-      if (article.country) {
-        setSelectedCountry(article.country);
+      if (article.countrySlug) {
+        setSelectedCountry(article.countrySlug);
       }
       // Restore article_type if the article has one saved
       if ((article as any).articleType) {
@@ -741,7 +744,29 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             )}
           </motion.div>
 
-          {/* Country / بلدان */}
+          {/* Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+              {t('admin.articles.editor.sectionLabel')}
+            </label>
+            <select
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+            >
+              <option value="" className="bg-midnight">{t('admin.articles.editor.selectSection')}</option>
+              {sections.map((s) => (
+                <option key={s.slug} value={s.slug} className="bg-midnight">{s.name}</option>
+              ))}
+            </select>
+          </motion.div>
+
+          {/* Country */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -749,14 +774,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              بلدان
+              {t('admin.articles.editor.countryLabel')}
             </label>
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">-- اختر البلد --</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.selectCountry')}</option>
               {countries.map((c) => (
                 <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
               ))}

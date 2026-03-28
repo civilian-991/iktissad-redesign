@@ -75,8 +75,11 @@ export function mapArticleRow(
     contentEn: row.content_en,
     featuredImage: row.featured_image,
     section: row.sections?.name ?? row.sections?.slug ?? "",
+    sectionSlug: row.sections?.slug ?? "",
     sector: row.sectors?.name ?? row.sectors?.slug ?? "",
+    sectorSlug: row.sectors?.slug ?? "",
     country: row.countries?.name ?? row.countries?.slug ?? "",
+    countrySlug: row.countries?.slug ?? "",
     author: {
       id: row.author_id ?? undefined,
       name: row.users?.name ?? "",

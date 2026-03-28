@@ -50,11 +50,11 @@ export default function LatestNews() {
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-gold" />
             <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-lg uppercase tracking-widest">
-              آخر المقالات
+              احدث المقالات
             </h2>
           </div>
           <a
-            href="/news"
+            href="/articles"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}

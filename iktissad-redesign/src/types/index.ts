@@ -160,8 +160,11 @@ export interface Article {
   /** Focal point Y 0–1 for hero crop (Phase 1A — not yet in DB, defaults to 0.5) */
   featuredImageFocalY?: number;
   section: string;
+  sectionSlug: string;
   sector: string;
+  sectorSlug: string;
   country: string;
+  countrySlug: string;
   author: {
     id?: string;
     name: string;

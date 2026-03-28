@@ -348,6 +348,8 @@ export const en = {
         imageFormats: 'PNG, JPG or WebP',
         sectionLabel: 'Section',
         selectSection: 'Select section',
+        countryLabel: 'Country',
+        selectCountry: 'Select country',
         tagsLabel: 'Tags',
         scheduleLabel: 'Schedule Publication',
         scheduleHint: 'Leave empty for immediate publication',

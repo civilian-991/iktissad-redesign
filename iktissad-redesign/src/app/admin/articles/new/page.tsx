@@ -42,10 +42,8 @@ import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetche
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
-const categoryKeys = ['economy', 'markets', 'companies', 'technology', 'investment', 'energy', 'realEstate', 'opinion'] as const;
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
 
-type CategoryKey = typeof categoryKeys[number];
 type TagKey = typeof tagKeys[number];
 type ArticleStatus = 'draft' | 'review' | 'scheduled' | 'published';
 
@@ -60,7 +58,7 @@ export default function NewArticlePage() {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState<CategoryKey | ''>('');
+  const [category, setCategory] = useState('');
   const [selectedTags, setSelectedTags] = useState<TagKey[]>([]);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [status, setStatus] = useState<ArticleStatus>('draft');
@@ -71,6 +69,9 @@ export default function NewArticlePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
   const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: sectionsRes } = useSWR<any>('/api/sections', swrFetcher, { revalidateOnFocus: false });
+  const sections: { slug: string; name: string }[] = sectionsRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
@@ -189,10 +190,6 @@ export default function NewArticlePage() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const getCategoryName = (key: CategoryKey): string => {
-    return t(`admin.articles.categories.${key}`);
   };
 
   const getTagName = (key: TagKey): string => {
@@ -448,7 +445,7 @@ export default function NewArticlePage() {
             />
           </motion.div>
 
-          {/* Category */}
+          {/* Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -460,19 +457,19 @@ export default function NewArticlePage() {
             </label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value as CategoryKey)}
+              onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
               <option value="" className="bg-midnight">{t('admin.articles.editor.selectSection')}</option>
-              {categoryKeys.map((cat) => (
-                <option key={cat} value={cat} className="bg-midnight">
-                  {getCategoryName(cat)}
+              {sections.map((s) => (
+                <option key={s.slug} value={s.slug} className="bg-midnight">
+                  {s.name}
                 </option>
               ))}
             </select>
           </motion.div>
 
-          {/* Country / بلدان */}
+          {/* Country */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -480,14 +477,14 @@ export default function NewArticlePage() {
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              بلدان
+              {t('admin.articles.editor.countryLabel')}
             </label>
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">-- اختر البلد --</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.selectCountry')}</option>
               {countries.map((c) => (
                 <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
               ))}

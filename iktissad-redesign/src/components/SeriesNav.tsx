@@ -82,7 +82,7 @@ export default function SeriesNav({ articleId, className = '' }: SeriesNavProps)
             هذا المقال جزء من ملف
           </p>
           <Link
-            href={`/ملفات/${nav.seriesSlug}`}
+            href={`/files/${nav.seriesSlug}`}
             className="text-white font-[family-name:var(--font-display)] font-bold text-sm hover:text-gold transition-colors line-clamp-1"
           >
             {nav.seriesTitle}
@@ -143,7 +143,7 @@ export default function SeriesNav({ articleId, className = '' }: SeriesNavProps)
       {/* View all link */}
       <div className="px-5 py-3 border-t border-gold/10 bg-white/2">
         <Link
-          href={`/ملفات/${nav.seriesSlug}`}
+          href={`/files/${nav.seriesSlug}`}
           className="flex items-center justify-center gap-2 text-gold/80 hover:text-gold text-sm font-[family-name:var(--font-display)] font-semibold transition-colors"
         >
           <BookOpen size={14} />

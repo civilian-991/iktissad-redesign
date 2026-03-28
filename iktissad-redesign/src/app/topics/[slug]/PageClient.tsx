@@ -26,7 +26,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
     ) {
       return null;
     }
-    return `/api/sections/${slug}?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
+    return `/api/topics/${slug}?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
   }
 
   const { data, size, setSize, isLoading, isValidating, error } = useSWRInfinite<ApiResponse<SectionPage>>(
@@ -67,7 +67,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <a href="/sections" className="text-gold/70 hover:text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider transition-colors">
+              <a href="/topics" className="text-gold/70 hover:text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider transition-colors">
                 {t('pages.sections.title')}
               </a>
               <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4">
