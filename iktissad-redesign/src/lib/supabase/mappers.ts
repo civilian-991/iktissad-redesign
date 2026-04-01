@@ -23,6 +23,7 @@ import type {
   CommentRow,
   AuditLogRow,
   AdminNotificationRow,
+  ArticleSeriesRow,
 } from "./types";
 import type {
   Article,
@@ -44,6 +45,7 @@ import type {
   AdminNotification,
   Newsletter,
   NewsletterBlock,
+  ArticleSeries,
 } from "@/types";
 
 // ──────────────────────────────────────────────────────────────
@@ -93,6 +95,7 @@ export function mapArticleRow(
     publishedAt: row.published_at ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    videoUrl: (row as any).video_url ?? undefined,
   };
 }
 
@@ -425,6 +428,35 @@ export function mapAdminNotification(row: AdminNotificationRow): AdminNotificati
 // ──────────────────────────────────────────────────────────────
 // Newsletters
 // ──────────────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────
+// Article Series (Dossiers)
+// ──────────────────────────────────────────────────────────────
+
+export function mapArticleSeriesRow(
+  row: ArticleSeriesRow & { article_count?: number; articles?: { id: string; title: string; order_index: number; published_at?: string }[] }
+): ArticleSeries {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    titleEn: row.title_en,
+    description: row.description,
+    descriptionEn: row.description_en,
+    coverImage: row.cover_image,
+    status: row.status,
+    createdBy: row.created_by ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    articleCount: row.article_count ?? 0,
+    articles: (row.articles ?? []).map((a: { id: string; title: string; order_index: number; published_at?: string }) => ({
+      id: a.id,
+      title: a.title,
+      orderIndex: a.order_index,
+      publishedAt: a.published_at,
+    })),
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapNewsletterRow(row: any): Newsletter {
