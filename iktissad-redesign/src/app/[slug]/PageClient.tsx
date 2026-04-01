@@ -5,7 +5,6 @@ import { motion } from 'motion/react';
 import NextImage from 'next/image';
 import {
   Clock,
-  Eye,
   Facebook,
   Twitter,
   Linkedin,
@@ -35,6 +34,55 @@ import type { JSONContent } from '@tiptap/core';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT = 3;
+
+// ── Video helpers ─────────────────────────────────────────────────────────────
+function toEmbedUrl(src: string): string {
+  const s = src.trim();
+  if (s.includes('youtube') || s.includes('youtu.be')) {
+    if (s.includes('/embed/')) return s;
+    const short = s.match(/youtu\.be\/([^?&]+)/);
+    if (short) return `https://www.youtube.com/embed/${short[1]}`;
+    const watch = s.match(/[?&]v=([^&]+)/);
+    if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
+  }
+  if (s.includes('vimeo')) {
+    const m = s.match(/vimeo\.com\/(\d+)/);
+    if (m) return `https://player.vimeo.com/video/${m[1]}`;
+  }
+  return s;
+}
+
+/** Extract first [Video: URL] or <iframe src="..."> from HTML. Returns embed URL or null. */
+function extractHeroVideo(html: string): string | null {
+  // [Video: URL] placeholder (from migration)
+  const placeholder = html.match(/\[Video:\s*(https?:\/\/[^\]]+)\]/);
+  if (placeholder) return toEmbedUrl(placeholder[1]);
+  // Raw iframe (if migration ran without cleanHtml)
+  const iframe = html.match(/<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/i);
+  if (iframe) return toEmbedUrl(iframe[1]);
+  return null;
+}
+
+/** Remove the first video placeholder/iframe from HTML (it's shown in the hero instead). */
+function stripFirstVideo(html: string): string {
+  // Remove [Video: URL] placeholder paragraph
+  let result = html.replace(/<p>\s*\[Video:\s*https?:\/\/[^\]]+\]\s*<\/p>/i, '');
+  if (result !== html) return result;
+  // Fallback: strip bare placeholder without <p>
+  result = html.replace(/\[Video:\s*https?:\/\/[^\]]+\]/i, '');
+  if (result !== html) return result;
+  // Strip raw iframe
+  result = html.replace(/<iframe[^>]+>[\s\S]*?<\/iframe>/i, '');
+  return result;
+}
+
+/** Restore remaining [Video: URL] placeholders in body as inline embeds. */
+function restoreVideoEmbeds(html: string): string {
+  return html.replace(/\[Video:\s*(https?:\/\/[^\]]+)\]/g, (_, src) => {
+    const embedSrc = toEmbedUrl(src);
+    return `<div class="video-embed-wrapper"><iframe src="${embedSrc}" allowfullscreen loading="lazy" title="فيديو"></iframe></div>`;
+  });
+}
 
 // ── Helper: truncate HTML string to first N closing </p> tags ─────────────────
 function truncateHtmlToParagraphs(html: string, maxParagraphs = 3): string {
@@ -119,10 +167,18 @@ export default function ArticlePageClient({
     freeArticlesReadThisMonth >= FREE_ARTICLE_LIMIT;
 
   // Determine content format: TipTap JSON or legacy HTML string
-  const rawContent = article?.content ?? '';
+  const _baseContent = article?.content ?? '';
   const isJsonContent =
-    typeof rawContent === 'object' ||
-    (typeof rawContent === 'string' && rawContent.trim().startsWith('{'));
+    typeof _baseContent === 'object' ||
+    (typeof _baseContent === 'string' && _baseContent.trim().startsWith('{'));
+  // Hero video: prefer explicit video_url field, fall back to scanning legacy HTML content
+  const heroVideoUrl: string | null =
+    (article as any)?.videoUrl
+      ? toEmbedUrl((article as any).videoUrl)
+      : isJsonContent ? null : extractHeroVideo(_baseContent);
+  const rawContent = isJsonContent
+    ? _baseContent
+    : restoreVideoEmbeds(heroVideoUrl ? stripFirstVideo(_baseContent) : _baseContent);
 
   // For paywall: parse/truncate to ~3 paragraphs
   const truncatedHtml = isPaywalled && !isJsonContent
@@ -350,24 +406,36 @@ export default function ArticlePageClient({
                 )}
               </div>
 
-              {/* Featured image — full width */}
-              {article.featuredImage && (
+              {/* Featured media — video embed or image */}
+              {(heroVideoUrl || article.featuredImage) && (
                 <motion.figure
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1, duration: 0.5 }}
                   className="mb-6"
                 >
-                  <div className="relative overflow-hidden border border-sand/50 aspect-[1200/630]">
-                    <NextImage
-                      src={article.featuredImage}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                      priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
-                    />
-                  </div>
+                  {heroVideoUrl ? (
+                    <div className="relative overflow-hidden border border-sand/50 aspect-video">
+                      <iframe
+                        src={heroVideoUrl}
+                        title={article.title}
+                        allowFullScreen
+                        loading="eager"
+                        className="absolute inset-0 w-full h-full border-0"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative overflow-hidden border border-sand/50 aspect-[1200/630]">
+                      <NextImage
+                        src={article.featuredImage}
+                        alt={article.title}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
+                      />
+                    </div>
+                  )}
                 </motion.figure>
               )}
 
@@ -401,12 +469,6 @@ export default function ArticlePageClient({
                             {publishedDate}
                           </span>
                         )}
-                        {article.views > 0 && (
-                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
-                            <Eye size={10} className="text-gold/60" />
-                            {article.views.toLocaleString('ar-SA')}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </Link>
@@ -433,12 +495,6 @@ export default function ArticlePageClient({
                           <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Clock size={10} className="text-gold/60" />
                             {publishedDate}
-                          </span>
-                        )}
-                        {article.views > 0 && (
-                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
-                            <Eye size={10} className="text-gold/60" />
-                            {article.views.toLocaleString('ar-SA')}
                           </span>
                         )}
                       </div>
@@ -780,6 +836,8 @@ export default function ArticlePageClient({
         .article-body-slug strong { font-weight: 700; color: #0C1E2A; }
         .article-body-slug em { color: #275A73; }
         .article-body-slug img { max-width: 100%; height: auto; margin: 2rem 0; border: 1px solid #E8E0D0; display: block; }
+        .article-body-slug .video-embed-wrapper { position: relative; width: 100%; margin: 2rem 0; }
+        .article-body-slug .video-embed-wrapper iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
         .article-body-slug figure { margin: 2rem 0; }
         .article-body-slug figcaption { font-size: 0.78rem; color: #548490; font-family: var(--font-display), system-ui, sans-serif; margin-top: 0.5rem; text-align: center; }
         .article-body-slug table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; }

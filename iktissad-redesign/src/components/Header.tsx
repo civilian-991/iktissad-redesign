@@ -8,7 +8,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import type { Article } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -99,6 +100,11 @@ export default function Header() {
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Article[]>([]);
+  const [trendingArticles, setTrendingArticles] = useState<Article[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get navigation item name from translations
   const getNavName = (key: string): string => {
@@ -163,9 +169,12 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const y = window.scrollY;
+      // Hysteresis: collapse at 100px, expand only when back below 30px.
+      // Prevents the header size-change from pushing content and oscillating.
+      setIsScrolled(prev => (prev ? y > 30 : y > 100));
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -180,6 +189,35 @@ export default function Header() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Fetch trending articles when search modal opens
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setSearchQuery('');
+      setSearchResults([]);
+      return;
+    }
+    fetch('/api/search/trending?limit=5')
+      .then(r => r.json())
+      .then(json => setTrendingArticles(json.data ?? []))
+      .catch(() => {});
+  }, [isSearchOpen]);
+
+  // Debounced search
+  const runSearch = useCallback((q: string) => {
+    if (!q.trim()) { setSearchResults([]); setIsSearching(false); return; }
+    setIsSearching(true);
+    fetch(`/api/search?q=${encodeURIComponent(q)}&pageSize=6`)
+      .then(r => r.json())
+      .then(json => { setSearchResults(json.data ?? []); setIsSearching(false); })
+      .catch(() => setIsSearching(false));
+  }, []);
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => runSearch(searchQuery), 350);
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+  }, [searchQuery, runSearch]);
 
   return (
     <>
@@ -474,6 +512,8 @@ export default function Header() {
               <div className="relative">
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
                   placeholder={t('header.search.placeholder')}
                   className="w-full px-8 py-6 text-xl bg-white/5 border border-gold/30 text-white font-[family-name:var(--font-display)] placeholder:text-white/60 focus:outline-none focus:border-gold transition-colors"
                   autoFocus
@@ -481,20 +521,80 @@ export default function Header() {
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={iconSizes.lg} />
               </div>
 
-              {/* Quick Links */}
-              <div className="mt-8 flex flex-wrap gap-3">
-                <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">
-                  {t('header.search.trending')}
-                </span>
-                {(t('header.search.trendingTerms') as unknown as string[]).map((term: string) => (
-                  <button
-                    key={term}
-                    className="px-4 py-1.5 border border-gold/20 text-gold/60 text-sm font-[family-name:var(--font-display)] hover:border-gold hover:text-gold transition-colors"
-                  >
-                    {term}
-                  </button>
-                ))}
-              </div>
+              {/* Results */}
+              {searchQuery.trim() ? (
+                <div className="mt-4 space-y-0 max-h-[40vh] overflow-y-auto">
+                  {isSearching && (
+                    <div className="py-8 text-center text-white/50 text-sm font-[family-name:var(--font-display)]">
+                      جارٍ البحث...
+                    </div>
+                  )}
+                  {!isSearching && searchResults.length === 0 && (
+                    <div className="py-8 text-center text-white/50 text-sm font-[family-name:var(--font-display)]">
+                      لا نتائج لـ «{searchQuery}»
+                    </div>
+                  )}
+                  {!isSearching && searchResults.map(article => (
+                    <Link
+                      key={article.id}
+                      href={`/${article.slug}`}
+                      onClick={() => setIsSearchOpen(false)}
+                      className="flex gap-4 p-3 border-b border-white/10 hover:bg-white/5 transition-colors group"
+                    >
+                      {article.featuredImage && (
+                        <img src={article.featuredImage} alt="" className="w-14 h-14 object-cover shrink-0 opacity-80 group-hover:opacity-100" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-white text-sm font-[family-name:var(--font-display)] leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                          {article.title}
+                        </p>
+                        {article.section && (
+                          <p className="text-gold/50 text-xs mt-1">{article.section}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                /* Trending keywords + trending articles when no query */
+                <>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">
+                      {t('header.search.trending')}
+                    </span>
+                    {(['أسهم', 'نفط', 'ذهب', 'عقارات', 'بنوك'] as string[]).map((term: string) => (
+                      <button
+                        key={term}
+                        onClick={() => setSearchQuery(term)}
+                        className="px-4 py-1.5 border border-gold/20 text-gold/60 text-sm font-[family-name:var(--font-display)] hover:border-gold hover:text-gold transition-colors"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                  {trendingArticles.length > 0 && (
+                    <div className="mt-4 space-y-0 max-h-[32vh] overflow-y-auto">
+                      {trendingArticles.map(article => (
+                        <Link
+                          key={article.id}
+                          href={`/${article.slug}`}
+                          onClick={() => setIsSearchOpen(false)}
+                          className="flex gap-4 p-3 border-b border-white/10 hover:bg-white/5 transition-colors group"
+                        >
+                          {article.featuredImage && (
+                            <img src={article.featuredImage} alt="" className="w-12 h-12 object-cover shrink-0 opacity-70 group-hover:opacity-100" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-white/80 text-sm font-[family-name:var(--font-display)] leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                              {article.title}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Close Button */}
               <button

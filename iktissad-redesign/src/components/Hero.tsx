@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock, ArrowUpLeft, Flame, Loader2, TrendingUp } from 'lucide-react';
+import { Clock, ArrowUpLeft, Loader2, TrendingUp } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
@@ -47,10 +47,9 @@ export default function Hero() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <Flame size={15} className="text-gold" />
-            <span className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm uppercase tracking-widest">
-              أبرز المقالات
-            </span>
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+              مواضيع رئيسية
+            </h2>
           </div>
           {/* Progress dots */}
           {articles.length > 1 && (
@@ -133,7 +132,7 @@ export default function Hero() {
             {/* All 5 articles list — active one highlighted */}
             <div className="lg:col-span-5 flex flex-col bg-paper">
               <div className="bg-obsidian px-4 py-3 flex items-center justify-end">
-                <a href="/search" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
+                <a href="/articles?featured=true" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
                   {t('common.actions.viewMore')}
                   <ArrowUpLeft size={11} />
                 </a>

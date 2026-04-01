@@ -8,18 +8,17 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 
-// Regions are editorial structure — countries mapped to their DB slugs
 const regions = [
   {
     id: 'gulf',
     name: 'الخليج',
     countries: [
-      { id: 'saudi', name: 'السعودية', slug: 'السعودية', flag: 'https://flagcdn.com/w40/sa.png' },
-      { id: 'uae',   name: 'الإمارات', slug: 'الإمارات', flag: 'https://flagcdn.com/w40/ae.png' },
-      { id: 'qatar', name: 'قطر',      slug: 'قطر',       flag: 'https://flagcdn.com/w40/qa.png' },
-      { id: 'kuwait',  name: 'الكويت',  slug: 'الكويت',   flag: 'https://flagcdn.com/w40/kw.png' },
-      { id: 'bahrain', name: 'البحرين', slug: 'البحرين',  flag: 'https://flagcdn.com/w40/bh.png' },
-      { id: 'oman',    name: 'عُمان',   slug: 'عُمان',    flag: 'https://flagcdn.com/w40/om.png' },
+      { id: 'saudi',   name: 'السعودية', slug: 'السعودية', flag: 'https://flagcdn.com/w40/sa.png' },
+      { id: 'uae',     name: 'الإمارات', slug: 'الإمارات', flag: 'https://flagcdn.com/w40/ae.png' },
+      { id: 'qatar',   name: 'قطر',      slug: 'قطر',      flag: 'https://flagcdn.com/w40/qa.png' },
+      { id: 'kuwait',  name: 'الكويت',   slug: 'الكويت',   flag: 'https://flagcdn.com/w40/kw.png' },
+      { id: 'bahrain', name: 'البحرين',  slug: 'البحرين',  flag: 'https://flagcdn.com/w40/bh.png' },
+      { id: 'oman',    name: 'عُمان',    slug: 'عُمان',    flag: 'https://flagcdn.com/w40/om.png' },
     ],
   },
   {
@@ -48,16 +47,16 @@ const regions = [
     name: 'العالم',
     countries: [
       { id: 'usa',    name: 'أمريكا', slug: 'الولايات-المتحدة', flag: 'https://flagcdn.com/w40/us.png' },
-      { id: 'china',  name: 'الصين',  slug: 'الصين',  flag: 'https://flagcdn.com/w40/cn.png' },
-      { id: 'india',  name: 'الهند',  slug: 'الهند',  flag: 'https://flagcdn.com/w40/in.png' },
-      { id: 'turkey', name: 'تركيا',  slug: 'تركيا',  flag: 'https://flagcdn.com/w40/tr.png' },
+      { id: 'china',  name: 'الصين',  slug: 'الصين',            flag: 'https://flagcdn.com/w40/cn.png' },
+      { id: 'india',  name: 'الهند',  slug: 'الهند',            flag: 'https://flagcdn.com/w40/in.png' },
+      { id: 'turkey', name: 'تركيا',  slug: 'تركيا',            flag: 'https://flagcdn.com/w40/tr.png' },
     ],
   },
 ];
 
 type Country = typeof regions[0]['countries'][0];
 
-function CountryContent({ country, regionName }: { country: Country; regionName: string }) {
+function CountryContent({ country }: { country: Country }) {
   const { t } = useTranslation();
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
     `/api/articles?country=${encodeURIComponent(country.slug)}&status=published&pageSize=4`,
@@ -69,89 +68,95 @@ function CountryContent({ country, regionName }: { country: Country; regionName:
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="text-gold animate-spin" size={40} />
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="text-gold animate-spin" size={32} />
       </div>
     );
   }
 
   if (!featured) {
     return (
-      <div className="text-center py-20">
-        <p className="text-white/50 font-[family-name:var(--font-display)]">لا توجد مقالات لهذا البلد حالياً.</p>
+      <div className="text-center py-16">
+        <p className="text-charcoal/50 font-[family-name:var(--font-display)]">لا توجد مقالات لهذا البلد حالياً.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8">
-      {/* Featured Article */}
-      <a href={`/${featured.slug}`} className="relative h-96 lg:h-auto min-h-[400px] overflow-hidden group block">
+    <div className="grid lg:grid-cols-2 gap-px bg-sand/40 border border-sand/40">
+      {/* Featured — full bleed image with overlay */}
+      <a
+        href={`/${featured.slug}`}
+        className="relative overflow-hidden group block"
+        style={{ minHeight: '18rem' }}
+      >
         {featured.featuredImage ? (
           <img
             src={featured.featuredImage}
             alt={featured.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 absolute inset-0"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-navy to-navy-light" />
+          <div className="absolute inset-0" style={{ background: 'var(--color-brand-800)' }} />
         )}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/5 backdrop-blur-md border-t border-white/10 p-6 lg:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <img src={country.flag} alt={country.name} className="w-8 h-5 object-cover rounded-sm" />
-            <span className="text-white/70 font-[family-name:var(--font-display)] text-sm">{regionName}</span>
-            <span className="text-white/30 text-sm">/</span>
-            <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">{country.name}</span>
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to top, rgba(12,30,42,0.88) 0%, rgba(12,30,42,0.2) 60%, transparent 100%)' }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <img src={country.flag} alt={country.name} className="w-6 h-4 object-cover" />
+            <span className="text-white/70 font-[family-name:var(--font-display)] text-xs">{country.name}</span>
           </div>
-          <h3 className="text-xl lg:text-2xl font-[family-name:var(--font-display)] font-bold leading-tight mb-4 text-gold-light">
+          <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-base leading-snug line-clamp-3 group-hover:text-gold-light transition-colors duration-300 mb-2">
             {featured.title}
           </h3>
           {featured.publishedAt && (
-            <span className="text-white text-sm flex items-center gap-2">
-              <Clock size={14} />
-              {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+            <span className="text-white/50 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
+              <Clock size={10} />
+              {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })}
             </span>
           )}
         </div>
       </a>
 
-      {/* Article List */}
-      <div className="space-y-4">
-        {rest.map((article, index) => (
-          <motion.a
+      {/* Article list */}
+      <div className="bg-paper flex flex-col divide-y divide-sand">
+        {rest.map((article) => (
+          <a
             key={article.id}
             href={`/${article.slug}`}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="block bg-white/5 backdrop-blur-sm p-6 border border-white/10 hover:bg-white/10 hover:border-gold/30 transition-all duration-300 group"
+            className="group flex gap-4 p-4 hover:bg-cream transition-colors flex-1"
           >
-            <div className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-10 h-10 bg-gold/20 text-gold flex items-center justify-center font-[family-name:var(--font-display)] font-bold">
-                {index + 2}
-              </span>
-              <div className="flex-1">
-                <h4 className="font-[family-name:var(--font-display)] font-bold text-white leading-snug group-hover:text-gold transition-colors duration-300">
-                  {article.title}
-                </h4>
-                {article.publishedAt && (
-                  <span className="text-white/70 text-sm mt-2 flex items-center gap-2">
-                    <Clock size={14} />
-                    {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
-                  </span>
-                )}
+            {article.featuredImage && (
+              <div className="flex-shrink-0 overflow-hidden" style={{ width: '4.5rem', height: '3.25rem' }}>
+                <img
+                  src={article.featuredImage}
+                  alt={article.title}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
               </div>
-              <ArrowUpLeft size={20} className="text-gold/50 group-hover:text-gold transition-colors duration-300 flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              <h4 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                {article.title}
+              </h4>
+              {article.publishedAt && (
+                <span className="text-charcoal/40 text-xs flex items-center gap-1 mt-1 font-[family-name:var(--font-display)]">
+                  <Clock size={9} />
+                  {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })}
+                </span>
+              )}
             </div>
-          </motion.a>
+          </a>
         ))}
-
         <a
           href={`/countries/${country.slug}`}
-          className="flex items-center justify-center gap-2 w-full py-4 border border-dashed border-gold/30 text-gold font-[family-name:var(--font-display)] font-semibold hover:border-gold hover:bg-gold/10 transition-all duration-300"
+          className="flex items-center justify-center gap-1 py-3 text-gold text-xs font-bold font-[family-name:var(--font-display)] hover:bg-cream transition-colors"
         >
           {t('components.countryNews.viewAllNews', { country: country.name })}
-          <ArrowUpLeft size={18} />
+          <ArrowUpLeft size={13} />
         </a>
       </div>
     </div>
@@ -169,41 +174,36 @@ export default function CountryNews() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-br from-navy via-navy-light to-navy relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
+    <section className="bg-paper py-8 border-t border-charcoal/10">
+      <div className="container-editorial">
 
-      <div className="container-luxury relative">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
-            {t('components.countryNews.subtitle')}
-          </span>
-          <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold mt-2 mb-4 text-white">
-            {t('components.countryNews.title')}
-          </h2>
-          <div className="flex items-center justify-center gap-3 text-gold/50">
-            <span className="w-16 h-px bg-gradient-to-r from-transparent to-gold/50" />
-            <MapPin size={20} className="text-gold" />
-            <span className="w-16 h-px bg-gradient-to-l from-transparent to-gold/50" />
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-gold" />
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+              {t('components.countryNews.title')}
+            </h2>
           </div>
-        </motion.div>
+          <a
+            href="/countries"
+            className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
+          >
+            {t('common.actions.viewMore')}
+            <ArrowUpLeft size={13} />
+          </a>
+        </div>
 
-        {/* Region Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
+        {/* Region tabs */}
+        <div className="flex flex-wrap gap-0 border-b border-sand mb-4">
           {regions.map((region) => (
             <button
               key={region.id}
               onClick={() => handleRegionChange(region)}
-              className={`px-6 py-2.5 font-[family-name:var(--font-display)] font-bold text-sm transition-all duration-300 border-b-2 ${
+              className={`px-5 py-2.5 font-[family-name:var(--font-display)] font-bold text-sm transition-all duration-200 border-b-2 -mb-px ${
                 activeRegion.id === region.id
                   ? 'text-gold border-gold'
-                  : 'text-white/60 border-transparent hover:text-white hover:border-white/30'
+                  : 'text-charcoal/50 border-transparent hover:text-obsidian hover:border-sand'
               }`}
             >
               {region.name}
@@ -211,49 +211,46 @@ export default function CountryNews() {
           ))}
         </div>
 
-        <div className="w-full h-px bg-white/10 mb-6" />
-
-        {/* Country Tabs */}
+        {/* Country pills */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeRegion.id}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-wrap justify-center gap-2 mb-10"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex flex-wrap gap-2 mb-5"
           >
             {activeRegion.countries.map((country) => (
-              <motion.button
+              <button
                 key={country.id}
                 onClick={() => setActiveCountry(country)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 rounded-full font-[family-name:var(--font-display)] font-semibold text-sm flex items-center gap-2 transition-all duration-300 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-display)] border transition-all duration-200 ${
                   activeCountry.id === country.id
-                    ? 'bg-gold text-navy shadow-gold'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    ? 'bg-obsidian text-white border-obsidian'
+                    : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-obsidian'
                 }`}
               >
-                <img src={country.flag} alt={country.name} className="w-5 h-3.5 object-cover rounded-sm" />
+                <img src={country.flag} alt={country.name} className="w-5 h-3.5 object-cover" />
                 {country.name}
-              </motion.button>
+              </button>
             ))}
           </motion.div>
         </AnimatePresence>
 
-        {/* Country Articles */}
+        {/* Articles */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCountry.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <CountryContent country={activeCountry} regionName={activeRegion.name} />
+            <CountryContent country={activeCountry} />
           </motion.div>
         </AnimatePresence>
+
       </div>
     </section>
   );

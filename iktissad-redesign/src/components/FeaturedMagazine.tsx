@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { BookOpen, Eye, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { BookOpen, Eye, ArrowLeft, ArrowUpLeft, Sparkles, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
@@ -26,28 +26,18 @@ export default function FeaturedMagazine() {
 
       <div className="container-editorial relative">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-between mb-12"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-obsidian flex items-center justify-center">
-              <BookOpen className="text-gold" size={28} />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian">
-                {t('nav.group.magazine')}
-              </h2>
-              <p className="text-graphite">{t('components.featuredMagazine.subtitle')}</p>
-            </div>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-gold" />
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+              {t('nav.group.magazine')}
+            </h2>
           </div>
-          <a href="/magazine" className="hidden md:flex items-center gap-2 text-gold hover:text-gold-dark transition-colors font-[family-name:var(--font-display)] font-semibold">
+          <a href="/magazine" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
             <span>{t('pages.magazine.allIssues')}</span>
-            <ArrowLeft size={18} />
+            <ArrowUpLeft size={13} />
           </a>
-        </motion.div>
+        </div>
 
         {!data ? (
           <div className="flex items-center justify-center py-20">

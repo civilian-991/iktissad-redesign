@@ -11,85 +11,90 @@ export default function FeaturedProfiles() {
   const { t } = useTranslation();
 
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?tag=profile&featured=true&status=published&pageSize=8',
+    '/api/articles?tag=profile&featured=true&status=published&pageSize=6',
     swrFetcher
   );
   const profiles = data?.data ?? [];
 
-  return (
-    <section className="py-20 bg-cream relative overflow-hidden">
-      <div className="absolute inset-0 geometric-pattern opacity-30" />
+  if (!isLoading && profiles.length === 0) return null;
 
-      <div className="container-luxury relative">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
-        >
-          <div>
-            <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
-              {t('components.featuredProfiles.subtitle')}
-            </span>
-            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-navy mt-2">
+  return (
+    <section className="bg-cream py-8 border-t border-sand">
+      <div className="container-editorial">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-gold" />
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
               {t('components.featuredProfiles.sectionTitle')}
             </h2>
-            <p className="text-slate mt-2 max-w-lg">
-              {t('components.featuredProfiles.description')}
-            </p>
           </div>
           <a
             href="/profiles"
-            className="btn-navy flex items-center gap-2 self-start"
+            className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
-            <span>{t('components.featuredProfiles.viewAllProfiles')}</span>
-            <ArrowUpLeft size={18} />
+            {t('common.actions.viewMore')}
+            <ArrowUpLeft size={13} />
           </a>
-        </motion.div>
+        </div>
 
-        {/* Profiles Grid */}
+        {/* Grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="text-gold animate-spin" size={40} />
-          </div>
-        ) : profiles.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-slate font-[family-name:var(--font-display)]">لا توجد ملفات تعريفية متاحة حالياً.</p>
+          <div className="flex items-center justify-center h-44">
+            <Loader2 className="text-gold animate-spin" size={28} />
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {profiles.map((profile, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {profiles.map((profile, i) => (
               <motion.a
                 key={profile.id}
                 href={`/${profile.slug}`}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -6 }}
-                className="group flex flex-col items-center text-center gap-3"
+                transition={{ delay: i * 0.06 }}
+                className="group flex flex-col overflow-hidden bg-paper border border-sand hover:border-gold/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
-                {/* Avatar */}
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-sand group-hover:border-gold transition-colors duration-300 flex-shrink-0 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center">
+                {/* Photo */}
+                <div className="aspect-[3/4] overflow-hidden bg-cream relative flex-shrink-0">
                   {profile.featuredImage ? (
                     <img
                       src={profile.featuredImage}
                       alt={profile.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                     />
                   ) : (
-                    <UserCircle2 className="text-white/40" size={40} />
+                    <div
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ background: 'var(--color-brand-800)' }}
+                    >
+                      <UserCircle2 size={40} style={{ color: 'rgba(255,255,255,0.2)' }} />
+                    </div>
+                  )}
+                  {/* Subtle bottom gradient */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-12"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.25), transparent)' }}
+                  />
+                </div>
+
+                {/* Name */}
+                <div className="p-3 flex flex-col gap-1">
+                  <p className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300 text-center">
+                    {profile.title}
+                  </p>
+                  {profile.sector && (
+                    <p className="font-[family-name:var(--font-display)] text-xs text-charcoal/50 text-center line-clamp-1">
+                      {profile.sector}
+                    </p>
                   )}
                 </div>
-                {/* Name */}
-                <p className="font-[family-name:var(--font-display)] font-semibold text-navy text-sm group-hover:text-gold transition-colors duration-300 leading-snug line-clamp-2">
-                  {profile.title}
-                </p>
               </motion.a>
             ))}
           </div>
         )}
+
       </div>
     </section>
   );

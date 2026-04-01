@@ -153,50 +153,41 @@ export default function SectorNews() {
 
       <div className="container-editorial relative">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
-        >
-          <div>
-            <span className="section-label">{t('components.sectorNews.subtitle')}</span>
-            <h2 className="text-2xl md:text-3xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-3 mb-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-gold" />
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
               {t('components.sectorNews.title')}
             </h2>
-            <div className="divider-editorial max-w-xs">
-              <div className="diamond-accent" />
-            </div>
           </div>
-
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {totalPages > 1 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <motion.button
                   whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                   onClick={() => setCurrentPage(p => (p - 1 + totalPages) % totalPages)}
-                  className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
+                  className="w-7 h-7 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={14} />
                 </motion.button>
-                <span className="text-sm text-graphite font-[family-name:var(--font-display)] min-w-[60px] text-center">
+                <span className="text-xs text-graphite font-[family-name:var(--font-display)] min-w-[40px] text-center">
                   {currentPage + 1} / {totalPages}
                 </span>
                 <motion.button
                   whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                   onClick={() => setCurrentPage(p => (p + 1) % totalPages)}
-                  className="w-10 h-10 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
+                  className="w-7 h-7 border border-sand hover:border-gold text-graphite hover:text-gold flex items-center justify-center transition-colors"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={14} />
                 </motion.button>
               </div>
             )}
-            <a href="/industries" className="btn-outline inline-flex items-center gap-2">
+            <a href="/industries" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
               <span>{t('components.sectorNews.allSectors')}</span>
-              <ArrowUpLeft size={16} />
+              <ArrowUpLeft size={13} />
             </a>
           </div>
-        </motion.div>
+        </div>
 
         {/* Grid */}
         {sectors.length === 0 ? (

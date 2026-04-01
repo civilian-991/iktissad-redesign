@@ -1,56 +1,31 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
+import { Clock, ArrowUpLeft, Loader2, Newspaper } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-import useSWRInfinite from 'swr/infinite';
+import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
-
-const PAGE_SIZE = 12;
-
-function getKey(pageIndex: number, previousPageData: ApiResponse<Article[]> | null) {
-  // Stop fetching when there are no more pages
-  if (previousPageData && !previousPageData.pagination) return null;
-  if (
-    previousPageData?.pagination &&
-    pageIndex + 1 > previousPageData.pagination.totalPages
-  ) {
-    return null;
-  }
-  return `/api/articles?status=published&featured=false&pageSize=${PAGE_SIZE}&page=${pageIndex + 1}`;
-}
 
 export default function LatestNews() {
   const { t } = useTranslation();
 
-  const { data, size, setSize, isLoading, isValidating } = useSWRInfinite<ApiResponse<Article[]>>(
-    getKey,
+  const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
+    '/api/articles?status=published&featured=false&pageSize=6',
     swrFetcher
   );
-
-  const pages = data ?? [];
-  const articles = pages.flatMap((p) => p.data ?? []);
-
-  const lastPage = pages[pages.length - 1];
-  const hasMore =
-    lastPage?.pagination
-      ? lastPage.pagination.page < lastPage.pagination.totalPages
-      : false;
-
-  const isLoadingMore = isValidating && size > 1;
-  const isInitialLoading = isLoading && size === 1;
+  const articles = data?.data ?? [];
 
   return (
-    <section className="bg-cream py-10 border-t border-charcoal/10">
+    <section className="bg-paper py-8 border-t border-charcoal/10">
       <div className="container-editorial">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-6 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-lg uppercase tracking-widest">
-              احدث المقالات
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 bg-gold" />
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+              آخر الأخبار
             </h2>
           </div>
           <a
@@ -62,77 +37,72 @@ export default function LatestNews() {
           </a>
         </div>
 
-        {isInitialLoading ? (
+        {/* Articles */}
+        {isLoading ? (
           <div className="flex items-center justify-center h-48">
             <Loader2 className="text-gold animate-spin" size={28} />
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-charcoal/10 border border-charcoal/10">
-              {articles.map((article, i) => (
-                <motion.a
-                  key={article.id}
-                  href={`/${article.slug}`}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i, 11) * 0.04 }}
-                  className="bg-cream hover:bg-paper group flex gap-4 p-4 transition-colors"
-                >
-                  {/* Thumb */}
-                  {article.featuredImage && (
-                    <div className="w-24 h-18 flex-shrink-0 overflow-hidden" style={{ height: '4.5rem' }}>
-                      <img
-                        src={article.featuredImage}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                      {article.sector && (
-                        <span className="text-gold text-sm font-bold font-[family-name:var(--font-display)] block mb-1">
-                          {article.sector}
-                        </span>
-                      )}
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors">
-                        {article.title}
-                      </h3>
-                    </div>
-                    {article.publishedAt && (
-                      <span className="text-charcoal/40 text-sm flex items-center gap-1 mt-2">
-                        <Clock size={10} />
-                        {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
-                          year: 'numeric', month: 'short', day: 'numeric',
-                        })}
-                      </span>
-                    )}
-                  </div>
-                </motion.a>
-              ))}
-            </div>
-
-            {/* Load More */}
-            {hasMore && (
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={() => setSize(size + 1)}
-                  disabled={isLoadingMore}
-                  className="flex items-center gap-2 px-8 py-3 bg-navy text-white font-[family-name:var(--font-display)] font-semibold rounded-lg hover:bg-navy-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      {t('common.actions.loadingMore')}
-                    </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {articles.map((article, i) => (
+              <motion.a
+                key={article.id}
+                href={`/${article.slug}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="group relative bg-paper border border-sand hover:border-gold/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md flex flex-col overflow-hidden"
+              >
+                {/* Image with sector badge overlay */}
+                <div className="relative aspect-[16/9] overflow-hidden flex-shrink-0 bg-cream">
+                  {article.featuredImage ? (
+                    <img
+                      src={article.featuredImage}
+                      alt={article.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
                   ) : (
-                    t('common.actions.loadMore')
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Newspaper className="text-sand" size={28} />
+                    </div>
                   )}
-                </button>
-              </div>
-            )}
-          </>
+                  {/* Sector badge on image */}
+                  {article.sector && (
+                    <span
+                      className="absolute bottom-0 right-0 px-2.5 py-1 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wide"
+                      style={{
+                        background: 'var(--color-gold)',
+                        color: 'var(--color-brand-darker)',
+                      }}
+                    >
+                      {article.sector}
+                    </span>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-col justify-between flex-1 p-4 gap-3">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-relaxed line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                    {article.title}
+                  </h3>
+                  {article.publishedAt && (
+                    <span className="text-charcoal/40 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
+                      <Clock size={10} />
+                      {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                      })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom gold line reveal */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-right"
+                  style={{ background: 'var(--color-gold)' }}
+                />
+              </motion.a>
+            ))}
+          </div>
         )}
 
       </div>
