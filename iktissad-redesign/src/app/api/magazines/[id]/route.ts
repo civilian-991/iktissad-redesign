@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
@@ -107,6 +108,14 @@ export async function PUT(
   const data = parsed.data;
   const admin = createAdminClient();
 
+  // Fetch current status to detect publish transition
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: current } = await (admin.from("magazine_issues") as any)
+    .select("status")
+    .eq("id", id)
+    .single();
+  const oldStatus = current?.status as string | undefined;
+
   const updateData: Record<string, unknown> = {};
   if (data.issueNumber !== undefined) updateData.issue_number = data.issueNumber;
   if (data.title !== undefined) updateData.title = data.title;
@@ -134,6 +143,14 @@ export async function PUT(
       { error: error?.message ?? "Magazine issue not found" } satisfies ApiResponse<never>,
       { status: error ? 500 : 404 }
     );
+  }
+
+  // Bust ISR cache on every magazine update (cover, highlights, etc. affect listing)
+  revalidatePath('/magazine');
+  revalidatePath(`/magazine/${id}/browse`);
+  // On publish transition also bust homepage (FeaturedMagazine section)
+  if (data.status === 'published' && oldStatus !== 'published') {
+    revalidatePath('/');
   }
 
   const response: ApiResponse<MagazineIssue> = {

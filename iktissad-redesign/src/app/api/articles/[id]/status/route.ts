@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -105,9 +106,19 @@ export async function PUT(
       .single();
     if (slugRow?.slug) {
       void notifyIndexNow([slugRow.slug]);
+      // Bust ISR cache so the article and listing pages update immediately
+      revalidatePath(`/${slugRow.slug}`);
     }
+    revalidatePath('/');          // homepage latest news
+    revalidatePath('/articles');  // articles listing
     void dispatchWebhook('article.published', { article_id: id, slug: slugRow?.slug ?? null });
     void runAutomations('article.published', { article_id: id, slug: slugRow?.slug ?? null });
+  }
+
+  // Also revalidate listing pages when an article is unpublished
+  if (oldStatus === 'published' && data.status !== 'published') {
+    revalidatePath('/');
+    revalidatePath('/articles');
   }
 
   // Fire webhooks/automations when article enters review
