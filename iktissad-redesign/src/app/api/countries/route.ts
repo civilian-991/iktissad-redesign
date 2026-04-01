@@ -6,10 +6,9 @@ import type { ApiResponse, Country } from "@/types";
 export async function GET() {
   const supabase = await createClient();
 
-  const { data: rows, error } = await supabase
-    .from("countries")
-    .select()
-    .order("name", { ascending: true });
+  // Use RPC to COUNT in SQL — avoids the 1000-row PostgREST cap
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows, error } = await (supabase as any).rpc("get_countries_with_counts");
 
   if (error) {
     return NextResponse.json(

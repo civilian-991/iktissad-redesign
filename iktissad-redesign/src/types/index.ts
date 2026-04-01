@@ -182,6 +182,8 @@ export interface Article {
   publishedAt: string;
   createdAt: string;
   updatedAt: string;
+  /** Video URL from awalan ArticleVideo table (MP4 or embed URL) */
+  videoUrl?: string;
 }
 
 export interface ArticleVersion {
@@ -277,6 +279,7 @@ export interface Country {
   economicOverview: string;
   economicOverviewEn: string;
   keyIndicators: Record<string, string | number>;
+  articleCount?: number;
 }
 
 export interface Section {

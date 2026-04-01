@@ -497,6 +497,88 @@ export type Database = {
         };
         Relationships: [];
       };
+      // ── Phase 10.1: Article Series (Dossiers) ────────────────────
+      article_series: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          title_en: string;
+          description: string;
+          description_en: string;
+          cover_image: string;
+          status: "active" | "archived";
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          title: string;
+          title_en?: string;
+          description?: string;
+          description_en?: string;
+          cover_image?: string;
+          status?: "active" | "archived";
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          title?: string;
+          title_en?: string;
+          description?: string;
+          description_en?: string;
+          cover_image?: string;
+          status?: "active" | "archived";
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      series_articles: {
+        Row: {
+          id: string;
+          series_id: string;
+          article_id: string;
+          order_index: number;
+          added_at: string;
+        };
+        Insert: {
+          id?: string;
+          series_id: string;
+          article_id: string;
+          order_index?: number;
+          added_at?: string;
+        };
+        Update: {
+          id?: string;
+          series_id?: string;
+          article_id?: string;
+          order_index?: number;
+          added_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "series_articles_series_id_fkey";
+            columns: ["series_id"];
+            isOneToOne: false;
+            referencedRelation: "article_series";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "series_articles_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       // ── Phase 1A: Content Model ──────────────────────────────────
       magazine_sections: {
         Row: {
@@ -1623,6 +1705,14 @@ export type MediaUpdate = Tables["media"]["Update"];
 export type NewsletterSubscriberRow    = Tables["newsletter_subscribers"]["Row"];
 export type NewsletterSubscriberInsert = Tables["newsletter_subscribers"]["Insert"];
 export type NewsletterSubscriberUpdate = Tables["newsletter_subscribers"]["Update"];
+
+export type ArticleSeriesRow    = Tables["article_series"]["Row"];
+export type ArticleSeriesInsert = Tables["article_series"]["Insert"];
+export type ArticleSeriesUpdate = Tables["article_series"]["Update"];
+
+export type SeriesArticleRow    = Tables["series_articles"]["Row"];
+export type SeriesArticleInsert = Tables["series_articles"]["Insert"];
+export type SeriesArticleUpdate = Tables["series_articles"]["Update"];
 
 // ── Phase 1A: Content Model ──────────────────────────────────────────────────
 
