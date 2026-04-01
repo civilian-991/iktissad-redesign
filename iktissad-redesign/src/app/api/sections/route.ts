@@ -6,25 +6,11 @@ import type { ApiResponse, Section } from "@/types";
 export async function GET() {
   const supabase = await createClient();
 
-  // Fetch sections and published article counts in two queries (was N+1).
-  // The article count query uses a single GROUP BY instead of one query per section.
-  const [sectionsResult, countsResult] = await Promise.all([
-    supabase
-      .from("sections")
-      .select()
-      .order("name", { ascending: true }),
-    // Select section_id from published articles so we can group in JS.
-    // Supabase PostgREST does not expose GROUP BY directly, so we fetch
-    // just the FK column (no content) with a status filter — one round trip.
-    supabase
-      .from("articles")
-      .select("section_id")
-      .eq("status", "published" as const)
-      .not("section_id", "is", null),
-  ]);
-
+  // Use a server-side RPC to COUNT in SQL — avoids the 1000-row PostgREST
+  // client cap that would silently truncate counts for large sections.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows, error } = sectionsResult as { data: any[] | null; error: any };
+  const { data: rows, error } = await (supabase as any).rpc("get_sections_with_counts");
+
   if (error) {
     return NextResponse.json(
       { error: error.message } satisfies ApiResponse<never>,
@@ -32,16 +18,9 @@ export async function GET() {
     );
   }
 
-  // Build a count map from the single articles query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articleRows = (countsResult.data ?? []) as { section_id: string }[];
-  const countMap: Record<string, number> = {};
-  for (const r of articleRows) {
-    if (r.section_id) countMap[r.section_id] = (countMap[r.section_id] ?? 0) + 1;
-  }
-
-  const sections: Section[] = (rows ?? []).map((row) =>
-    mapSectionRow(row, countMap[row.id] ?? 0)
+  const sections: Section[] = (rows ?? []).map((row: any) =>
+    mapSectionRow(row, Number(row.article_count ?? 0))
   );
 
   const response: ApiResponse<Section[]> = {
