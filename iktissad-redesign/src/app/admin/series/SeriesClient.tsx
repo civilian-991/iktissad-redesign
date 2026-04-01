@@ -456,7 +456,7 @@ export default function SeriesClient() {
                       إدارة
                     </Link>
                     <Link
-                      href={`/ملفات/${s.slug}`}
+                      href={`/reports/${s.slug}`}
                       target="_blank"
                       className="p-2 bg-white/5 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       title="عرض الصفحة العامة"

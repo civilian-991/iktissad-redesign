@@ -1609,7 +1609,7 @@ export const ar = {
       readOnline: 'اقرأ عبر الإنترنت',
       download: 'تحميل النسخة',
       issueNumber: 'العدد رقم {number}',
-      highlights: 'أبرز المقالات',
+      highlights: 'مواضيع رئيسية',
       inThisIssue: 'في هذا العدد:',
       coverStory: 'قصة الغلاف',
       preview: 'معاينة العدد',

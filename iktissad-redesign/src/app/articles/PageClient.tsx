@@ -8,18 +8,22 @@ import { useTranslation } from '@/lib/i18n';
 import useSWRInfinite from 'swr/infinite';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
+import { useSearchParams } from 'next/navigation';
 
 const PAGE_SIZE = 21;
 
-function getKey(pageIndex: number, previousPageData: ApiResponse<Article[]> | null) {
-  if (previousPageData && !previousPageData.pagination) return null;
-  if (
-    previousPageData?.pagination &&
-    pageIndex + 1 > previousPageData.pagination.totalPages
-  ) {
-    return null;
-  }
-  return `/api/articles?status=published&pageSize=${PAGE_SIZE}&page=${pageIndex + 1}`;
+function makeGetKey(featuredOnly: boolean) {
+  return function getKey(pageIndex: number, previousPageData: ApiResponse<Article[]> | null) {
+    if (previousPageData && !previousPageData.pagination) return null;
+    if (
+      previousPageData?.pagination &&
+      pageIndex + 1 > previousPageData.pagination.totalPages
+    ) {
+      return null;
+    }
+    const featured = featuredOnly ? '&featured=true' : '';
+    return `/api/articles?status=published${featured}&pageSize=${PAGE_SIZE}&page=${pageIndex + 1}`;
+  };
 }
 
 function formatDate(iso: string) {
@@ -150,9 +154,11 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
 
 export default function LatestArticlesPageClient() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const featuredOnly = searchParams.get('featured') === 'true';
 
   const { data, size, setSize, isLoading, isValidating } = useSWRInfinite<ApiResponse<Article[]>>(
-    getKey,
+    makeGetKey(featuredOnly),
     swrFetcher
   );
 
@@ -187,13 +193,15 @@ export default function LatestArticlesPageClient() {
               className="text-center"
             >
               <span className="text-gold font-[family-name:var(--font-display)] text-xs font-bold tracking-[0.2em] uppercase block mb-3">
-                آخر الأخبار
+                {featuredOnly ? 'مواضيع رئيسية' : 'آخر الأخبار'}
               </span>
               <h1 className="text-4xl lg:text-5xl font-[family-name:var(--font-display)] font-black text-white mb-4">
-                أحدث المقالات
+                {featuredOnly ? 'المواضيع الرئيسية' : 'أحدث المقالات'}
               </h1>
               <p className="text-white/60 text-base max-w-xl mx-auto font-[family-name:var(--font-display)]">
-                تصفح أحدث المقالات والتحليلات الاقتصادية مرتّبةً بحسب تاريخ النشر
+                {featuredOnly
+                  ? 'أبرز المقالات والتحليلات الاقتصادية المختارة'
+                  : 'تصفح أحدث المقالات والتحليلات الاقتصادية مرتّبةً بحسب تاريخ النشر'}
               </p>
             </motion.div>
           </div>

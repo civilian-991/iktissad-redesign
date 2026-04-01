@@ -37,7 +37,13 @@ export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (supabase as any)
     .from("article_series")
-    .select(`*, series_articles(id, order_index, article_id, added_at)`)
+    .select(`
+      *,
+      series_articles(
+        id, order_index, added_at,
+        articles(id, slug, title, excerpt, featured_image, published_at, status)
+      )
+    `)
     .eq("slug", slug)
     .single();
 
@@ -50,15 +56,24 @@ export async function GET(
 
   const series = mapSeriesRow(row);
   if (Array.isArray(row.series_articles)) {
-    series.articleCount = row.series_articles.length;
-    series.articles = row.series_articles.map(
+    const sorted = [...row.series_articles].sort(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (sa: any) => ({
-        id: sa.article_id,
-        title: "",
-        orderIndex: sa.order_index,
-      })
+      (a: any, b: any) => a.order_index - b.order_index
     );
+    series.articleCount = sorted.length;
+    series.articles = sorted
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((sa: any) => sa.articles?.status === "published")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((sa: any) => ({
+        id: sa.articles?.id ?? sa.article_id,
+        title: sa.articles?.title ?? "",
+        slug: sa.articles?.slug,
+        excerpt: sa.articles?.excerpt,
+        featuredImage: sa.articles?.featured_image,
+        publishedAt: sa.articles?.published_at,
+        orderIndex: sa.order_index,
+      }));
   }
 
   return NextResponse.json({ data: series } satisfies ApiResponse<ArticleSeries>);

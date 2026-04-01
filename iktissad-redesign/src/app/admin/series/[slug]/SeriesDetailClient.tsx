@@ -577,7 +577,7 @@ export default function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
                 تعديل
               </button>
               <Link
-                href={`/ملفات/${slug}`}
+                href={`/reports/${slug}`}
                 target="_blank"
                 className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors text-sm font-[family-name:var(--font-display)] font-semibold"
               >

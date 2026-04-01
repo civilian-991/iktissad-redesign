@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
   const sector = searchParams.get("sector");
   const country = searchParams.get("country");
+  const type = searchParams.get("type");
 
   const supabase = await createClient();
 
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from("profiles")
     .select(PROFILE_SELECT, { count: "exact" }) as any;
+
+  if (type) {
+    query = query.eq("type", type);
+  }
 
   if (sector) {
     const { data: s } = await supabase
