@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SectionPageClient from './PageClient';
 
+export const revalidate = 3600; // 1 hour
+
 const sectionNames: Record<string, string> = {
   'economy': 'اقتصاد',
   'companies': 'شركات',

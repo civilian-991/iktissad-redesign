@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import ArticlePageClient from './PageClient';
 
+export const revalidate = 3600; // 1 hour
+
 const BASE_URL = 'https://www.iktissadonline.com';
 const SITE_NAME = 'الإقتصاد والأعمال';
 

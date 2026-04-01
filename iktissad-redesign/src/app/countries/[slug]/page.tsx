@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import CountryPageClient from './PageClient';
 
+export const revalidate = 3600; // 1 hour
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   return {

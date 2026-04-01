@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import SeriesPageClient from './PageClient';
 
+export const revalidate = 3600; // 1 hour
+
 async function fetchSeriesMeta(slug: string) {
   try {
     const supabase = await createClient();

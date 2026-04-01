@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import MagazineBrowsePageClient from './PageClient';
 import type { MagazineIssue } from '@/types';
 
+export const revalidate = 3600; // 1 hour
+
 interface PageProps {
   params: Promise<{ issueId: string }>;
 }
