@@ -16,6 +16,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import { updatePreferences } from '@/lib/api-client';
 
 // ── Sector options for the onboarding checklist ──────────────────────────────
 const SECTOR_KEYS = [
@@ -62,14 +63,14 @@ export default function SuccessPageClient() {
   async function handleSavePreferences() {
     setSavingPrefs(true);
     try {
-      // TODO: wire to a real user-preferences API route, e.g.:
-      //   await fetch('/api/account/preferences', {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({ sectors: Array.from(selectedSectors) }),
-      //   });
-      // Simulated delay for UX feedback
-      await new Promise((r) => setTimeout(r, 800));
+      const result = await updatePreferences({
+        sectors: Array.from(selectedSectors),
+        onboarded: true,
+      });
+      if (result.error) {
+        // Surface the error but don't block the user — they can skip.
+        console.error('[subscribe/success] failed to save preferences:', result.error);
+      }
       setPrefsSaved(true);
     } finally {
       setSavingPrefs(false);

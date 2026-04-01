@@ -1146,3 +1146,33 @@ export async function removeArticleFromSeries(
     { method: 'DELETE' }
   );
 }
+
+// ─── Account Preferences ─────────────────────────────────────────
+
+export type SectorKey =
+  | 'energy'
+  | 'banking'
+  | 'realEstate'
+  | 'technology'
+  | 'industry'
+  | 'trade';
+
+export interface AccountPreferences {
+  sectors?: SectorKey[];
+  onboarded?: boolean;
+}
+
+/**
+ * PATCH /api/account/preferences
+ *
+ * Persists the authenticated user's sector interests and/or onboarded flag
+ * into Supabase Auth user_metadata. Safe to call from client components.
+ */
+export async function updatePreferences(
+  prefs: AccountPreferences
+): Promise<ApiResponse<{ updated: boolean }>> {
+  return api<{ updated: boolean }>('/api/account/preferences', {
+    method: 'PATCH',
+    body: JSON.stringify(prefs),
+  });
+}
