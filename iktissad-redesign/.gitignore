@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Migration data (large files with internal state / source data)
+scripts/migration/progress-*.json
+scripts/progress-*.json
+scripts/drupal-export.json
