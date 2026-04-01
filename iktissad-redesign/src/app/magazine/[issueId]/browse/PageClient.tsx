@@ -85,6 +85,13 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [HTMLFlipBook, setHTMLFlipBook] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const handleDownload = async () => {
+    const res = await fetch(`/api/magazines/${issue.id}/pdf-url`);
+    if (!res.ok) return;
+    const json = await res.json();
+    if (json?.data?.url) window.open(json.data.url, '_blank');
+  };
   const uiTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const flipBookRef = useRef<any>(null);
 
@@ -213,12 +220,12 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             هذا العدد قيد التحضير
           </p>
           {issue.pdfUrl && (
-            <a
-              href={`/api/pdf-proxy?url=${encodeURIComponent(issue.pdfUrl)}`}
+            <button
+              onClick={handleDownload}
               className="inline-block mt-2 text-gold hover:text-gold-light font-[family-name:var(--font-display)] text-sm underline transition-colors"
             >
               قراءة بالتنسيق القديم (PDF)
-            </a>
+            </button>
           )}
         </div>
         <Link
@@ -381,14 +388,13 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
                 </button>
               )}
               {isSubscriber && issue.pdfUrl && (
-                <a
-                  href={issue.pdfUrl}
-                  download
+                <button
+                  onClick={handleDownload}
                   className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
                   title="تحميل PDF"
                 >
                   <Download size={17} />
-                </a>
+                </button>
               )}
               {!isSubscriber && (
                 <button
