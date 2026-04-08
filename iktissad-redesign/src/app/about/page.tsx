@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import AboutPageClient from './PageClient';
 
 export const metadata: Metadata = {
-  title: 'من نحن | الإقتصاد والأعمال',
-  description: 'تعرف على مجلة الإقتصاد والأعمال، المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي منذ عام 1956',
+  title: 'مجموعة الاقتصاد والأعمال — من الفهم إلى القرار',
+  description: 'منذ أكثر من خمسين عاماً، تعمل مجموعة الاقتصاد والأعمال في المساحة بين الخبر والقرار — موقع، مجلة، مجلة الدفاعية، مجلة الحسناء، ومؤتمرات ضمن رؤية واحدة.',
 };
 
 export default function AboutPage() {

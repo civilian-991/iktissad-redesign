@@ -57,12 +57,6 @@ const footerLinksConfig = {
     { key: 'tourism', href: '/industries/tourism-entertainment' },
     { key: 'energyEnv', href: '/industries/energy-environment' },
   ],
-  group: [
-    { key: 'magazine', href: '#', external: true },
-    { key: 'arabMarkets', href: '#', external: true },
-    { key: 'banking', href: '#', external: true },
-    { key: 'businessLeaders', href: '#', external: true },
-  ],
   about: [
     { key: 'aboutUs', href: '/about' },
     { key: 'team', href: '/team' },
@@ -118,17 +112,6 @@ export default function Footer() {
       energyEnv: t('nav.sectors.energyEnv'),
     };
     return sectorKeys[key] || key;
-  };
-
-  // Get group link name from translations
-  const getGroupName = (key: string): string => {
-    const groupKeys: Record<string, string> = {
-      magazine: t('nav.group.magazine'),
-      arabMarkets: t('nav.group.arabMarkets'),
-      banking: t('nav.group.banking'),
-      businessLeaders: t('nav.group.businessLeaders'),
-    };
-    return groupKeys[key] || key;
   };
 
   // Get about link name from translations
@@ -280,30 +263,6 @@ export default function Footer() {
                   </ul>
                 </div>
 
-                {/* Group Publications */}
-                <div>
-                  <h4 className="font-[family-name:var(--font-display)] font-bold text-lg mb-6 flex items-center gap-3">
-                    <span className="w-1 h-5 bg-gold" />
-                    <span className="text-gold">{t('nav.main.group')}</span>
-                  </h4>
-                  <ul className="space-y-3">
-                    {footerLinksConfig.group.map((link) => (
-                      <li key={link.key}>
-                        <a
-                          href={link.href}
-                          target={link.external ? '_blank' : undefined}
-                          rel={link.external ? 'noopener noreferrer' : undefined}
-                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
-                        >
-                          <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
-                          {getGroupName(link.key)}
-                          {link.external && <ExternalLink size={10} className="opacity-50" />}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
                 {/* About */}
                 <div>
                   <h4 className="font-[family-name:var(--font-display)] font-bold text-lg mb-6 flex items-center gap-3">
@@ -373,21 +332,18 @@ export default function Footer() {
       <div className="bg-midnight py-5 border-t border-gold/10">
         <div className="container-editorial">
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-2 text-xs text-white/60 font-[family-name:var(--font-display)]">
+            <Link href="/magazine" className="flex items-center gap-2 hover:text-gold transition-colors">
+              <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
+              مجلة الاقتصاد والأعمال
+            </Link>
+            <a href="https://www.defaiya.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-gold transition-colors">
+              <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
+              مجلة الدفاعية
+              <ExternalLink size={10} className="opacity-50" />
+            </a>
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
-              {t('nav.group.magazine')}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
-              {t('nav.group.arabMarkets')}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
-              {t('nav.group.banking')}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gold/30 rotate-45" />
-              {t('nav.group.businessLeaders')}
+              مجلة الحسناء
             </span>
           </div>
         </div>

@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "www.defaiya.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.iktissadonline.com",
+      },
+      {
+        protocol: "https",
         hostname: "flagcdn.com",
       },
       // Supabase Storage: signed object URLs

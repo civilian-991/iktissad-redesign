@@ -1,294 +1,372 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { Globe, Newspaper, Mic2, Layers, ExternalLink } from 'lucide-react';
 import NextImage from 'next/image';
-import { Target, Eye, Award, Users, Newspaper, Globe, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { useTranslation } from '@/lib/i18n';
-import useSWR from 'swr';
-import { swrFetcher } from '@/lib/api-client';
-import type { ApiResponse, AdminUser } from '@/types';
-import { siteStats } from '@/lib/site-config';
 
-const statsIcons = [Calendar, Newspaper, Users, Globe];
-const statsValues = [
-  String(siteStats.foundingYear),
-  siteStats.monthlyReaders,
-  siteStats.totalArticles,
-  String(siteStats.correspondentCountries),
+const sections = [
+  {
+    id: 'website',
+    icon: Globe,
+    tagline: 'ما لا تراه في الخبر',
+    title: 'الموقع',
+    intro: 'في قلب هذه الرؤية، يأتي موقع الاقتصاد والأعمال الإلكتروني.',
+    body: [
+      'ليس منصة تلاحق الأخبار، بل مساحة تكشف ما وراءها.',
+      'هنا، لا نكتب عمّا يُقال فقط، إنما عمّا لا يُقال.',
+      'نقرأ ما بين السطور، ونربط بين الأحداث، ونفكك الأرقام لنقدّم صورة أوضح.',
+    ],
+    highlight:
+      'نغطي الأسواق المالية، الشركات، السياسات الاقتصادية، والتحولات الكبرى في المنطقة والعالم. لكن كل خبر بالنسبة لنا هو نقطة بداية. نسأل: ماذا يعني هذا؟ ما الذي تغيّر فعلاً؟ وما الذي يمكن أن يحدث لاحقاً؟',
+    closing: 'لأن من يرى أكثر… يقرر أفضل.',
+  },
+  {
+    id: 'magazine',
+    icon: Newspaper,
+    tagline: 'فهم أعمق… أثر أطول',
+    title: 'المجلة',
+    intro: 'قبل أن تتسارع المنصات الرقمية، كانت مجلة الاقتصاد والأعمال.',
+    body: [
+      'ومنذ ذلك الحين، حافظت على موقعها كمرجع اقتصادي راسخ في العالم العربي.',
+      'في زمن السرعة، نمنح القضايا ما تستحقه من عمق.',
+      'وفي زمن الاختصار، نعيد بناء الصورة كاملة.',
+    ],
+    highlight:
+      'نقدّم تحليلات استراتيجية، دراسات قطاعية، وبروفايلات معمّقة لقيادات ترسم ملامح الاقتصاد. محتوى يُقرأ اليوم… ويُعاد إليه لاحقاً.',
+    closing: 'هنا يتحول الفهم إلى معرفة. والمعرفة إلى رؤية.',
+  },
+  {
+    id: 'conferences',
+    icon: Mic2,
+    tagline: 'حيث يلتقي القرار بمن يصنعه',
+    title: 'المؤتمرات',
+    intro: 'إذا كانت الكلمة تُنتج الفهم، فإن اللقاء المباشر يصنع التأثير.',
+    body: [
+      'على مدى أكثر من ثلاثة عقود، تحولت مؤتمرات الاقتصاد والأعمال إلى منصات تجمع من يصنع القرار، لا من يراقبه فقط.',
+      'أكثر من 350 مؤتمراً في 25 دولة، شارك فيها رؤساء دول وحكومات ووزراء ومحافظو مصارف مركزية ورؤساء شركات.',
+    ],
+    highlight:
+      'لم تكن مجرد فعاليات، بل منصات تُناقش فيها الرؤى والسياسات، تُبنى فيها العلاقات وتُعرض فيها الفرص.',
+    question: 'نبدأ دائماً من سؤال واضح: ماذا تريد هذه الجهة أن تقول، ولمن، ولماذا الآن؟',
+    closing: 'ومن هنا، نبني المنصة التي تُحدث الفرق.',
+  },
 ];
 
-const timelineYears = ['1956', '1975', '2000', '2015', '2024'];
-const valuesIcons = [Award, Users, Globe];
+const conferenceStats = [
+  { value: '+350', label: 'مؤتمراً' },
+  { value: '25', label: 'دولة' },
+  { value: '+50', label: 'عاماً من الخبرة' },
+];
 
 export default function AboutPageClient() {
-  const { t } = useTranslation();
-
-  const { data: profilesData, isLoading: profilesLoading } = useSWR<ApiResponse<AdminUser[]>>(
-    '/api/users?status=active&pageSize=8',
-    swrFetcher
-  );
-  const featuredTeam = (profilesData?.data ?? []).filter(
-    (u) => u.role === 'admin' || u.role === 'editor'
-  ).slice(0, 4);
-
-  const stats = statsValues.map((value, i) => ({
-    icon: statsIcons[i],
-    value,
-    label: t(`pages.about.stats.${i}.label`),
-  }));
-
-  const timeline = timelineYears.map((year, i) => ({
-    year,
-    title: t(`pages.about.timeline.${i}.title`),
-    description: t(`pages.about.timeline.${i}.description`),
-  }));
-
-  const values = valuesIcons.map((icon, i) => ({
-    icon,
-    title: t(`pages.about.valuesList.${i}.title`),
-    desc: t(`pages.about.valuesList.${i}.desc`),
-  }));
-
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-cream">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-navy via-navy-light to-navy py-24 overflow-hidden">
+      <main className="min-h-screen bg-cream" dir="rtl">
+
+        {/* ── Hero ── */}
+        <section className="relative bg-gradient-to-br from-navy via-navy-light to-navy py-28 overflow-hidden">
           <div className="absolute inset-0 star-pattern opacity-20" />
           <div className="absolute top-0 left-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-2xl" />
 
           <div className="container-luxury relative">
             <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="max-w-3xl mx-auto text-center"
+            >
+              <p className="text-gold text-sm font-semibold tracking-widest uppercase mb-4">
+                من نحن
+              </p>
+              <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mb-6 leading-tight">
+                الاقتصاد والأعمال
+                <span className="block text-gold mt-2">من الفهم إلى القرار</span>
+              </h1>
+            </motion.div>
+
+            {/* Intro text */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center max-w-4xl mx-auto"
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="max-w-3xl mx-auto mt-10 bg-white/8 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
             >
-              <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mb-6">
-                {t('pages.about.title')}
-              </h1>
-              <p className="text-xl text-white/80 leading-relaxed">
-                {t('pages.about.heroSubtitle')}
+              <p className="text-white/85 text-lg leading-relaxed mb-6">
+                في عالم تتسارع فيه الأحداث وتتشابك فيه المصالح، لم تعد المشكلة في نقص المعلومات، بل في القدرة على فهمها. لم يعد كافياً أن تعرف ما حدث، بل أن تفهم لماذا حدث، وماذا يعني، وإلى أين يقود.
+              </p>
+              <p className="text-white/85 text-lg leading-relaxed mb-8">
+                في هذه المساحة بين الخبر والقرار، تعمل الاقتصاد والأعمال منذ أكثر من خمسين عاماً.
+              </p>
+              <div className="border-r-4 border-gold pr-6 space-y-2">
+                <p className="text-white font-semibold text-xl">نحن لا ننقل الخبر.</p>
+                <p className="text-white/90 text-lg">نفسّره. نضعه في سياقه. ونستبق اتجاهه.</p>
+              </div>
+              <p className="text-gold font-[family-name:var(--font-display)] font-bold text-xl mt-6">
+                لأن القيمة الحقيقية تبدأ من الفهم… وتنتهي بالقرار.
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="py-12 bg-ivory">
-          <div className="container-luxury">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-xl p-6 text-center shadow-sm"
-                >
-                  <stat.icon className="mx-auto text-gold mb-3" size={32} />
-                  <div className="text-3xl font-[family-name:var(--font-display)] font-black text-navy mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-slate text-sm">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Mission & Vision */}
-        <section className="py-20">
-          <div className="container-luxury">
-            <div className="grid md:grid-cols-2 gap-8">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl p-8 shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center mb-6">
-                  <Target className="text-white" size={32} />
-                </div>
-                <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                  {t('pages.about.mission')}
-                </h2>
-                <p className="text-charcoal leading-relaxed">
-                  {t('pages.about.missionBody')}
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl p-8 shadow-lg"
-              >
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-navy to-navy-light flex items-center justify-center mb-6">
-                  <Eye className="text-white" size={32} />
-                </div>
-                <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                  {t('pages.about.vision')}
-                </h2>
-                <p className="text-charcoal leading-relaxed">
-                  {t('pages.about.visionBody')}
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Timeline */}
-        <section className="py-20 bg-navy text-white">
-          <div className="container-luxury">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
+        {/* ── Three Pillars ── */}
+        {sections.map((section, index) => {
+          const isEven = index % 2 === 0;
+          const Icon = section.icon;
+          return (
+            <section
+              key={section.id}
+              className={`py-20 ${isEven ? 'bg-ivory' : 'bg-white'}`}
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold mb-4 text-white">
-                {t('pages.about.history')}
-              </h2>
-              <p className="text-white/70">
-                {t('pages.about.historySubtitle')}
-              </p>
-            </motion.div>
-
-            <div className="relative">
-              {/* Line */}
-              <div className="absolute top-0 bottom-0 right-1/2 w-px bg-gold/30 hidden md:block" />
-
-              <div className="space-y-12">
-                {timeline.map((item, index) => (
+              <div className="container-luxury">
+                <div className="max-w-4xl mx-auto">
                   <motion.div
-                    key={item.year}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`flex items-center gap-8 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
+                    transition={{ duration: 0.6 }}
                   >
-                    <div className={`flex-1 ${index % 2 === 0 ? 'md:text-left' : 'md:text-right'}`}>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                        <span className="text-gold font-[family-name:var(--font-display)] font-bold text-2xl">
-                          {item.year}
-                        </span>
-                        <h3 className="text-xl font-[family-name:var(--font-display)] font-bold mt-2 mb-2 text-white">
-                          {item.title}
-                        </h3>
-                        <p className="text-white/70">{item.description}</p>
+                    {/* Section header */}
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Icon className="text-white" size={26} />
+                      </div>
+                      <div>
+                        <p className="text-gold text-sm font-semibold tracking-wide">{section.tagline}</p>
+                        <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-navy">
+                          {section.title}
+                        </h2>
                       </div>
                     </div>
-                    <div className="hidden md:flex w-4 h-4 rounded-full bg-gold flex-shrink-0 relative z-10" />
-                    <div className="flex-1 hidden md:block" />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Team */}
-        <section className="py-20">
-          <div className="container-luxury">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                {t('pages.team.title')}
-              </h2>
-              <p className="text-slate">
-                {t('pages.about.teamSubtitle')}
-              </p>
-            </motion.div>
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-l from-transparent via-gold/40 to-transparent mb-8" />
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {profilesLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <div className="w-24 h-24 rounded-full bg-navy/10 animate-pulse mx-auto mb-4" />
-                    <div className="h-5 bg-navy/10 animate-pulse rounded w-3/4 mx-auto mb-2" />
-                    <div className="h-4 bg-navy/10 animate-pulse rounded w-1/2 mx-auto" />
-                  </div>
-                ))
-              ) : featuredTeam.length > 0 ? (
-                featuredTeam.map((member, index) => (
-                  <motion.div
-                    key={member.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow"
-                  >
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gold/20 bg-navy/10">
-                      {member.avatar ? (
-                        <NextImage
-                          src={member.avatar}
-                          alt={member.name}
-                          fill
-                          className="object-cover"
-                          sizes="96px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-navy/40 text-2xl font-bold">
-                          {member.name.charAt(0)}
-                        </div>
-                      )}
+                    {/* Intro */}
+                    <p className="text-navy font-semibold text-xl mb-4 leading-relaxed">
+                      {section.intro}
+                    </p>
+
+                    {/* Body paragraphs */}
+                    <div className="space-y-3 mb-6">
+                      {section.body.map((para, i) => (
+                        <p key={i} className="text-charcoal text-lg leading-relaxed">
+                          {para}
+                        </p>
+                      ))}
                     </div>
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
-                      {member.name}
-                    </h3>
-                    <p className="text-slate text-sm">{member.department || member.role}</p>
-                  </motion.div>
-                ))
-              ) : null}
-            </div>
-          </div>
-        </section>
 
-        {/* Values */}
-        <section className="py-20 bg-ivory">
+                    {/* Highlight box */}
+                    <div className="bg-navy/5 border border-navy/10 rounded-xl p-6 mb-6">
+                      <p className="text-charcoal leading-relaxed">
+                        {section.highlight}
+                      </p>
+                    </div>
+
+                    {/* Conference stats */}
+                    {section.id === 'conferences' && (
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        {conferenceStats.map((stat) => (
+                          <div key={stat.label} className="bg-navy rounded-xl p-5 text-center">
+                            <div className="text-3xl font-[family-name:var(--font-display)] font-black text-gold mb-1">
+                              {stat.value}
+                            </div>
+                            <div className="text-white/70 text-sm">{stat.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Optional question */}
+                    {'question' in section && (
+                      <p className="text-navy font-semibold text-lg mb-4 leading-relaxed">
+                        {section.question}
+                      </p>
+                    )}
+
+                    {/* Closing tagline */}
+                    <p className="text-gold font-[family-name:var(--font-display)] font-bold text-xl">
+                      {section.closing}
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
+            </section>
+          );
+        })}
+
+        {/* ── Publications ── */}
+        <section className="py-20 bg-white">
           <div className="container-luxury">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-12"
+              className="max-w-4xl mx-auto"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
-                {t('pages.about.values')}
-              </h2>
-            </motion.div>
+              <div className="mb-10">
+                <p className="text-gold text-sm font-semibold tracking-wide mb-1">إصداراتنا</p>
+                <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-navy">
+                  منشورات المجموعة
+                </h2>
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {values.map((value, index) => (
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* مجلة الاقتصاد والأعمال */}
                 <motion.div
-                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
+                  transition={{ delay: 0 }}
+                  className="group bg-ivory rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
                 >
-                  <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                    <value.icon className="text-gold" size={28} />
+                  <div className="h-44 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center px-8">
+                    <div className="relative w-full h-20">
+                      <NextImage
+                        src="/logo.png"
+                        alt="مجلة الاقتصاد والأعمال"
+                        fill
+                        className="object-contain brightness-0 invert"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
-                    {value.title}
-                  </h3>
-                  <p className="text-slate">{value.desc}</p>
+                  <div className="p-5">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                      مجلة الاقتصاد والأعمال
+                    </h3>
+                    <p className="text-slate text-sm mb-4 leading-relaxed">
+                      المجلة الاقتصادية الأولى في العالم العربي — تحليلات استراتيجية ودراسات قطاعية منذ أكثر من خمسين عاماً.
+                    </p>
+                    <a
+                      href="/magazine"
+                      className="inline-flex items-center gap-1.5 text-gold text-sm font-semibold hover:gap-2.5 transition-all"
+                    >
+                      تصفح الأعداد <ExternalLink size={14} />
+                    </a>
+                  </div>
                 </motion.div>
-              ))}
-            </div>
+
+                {/* الدفاعية */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="group bg-ivory rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+                >
+                  <div className="h-44 relative overflow-hidden bg-charcoal">
+                    <NextImage
+                      src="https://www.defaiya.com/sites/default/files/magazines/defaiya/regular/DR0159/cover.jpg"
+                      alt="مجلة الدفاعية"
+                      fill
+                      className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 to-transparent" />
+                    <div className="absolute bottom-3 right-3 bg-gold text-white text-xs font-bold px-2 py-0.5 rounded">
+                      العدد 159
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                      مجلة الدفاعية
+                    </h3>
+                    <p className="text-slate text-sm mb-4 leading-relaxed">
+                      Arab Defense &amp; Aerospace News — المرجع العربي الأول في أخبار الدفاع والفضاء والأمن الإقليمي.
+                    </p>
+                    <a
+                      href="https://www.defaiya.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-gold text-sm font-semibold hover:gap-2.5 transition-all"
+                    >
+                      زيارة الموقع <ExternalLink size={14} />
+                    </a>
+                  </div>
+                </motion.div>
+
+                {/* الحسناء */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  className="group bg-ivory rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+                >
+                  <div className="h-44 bg-gradient-to-br from-rose-900 to-rose-700 flex items-center justify-center px-8">
+                    <div className="relative w-full h-24">
+                      <NextImage
+                        src="https://www.iktissadonline.com/sites/default/files/2018-hasnaa-logo-block.jpg"
+                        alt="مجلة الحسناء"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                      مجلة الحسناء
+                    </h3>
+                    <p className="text-slate text-sm mb-4 leading-relaxed">
+                      مجلة المرأة العربية — موضة، جمال، وأسلوب حياة راقٍ للمرأة العربية المعاصرة.
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </section>
+
+        {/* ── منظومة واحدة — Closing ── */}
+        <section className="py-24 bg-navy text-white overflow-hidden relative">
+          <div className="absolute inset-0 star-pattern opacity-10" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gold/8 rounded-full blur-3xl" />
+
+          <div className="container-luxury relative">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="max-w-3xl mx-auto text-center"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center mx-auto mb-8 shadow-xl">
+                <Layers className="text-white" size={30} />
+              </div>
+
+              <h2 className="text-4xl font-[family-name:var(--font-display)] font-black mb-2">
+                منظومة واحدة
+              </h2>
+              <p className="text-gold font-semibold text-lg mb-10">رؤية متكاملة</p>
+
+              <div className="space-y-4 mb-10 text-right">
+                {[
+                  { icon: Globe, text: 'موقع يكشف ما لا تراه في الخبر' },
+                  { icon: Newspaper, text: 'مجلة تقدم فهماً أعمق… وأثراً أطول' },
+                  { icon: Mic2, text: 'مؤتمرات تُصنع فيها العلاقات ويُبنى التأثير' },
+                ].map(({ icon: ItemIcon, text }) => (
+                  <div key={text} className="flex items-center gap-4 bg-white/8 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/10">
+                    <ItemIcon className="text-gold flex-shrink-0" size={22} />
+                    <span className="text-white/90 text-lg">{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-white/15 pt-8">
+                <p className="text-white/70 text-sm mb-2">كل ذلك ضمن رؤية واحدة</p>
+                <p className="text-3xl font-[family-name:var(--font-display)] font-black text-gold">
+                  من الفهم إلى القرار.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
       </main>
       <Footer />
     </>

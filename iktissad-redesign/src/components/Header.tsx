@@ -78,7 +78,7 @@ const navigationConfig: NavItem[] = [
     ]
   },
   { key: 'magazine', href: '/magazine' },
-  { key: 'group', href: '/publications' },
+  { key: 'group', href: '/about' },
 ];
 
 const socialLinks = [
