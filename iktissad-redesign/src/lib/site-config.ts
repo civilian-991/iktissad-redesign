@@ -4,7 +4,7 @@
  */
 
 export const siteStats = {
-  foundingYear: 1956,
+  foundingYear: 1977,
   monthlyReaders: '+50K',
   totalArticles: '+2M',
   /** Number of countries with active correspondents */

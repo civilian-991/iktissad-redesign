@@ -11,8 +11,8 @@ export const en = {
     brand: {
       name: 'Al-Iktissad Wal-Aamal',
       nameEn: 'AL-IKTISSAD WAL-AAMAL',
-      tagline: 'Since 1956',
-      description: 'The leading source for economic and financial news in the Arab world since 1956. We cover the most important developments in financial markets, business, and trade.',
+      tagline: 'Since 1977',
+      description: 'The leading source for economic and financial news in the Arab world since 1977. We cover the most important developments in financial markets, business, and trade.',
       location: 'Beirut, Lebanon',
     },
     actions: {
@@ -909,12 +909,12 @@ export const en = {
     home: {
       title: 'Home',
       subtitle: 'Latest economic and financial news from the Arab world',
-      seoDescription: 'Al-Iktissad Wal-Aamal - The leading source for economic and financial news in the Arab world since 1956. Comprehensive coverage of markets, companies, and investments.',
+      seoDescription: 'Al-Iktissad Wal-Aamal - The leading source for economic and financial news in the Arab world since 1977. Comprehensive coverage of markets, companies, and investments.',
     },
     about: {
       title: 'About Us',
       subtitle: 'Learn about Al-Iktissad Wal-Aamal Magazine',
-      heroSubtitle: 'Since 1956, we have provided Arab readers with the finest economic and financial analysis, becoming the most trusted source for economic news in the Arab world',
+      heroSubtitle: 'Since 1977, we have provided Arab readers with the finest economic and financial analysis, becoming the most trusted source for economic news in the Arab world',
       mission: 'Our Mission',
       missionText: 'To deliver the most accurate and comprehensive economic and financial coverage for decision-makers in the Arab world, while maintaining the highest standards of professionalism and objectivity.',
       missionBody: 'We strive to deliver high-quality economic and financial content that helps readers, investors, and decision-makers understand markets and make informed decisions. We uphold the highest standards of professionalism, accuracy, and objectivity in everything we publish.',
@@ -923,7 +923,7 @@ export const en = {
       visionBody: 'To be the leading and most influential platform in Arab economic media, and a trusted source of information and analysis that shapes the Arab world\'s understanding of economics and business.',
       history: 'Our History',
       historySubtitle: 'Over 65 years of excellence in economic media',
-      historyText: 'Al-Iktissad Wal-Aamal magazine was founded in 1956 in Beirut, Lebanon, making it the oldest economic magazine in the Arab world. For over six decades, the magazine has accompanied the major economic transformations in the region.',
+      historyText: 'Al-Iktissad Wal-Aamal magazine was founded in 1977 in Beirut, Lebanon, making it the oldest economic magazine in the Arab world. For over six decades, the magazine has accompanied the major economic transformations in the region.',
       values: 'Our Values',
       valuesItem1: 'Credibility and accuracy in reporting',
       valuesItem2: 'Independence and objectivity in analysis',
@@ -1494,7 +1494,7 @@ export const en = {
     },
     group: {
       title: 'Iktissad Group',
-      subtitle: 'A leading media group serving the Arab business community since 1956',
+      subtitle: 'A leading media group serving the Arab business community since 1977',
       heroSubtitle: 'The largest specialized media group for economic and financial affairs in the Arab world',
       publications: 'Our Publications',
       publicationsText: 'A collection of specialized publications covering various aspects of economics and business',
@@ -1508,7 +1508,7 @@ export const en = {
       publicationLeaders: 'Business Leaders Guide',
       publicationLeadersDesc: 'A comprehensive guide to business leaders in the Arab world',
       publicationsList: {
-        '0': { name: 'Al-Iktissad Wal-Aamal Magazine', description: 'The leading economic magazine in the Arab world since 1956' },
+        '0': { name: 'Al-Iktissad Wal-Aamal Magazine', description: 'The leading economic magazine in the Arab world since 1977' },
         '1': { name: 'Arab Markets Magazine', description: 'Comprehensive coverage of Arab financial markets and stock exchanges' },
         '2': { name: 'Banks & Finance Magazine', description: 'The premier reference for the Arab banking sector' },
         '3': { name: 'Business Leaders Guide', description: 'The annual encyclopedia of business leaders in the Arab world' },
@@ -1545,7 +1545,7 @@ export const en = {
       },
       history: 'Our History',
       historyText: 'Over six decades of leadership in Arab economic media',
-      historyMilestone1: 'Founded in Beirut in 1956',
+      historyMilestone1: 'Founded in Beirut in 1977',
       historyMilestone2: 'Launch of Arab Markets in the 1980s',
       historyMilestone3: 'Digital expansion in the new millennium',
       historyMilestone4: 'Launch of the new digital platform',
