@@ -13,6 +13,7 @@
 'use client';
 
 import { useCallback, useState, useRef, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { useEditorPerformance } from '@/hooks/useEditorPerformance';
 import type { JSONContent } from '@tiptap/core';
@@ -51,6 +52,7 @@ import {
   AlignLeft,
   Heading1,
   Heading2,
+  Heading3,
   Image as ImageIcon,
   Unlink,
   Table as TableIcon,
@@ -476,6 +478,49 @@ export default function RichTextEditor({
     [editor]
   );
 
+  // ── Floating bubble toolbar position ──────────────────────
+  const [bubblePos, setBubblePos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const updateBubble = () => {
+      const { from, to } = editor.state.selection;
+      const hasSelection = from !== to;
+
+      if (!hasSelection || editor.view.isDestroyed) {
+        setBubblePos(null);
+        return;
+      }
+
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        setBubblePos(null);
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      if (rect.width === 0) {
+        setBubblePos(null);
+        return;
+      }
+
+      setBubblePos({
+        top: rect.top + window.scrollY - 48,
+        left: rect.left + window.scrollX + rect.width / 2,
+      });
+    };
+
+    editor.on('selectionUpdate', updateBubble);
+    editor.on('blur', () => setBubblePos(null));
+
+    return () => {
+      editor.off('selectionUpdate', updateBubble);
+    };
+  }, [editor]);
+
   /**
    * Insert an image (via TipTap Image extension — simple inline image).
    * For rich figure with caption/credit, use FigureExtension.insertFigure().
@@ -610,6 +655,61 @@ export default function RichTextEditor({
           {charCount.toLocaleString('ar')} حرف
         </span>
       </div>
+
+      {/* ── Floating Bubble Toolbar (portal, appears on selection) ── */}
+      {bubblePos && typeof document !== 'undefined' && createPortal(
+        <div
+          style={{
+            position: 'absolute',
+            top: bubblePos.top,
+            left: bubblePos.left,
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+          }}
+          onMouseDown={(e) => e.preventDefault()} // keep editor focus
+          className="flex items-center gap-0.5 px-1.5 py-1 bg-[#0a0a0f] border border-[rgba(221,168,83,0.25)] rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-150"
+        >
+          {/* Bold */}
+          <button type="button" title="غامق" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('bold') ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Bold size={13} />
+          </button>
+          {/* Italic */}
+          <button type="button" title="مائل" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('italic') ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Italic size={13} />
+          </button>
+          {/* Underline */}
+          <button type="button" title="تحته خط" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('underline') ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <UnderlineIcon size={13} />
+          </button>
+
+          <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+          {/* H1 */}
+          <button type="button" title="عنوان 1" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 1 }) ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Heading1 size={13} />
+          </button>
+          {/* H2 */}
+          <button type="button" title="عنوان 2" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 2 }) ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Heading2 size={13} />
+          </button>
+          {/* H3 */}
+          <button type="button" title="عنوان 3" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 3 }) ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Heading3 size={13} />
+          </button>
+
+          <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+          {/* Link */}
+          <button type="button" title="رابط" onMouseDown={(e) => { e.preventDefault(); setShowLinkInput(true); }} className={`p-1.5 rounded transition-colors ${editor.isActive('link') ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Link2 size={13} />
+          </button>
+          {/* Quote */}
+          <button type="button" title="اقتباس" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBlockquote().run(); }} className={`p-1.5 rounded transition-colors ${editor.isActive('blockquote') ? 'text-[#DDA853] bg-[rgba(221,168,83,0.12)]' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+            <Quote size={13} />
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* ── TipTap Prose Styles ──────────────────────────────── */}
       <style jsx global>{`

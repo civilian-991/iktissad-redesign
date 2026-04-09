@@ -80,6 +80,15 @@ const updateArticleSchema = z.object({
   featuredImageFocalX: z.number().min(0).max(1).optional(),
   /** Focal point Y (0–1) for smart image cropping */
   featuredImageFocalY: z.number().min(0).max(1).optional(),
+  featured: z.boolean().optional(),
+  editorChoice: z.boolean().optional(),
+  isBreaking: z.boolean().optional(),
+  paywalled: z.boolean().optional(),
+  metaTitle: z.string().max(120).optional(),
+  metaDescription: z.string().max(320).optional(),
+  ogImage: z.string().url().optional().or(z.literal('')),
+  canonicalUrl: z.string().url().optional().or(z.literal('')),
+  noIndex: z.boolean().optional(),
 });
 
 export async function PUT(
@@ -133,6 +142,15 @@ export async function PUT(
   if (data.article_type !== undefined) updateData.article_type = data.article_type;
   if (data.featuredImageFocalX !== undefined) updateData.featured_image_focal_x = data.featuredImageFocalX;
   if (data.featuredImageFocalY !== undefined) updateData.featured_image_focal_y = data.featuredImageFocalY;
+  if (data.featured !== undefined) updateData.featured = data.featured;
+  if (data.editorChoice !== undefined) updateData.editor_choice = data.editorChoice;
+  if (data.isBreaking !== undefined) updateData.is_breaking = data.isBreaking;
+  if (data.paywalled !== undefined) updateData.is_paywalled = data.paywalled;
+  if (data.metaTitle !== undefined) updateData.meta_title = data.metaTitle || null;
+  if (data.metaDescription !== undefined) updateData.meta_description = data.metaDescription || null;
+  if (data.ogImage !== undefined) updateData.og_image = data.ogImage || null;
+  if (data.canonicalUrl !== undefined) updateData.canonical_url = data.canonicalUrl || null;
+  if (data.noIndex !== undefined) updateData.no_index = data.noIndex;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {

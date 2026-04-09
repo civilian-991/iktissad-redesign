@@ -34,6 +34,12 @@ import {
   RefreshCcw,
   MessageSquare,
   Share2,
+  Star,
+  Zap,
+  User,
+  Link as LinkIcon,
+  X,
+  Plus,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
@@ -113,17 +119,32 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
   const [title, setTitle] = useState('');
   const [titleEn, setTitleEn] = useState('');
+  const [slug, setSlug] = useState('');
+  const [deck, setDeck] = useState('');
   const [excerpt, setExcerpt] = useState('');
+  const [excerptEn, setExcerptEn] = useState('');
   const [content, setContent] = useState('');
   // editorBody stores TipTap JSON for the new editor; falls back to content string
   const [editorBody, setEditorBody] = useState<JSONContent | null>(null);
   const [section, setSection] = useState('');
+  const [selectedSector, setSelectedSector] = useState('');
+  const [selectedAuthorId, setSelectedAuthorId] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTagInput, setCustomTagInput] = useState('');
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [focalX, setFocalX] = useState(0.5);
   const [focalY, setFocalY] = useState(0.5);
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
+  const [scheduledAt, setScheduledAt] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+  const [featured, setFeatured] = useState(false);
+  const [editorChoice, setEditorChoice] = useState(false);
+  const [isBreaking, setIsBreaking] = useState(false);
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [ogImage, setOgImage] = useState('');
+  const [canonicalUrl, setCanonicalUrl] = useState('');
+  const [noIndex, setNoIndex] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
@@ -131,6 +152,12 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sectionsRes } = useSWR<any>('/api/sections', swrFetcher, { revalidateOnFocus: false });
   const sections: { slug: string; name: string }[] = sectionsRes?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: sectorsRes } = useSWR<any>('/api/sectors', swrFetcher, { revalidateOnFocus: false });
+  const sectors: { slug: string; name: string }[] = sectorsRes?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: usersRes } = useSWR<any>('/api/users', swrFetcher, { revalidateOnFocus: false });
+  const users: { id: string; name: string }[] = usersRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
@@ -179,9 +206,34 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getContentHash = useCallback(() =>
-    JSON.stringify({ title, titleEn, excerpt, content, section, selectedTags, selectedCountry }),
-    [title, titleEn, excerpt, content, section, selectedTags, selectedCountry]
+    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex }),
+    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex]
   );
+
+  const buildSavePayload = useCallback(() => ({
+    title, titleEn, slug: slug || undefined, deck: deck || undefined, excerpt, excerptEn: excerptEn || undefined,
+    content,
+    ...(editorBody ? { body: editorBody } : {}),
+    sectionSlug: section || undefined,
+    sectorSlug: selectedSector || undefined,
+    countrySlug: selectedCountry || undefined,
+    authorId: selectedAuthorId || undefined,
+    tags: selectedTags,
+    featuredImage: featuredImage || '',
+    status,
+    publishedAt: status === 'scheduled' && scheduledAt ? scheduledAt : undefined,
+    featuredImageFocalX: focalX,
+    featuredImageFocalY: focalY,
+    featured,
+    editorChoice,
+    isBreaking,
+    metaTitle: metaTitle || undefined,
+    metaDescription: metaDescription || undefined,
+    ogImage: ogImage || undefined,
+    canonicalUrl: canonicalUrl || undefined,
+    noIndex,
+    ...(articleType ? { article_type: articleType } : {}),
+  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountry, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
 
   const performAutoSave = useCallback(async () => {
     if (!title.trim()) return;
@@ -189,24 +241,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     if (hash === lastSavedHashRef.current) return;
     setAutoSaveStatus('saving');
     try {
-      await updateArticle(id, {
-        title, titleEn, excerpt, content,
-        // Pass TipTap JSON body if available (new format)
-        ...(editorBody ? { body: editorBody } : {}),
-        sectionSlug: section || undefined,
-        countrySlug: selectedCountry || undefined,
-        tags: selectedTags,
-        featuredImage: featuredImage || '',
-        status,
-        featuredImageFocalX: focalX,
-        featuredImageFocalY: focalY,
-      } as any);
+      await updateArticle(id, buildSavePayload() as any);
       lastSavedHashRef.current = hash;
       setAutoSaveStatus('saved');
     } catch {
       setAutoSaveStatus('error');
     }
-  }, [id, title, titleEn, excerpt, content, editorBody, section, selectedTags, selectedCountry, featuredImage, status, focalX, focalY, getContentHash]);
+  }, [id, buildSavePayload, getContentHash, title]);
 
   // Trigger auto-save 30s after last change (only after initialization)
   useEffect(() => {
@@ -219,29 +260,39 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, excerpt, content, section, selectedTags, selectedCountry, featuredImage, focalX, focalY, initialized, performAutoSave]);
+  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featuredImage, focalX, focalY, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
     if (article && !initialized) {
       setTitle(article.title);
       setTitleEn(article.titleEn || '');
+      setSlug(article.slug || '');
+      setDeck(article.deck || '');
       setExcerpt(article.excerpt);
+      setExcerptEn(article.excerptEn || '');
       setContent(article.content);
       setSection(article.sectionSlug || '');
+      setSelectedSector(article.sectorSlug || '');
+      setSelectedAuthorId(article.author?.id || '');
       setSelectedTags(article.tags || []);
       setFeaturedImage(article.featuredImage || null);
       setStatus(article.status);
-      if (article.countrySlug) {
-        setSelectedCountry(article.countrySlug);
+      setFeatured(article.featured ?? false);
+      setEditorChoice(article.editorChoice ?? false);
+      setIsBreaking(article.isBreaking ?? false);
+      if (article.publishedAt && article.status === 'scheduled') {
+        setScheduledAt(article.publishedAt.slice(0, 16)); // datetime-local format
       }
-      // Restore article_type if the article has one saved
-      if ((article as any).articleType) {
-        setArticleType((article as any).articleType as ArticleType);
-      }
-      // Restore focal point if saved
+      if (article.countrySlug) setSelectedCountry(article.countrySlug);
+      if (article.articleType) setArticleType(article.articleType as ArticleType);
       if (article.featuredImageFocalX !== undefined) setFocalX(article.featuredImageFocalX);
       if (article.featuredImageFocalY !== undefined) setFocalY(article.featuredImageFocalY);
+      setMetaTitle(article.metaTitle || '');
+      setMetaDescription(article.metaDescription || '');
+      setOgImage(article.ogImage || '');
+      setCanonicalUrl(article.canonicalUrl || '');
+      setNoIndex(article.noIndex ?? false);
       setInitialized(true);
     }
   }, [article, initialized]);
@@ -252,6 +303,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     );
   };
 
+  const addCustomTag = () => {
+    const tag = customTagInput.trim();
+    if (tag && !selectedTags.includes(tag)) {
+      setSelectedTags((prev) => [...prev, tag]);
+    }
+    setCustomTagInput('');
+  };
+
   const handleSave = async () => {
     if (!title.trim()) {
       toast.error(t('admin.articles.editor.titleRequired'));
@@ -259,23 +318,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     }
     setIsSaving(true);
     try {
-      await updateArticle(id, {
-        title,
-        titleEn,
-        excerpt,
-        content,
-        // Pass TipTap JSON body if editor has produced output
-        ...(editorBody ? { body: editorBody } : {}),
-        sectionSlug: section || undefined,
-        countrySlug: selectedCountry || undefined,
-        tags: selectedTags,
-        featuredImage: featuredImage || '',
-        status,
-        // article_type is optional — only send if set
-        ...(articleType ? { article_type: articleType } : {}),
-        featuredImageFocalX: focalX,
-        featuredImageFocalY: focalY,
-      } as any);
+      await updateArticle(id, buildSavePayload() as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
       // Fire-and-forget version snapshot on every manual save
       void createArticleVersion(id).catch(() => {/* silent — versioning is best-effort */});
@@ -600,6 +643,46 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             </div>
           </motion.div>
 
+          {/* Slug + Deck */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6 space-y-4"
+          >
+            {/* Slug */}
+            <div>
+              <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                <LinkIcon size={14} />
+                الرابط الدائم (Slug)
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-white/30 text-sm font-[family-name:var(--font-display)] shrink-0">/news/</span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-\u0600-\u06FF]/g, ''))}
+                  placeholder="article-slug"
+                  dir="ltr"
+                  className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-mono placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+                />
+              </div>
+            </div>
+            {/* Deck / Standfirst */}
+            <div>
+              <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                الديك (مقدمة المقال)
+              </label>
+              <input
+                type="text"
+                value={deck}
+                onChange={(e) => setDeck(e.target.value)}
+                placeholder="جملة تمهيدية تظهر أسفل العنوان مباشرة…"
+                className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+              />
+            </div>
+          </motion.div>
+
           {/* Excerpt */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -627,6 +710,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               placeholder={t('admin.articles.editor.excerptPlaceholder')}
               rows={3}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors resize-none"
+            />
+            <textarea
+              value={excerptEn}
+              onChange={(e) => setExcerptEn(e.target.value)}
+              placeholder="Excerpt in English (EN)…"
+              rows={2}
+              dir="ltr"
+              className="mt-2 w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors resize-none"
             />
           </motion.div>
 
@@ -766,6 +857,28 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             </select>
           </motion.div>
 
+          {/* Sector */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+              القطاع
+            </label>
+            <select
+              value={selectedSector}
+              onChange={(e) => setSelectedSector(e.target.value)}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+            >
+              <option value="" className="bg-midnight">بدون قطاع</option>
+              {sectors.map((s) => (
+                <option key={s.slug} value={s.slug} className="bg-midnight">{s.name}</option>
+              ))}
+            </select>
+          </motion.div>
+
           {/* Country */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -788,6 +901,29 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             </select>
           </motion.div>
 
+          {/* Author */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+              <User size={14} />
+              الكاتب
+            </label>
+            <select
+              value={selectedAuthorId}
+              onChange={(e) => setSelectedAuthorId(e.target.value)}
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+            >
+              <option value="" className="bg-midnight">بدون كاتب</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>
+              ))}
+            </select>
+          </motion.div>
+
           {/* Tags */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -799,7 +935,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               <Tag size={14} />
               {t('admin.articles.editor.tagsLabel')}
             </label>
-            <div className="flex flex-wrap gap-2">
+            {/* Preset tags */}
+            <div className="flex flex-wrap gap-2 mb-3">
               {tagKeys.map((tag) => (
                 <button
                   key={tag}
@@ -814,9 +951,145 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </button>
               ))}
             </div>
+            {/* Custom tags */}
+            {selectedTags.filter(t => !tagKeys.includes(t as any)).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {selectedTags.filter(t => !tagKeys.includes(t as any)).map((tag) => (
+                  <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gold/15 text-gold text-xs font-[family-name:var(--font-display)] border border-gold/20">
+                    {tag}
+                    <button onClick={() => toggleTag(tag)} className="hover:text-white transition-colors"><X size={10} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Custom tag input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customTagInput}
+                onChange={(e) => setCustomTagInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); }}}
+                placeholder="وسم مخصص…"
+                className="flex-1 bg-white/5 border border-gold/10 rounded-lg py-1.5 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+              />
+              <button
+                onClick={addCustomTag}
+                disabled={!customTagInput.trim()}
+                className="p-1.5 bg-white/5 border border-gold/10 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
           </motion.div>
 
-          {/* SEO Panel */}
+          {/* SEO Metadata — saveable fields */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.47 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-4">
+              بيانات SEO
+            </label>
+            <div className="space-y-3">
+              {/* Meta title */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">عنوان SEO</label>
+                  <span className={`text-[10px] tabular-nums ${metaTitle.length > 65 ? 'text-loss' : metaTitle.length > 55 ? 'text-gold' : 'text-white/30'}`}>
+                    {metaTitle.length}/65
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  placeholder={title ? `${title} | الإقتصاد والأعمال` : 'عنوان مخصص لمحركات البحث…'}
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors"
+                />
+              </div>
+
+              {/* Meta description */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">وصف SEO</label>
+                  <span className={`text-[10px] tabular-nums ${metaDescription.length > 160 ? 'text-loss' : metaDescription.length > 140 ? 'text-gold' : 'text-white/30'}`}>
+                    {metaDescription.length}/160
+                  </span>
+                </div>
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder={excerpt || 'وصف مخصص لظهوره في نتائج البحث…'}
+                  rows={3}
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors resize-none"
+                />
+              </div>
+
+              {/* OG Image */}
+              <div>
+                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">صورة المشاركة (OG Image)</label>
+                <input
+                  type="url"
+                  value={ogImage}
+                  onChange={(e) => setOgImage(e.target.value)}
+                  placeholder={featuredImage || 'https://…'}
+                  dir="ltr"
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors"
+                />
+                {ogImage && (
+                  <img src={ogImage} alt="OG preview" className="mt-2 rounded-lg w-full h-24 object-cover opacity-70" />
+                )}
+              </div>
+
+              {/* Canonical URL */}
+              <div>
+                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">رابط Canonical</label>
+                <input
+                  type="url"
+                  value={canonicalUrl}
+                  onChange={(e) => setCanonicalUrl(e.target.value)}
+                  placeholder={`https://iktissadonline.com/${slug || '…'}`}
+                  dir="ltr"
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors"
+                />
+              </div>
+
+              {/* Google snippet preview */}
+              <div className="rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-right" dir="rtl">
+                <p className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2">معاينة نتيجة البحث</p>
+                <p className="text-[13px] font-medium text-blue-400 leading-snug truncate">
+                  {(metaTitle || title || 'عنوان المقال').slice(0, 65)}
+                </p>
+                <p className="text-[11px] text-green-500 mt-0.5 mb-1">
+                  iktissadonline.com › {slug || 'article-slug'}
+                </p>
+                <p className="text-[12px] text-zinc-400 leading-relaxed line-clamp-2">
+                  {(metaDescription || excerpt || 'أضف وصفاً تعريفياً ليظهر هنا في نتائج البحث.').slice(0, 160)}
+                </p>
+              </div>
+
+              {/* noindex toggle */}
+              <button
+                type="button"
+                onClick={() => setNoIndex(!noIndex)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-right ${noIndex ? 'bg-loss/10 border border-loss/30' : 'bg-white/5 border border-transparent hover:bg-white/10'}`}
+              >
+                <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${noIndex ? 'bg-loss border-loss' : 'border-white/20'}`}>
+                  {noIndex && <Check size={10} className="text-white" />}
+                </div>
+                <div className="flex-1 text-right">
+                  <p className={`text-sm font-[family-name:var(--font-display)] font-medium ${noIndex ? 'text-loss' : 'text-white/70'}`}>
+                    إخفاء من محركات البحث (noindex)
+                  </p>
+                  <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">لا يُنصح إلا للمحتوى المؤقت أو المكرر</p>
+                </div>
+              </button>
+            </div>
+          </motion.div>
+
+          {/* SEO Analysis Panel */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -875,6 +1148,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               {[
                 { value: 'draft' as const, labelKey: 'draft', icon: FileText, color: 'text-white/60' },
                 { value: 'review' as const, labelKey: 'review', icon: Clock, color: 'text-gold' },
+                { value: 'scheduled' as const, labelKey: 'scheduled', icon: Calendar, color: 'text-teal' },
                 { value: 'published' as const, labelKey: 'published', icon: Send, color: 'text-profit' },
               ].map((opt) => (
                 <label
@@ -898,6 +1172,61 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                     {t(`admin.articles.status.${opt.labelKey}`)}
                   </span>
                 </label>
+              ))}
+            </div>
+            {/* Scheduled date picker */}
+            {status === 'scheduled' && (
+              <div className="mt-3 pt-3 border-t border-gold/10">
+                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1.5">
+                  تاريخ ووقت النشر
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                />
+              </div>
+            )}
+          </motion.div>
+
+          {/* Flags — Featured / Editor's Choice / Breaking */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
+          >
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+              خصائص المقال
+            </label>
+            <div className="space-y-2">
+              {[
+                { label: 'مقال مميز', desc: 'يظهر في الواجهة الرئيسية', value: featured, set: setFeatured, icon: Star, color: 'text-gold' },
+                { label: 'اختيار المحرر', desc: 'يُعرض في قائمة مختارات المحرر', value: editorChoice, set: setEditorChoice, icon: Check, color: 'text-profit' },
+                { label: 'خبر عاجل', desc: 'يظهر في شريط الأخبار العاجلة', value: isBreaking, set: setIsBreaking, icon: Zap, color: 'text-loss' },
+              ].map((flag) => (
+                <button
+                  key={flag.label}
+                  type="button"
+                  onClick={() => flag.set(!flag.value)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-right ${
+                    flag.value
+                      ? 'bg-gold/10 border border-gold/30'
+                      : 'bg-white/5 border border-transparent hover:bg-white/10'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${flag.value ? 'bg-gold/20' : 'bg-white/5'}`}>
+                    <flag.icon size={15} className={flag.value ? flag.color : 'text-white/40'} />
+                  </div>
+                  <div className="flex-1 min-w-0 text-right">
+                    <p className={`text-sm font-[family-name:var(--font-display)] font-medium ${flag.value ? 'text-gold' : 'text-white/70'}`}>{flag.label}</p>
+                    <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">{flag.desc}</p>
+                  </div>
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${flag.value ? 'bg-gold border-gold' : 'border-white/20'}`}>
+                    {flag.value && <Check size={10} className="text-obsidian" />}
+                  </div>
+                </button>
               ))}
             </div>
           </motion.div>

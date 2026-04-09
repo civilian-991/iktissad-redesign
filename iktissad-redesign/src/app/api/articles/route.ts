@@ -115,11 +115,14 @@ export async function GET(request: NextRequest) {
   const start = (page - 1) * pageSize;
   const sortFeaturedFirst = searchParams.get("sortFeaturedFirst") === "true";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let orderedQuery = (query as any).order("published_at", { ascending: false, nullsFirst: false });
+  let orderedQuery = (query as any)
+    .order("published_at", { ascending: false, nullsFirst: true })
+    .order("created_at", { ascending: false });
   if (sortFeaturedFirst) {
     orderedQuery = (query as any)
       .order("featured", { ascending: false })
-      .order("published_at", { ascending: false, nullsFirst: false });
+      .order("published_at", { ascending: false, nullsFirst: true })
+      .order("created_at", { ascending: false });
   }
   const { data: rows, count, error } = await orderedQuery.range(start, start + pageSize - 1);
 
@@ -155,7 +158,13 @@ const createArticleSchema = z.object({
   excerptEn: z.string().optional().default(""),
   content: z.string().optional().default(""),
   contentEn: z.string().optional().default(""),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: (z.any() as z.ZodType<string | Record<string, unknown> | unknown[]>).optional(),
+  deck: z.string().optional(),
+  deckEn: z.string().optional(),
   featuredImage: z.string().optional().default(""),
+  featuredImageFocalX: z.number().min(0).max(1).optional(),
+  featuredImageFocalY: z.number().min(0).max(1).optional(),
   sectionSlug: z.string().optional(),
   sectorSlug: z.string().optional(),
   countrySlug: z.string().optional(),
@@ -163,6 +172,16 @@ const createArticleSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   status: z.enum(["published", "draft", "review", "scheduled"]).optional().default("draft"),
   publishedAt: z.string().optional(),
+  featured: z.boolean().optional(),
+  editorChoice: z.boolean().optional(),
+  isBreaking: z.boolean().optional(),
+  paywalled: z.boolean().optional(),
+  article_type: z.enum(["news", "report", "analysis", "interview", "opinion"]).optional(),
+  metaTitle: z.string().max(120).optional(),
+  metaDescription: z.string().max(320).optional(),
+  ogImage: z.string().url().optional().or(z.literal('')),
+  canonicalUrl: z.string().url().optional().or(z.literal('')),
+  noIndex: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -210,25 +229,46 @@ export async function POST(request: NextRequest) {
     countryId = (c as { id: string } | null)?.id ?? null;
   }
 
+  // Build insert — only include optional fields when provided so DB defaults apply
+  const insertData: Record<string, unknown> = {
+    title: data.title,
+    title_en: data.titleEn,
+    slug: data.slug,
+    excerpt: data.excerpt,
+    excerpt_en: data.excerptEn,
+    content: data.content,
+    content_en: data.contentEn,
+    featured_image: data.featuredImage,
+    section_id: sectionId,
+    sector_id: sectorId,
+    country_id: countryId,
+    author_id: data.authorId ?? null,
+    tags: data.tags,
+    status: data.status,
+    published_at: data.publishedAt ?? null,
+  };
+  if (data.deck !== undefined) insertData.deck = data.deck;
+  if (data.deckEn !== undefined) insertData.deck_en = data.deckEn;
+  if (data.body !== undefined) {
+    if (typeof data.body === "string") insertData.content = data.body;
+    else insertData.body = data.body;
+  }
+  if (data.featuredImageFocalX !== undefined) insertData.featured_image_focal_x = data.featuredImageFocalX;
+  if (data.featuredImageFocalY !== undefined) insertData.featured_image_focal_y = data.featuredImageFocalY;
+  if (data.featured !== undefined) insertData.featured = data.featured;
+  if (data.editorChoice !== undefined) insertData.editor_choice = data.editorChoice;
+  if (data.isBreaking !== undefined) insertData.is_breaking = data.isBreaking;
+  if (data.paywalled !== undefined) insertData.is_paywalled = data.paywalled;
+  if (data.article_type !== undefined) insertData.article_type = data.article_type;
+  if (data.metaTitle !== undefined) insertData.meta_title = data.metaTitle || null;
+  if (data.metaDescription !== undefined) insertData.meta_description = data.metaDescription || null;
+  if (data.ogImage !== undefined) insertData.og_image = data.ogImage || null;
+  if (data.canonicalUrl !== undefined) insertData.canonical_url = data.canonicalUrl || null;
+  if (data.noIndex !== undefined) insertData.no_index = data.noIndex;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (admin.from("articles") as any)
-    .insert({
-      title: data.title,
-      title_en: data.titleEn,
-      slug: data.slug,
-      excerpt: data.excerpt,
-      excerpt_en: data.excerptEn,
-      content: data.content,
-      content_en: data.contentEn,
-      featured_image: data.featuredImage,
-      section_id: sectionId,
-      sector_id: sectorId,
-      country_id: countryId,
-      author_id: data.authorId ?? null,
-      tags: data.tags,
-      status: data.status,
-      published_at: data.publishedAt ?? null,
-    })
+    .insert(insertData)
     .select(ARTICLE_SELECT)
     .single();
 

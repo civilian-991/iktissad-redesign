@@ -95,7 +95,21 @@ export function mapArticleRow(
     publishedAt: row.published_at ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    deck: (row as any).deck ?? undefined,
+    deckEn: (row as any).deck_en ?? undefined,
+    accentColor: (row as any).accent_color ?? undefined,
+    featuredImageFocalX: (row as any).featured_image_focal_x ?? 0.5,
+    featuredImageFocalY: (row as any).featured_image_focal_y ?? 0.5,
+    body: (row as any).body ?? undefined,
+    isBreaking: (row as any).is_breaking ?? false,
+    paywalled: (row as any).is_paywalled ?? false,
+    articleType: (row as any).article_type ?? undefined,
     videoUrl: (row as any).video_url ?? undefined,
+    metaTitle: (row as any).meta_title ?? undefined,
+    metaDescription: (row as any).meta_description ?? undefined,
+    ogImage: (row as any).og_image ?? undefined,
+    canonicalUrl: (row as any).canonical_url ?? undefined,
+    noIndex: (row as any).no_index ?? false,
   };
 }
 

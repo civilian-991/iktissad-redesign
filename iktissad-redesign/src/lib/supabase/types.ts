@@ -189,6 +189,25 @@ export type Database = {
           published_at: string | null;
           created_at: string;
           updated_at: string;
+          body: Json | null;
+          deck: string | null;
+          deck_en: string | null;
+          accent_color: string | null;
+          featured_image_focal_x: number;
+          featured_image_focal_y: number;
+          article_type: string | null;
+          is_breaking: boolean;
+          is_paywalled: boolean;
+          is_paid: boolean;
+          video_url: string | null;
+          meta_title: string | null;
+          meta_description: string | null;
+          og_image: string | null;
+          canonical_url: string | null;
+          no_index: boolean;
+          source_site: string | null;
+          source_id: number | null;
+          legacy_url: string | null;
         };
         Insert: {
           id?: string;
@@ -212,6 +231,25 @@ export type Database = {
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          body?: Json | null;
+          deck?: string | null;
+          deck_en?: string | null;
+          accent_color?: string | null;
+          featured_image_focal_x?: number;
+          featured_image_focal_y?: number;
+          article_type?: string | null;
+          is_breaking?: boolean;
+          is_paywalled?: boolean;
+          is_paid?: boolean;
+          video_url?: string | null;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          og_image?: string | null;
+          canonical_url?: string | null;
+          no_index?: boolean;
+          source_site?: string | null;
+          source_id?: number | null;
+          legacy_url?: string | null;
         };
         Update: {
           id?: string;
@@ -235,6 +273,25 @@ export type Database = {
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          body?: Json | null;
+          deck?: string | null;
+          deck_en?: string | null;
+          accent_color?: string | null;
+          featured_image_focal_x?: number;
+          featured_image_focal_y?: number;
+          article_type?: string | null;
+          is_breaking?: boolean;
+          is_paywalled?: boolean;
+          is_paid?: boolean;
+          video_url?: string | null;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          og_image?: string | null;
+          canonical_url?: string | null;
+          no_index?: boolean;
+          source_site?: string | null;
+          source_id?: number | null;
+          legacy_url?: string | null;
         };
         Relationships: [
           {

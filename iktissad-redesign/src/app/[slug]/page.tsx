@@ -33,39 +33,46 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const url = `${BASE_URL}/${slug}`;
-  const images = article.featuredImage
-    ? [{ url: article.featuredImage, width: 1200, height: 630, alt: article.title }]
+  // Dedicated SEO fields take priority; fall back to article content
+  const metaTitle = article.metaTitle || article.title;
+  const metaDescription = article.metaDescription || article.excerpt || 'اقرأ أحدث المقالات والتحليلات الاقتصادية';
+  const ogImageUrl = article.ogImage || article.featuredImage;
+  const canonicalUrl = article.canonicalUrl || `${BASE_URL}/${slug}`;
+
+  const ogImages = ogImageUrl
+    ? [{ url: ogImageUrl, width: 1200, height: 630, alt: metaTitle }]
     : [];
 
   return {
-    title: `${article.title} | ${SITE_NAME}`,
-    description: article.excerpt || 'اقرأ أحدث المقالات والتحليلات الاقتصادية',
+    title: `${metaTitle} | ${SITE_NAME}`,
+    description: metaDescription,
+    ...(article.noIndex && { robots: { index: false, follow: false } }),
     openGraph: {
       type: 'article',
-      url,
-      title: article.title,
-      description: article.excerpt || 'اقرأ أحدث المقالات والتحليلات الاقتصادية',
+      url: canonicalUrl,
+      title: metaTitle,
+      description: metaDescription,
       siteName: SITE_NAME,
       locale: 'ar_AR',
-      images,
+      images: ogImages,
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
       authors: article.author?.name ? [`${BASE_URL}/profiles/${article.author.name}`] : [],
-      section: article.section?.name,
+      section: article.section,
       tags: article.tags ?? [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt || 'اقرأ أحدث المقالات والتحليلات الاقتصادية',
-      images: article.featuredImage ? [article.featuredImage] : [],
+      title: metaTitle,
+      description: metaDescription,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
     alternates: {
-      canonical: url,
+      canonical: canonicalUrl,
     },
   };
 }
+
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -110,29 +117,34 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     ? {
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
-        headline: article.title,
-        description: article.excerpt || '',
-        image: article.featuredImage ? [article.featuredImage] : [],
+        headline: article.metaTitle || article.title,
+        description: article.metaDescription || article.excerpt || '',
+        image: (article.ogImage || article.featuredImage)
+          ? [{ '@type': 'ImageObject', url: article.ogImage || article.featuredImage, width: 1200, height: 630 }]
+          : [],
         datePublished: article.publishedAt,
         dateModified: article.updatedAt || article.publishedAt,
-        author: {
-          '@type': 'Person',
-          name: article.author?.name || SITE_NAME,
-        },
+        author: article.author?.name
+          ? { '@type': 'Person', name: article.author.name }
+          : { '@type': 'Organization', name: SITE_NAME },
         publisher: {
           '@type': 'Organization',
           name: SITE_NAME,
           logo: {
             '@type': 'ImageObject',
             url: `${BASE_URL}/logo.png`,
+            width: 200,
+            height: 60,
           },
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `${BASE_URL}/${slug}`,
+          '@id': article.canonicalUrl || `${BASE_URL}/${slug}`,
         },
+        articleSection: article.section || undefined,
+        keywords: article.tags?.join(', ') || undefined,
         inLanguage: 'ar',
-        isAccessibleForFree: true,
+        isAccessibleForFree: !article.paywalled,
       }
     : null;
 

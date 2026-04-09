@@ -162,7 +162,7 @@ export default function ArticlePageClient({
   // NOTE: `article.paywalled` requires an `is_paywalled` boolean column in the
   // articles table (mapped to `paywalled` in camelCase via mappers.ts).
   const isPaywalled =
-    (article as any)?.paywalled === true &&
+    article?.paywalled === true &&
     subscriptionTier === 'free' &&
     freeArticlesReadThisMonth >= FREE_ARTICLE_LIMIT;
 
@@ -173,8 +173,8 @@ export default function ArticlePageClient({
     (typeof _baseContent === 'string' && _baseContent.trim().startsWith('{'));
   // Hero video: prefer explicit video_url field, fall back to scanning legacy HTML content
   const heroVideoUrl: string | null =
-    (article as any)?.videoUrl
-      ? toEmbedUrl((article as any).videoUrl)
+    article?.videoUrl
+      ? toEmbedUrl(article.videoUrl)
       : isJsonContent ? null : extractHeroVideo(_baseContent);
   const rawContent = isJsonContent
     ? _baseContent

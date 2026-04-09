@@ -155,9 +155,7 @@ export interface Article {
   /** Optional accent color (hex) for magazine layout theming */
   accentColor?: string;
   featuredImage: string;
-  /** Focal point X 0–1 for hero crop (Phase 1A — not yet in DB, defaults to 0.5) */
   featuredImageFocalX?: number;
-  /** Focal point Y 0–1 for hero crop (Phase 1A — not yet in DB, defaults to 0.5) */
   featuredImageFocalY?: number;
   section: string;
   sectionSlug: string;
@@ -174,16 +172,27 @@ export interface Article {
   status: "published" | "draft" | "review" | "scheduled";
   featured: boolean;
   editorChoice: boolean;
-  /** Paywall flag (Phase 1A — not yet in DB) */
   paywalled?: boolean;
-  /** Breaking news flag (Phase 1A — not yet in DB) */
   isBreaking?: boolean;
+  /** Editorial article type: news | report | analysis | interview | opinion */
+  articleType?: string;
   views: number;
   publishedAt: string;
   createdAt: string;
   updatedAt: string;
   /** Video URL from awalan ArticleVideo table (MP4 or embed URL) */
   videoUrl?: string;
+  // ── SEO metadata (overrides title/excerpt/featuredImage in <head>) ──────────
+  /** Custom <title> tag (max ~65 chars). Falls back to title. */
+  metaTitle?: string;
+  /** Custom meta description (max ~160 chars). Falls back to excerpt. */
+  metaDescription?: string;
+  /** Custom Open Graph image URL. Falls back to featuredImage. */
+  ogImage?: string;
+  /** Custom canonical URL — for syndicated / duplicate content. */
+  canonicalUrl?: string;
+  /** When true, adds noindex,nofollow robots directive. */
+  noIndex?: boolean;
 }
 
 export interface ArticleVersion {
