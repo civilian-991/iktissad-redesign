@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { verifyTurnstile } from "@/lib/turnstile";
 import type { ApiResponse } from "@/types";
 
 /**
@@ -28,6 +29,7 @@ const contactSchema = z.object({
   email: z.string().email("Invalid email address"),
   subject: z.string().min(1, "Subject is required").max(200),
   message: z.string().min(1, "Message is required").max(5000),
+  turnstileToken: z.string().min(1, "Bot verification required"),
 });
 
 export async function POST(request: NextRequest) {
@@ -49,7 +51,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, email, subject, message } = parsed.data;
+  const { name, email, subject, message, turnstileToken } = parsed.data;
+
+  // Verify Cloudflare Turnstile token before any DB work
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    null;
+  const isHuman = await verifyTurnstile(turnstileToken, ip);
+  if (!isHuman) {
+    return NextResponse.json(
+      { error: "Bot verification failed" } satisfies ApiResponse<never>,
+      { status: 403 }
+    );
+  }
+
   const admin = createAdminClient();
 
   // Simple rate limiting: reject if same email submitted within the last hour
@@ -70,12 +86,6 @@ export async function POST(request: NextRequest) {
       { status: 429 }
     );
   }
-
-  // Get real IP from headers (handles proxies / Vercel edge)
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    null;
 
   const { error } = await db.from("contact_submissions").insert({
     name,

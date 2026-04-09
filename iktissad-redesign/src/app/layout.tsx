@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 import CookieConsent from "@/components/CookieConsent";
 import SentryUserIdentification from "@/components/SentryUserIdentification";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -40,6 +42,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  // Google Search Console ownership verification
+  // Set NEXT_PUBLIC_GSC_VERIFICATION in your environment variables
+  ...(process.env.NEXT_PUBLIC_GSC_VERIFICATION && {
+    verification: { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION },
+  }),
 };
 
 export default function RootLayout({
@@ -55,7 +62,34 @@ export default function RootLayout({
           <SentryUserIdentification />
         </Providers>
         <CookieConsent />
+
+        {/* Google Ad Manager — GPT library + single-request mode init */}
+        {process.env.NEXT_PUBLIC_GAM_NETWORK_CODE && (
+          <>
+            <Script
+              id="gpt-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `window.googletag = window.googletag || {cmd: []};
+googletag.cmd.push(function() {
+  googletag.pubads().enableSingleRequest();
+  googletag.pubads().collapseEmptyDivs();
+  googletag.enableServices();
+});`,
+              }}
+            />
+            <Script
+              src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
+              strategy="afterInteractive"
+            />
+          </>
+        )}
       </body>
+
+      {/* Google Analytics 4 */}
+      {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+      )}
     </html>
   );
 }

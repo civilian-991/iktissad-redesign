@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { verifyTurnstile } from "@/lib/turnstile";
 import type { ApiResponse } from "@/types";
 
 interface NewsletterSubscription {
@@ -10,6 +11,7 @@ interface NewsletterSubscription {
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email format"),
+  turnstileToken: z.string().min(1, "Bot verification required"),
 });
 
 export async function POST(request: NextRequest) {
@@ -31,7 +33,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { email } = parsed.data;
+  const { email, turnstileToken } = parsed.data;
+
+  // Verify Cloudflare Turnstile token
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    null;
+  const isHuman = await verifyTurnstile(turnstileToken, ip);
+  if (!isHuman) {
+    return NextResponse.json(
+      { error: "Bot verification failed" } satisfies ApiResponse<never>,
+      { status: 403 }
+    );
+  }
+
   const admin = createAdminClient();
 
   // Check if already actively subscribed

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
 import { Loader2, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface LoginClientProps {
   redirectTo?: string;
@@ -61,6 +62,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Auto-focus MFA input when step changes
   useEffect(() => {
@@ -100,11 +102,32 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
     // On success Supabase redirects the browser — no further action needed
   };
 
+  // ── Shared Turnstile verification (called before any Supabase auth) ──────
+  const verifyBot = async (): Promise<boolean> => {
+    if (!turnstileToken) {
+      setError('يرجى إكمال التحقق من أنك لست روبوتًا');
+      return false;
+    }
+    const res = await fetch('/api/auth/turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ turnstileToken }),
+    });
+    if (!res.ok) {
+      setError('فشل التحقق. يرجى تحديث الصفحة والمحاولة مجدداً.');
+      setLoading(false);
+      return false;
+    }
+    return true;
+  };
+
   // ── Credentials (email + password) ───────────────────────────────────────
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!(await verifyBot())) return;
 
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -216,6 +239,8 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!(await verifyBot())) return;
 
     const supabase = createClient();
     const { error: otpError } = await supabase.auth.signInWithOtp({
@@ -400,6 +425,20 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
 
             {/* Mode tabs */}
             {modeTabs}
+
+            {/* Cloudflare Turnstile — reset when switching modes */}
+            {(mode === 'password' || mode === 'magic_link') && (
+              <div className="flex justify-center">
+                <Turnstile
+                  key={mode}
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={setTurnstileToken}
+                  onError={() => setTurnstileToken('')}
+                  onExpire={() => setTurnstileToken('')}
+                  options={{ theme: 'dark', language: 'ar' }}
+                />
+              </div>
+            )}
 
             {/* ── Password mode ── */}
             {mode === 'password' && (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Send, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useTranslation } from '@/lib/i18n';
 
 const COOKIE_NAME = 'newsletter_subscribed';
@@ -23,6 +24,7 @@ export default function Newsletter() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Hide form on mount if already subscribed (cookie check)
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function Newsletter() {
       const res = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstileToken }),
       });
 
       if (!res.ok) {
@@ -124,6 +126,17 @@ export default function Newsletter() {
             transition={{ delay: 0.2 }}
             className="max-w-xl mx-auto"
           >
+            {/* Cloudflare Turnstile — dark theme to match dark background */}
+            <div className="flex justify-center mb-4">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={setTurnstileToken}
+                onError={() => setTurnstileToken('')}
+                onExpire={() => setTurnstileToken('')}
+                options={{ theme: 'dark', language: 'ar' }}
+              />
+            </div>
+
             <form
               onSubmit={handleSubmit}
               className="flex flex-col sm:flex-row gap-4"
@@ -141,7 +154,7 @@ export default function Newsletter() {
                     error ? 'border-red-400/60' : 'border-gold/20 focus:border-gold/50'
                   }`}
                   required
-                  disabled={isLoading || isSubmitted}
+                  disabled={isLoading || isSubmitted || !turnstileToken}
                 />
                 <Mail className="absolute right-5 top-1/2 -translate-y-1/2 text-gold/50" size={20} />
               </div>
@@ -150,7 +163,7 @@ export default function Newsletter() {
                 type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                disabled={isSubmitted || isLoading}
+                disabled={isSubmitted || isLoading || !turnstileToken}
                 className={`px-8 py-4 font-[family-name:var(--font-display)] font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
                   isSubmitted
                     ? 'bg-profit text-white cursor-default'

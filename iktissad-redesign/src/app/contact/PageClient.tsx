@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, MessageSquare, Building2, Loader2, AlertCircle } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -21,6 +22,7 @@ export default function ContactPageClient() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ export default function ContactPageClient() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({ ...formState, turnstileToken }),
       });
 
       if (!res.ok) {
@@ -196,6 +198,15 @@ export default function ContactPageClient() {
                       />
                     </div>
 
+                    {/* Cloudflare Turnstile */}
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                      onSuccess={setTurnstileToken}
+                      onError={() => setTurnstileToken('')}
+                      onExpire={() => setTurnstileToken('')}
+                      options={{ theme: 'light', language: 'ar' }}
+                    />
+
                     {/* Inline error */}
                     {error && (
                       <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">
@@ -208,7 +219,7 @@ export default function ContactPageClient() {
                       type="submit"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      disabled={isSubmitted || isLoading}
+                      disabled={isSubmitted || isLoading || !turnstileToken}
                       className={`w-full py-4 rounded-lg font-[family-name:var(--font-display)] font-bold flex items-center justify-center gap-2 transition-all ${
                         isSubmitted
                           ? 'bg-green-500 text-white cursor-default'
