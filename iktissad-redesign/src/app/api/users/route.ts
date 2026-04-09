@@ -134,13 +134,14 @@ export async function POST(request: NextRequest) {
 
   // 3. Insert into admin_roles so the user can actually access the admin panel.
   //    Map public.users roles → admin_roles roles used by the RBAC proxy.
-  const adminRoleMap: Record<string, string> = {
+  type AdminRoleValue = "super_admin" | "finance" | "advertiser_manager" | "editor" | "writer";
+  const adminRoleMap: Record<string, AdminRoleValue> = {
     admin: "super_admin",
     editor: "editor",
     author: "writer",
     contributor: "writer",
   };
-  const adminRole = adminRoleMap[data.role] ?? "writer";
+  const adminRole: AdminRoleValue = adminRoleMap[data.role] ?? "writer";
 
   await admin.from("admin_roles").insert({
     user_id: authData.user.id,
