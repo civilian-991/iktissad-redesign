@@ -86,6 +86,7 @@ export default function ArticlesPage() {
     status: selectedStatus !== 'all' ? selectedStatus : undefined,
     search: searchQuery || undefined,
     country: filterCountry || undefined,
+    sortBy,
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

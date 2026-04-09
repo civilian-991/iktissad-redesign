@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
   const breaking = searchParams.get("breaking");
   const tag = searchParams.get("tag");
   const authorId = searchParams.get("authorId");
+  const search = searchParams.get("search");
 
   const supabase = await createClient();
 
@@ -112,18 +113,31 @@ export async function GET(request: NextRequest) {
     query = query.eq("author_id", authorId);
   }
 
-  const start = (page - 1) * pageSize;
-  const sortFeaturedFirst = searchParams.get("sortFeaturedFirst") === "true";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let orderedQuery = (query as any)
-    .order("published_at", { ascending: false, nullsFirst: true })
-    .order("created_at", { ascending: false });
-  if (sortFeaturedFirst) {
-    orderedQuery = (query as any)
-      .order("featured", { ascending: false })
-      .order("published_at", { ascending: false, nullsFirst: true })
-      .order("created_at", { ascending: false });
+  if (search) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = (query as any).ilike("title", `%${search}%`);
   }
+
+  const start = (page - 1) * pageSize;
+  const sortBy = searchParams.get("sortBy") ?? "date";
+  const sortFeaturedFirst = searchParams.get("sortFeaturedFirst") === "true";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let orderedQuery: any = query;
+  if (sortFeaturedFirst) {
+    orderedQuery = orderedQuery.order("featured", { ascending: false });
+  }
+  if (sortBy === "views") {
+    orderedQuery = orderedQuery
+      .order("views", { ascending: false })
+      .order("updated_at", { ascending: false });
+  } else if (sortBy === "title") {
+    orderedQuery = orderedQuery.order("title", { ascending: true });
+  } else {
+    // default "date" — most recently updated first (best for admin)
+    orderedQuery = orderedQuery.order("updated_at", { ascending: false });
+  }
+
   const { data: rows, count, error } = await orderedQuery.range(start, start + pageSize - 1);
 
   if (error) {

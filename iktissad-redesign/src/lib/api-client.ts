@@ -365,6 +365,7 @@ export interface ArticleListParams {
   country?: string;
   status?: string;
   search?: string;
+  sortBy?: 'date' | 'views' | 'title';
 }
 
 function buildQuery(
