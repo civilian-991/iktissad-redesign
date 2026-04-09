@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
 const createUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
+  password: z.string().min(8).optional(),
   role: z.enum(["admin", "editor", "author", "contributor"]).optional().default("author"),
   avatar: z.string().optional().default(""),
   department: z.string().optional().default(""),
@@ -90,9 +91,28 @@ export async function POST(request: NextRequest) {
   const data = parsed.data;
   const admin = createAdminClient();
 
+  // 1. Create the user in Supabase Auth so they can actually log in
+  const { data: authData, error: authError } = await admin.auth.admin.createUser({
+    email: data.email,
+    password: data.password,
+    email_confirm: true, // skip confirmation email — admin is creating the account
+    user_metadata: { name: data.name },
+  });
+
+  if (authError) {
+    const isDuplicate = authError.message.toLowerCase().includes("already registered") ||
+      authError.message.toLowerCase().includes("already exists");
+    return NextResponse.json(
+      { error: isDuplicate ? "Email already exists" : authError.message } satisfies ApiResponse<never>,
+      { status: isDuplicate ? 409 : 500 }
+    );
+  }
+
+  // 2. Insert the profile row in the users table, keyed by the auth user's UUID
   const { data: row, error } = await admin
     .from("users")
     .insert({
+      id: authData.user.id,
       email: data.email,
       name: data.name,
       role: data.role,
@@ -104,12 +124,30 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    const isDuplicate = error.message.includes("duplicate");
+    // Roll back the auth user if profile insert fails
+    await admin.auth.admin.deleteUser(authData.user.id);
     return NextResponse.json(
-      { error: isDuplicate ? "Email already exists" : error.message } satisfies ApiResponse<never>,
-      { status: isDuplicate ? 409 : 500 }
+      { error: error.message } satisfies ApiResponse<never>,
+      { status: 500 }
     );
   }
+
+  // 3. Insert into admin_roles so the user can actually access the admin panel.
+  //    Map public.users roles → admin_roles roles used by the RBAC proxy.
+  const adminRoleMap: Record<string, string> = {
+    admin: "super_admin",
+    editor: "editor",
+    author: "writer",
+    contributor: "writer",
+  };
+  const adminRole = adminRoleMap[data.role] ?? "writer";
+
+  await admin.from("admin_roles").insert({
+    user_id: authData.user.id,
+    role: adminRole,
+    permissions: {},
+    two_fa_enabled: false,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response: ApiResponse<AdminUser> = { data: mapUserRow(row as any) };

@@ -72,6 +72,7 @@ export default function NewUserPage() {
       await createUser({
         name,
         email,
+        password: password || undefined,
         phone: phone || undefined,
         role,
         department: department || undefined,
