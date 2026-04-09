@@ -1,0 +1,7 @@
+{
+  "name": "iktissad-root",
+  "private": true,
+  "dependencies": {
+    "next": "16.1.1"
+  }
+}
