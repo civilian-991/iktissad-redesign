@@ -31,10 +31,21 @@ function buildItem(row: RssArticleRow): string {
     ? new Date(row.published_at).toUTCString()
     : new Date().toUTCString();
   const authorName = row.users?.name ?? '';
+  const sectionName = row.sections?.name ?? '';
   const articleUrl = `${BASE_URL}/${escapeXml(slug)}`;
+  const image = row.featured_image;
 
   const authorTag = authorName
     ? `<author>author@iktissadonline.com (${escapeXml(authorName)})</author>`
+    : '';
+
+  const categoryTag = sectionName
+    ? `<category>${escapeXml(sectionName)}</category>`
+    : '';
+
+  // Media enclosure for Google News (image required for rich results)
+  const enclosureTag = image
+    ? `<enclosure url="${escapeXml(image)}" type="image/jpeg" length="0"/>`
     : '';
 
   return `    <item>
@@ -44,6 +55,8 @@ function buildItem(row: RssArticleRow): string {
       <pubDate>${pubDate}</pubDate>
       <description><![CDATA[${excerpt}]]></description>
       ${authorTag}
+      ${categoryTag}
+      ${enclosureTag}
     </item>`;
 }
 
@@ -62,7 +75,7 @@ export function buildRssFeed(
   const items = (rows ?? []).map(buildItem).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xml:lang="ar" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xml:lang="ar" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>${escapeXml(title)}</title>
     <link>${BASE_URL}</link>

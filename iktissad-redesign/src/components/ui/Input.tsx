@@ -154,7 +154,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ? 'border-profit focus:border-profit focus:ring-profit/20'
       : '';
 
-    const iconPadding = leftIcon ? 'pr-4 pl-11' : rightIcon || isPassword ? 'pr-11 pl-4' : '';
+    const iconPadding = leftIcon ? 'ps-4 pe-11' : rightIcon || isPassword ? 'ps-11 pe-4' : '';
 
     return (
       <div className={`${fullWidth ? 'w-full' : ''} ${containerClassName}`}>
@@ -171,7 +171,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
               {leftIcon}
             </div>
           )}
@@ -194,7 +194,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {(rightIcon || isPassword || hasError || hasSuccess) && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <div className="absolute end-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
               {hasError && <AlertCircle className="text-loss" size={18} />}
               {hasSuccess && <CheckCircle className="text-profit" size={18} />}
               {isPassword && (

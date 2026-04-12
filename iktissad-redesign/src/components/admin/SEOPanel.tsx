@@ -206,7 +206,7 @@ function SnippetPreview({ title, excerpt }: SnippetPreviewProps) {
       : excerpt || "أضف وصفاً تعريفياً ليظهر هنا في نتائج البحث.";
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-right" dir="rtl">
+    <div className="rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-start" dir="rtl">
       <p className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2 flex items-center gap-1.5">
         <Eye size={12} />
         معاينة نتيجة البحث
@@ -352,7 +352,7 @@ export default function SEOPanel({
 
   return (
     <div
-      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-5 text-right"
+      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-5 text-start"
       dir="rtl"
     >
       {/* Panel header */}
@@ -372,11 +372,11 @@ export default function SEOPanel({
             value={localKeyword}
             onChange={handleKeywordChange}
             placeholder="أدخل الكلمة المفتاحية…"
-            className="w-full rounded-lg bg-zinc-800 border border-zinc-600 text-sm text-white placeholder-zinc-500 pr-8 pl-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+            className="w-full rounded-lg bg-zinc-800 border border-zinc-600 text-sm text-white placeholder-zinc-500 ps-8 pe-3 py-2 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
           />
           <Search
             size={13}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
+            className="absolute start-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
           />
         </div>
       </div>

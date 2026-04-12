@@ -197,13 +197,13 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
               ${dotSizeStyles[size]}
               rounded-full
               ${dotColor || (variant === 'success' ? 'bg-profit' : variant === 'danger' ? 'bg-loss' : 'bg-current')}
-              mr-1.5
+              ms-1.5
             `}
           />
         )}
-        {leftIcon && <span className="mr-1 flex-shrink-0">{leftIcon}</span>}
+        {leftIcon && <span className="ms-1 flex-shrink-0">{leftIcon}</span>}
         {children}
-        {rightIcon && <span className="ml-1 flex-shrink-0">{rightIcon}</span>}
+        {rightIcon && <span className="me-1 flex-shrink-0">{rightIcon}</span>}
       </>
     );
 

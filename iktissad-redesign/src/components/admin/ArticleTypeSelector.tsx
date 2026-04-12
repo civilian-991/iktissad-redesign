@@ -81,7 +81,7 @@ export default function ArticleTypeSelector({
             <Info size={14} />
           </button>
           {showTooltip && (
-            <div className="absolute right-0 top-6 z-20 w-56 rounded-xl bg-obsidian/95 border border-gold/20 p-3 text-xs text-white/70 font-[family-name:var(--font-display)] shadow-elevated">
+            <div className="absolute start-0 top-6 z-20 w-56 rounded-xl bg-obsidian/95 border border-gold/20 p-3 text-xs text-white/70 font-[family-name:var(--font-display)] shadow-elevated">
               يحدد نوع المقال البنية الهيكلية المقترحة وعدد الكلمات المستهدف
               ويوجّه نبرة الكتابة وأسلوبها.
             </div>
@@ -128,7 +128,7 @@ export default function ArticleTypeSelector({
           <button
             type="button"
             onClick={() => setShowInfo((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-2.5 text-right hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2.5 text-start hover:bg-white/5 transition-colors"
           >
             <span className="flex items-center gap-2">
               <span

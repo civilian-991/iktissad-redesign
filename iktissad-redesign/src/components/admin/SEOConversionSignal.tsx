@@ -131,7 +131,7 @@ export default function SEOConversionSignal({
 
   return (
     <div
-      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-4 text-right"
+      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-4 text-start"
       dir="rtl"
     >
       {/* Panel header */}

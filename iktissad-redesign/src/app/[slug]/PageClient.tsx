@@ -27,13 +27,74 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import BookmarkButton from '@/components/BookmarkButton';
+import { trackShareEvent } from '@/lib/api-client';
 import PaywallModal from '@/components/magazine/PaywallModal';
 import TipTapRenderer from '@/components/admin/TipTapRenderer';
 import ArticleComments from '@/components/ArticleComments';
+import GiftArticleButton from '@/components/GiftArticleButton';
+import ArticleTldr from '@/components/ArticleTldr';
+import RelatedArticles from '@/components/RelatedArticles';
+import ListenButton from '@/components/ListenButton';
+import Poll from '@/components/Poll';
+import LiveBlog from '@/components/LiveBlog';
 import type { JSONContent } from '@tiptap/core';
+import { addBidiIsolation } from '@/lib/i18n/format';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
-const FREE_ARTICLE_LIMIT = 3;
+const FREE_ARTICLE_LIMIT_DEFAULT = 5;
+
+// ── Anonymous session helpers ─────────────────────────────────────────────────
+const SESSION_COOKIE = 'ikt_sid';
+const ANON_METER_KEY = 'ikt_reads';
+
+function getOrCreateSessionId(): string {
+  if (typeof document === 'undefined') return '';
+  const existing = document.cookie
+    .split('; ')
+    .find(r => r.startsWith(`${SESSION_COOKIE}=`))
+    ?.split('=')[1];
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  // 30-day session cookie
+  document.cookie = `${SESSION_COOKIE}=${id}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+  return id;
+}
+
+/** Returns count of unique articles read this calendar month by anonymous user. */
+function getAnonReadCount(): number {
+  if (typeof localStorage === 'undefined') return 0;
+  try {
+    const raw = localStorage.getItem(ANON_METER_KEY);
+    if (!raw) return 0;
+    const { month, slugs }: { month: string; slugs: string[] } = JSON.parse(raw);
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+    if (month !== currentMonth) return 0;
+    return Array.isArray(slugs) ? slugs.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Adds a slug to the anonymous meter. Returns new count. */
+function recordAnonRead(slug: string): number {
+  if (typeof localStorage === 'undefined') return 0;
+  try {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+    const raw = localStorage.getItem(ANON_METER_KEY);
+    let slugs: string[] = [];
+    if (raw) {
+      const parsed: { month: string; slugs: string[] } = JSON.parse(raw);
+      if (parsed.month === currentMonth) slugs = parsed.slugs ?? [];
+    }
+    if (!slugs.includes(slug)) slugs.push(slug);
+    localStorage.setItem(ANON_METER_KEY, JSON.stringify({ month: currentMonth, slugs }));
+    return slugs.length;
+  } catch {
+    return 0;
+  }
+}
 
 // ── Video helpers ─────────────────────────────────────────────────────────────
 function toEmbedUrl(src: string): string {
@@ -97,16 +158,38 @@ function truncateHtmlToParagraphs(html: string, maxParagraphs = 3): string {
   return count > 0 ? html.slice(0, idx) : html.slice(0, 500);
 }
 
+interface PaywallSettings {
+  freeArticleLimit: number;
+  giftLinksPerMonth: number;
+  singleArticleDefaultPrice: number;
+  dynamicPaywall: boolean;
+  socialBonusArticle: boolean;
+  highEngagementBonus: number;
+  highEngagementThreshold: number;
+}
+
 interface ArticlePageClientProps {
   params: Promise<{ slug: string }>;
   subscriptionTier?: 'free' | 'premium' | 'digital';
   freeArticlesReadThisMonth?: number;
+  freeArticleLimit?: number;
+  hasPurchasedArticle?: boolean;
+  giftValid?: boolean;
+  giftToken?: string;
+  paywallSettings?: PaywallSettings;
+  dbUserId?: string | null;
 }
 
 export default function ArticlePageClient({
   params,
   subscriptionTier = 'free',
   freeArticlesReadThisMonth = 0,
+  freeArticleLimit = FREE_ARTICLE_LIMIT_DEFAULT,
+  hasPurchasedArticle = false,
+  giftValid = false,
+  giftToken,
+  paywallSettings,
+  dbUserId,
 }: ArticlePageClientProps) {
   const { t } = useTranslation();
   const { slug } = use(params);
@@ -158,13 +241,47 @@ export default function ArticlePageClient({
 
   const relatedIsAi = hasSimilar;
 
+  // ── Anonymous meter: count from localStorage for non-authenticated users ─────
+  const [anonReadCount, setAnonReadCount] = useState(0);
+  useEffect(() => {
+    if (subscriptionTier === 'free' && !dbUserId) {
+      setAnonReadCount(getAnonReadCount());
+    }
+  }, [subscriptionTier, dbUserId]);
+
+  // ── Track article read (fire-and-forget after article loads) ─────────────
+  useEffect(() => {
+    if (!article?.id) return;
+    const sessionId = getOrCreateSessionId();
+
+    // Bump anonymous meter
+    if (!dbUserId) {
+      const newCount = recordAnonRead(slug);
+      setAnonReadCount(newCount);
+    }
+
+    // Post reading session (best-effort, non-blocking)
+    fetch('/api/track/article-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        articleId: article.id,
+        sessionId,
+        referrer: document.referrer || undefined,
+      }),
+    }).catch(() => { /* ignore */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [article?.id]);
+
   // ── Paywall gate logic ─────────────────────────────────────────────────────
-  // NOTE: `article.paywalled` requires an `is_paywalled` boolean column in the
-  // articles table (mapped to `paywalled` in camelCase via mappers.ts).
+  // Bypass conditions: paid subscriber, purchased article, or valid gift link
+  const effectiveReadCount = dbUserId ? freeArticlesReadThisMonth : anonReadCount;
   const isPaywalled =
     article?.paywalled === true &&
+    !hasPurchasedArticle &&
+    !giftValid &&
     subscriptionTier === 'free' &&
-    freeArticlesReadThisMonth >= FREE_ARTICLE_LIMIT;
+    effectiveReadCount >= freeArticleLimit;
 
   // Determine content format: TipTap JSON or legacy HTML string
   const _baseContent = article?.content ?? '';
@@ -212,6 +329,13 @@ export default function ArticlePageClient({
     if (typeof window === 'undefined') return;
     const url = window.location.href;
     const text = article?.title ?? '';
+
+    // Track share event (fire-and-forget)
+    if (article?.id) {
+      const trackPlatform = platform === 'copy' ? 'copy_link' : platform;
+      void trackShareEvent({ articleId: article.id, platform: trackPlatform }).catch(() => {});
+    }
+
     if (platform === 'copy') {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -398,6 +522,12 @@ export default function ArticlePageClient({
                 </div>
                 {/* Bookmark button */}
                 <BookmarkButton articleId={article.id} />
+                {/* Phase 6.5 — Text-to-Speech */}
+                <ListenButton
+                  text={typeof rawContent === 'string' ? rawContent.replace(/<[^>]+>/g, '') : article.excerpt || article.title}
+                  lang="ar"
+                  articleId={article.id}
+                />
                 {readTime > 0 && (
                   <span className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
                     <BookOpen size={11} className="text-gold/60" />
@@ -433,6 +563,8 @@ export default function ArticlePageClient({
                         className="object-cover"
                         priority
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
+                        placeholder="blur"
+                        blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjYzMCI+PHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjMwIiBmaWxsPSIjRThENUI3Ii8+PC9zdmc+"
                       />
                     </div>
                   )}
@@ -513,6 +645,11 @@ export default function ArticlePageClient({
                 </p>
               )}
 
+              {/* AI TLDR summary — shown when a summary has been generated */}
+              {article.summary && (
+                <ArticleTldr summary={article.summary} summaryEn={article.summaryEn ?? undefined} />
+              )}
+
               {/* Article body */}
               {isPaywalled ? (
                 /* ── Paywalled: show truncated preview + fade + modal ── */
@@ -529,7 +666,7 @@ export default function ArticlePageClient({
                     <div
                       className="article-body-slug"
                       style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
-                      dangerouslySetInnerHTML={{ __html: truncatedHtml ?? '' }}
+                      dangerouslySetInnerHTML={{ __html: addBidiIsolation(truncatedHtml ?? '') }}
                     />
                   )}
 
@@ -557,9 +694,11 @@ export default function ArticlePageClient({
                   <PaywallModal
                     isOpen={paywallOpen}
                     onClose={() => setPaywallOpen(false)}
-                    articleCount={freeArticlesReadThisMonth}
-                    maxFreeArticles={FREE_ARTICLE_LIMIT}
+                    articleCount={effectiveReadCount}
+                    maxFreeArticles={freeArticleLimit}
                     reason="article_limit"
+                    articleId={article.id}
+                    articlePrice={article.articlePrice ?? paywallSettings?.singleArticleDefaultPrice}
                   />
                 </div>
               ) : (
@@ -581,10 +720,16 @@ export default function ArticlePageClient({
                   <div
                     className="article-body-slug"
                     style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
-                    dangerouslySetInnerHTML={{ __html: rawContent as string }}
+                    dangerouslySetInnerHTML={{ __html: addBidiIsolation(rawContent as string) }}
                   />
                 )
               )}
+
+              {/* Phase 6.4 — Live Blog */}
+              <LiveBlog articleId={article.id} />
+
+              {/* Phase 6.6 — Reader Polls */}
+              <Poll articleId={article.id} />
 
               {/* Tags */}
               {article.tags?.length > 0 && (
@@ -630,8 +775,20 @@ export default function ArticlePageClient({
                   >
                     {copied ? <Check size={12} /> : <Link2 size={12} />}
                   </button>
+
+                  {/* Gift link — only shown to active subscribers on paywalled articles */}
+                  {subscriptionTier !== 'free' && article.paywalled && (
+                    <GiftArticleButton articleId={article.id} compact />
+                  )}
                 </div>
               </div>
+
+              {/* Phase 6.2 — Related articles grid below content */}
+              <RelatedArticles
+                articleId={article.id}
+                sectionSlug={article.section}
+                limit={4}
+              />
 
               {/* F2.2 — Comments section */}
               <ArticleComments articleId={article.id} />
@@ -772,10 +929,10 @@ export default function ArticlePageClient({
           color: #DDA853;
         }
         .article-body-slug .article-body-slug-tiptap blockquote {
-          border-right: 3px solid #DDA853;
+          border-inline-start: 3px solid #DDA853;
           border-top: 1px solid rgba(221,168,83,0.15);
           border-bottom: 1px solid rgba(221,168,83,0.15);
-          border-left: none;
+          border-inline-end: none;
           background: rgba(221,168,83,0.03);
           color: #183B4E;
         }
@@ -789,7 +946,7 @@ export default function ArticlePageClient({
           color: #DDA853;
           float: right;
           line-height: 0.82;
-          margin-left: 0.12em;
+          margin-inline-end: 0.12em;
           margin-bottom: -0.08em;
           margin-top: 0.08em;
         }
@@ -812,7 +969,7 @@ export default function ArticlePageClient({
           margin-bottom: 0.875rem;
         }
         .article-body-slug blockquote {
-          border-right: 3px solid #DDA853;
+          border-inline-start: 3px solid #DDA853;
           border-top: 1px solid rgba(221,168,83,0.15);
           border-bottom: 1px solid rgba(221,168,83,0.15);
           padding: 1.25rem 1.4rem;
@@ -828,7 +985,7 @@ export default function ArticlePageClient({
           line-height: 1.85;
           font-style: italic;
         }
-        .article-body-slug ul, .article-body-slug ol { padding-right: 1.5rem; margin-bottom: 1.5rem; }
+        .article-body-slug ul, .article-body-slug ol { padding-inline-start: 1.5rem; margin-bottom: 1.5rem; }
         .article-body-slug li { margin-bottom: 0.55rem; line-height: 1.9; }
         .article-body-slug ul li::marker { color: #DDA853; }
         .article-body-slug a { color: #C49240; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(196,146,64,0.3); }
@@ -852,16 +1009,22 @@ export default function ArticlePageClient({
 function ReadingProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
+    let rafId = 0;
     const update = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      setProgress(docHeight > 0 ? scrollTop / docHeight : 0);
+      rafId = requestAnimationFrame(() => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        setProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
+      });
     };
     window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
   return (
-    <div className="fixed top-0 right-0 left-0 h-[2px] z-[100] bg-obsidian/5">
+    <div className="fixed top-0 right-0 left-0 h-[3px] z-[100] bg-obsidian/5">
       <motion.div className="h-full bg-gold" style={{ scaleX: progress, transformOrigin: 'right center' }} initial={false} />
     </div>
   );

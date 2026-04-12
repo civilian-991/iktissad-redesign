@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
+import PushNotificationToggle from '@/components/PushNotificationToggle';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION DATA
@@ -334,7 +335,7 @@ export default function Header() {
                         }`}
                       />
                     )}
-                    <span className="absolute bottom-1 right-4 left-4 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-right" />
+                    <span className="absolute bottom-1 start-4 end-4 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
                   </Link>
 
                   {/* Dropdown Menu */}
@@ -345,7 +346,7 @@ export default function Header() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: animations.durationMs.fast / 1000 }}
-                        className={`absolute top-full right-0 bg-paper shadow-elevated border-t-2 border-gold overflow-hidden`}
+                        className={`absolute top-full start-0 bg-paper shadow-elevated border-t-2 border-gold overflow-hidden`}
                         style={{ width: item.wide ? config.submenu.wideWidth : config.submenu.normalWidth }}
                       >
                         <div className={`py-3 ${item.wide ? 'grid grid-cols-2 gap-x-4 px-2' : ''}`}>
@@ -358,7 +359,7 @@ export default function Header() {
                             >
                               <Link
                                 href={subItem.href}
-                                className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:pr-7 transition-all duration-200"
+                                className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:ps-7 transition-all duration-200"
                               >
                                 {getSubmenuName(item.key, subItem.key)}
                               </Link>
@@ -384,6 +385,11 @@ export default function Header() {
               >
                 <Search size={iconSizes.md} />
               </motion.button>
+
+              {/* Push Notification Toggle */}
+              <div className="hidden md:block">
+                <PushNotificationToggle />
+              </div>
 
               {/* Subscribe Button */}
               <Link
@@ -428,7 +434,7 @@ export default function Header() {
                       {item.submenu && <ChevronDown size={iconSizes.sm} className="text-gold/50" />}
                     </Link>
                     {item.submenu && (
-                      <div className="bg-cream/50 border-r-2 border-gold/20 mr-4">
+                      <div className="bg-cream/50 border-s-2 border-gold/20 ms-4">
                         {item.submenu.slice(0, 6).map((subItem) => (
                           <Link
                             key={subItem.key}
@@ -518,7 +524,7 @@ export default function Header() {
                   className="w-full px-8 py-6 text-xl bg-white/5 border border-gold/30 text-white font-[family-name:var(--font-display)] placeholder:text-white/60 focus:outline-none focus:border-gold transition-colors"
                   autoFocus
                 />
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={iconSizes.lg} />
+                <Search className="absolute end-6 top-1/2 -translate-y-1/2 text-gold" size={iconSizes.lg} />
               </div>
 
               {/* Results */}
@@ -542,7 +548,9 @@ export default function Header() {
                       className="flex gap-4 p-3 border-b border-white/10 hover:bg-white/5 transition-colors group"
                     >
                       {article.featuredImage && (
-                        <img src={article.featuredImage} alt="" className="w-14 h-14 object-cover shrink-0 opacity-80 group-hover:opacity-100" />
+                        <div className="relative w-14 h-14 shrink-0">
+                          <Image src={article.featuredImage} alt="" fill className="object-cover opacity-80 group-hover:opacity-100" sizes="56px" />
+                        </div>
                       )}
                       <div className="min-w-0">
                         <p className="text-white text-sm font-[family-name:var(--font-display)] leading-snug line-clamp-2 group-hover:text-gold transition-colors">
@@ -582,7 +590,9 @@ export default function Header() {
                           className="flex gap-4 p-3 border-b border-white/10 hover:bg-white/5 transition-colors group"
                         >
                           {article.featuredImage && (
-                            <img src={article.featuredImage} alt="" className="w-12 h-12 object-cover shrink-0 opacity-70 group-hover:opacity-100" />
+                            <div className="relative w-12 h-12 shrink-0">
+                              <Image src={article.featuredImage} alt="" fill className="object-cover opacity-70 group-hover:opacity-100" sizes="48px" />
+                            </div>
                           )}
                           <div className="min-w-0">
                             <p className="text-white/80 text-sm font-[family-name:var(--font-display)] leading-snug line-clamp-2 group-hover:text-gold transition-colors">
@@ -599,7 +609,7 @@ export default function Header() {
               {/* Close Button */}
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="absolute top-4 left-4 w-12 h-12 border border-white/20 text-white/60 flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
+                className="absolute top-4 end-4 w-12 h-12 border border-white/20 text-white/60 flex items-center justify-center hover:border-gold hover:text-gold transition-colors"
                 aria-label={t('header.search.close')}
               >
                 <X size={iconSizes.lg} />

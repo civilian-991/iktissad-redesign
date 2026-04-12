@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
@@ -58,6 +59,7 @@ type Country = typeof regions[0]['countries'][0];
 
 function CountryContent({ country }: { country: Country }) {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
     `/api/articles?country=${encodeURIComponent(country.slug)}&status=published&pageSize=4`,
     swrFetcher
@@ -106,7 +108,7 @@ function CountryContent({ country }: { country: Country }) {
         />
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <div className="flex items-center gap-2 mb-2">
-            <img src={country.flag} alt={country.name} className="w-6 h-4 object-cover" />
+            <Image src={country.flag} alt={country.name} width={24} height={16} className="object-cover" />
             <span className="text-white/70 font-[family-name:var(--font-display)] text-xs">{country.name}</span>
           </div>
           <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-base leading-snug line-clamp-3 group-hover:text-gold-light transition-colors duration-300 mb-2">
@@ -115,7 +117,7 @@ function CountryContent({ country }: { country: Country }) {
           {featured.publishedAt && (
             <span className="text-white/50 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
               <Clock size={10} />
-              {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })}
+              {fmtDate(featured.publishedAt, { month: 'short', day: 'numeric' })}
             </span>
           )}
         </div>
@@ -145,7 +147,7 @@ function CountryContent({ country }: { country: Country }) {
               {article.publishedAt && (
                 <span className="text-charcoal/40 text-xs flex items-center gap-1 mt-1 font-[family-name:var(--font-display)]">
                   <Clock size={9} />
-                  {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })}
+                  {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
                 </span>
               )}
             </div>
@@ -231,7 +233,7 @@ export default function CountryNews() {
                     : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-obsidian'
                 }`}
               >
-                <img src={country.flag} alt={country.name} className="w-5 h-3.5 object-cover" />
+                <Image src={country.flag} alt={country.name} width={20} height={14} className="object-cover" />
                 {country.name}
               </button>
             ))}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { validateCsrfToken } from "@/lib/csrf";
 
 // =============================================================================
 // PUBLIC API KEY VALIDATION (Phase 10.2)
@@ -150,19 +151,37 @@ export function apiKeyRateLimitResponse() {
  * Uses the Supabase SSR server client (cookie-based session) which is the
  * correct approach post-Stack Auth removal.
  *
+ * Optionally accepts the request to also validate the CSRF token (double-submit
+ * cookie pattern). Pass `request` for any mutation endpoint that should be
+ * CSRF-protected. Returns `csrfFailed: true` if CSRF validation fails.
+ *
  * Returns { authenticated: true, userId } on success, or { authenticated: false }.
  */
-export async function requireAuth(): Promise<{ authenticated: boolean; userId?: string }> {
+export async function requireAuth(
+  request?: Request
+): Promise<{ authenticated: boolean; userId?: string; csrfFailed?: boolean }> {
   try {
     const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
     if (!error && user) {
+      // Validate CSRF token when request is provided (mutation routes)
+      if (request) {
+        const csrfValid = await validateCsrfToken(request);
+        if (!csrfValid) {
+          return { authenticated: true, userId: user.id, csrfFailed: true };
+        }
+      }
       return { authenticated: true, userId: user.id };
     }
     return { authenticated: false };
   } catch {
     return { authenticated: false };
   }
+}
+
+/** Return a 403 response for CSRF validation failures. */
+export function csrfForbiddenResponse(): NextResponse {
+  return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
 }
 
 /**

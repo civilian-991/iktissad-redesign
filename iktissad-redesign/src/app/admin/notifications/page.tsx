@@ -23,6 +23,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { formatRelativeTime } from '@/lib/i18n/format';
 import { iconSizes } from '@/lib/design-tokens';
 import { createClient } from '@/lib/supabase/client';
 
@@ -68,11 +69,7 @@ function getNotificationIcon(type: NotificationType, size = 18) {
 }
 
 function formatTime(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
-  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
-  return `منذ ${Math.floor(diff / 86400)} يوم`;
+  return formatRelativeTime(iso, 'ar');
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────

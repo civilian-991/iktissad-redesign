@@ -175,7 +175,7 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2.5 bg-zinc-800 hover:bg-zinc-750 transition-colors text-right"
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-zinc-800 hover:bg-zinc-750 transition-colors text-start"
       >
         <span className="flex items-center gap-2 text-xs font-semibold text-zinc-300 uppercase tracking-wide">
           {icon}
@@ -290,7 +290,7 @@ export default function GEOPanel({
 
   return (
     <div
-      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-5 text-right"
+      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-5 text-start"
       dir="rtl"
     >
       {/* Panel header */}
@@ -375,11 +375,11 @@ export default function GEOPanel({
             icon={<MessageSquare size={13} className="text-blue-400" />}
             badge={
               result.directAnswerExists ? (
-                <span className="mr-1 text-[10px] text-green-400 border border-green-700/50 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
+                <span className="ms-1 text-[10px] text-green-400 border border-green-700/50 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
                   موجودة
                 </span>
               ) : (
-                <span className="mr-1 text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
+                <span className="ms-1 text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
                   مقترحة
                 </span>
               )
@@ -416,7 +416,7 @@ export default function GEOPanel({
             title="أسئلة متكررة مقترحة"
             icon={<ListChecks size={13} className="text-purple-400" />}
             badge={
-              <span className="mr-1 text-[10px] text-zinc-400 border border-zinc-700 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
+              <span className="ms-1 text-[10px] text-zinc-400 border border-zinc-700 rounded px-1.5 py-0.5 leading-none normal-case font-normal">
                 {result.faqSuggestions.length} أسئلة
               </span>
             }
@@ -455,7 +455,7 @@ export default function GEOPanel({
             defaultOpen={false}
             badge={
               <span
-                className={`mr-1 text-[10px] border rounded px-1.5 py-0.5 leading-none normal-case font-normal ${
+                className={`ms-1 text-[10px] border rounded px-1.5 py-0.5 leading-none normal-case font-normal ${
                   result.citationFormatting.score >= 70
                     ? "text-green-400 border-green-700/50"
                     : result.citationFormatting.score >= 40

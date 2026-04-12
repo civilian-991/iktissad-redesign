@@ -1,0 +1,39 @@
+{
+  "name": "الإقتصاد والأعمال",
+  "short_name": "الإقتصاد",
+  "description": "المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#B8860B",
+  "lang": "ar",
+  "dir": "rtl",
+  "orientation": "portrait-primary",
+  "categories": ["news", "finance", "business"],
+  "icons": [
+    {
+      "src": "/iktissad-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "أحدث الأخبار",
+      "url": "/articles",
+      "description": "اقرأ أحدث الأخبار الاقتصادية"
+    },
+    {
+      "name": "المجلة",
+      "url": "/magazine",
+      "description": "تصفح أعداد المجلة"
+    }
+  ]
+}

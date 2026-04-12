@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, TrendingUp } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 
 export default function Hero() {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
   const [active, setActive] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -110,9 +111,7 @@ export default function Hero() {
                       {main.publishedAt && (
                         <span className="text-charcoal/50 text-sm flex items-center gap-1">
                           <Clock size={11} />
-                          {new Date(main.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
-                            month: 'short', day: 'numeric',
-                          })}
+                          {fmtDate(main.publishedAt, { month: 'short', day: 'numeric' })}
                         </span>
                       )}
                     </div>
@@ -149,7 +148,7 @@ export default function Hero() {
                     onClick={() => setActive(i)}
                     className={`flex-1 flex gap-3 p-4 text-start transition-colors group w-full ${
                       i !== articles.length - 1 ? 'border-b border-charcoal/10' : ''
-                    } ${i === active ? 'bg-gold/8 border-r-2 border-r-gold' : 'hover:bg-gold/5'}`}
+                    } ${i === active ? 'bg-gold/8 border-s-2 border-s-gold' : 'hover:bg-gold/5'}`}
                   >
                     {/* Thumb */}
                     {article.featuredImage && (
@@ -188,9 +187,7 @@ export default function Hero() {
                       {article.publishedAt && (
                         <span className="text-charcoal/40 text-sm flex items-center gap-1 mt-1">
                           <Clock size={10} />
-                          {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
-                            month: 'short', day: 'numeric',
-                          })}
+                          {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
                         </span>
                       )}
                     </div>

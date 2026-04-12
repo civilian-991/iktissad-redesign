@@ -114,7 +114,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return (
       <div
         dir="rtl"
-        className="rounded-xl border border-red-500/20 bg-red-950/20 p-6 text-right"
+        className="rounded-xl border border-red-500/20 bg-red-950/20 p-6 text-start"
       >
         {/* Header */}
         <div className="flex items-start gap-4 mb-5">

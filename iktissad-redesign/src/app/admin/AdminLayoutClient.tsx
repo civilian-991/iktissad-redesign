@@ -113,7 +113,12 @@ const subscriptionNavConfig: SubNavItem[] = [
 ];
 
 const analyticsNavConfig: SubNavItem[] = [
+  { key: 'realtimeDashboard', href: '/admin/dashboard/realtime', icon: TrendingUp },
   { key: 'readingAnalytics', href: '/admin/reading-analytics', icon: BarChart2 },
+  { key: 'headlineTests',    href: '/admin/headline-tests',    icon: FlaskConical },
+  { key: 'segments',         href: '/admin/segments',           icon: Users2 },
+  { key: 'shareAnalytics',   href: '/admin/share-analytics',   icon: Share2 },
+  { key: 'seoDashboard',     href: '/admin/seo-dashboard',     icon: Search },
   { key: 'comments',         href: '/admin/comments',          icon: MessageSquare },
   { key: 'auditLog',         href: '/admin/audit-log',         icon: ClipboardList },
   { key: 'notifications',    href: '/admin/notifications',     icon: Bell },
@@ -199,7 +204,12 @@ export default function AdminLayoutClient({
       revenue:          t('admin.revenue.title'),
       plans:            t('admin.plans.title'),
       promoCodes:       t('admin.promoCodes.title'),
+      realtimeDashboard: t('admin.realtimeDashboard.title'),
       readingAnalytics: t('admin.common.readingAnalytics'),
+      headlineTests:    t('admin.headlineTests.title'),
+      segments:         t('admin.segments.title'),
+      shareAnalytics:   t('admin.shareAnalytics.title'),
+      seoDashboard:     t('admin.seoDashboard.title'),
       comments:         t('admin.common.comments'),
       auditLog:         t('admin.common.auditLog'),
       notifications:    t('admin.common.notifications'),

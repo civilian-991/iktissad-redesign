@@ -2,13 +2,14 @@
 
 import { motion } from 'motion/react';
 import { Building2, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 
 export default function CompaniesSection() {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
 
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
     '/api/articles?section=companies&status=published&pageSize=6',
@@ -79,7 +80,7 @@ export default function CompaniesSection() {
                 {/* Top sector badge */}
                 {article.sector && (
                   <span
-                    className="absolute top-3 right-3 px-2 py-0.5 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wide"
+                    className="absolute top-3 start-3 px-2 py-0.5 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wide"
                     style={{
                       background: 'var(--color-gold)',
                       color: 'var(--color-brand-darker)',
@@ -90,16 +91,14 @@ export default function CompaniesSection() {
                 )}
 
                 {/* Bottom text */}
-                <div className="absolute bottom-0 right-0 left-0 p-3">
+                <div className="absolute bottom-0 inset-x-0 p-3">
                   <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-xs leading-relaxed line-clamp-3 mb-2">
                     {article.title}
                   </h3>
                   {article.publishedAt && (
                     <span className="flex items-center gap-1 text-white/50 font-[family-name:var(--font-display)]" style={{ fontSize: '0.65rem' }}>
                       <Clock size={8} />
-                      {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
-                        month: 'short', day: 'numeric',
-                      })}
+                      {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
                     </span>
                   )}
                 </div>

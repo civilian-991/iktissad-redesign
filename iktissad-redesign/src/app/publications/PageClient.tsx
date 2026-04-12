@@ -161,7 +161,7 @@ export default function GroupPageClient() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-navy/80 to-transparent" />
-                    <div className="absolute bottom-4 right-4 left-4">
+                    <div className="absolute bottom-4 inset-x-4">
                       <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-white">
                         {pub.name}
                       </h3>
@@ -185,7 +185,7 @@ export default function GroupPageClient() {
                       <span className="font-[family-name:var(--font-display)] font-semibold text-sm">
                         {t('pages.group.visitSite')}
                       </span>
-                      <ExternalLink size={16} className="mr-1" />
+                      <ExternalLink size={16} className="ms-1" />
                     </div>
                   </div>
                 </motion.a>

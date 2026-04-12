@@ -238,9 +238,9 @@ export default function MediaPicker({
                       placeholder="البحث في الملفات..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 pr-10 pl-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+                      className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 ps-10 pe-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                     />
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
                   </div>
 
                   {/* File Grid */}
@@ -281,7 +281,7 @@ export default function MediaPicker({
                           )}
                           {/* Selection indicator */}
                           {selectedFile?.path === file.path && (
-                            <div className="absolute top-2 right-2 w-6 h-6 bg-gold rounded-full flex items-center justify-center">
+                            <div className="absolute top-2 start-2 w-6 h-6 bg-gold rounded-full flex items-center justify-center">
                               <Check size={14} className="text-obsidian" />
                             </div>
                           )}

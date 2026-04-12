@@ -118,6 +118,31 @@ export class ApiError extends Error {
   }
 }
 
+// ─── CSRF token cache ────────────────────────────────────────────
+
+let cachedCsrfToken: string | null = null;
+
+/**
+ * Fetch (and cache) the CSRF token from /api/auth/csrf.
+ * Called automatically before any mutation request.
+ */
+async function fetchCsrfToken(): Promise<string> {
+  if (cachedCsrfToken) return cachedCsrfToken;
+  try {
+    const res = await fetch("/api/auth/csrf");
+    if (res.ok) {
+      const data = (await res.json()) as { csrfToken?: string };
+      if (data.csrfToken) {
+        cachedCsrfToken = data.csrfToken;
+        return cachedCsrfToken;
+      }
+    }
+  } catch {
+    // CSRF fetch failure is non-fatal — server will return 403 if required
+  }
+  return "";
+}
+
 // ─── Rate-limit queue & state ────────────────────────────────────
 
 const MAX_QUEUE_SIZE = 20;
@@ -322,11 +347,29 @@ async function fetchWithRetry<T>(
 
 // ─── Public base fetcher ─────────────────────────────────────────
 
+const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
 async function api<T>(
   path: string,
   init?: RequestInit & { signal?: AbortSignal }
 ): Promise<ApiResponse<T>> {
-  return fetchWithRetry<T>(path, init ?? {});
+  const method = (init?.method ?? "GET").toUpperCase();
+  let extraHeaders: Record<string, string> = {};
+
+  // Automatically include CSRF token for all mutation requests
+  if (MUTATION_METHODS.has(method)) {
+    const csrfToken = await fetchCsrfToken();
+    if (csrfToken) {
+      extraHeaders["x-csrf-token"] = csrfToken;
+    }
+  }
+
+  const mergedInit: RequestInit & { signal?: AbortSignal } = {
+    ...init,
+    headers: { ...extraHeaders, ...(init?.headers ?? {}) },
+  };
+
+  return fetchWithRetry<T>(path, mergedInit);
 }
 
 /**
@@ -1177,3 +1220,90 @@ export async function updatePreferences(
     body: JSON.stringify(prefs),
   });
 }
+
+// ─── Phase 5 AI Features ─────────────────────────────────────────────────────
+
+export async function aiAutoTag(
+  content: string,
+  title: string,
+  existingTags: string[] = []
+): Promise<ApiResponse<{ tags: string[] }>> {
+  return api<{ tags: string[] }>('/api/ai/auto-tag', {
+    method: 'POST',
+    body: JSON.stringify({ content, title, existingTags }),
+  });
+}
+
+export async function aiSummarize(
+  articleId: string,
+  content: string,
+  title: string
+): Promise<ApiResponse<{ summary: string; summaryEn: string }>> {
+  return api<{ summary: string; summaryEn: string }>('/api/ai/summarize', {
+    method: 'POST',
+    body: JSON.stringify({ articleId, content, title }),
+  });
+}
+
+export async function aiGenerateSocialCards(
+  articleId: string,
+  title: string,
+  featuredImage?: string,
+  accentColor?: string
+): Promise<ApiResponse<{ twitter: string; linkedin: string; whatsapp: string }>> {
+  return api<{ twitter: string; linkedin: string; whatsapp: string }>('/api/ai/social-card', {
+    method: 'POST',
+    body: JSON.stringify({ articleId, title, featuredImage, accentColor }),
+  });
+}
+
+// ─── Phase 7: Analytics & Insights ──────────────────────────────────────────
+
+import type { RealtimeAnalytics } from '@/app/api/admin/analytics/realtime/route';
+
+// SegmentAnalytics type — will be exported from the segments route once created
+export type { RealtimeAnalytics };
+
+export const realtimeAnalyticsKey = () => '/api/admin/analytics/realtime';
+
+export const segmentAnalyticsKey = (period?: string) =>
+  period ? `/api/admin/analytics/segments?period=${period}` : '/api/admin/analytics/segments';
+
+export const headlineTestsKey = (params: { status?: string; articleId?: string } = {}) =>
+  buildQuery('/api/admin/headline-tests', params);
+
+export const headlineTestKey = (id: string) => `/api/admin/headline-tests/${id}`;
+
+export async function createHeadlineTest(
+  data: { articleId: string; variants: string[]; minSample?: number }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>('/api/admin/headline-tests', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateHeadlineTest(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>(`/api/admin/headline-tests/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function trackShareEvent(
+  data: { articleId: string; platform: string; sessionId?: string }
+): Promise<ApiResponse<{ ok: true }>> {
+  return api<{ ok: true }>('/api/analytics/share-event', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export const shareAnalyticsKey = (period?: string) =>
+  period ? `/api/admin/analytics/shares?period=${period}` : '/api/admin/analytics/shares';
+
+export const seoScoresKey = (params: { page?: number; pageSize?: number; sortBy?: string } = {}) =>
+  buildQuery('/api/admin/analytics/seo-scores', params);

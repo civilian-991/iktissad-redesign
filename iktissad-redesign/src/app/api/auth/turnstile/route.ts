@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { authEndpointLimit, getClientIp, rateLimitedResponse } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types";
 
 /**
@@ -8,6 +9,9 @@ import type { ApiResponse } from "@/types";
  * with Supabase auth (which has no server-side hook for bot checks).
  */
 export async function POST(request: NextRequest) {
+  // Strict rate limit: 10 attempts/min per IP (auth endpoint)
+  const rl = authEndpointLimit(`turnstile:${getClientIp(request)}`);
+  if (!rl.allowed) return rateLimitedResponse(rl);
   let body: unknown;
   try {
     body = await request.json();

@@ -23,30 +23,33 @@ export default function GlobalError({
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          fontFamily: "sans-serif",
+          fontFamily: "Tajawal, Noto Sans Arabic, sans-serif",
           gap: "1rem",
           padding: "2rem",
           textAlign: "center",
+          backgroundColor: "#faf8f5",
+          color: "#1a1a1a",
         }}
       >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+        <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
           حدث خطأ غير متوقع
         </h1>
-        <p style={{ color: "#666" }}>
-          We encountered an unexpected error. Our team has been notified.
+        <p style={{ color: "#666", fontSize: "1.125rem" }}>
+          نعتذر عن هذا الخطأ. تم إبلاغ الفريق التقني. يرجى المحاولة مرة أخرى.
         </p>
         <button
           onClick={reset}
           style={{
-            padding: "0.5rem 1.5rem",
-            background: "#1a1a1a",
+            padding: "0.75rem 2rem",
+            background: "#c9a84c",
             color: "#fff",
             border: "none",
-            borderRadius: "0.375rem",
+            borderRadius: "0.5rem",
             cursor: "pointer",
+            fontSize: "1rem",
           }}
         >
-          Try again
+          إعادة المحاولة
         </button>
       </body>
     </html>

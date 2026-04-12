@@ -2,34 +2,72 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
+
+export interface CookiePreferences {
+  necessary: true;   // always on
+  analytics: boolean;
+  advertising: boolean;
+}
+
+const CONSENT_KEY = 'cookie-consent';
+const PREFS_KEY = 'cookie-preferences';
+
+function getStoredPreferences(): CookiePreferences | null {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as CookiePreferences;
+  } catch {
+    return null;
+  }
+}
+
+export function getConsentPreferences(): CookiePreferences | null {
+  if (typeof window === 'undefined') return null;
+  const consent = localStorage.getItem(CONSENT_KEY);
+  if (!consent || consent === 'pending') return null;
+  return getStoredPreferences();
+}
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showCustomize, setShowCustomize] = useState(false);
+  const [analytics, setAnalytics] = useState(true);
+  const [advertising, setAdvertising] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-    const consent = localStorage.getItem('cookie-consent');
+    const consent = localStorage.getItem(CONSENT_KEY);
     if (consent === null) {
-      // Small delay so the slide-up animation is visible on first render
       const timer = setTimeout(() => setVisible(true), 300);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
+  function saveAndClose(prefs: CookiePreferences) {
+    localStorage.setItem(CONSENT_KEY, 'accepted');
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
     setVisible(false);
-    window.dispatchEvent(new Event('cookie-consent-accepted'));
+    window.dispatchEvent(new CustomEvent('cookie-consent-saved', { detail: prefs }));
+  }
+
+  const handleAcceptAll = () =>
+    saveAndClose({ necessary: true, analytics: true, advertising: true });
+
+  const handleRejectAll = () => {
+    localStorage.setItem(CONSENT_KEY, 'declined');
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ necessary: true, analytics: false, advertising: false }));
+    setVisible(false);
+    window.dispatchEvent(new CustomEvent('cookie-consent-saved', {
+      detail: { necessary: true, analytics: false, advertising: false },
+    }));
   };
 
-  const handleDecline = () => {
-    localStorage.setItem('cookie-consent', 'declined');
-    setVisible(false);
-  };
+  const handleSavePreferences = () =>
+    saveAndClose({ necessary: true, analytics, advertising });
 
-  // Don't render anything until mounted to avoid hydration mismatch
   if (!mounted) return null;
 
   return (
@@ -44,103 +82,131 @@ export default function CookieConsent() {
         ${visible ? 'translate-y-0' : 'translate-y-full'}
       `}
     >
-      {/* Gold top border accent */}
       <div className="h-[2px] w-full" style={{ background: 'linear-gradient(90deg, transparent, #DDA853, #DDA853 60%, transparent)' }} />
 
-      {/* Banner body */}
-      <div
-        className="w-full px-4 py-5 sm:px-6 lg:px-8"
-        style={{ backgroundColor: '#0C1E2A', borderTop: '1px solid rgba(221,168,83,0.25)' }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="w-full" style={{ backgroundColor: '#0C1E2A', borderTop: '1px solid rgba(221,168,83,0.25)' }}>
 
-          {/* Text content */}
+        {/* ── Customize panel ── */}
+        {showCustomize && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-b border-gold/10 space-y-3">
+            <p className="text-sm font-bold text-right" style={{ color: '#DDA853' }}>
+              إدارة تفضيلات ملفات تعريف الارتباط
+            </p>
+
+            {/* Necessary — always on */}
+            <div className="flex items-center justify-between py-2 border-b border-white/5">
+              <div className="text-right">
+                <p className="text-sm font-semibold" style={{ color: '#E5E7EB' }}>ضرورية</p>
+                <p className="text-xs" style={{ color: '#6E98A2' }}>الجلسة، الأمان، CSRF — لا يمكن تعطيلها</p>
+              </div>
+              <div className="px-3 py-1 rounded text-xs font-bold" style={{ backgroundColor: 'rgba(221,168,83,0.15)', color: '#DDA853' }}>
+                دائماً مفعّلة
+              </div>
+            </div>
+
+            {/* Analytics */}
+            <div className="flex items-center justify-between py-2 border-b border-white/5">
+              <div className="text-right">
+                <p className="text-sm font-semibold" style={{ color: '#E5E7EB' }}>التحليلات</p>
+                <p className="text-xs" style={{ color: '#6E98A2' }}>Google Analytics — يساعدنا على تحسين المحتوى</p>
+              </div>
+              <button
+                onClick={() => setAnalytics(!analytics)}
+                className={`w-11 h-6 rounded-full transition-all relative shrink-0 ${analytics ? '' : 'bg-white/10'}`}
+                style={analytics ? { backgroundColor: '#DDA853' } : {}}
+                aria-checked={analytics}
+                role="switch"
+              >
+                <span
+                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all"
+                  style={{ right: analytics ? '2px' : 'auto', left: analytics ? 'auto' : '2px' }}
+                />
+              </button>
+            </div>
+
+            {/* Advertising */}
+            <div className="flex items-center justify-between py-2">
+              <div className="text-right">
+                <p className="text-sm font-semibold" style={{ color: '#E5E7EB' }}>الإعلانات</p>
+                <p className="text-xs" style={{ color: '#6E98A2' }}>Google Ad Manager — إعلانات مخصصة</p>
+              </div>
+              <button
+                onClick={() => setAdvertising(!advertising)}
+                className={`w-11 h-6 rounded-full transition-all relative shrink-0 ${advertising ? '' : 'bg-white/10'}`}
+                style={advertising ? { backgroundColor: '#DDA853' } : {}}
+                aria-checked={advertising}
+                role="switch"
+              >
+                <span
+                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all"
+                  style={{ right: advertising ? '2px' : 'auto', left: advertising ? 'auto' : '2px' }}
+                />
+              </button>
+            </div>
+
+            <button
+              onClick={handleSavePreferences}
+              className="w-full py-2 rounded text-sm font-bold transition-colors"
+              style={{ backgroundColor: '#DDA853', color: '#0C1E2A' }}
+            >
+              حفظ التفضيلات
+            </button>
+          </div>
+        )}
+
+        {/* ── Main banner row ── */}
+        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+
           <div className="flex-1 text-right">
             <p className="text-sm font-bold mb-1" style={{ color: '#DDA853' }}>
               ملفات تعريف الارتباط (Cookies)
             </p>
             <p className="text-sm leading-relaxed" style={{ color: '#B5CCD2' }}>
-              نستخدم ملفات تعريف الارتباط لتحسين تجربتك وتحليل حركة الزيارات. بالنقر على «قبول»، فإنك توافق على استخدامنا لها وفقاً لـ{' '}
-              <Link
-                href="/privacy"
-                className="underline underline-offset-2 transition-colors duration-200"
-                style={{ color: '#E5BA6F' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#DDA853')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#E5BA6F')}
-              >
+              نستخدم ملفات تعريف الارتباط لتحسين تجربتك وتحليل حركة الزيارات.{' '}
+              <Link href="/privacy" className="underline underline-offset-2" style={{ color: '#E5BA6F' }}>
                 سياسة الخصوصية
               </Link>
-              .
             </p>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {/* Accept button */}
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+            {/* Customize toggle */}
             <button
-              onClick={handleAccept}
-              className="
-                px-5 py-2 rounded text-sm font-bold
-                transition-colors duration-200
-                focus:outline-none focus:ring-2 focus:ring-offset-2
-              "
-              style={{
-                backgroundColor: '#DDA853',
-                color: '#0C1E2A',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#E5BA6F')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#DDA853')}
-              onFocus={e => (e.currentTarget.style.boxShadow = '0 0 0 2px #0C1E2A, 0 0 0 4px #DDA853')}
-              onBlur={e => (e.currentTarget.style.boxShadow = 'none')}
+              onClick={() => setShowCustomize(!showCustomize)}
+              className="px-4 py-2 rounded text-xs font-medium flex items-center gap-1 transition-colors"
+              style={{ border: '1px solid rgba(221,168,83,0.3)', color: '#DDA853' }}
             >
-              قبول الكل
+              تخصيص
+              {showCustomize ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
             </button>
 
-            {/* Decline button */}
+            {/* Reject */}
             <button
-              onClick={handleDecline}
-              className="
-                px-5 py-2 rounded text-sm font-medium
-                transition-colors duration-200
-                focus:outline-none
-              "
-              style={{
-                border: '1px solid rgba(181,204,210,0.35)',
-                color: '#B5CCD2',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'rgba(181,204,210,0.7)';
-                e.currentTarget.style.color = '#FFFFFF';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(181,204,210,0.35)';
-                e.currentTarget.style.color = '#B5CCD2';
-              }}
-              onFocus={e => (e.currentTarget.style.boxShadow = '0 0 0 2px #0C1E2A, 0 0 0 4px rgba(181,204,210,0.5)')}
-              onBlur={e => (e.currentTarget.style.boxShadow = 'none')}
+              onClick={handleRejectAll}
+              className="px-4 py-2 rounded text-sm font-medium transition-colors"
+              style={{ border: '1px solid rgba(181,204,210,0.35)', color: '#B5CCD2' }}
             >
               رفض
             </button>
 
-            {/* X close button (same as decline) */}
+            {/* Accept all */}
             <button
-              onClick={handleDecline}
+              onClick={handleAcceptAll}
+              className="px-5 py-2 rounded text-sm font-bold transition-colors"
+              style={{ backgroundColor: '#DDA853', color: '#0C1E2A' }}
+            >
+              قبول الكل
+            </button>
+
+            <button
+              onClick={handleRejectAll}
               aria-label="إغلاق"
-              className="
-                p-1.5 rounded
-                transition-colors duration-200
-                focus:outline-none
-              "
+              className="p-1.5 rounded transition-colors"
               style={{ color: '#6E98A2' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#B5CCD2')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#6E98A2')}
-              onFocus={e => (e.currentTarget.style.boxShadow = '0 0 0 2px rgba(181,204,210,0.4)')}
-              onBlur={e => (e.currentTarget.style.boxShadow = 'none')}
             >
               <X size={16} strokeWidth={2} />
             </button>
           </div>
-
         </div>
       </div>
     </div>

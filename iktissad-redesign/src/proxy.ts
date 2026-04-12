@@ -1,137 +1,107 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from 'next/server';
 
-// ─── RBAC: routes that require specific roles ─────────────────────────────────
-// Routes NOT listed here are accessible to ALL authenticated admins.
-const RBAC_MAP: Record<string, string[]> = {
-  "/admin/subscribers": ["super_admin", "finance"],
-  "/admin/revenue": ["super_admin", "finance"],
-  "/admin/promo-codes": ["super_admin", "finance"],
-  "/admin/users": ["super_admin"],
-  "/admin/settings": ["super_admin"],
-  "/admin/audit-log": ["super_admin"],
-  "/admin/advertisers": ["super_admin", "advertiser_manager"],
-  "/admin/ads": ["super_admin", "advertiser_manager"],
-  "/admin/articles": ["super_admin", "editor", "writer"],
-  "/admin/magazines": ["super_admin", "editor"],
-  "/admin/comments": ["super_admin", "editor"],
-  "/admin/reading-analytics": ["super_admin", "editor", "finance"],
-};
+// ─── Constants ───────────────────────────────────────────────────
 
-// Helper: find the most-specific matching RBAC entry for a pathname
-function getRbacRoles(pathname: string): string[] | null {
-  // Sort keys by length descending so more specific paths match first
-  const keys = Object.keys(RBAC_MAP).sort((a, b) => b.length - a.length);
-  for (const key of keys) {
-    if (pathname === key || pathname.startsWith(key + "/")) {
-      return RBAC_MAP[key];
-    }
-  }
-  return null; // no restriction
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * API routes that are called by external services or don't require CSRF.
+ * Pattern matched against request.nextUrl.pathname.
+ */
+const CSRF_EXEMPT_PATTERNS = [
+  /^\/api\/webhooks\//,          // Payment / external webhooks (use HMAC sig instead)
+  /^\/api\/auth\/csrf$/,         // CSRF token endpoint itself
+  /^\/api\/auth\/turnstile$/,    // Bot-check endpoint (no session yet)
+  /^\/api\/newsletter$/,         // Public newsletter signup
+  /^\/api\/indexnow\//,          // Search-engine ping (no session)
+  /^\/monitoring/,               // Sentry tunnel
+];
+
+// ─── CSRF validation (double-submit cookie) ──────────────────────
+
+function isCsrfExempt(pathname: string): boolean {
+  return CSRF_EXEMPT_PATTERNS.some((re) => re.test(pathname));
 }
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  let response = NextResponse.next({ request });
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
-  // Create Supabase client that can read/write cookies to keep session alive
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
+function csrfForbidden(): NextResponse {
+  return new NextResponse(
+    JSON.stringify({ error: 'Invalid CSRF token' }),
+    { status: 403, headers: { 'Content-Type': 'application/json' } }
   );
+}
 
-  // Refresh session (important for keeping session alive across requests)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+// ─── Proxy handler ───────────────────────────────────────────────
 
-  // ─── Admin route protection ───────────────────────────────────────────────
-  if (pathname.startsWith("/admin")) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(url);
-    }
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const method = request.method.toUpperCase();
 
-    // ─── RBAC check ───────────────────────────────────────────────────────
-    const requiredRoles = getRbacRoles(pathname);
-    if (requiredRoles !== null) {
-      const { data: roleRow } = await supabase
-        .from("admin_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
+  // ── 1. CSRF enforcement for API mutations ──────────────────────
+  // Applied at the proxy layer so every POST/PUT/PATCH/DELETE route
+  // is protected without touching individual route files.
+  if (
+    pathname.startsWith('/api/') &&
+    MUTATION_METHODS.has(method) &&
+    !isCsrfExempt(pathname)
+  ) {
+    const cookieToken = request.cookies.get('csrf-token')?.value;
+    const headerToken = request.headers.get('x-csrf-token');
 
-      const userRole = (roleRow as { role: string } | null)?.role ?? null;
-
-      // super_admin always bypasses RBAC restrictions
-      if (userRole !== "super_admin") {
-        if (!userRole || !requiredRoles.includes(userRole)) {
-          return NextResponse.json(
-            {
-              error: "غير مصرح",
-              message: "ليس لديك صلاحية للوصول إلى هذه الصفحة",
-            },
-            { status: 403 }
-          );
-        }
-      }
+    if (!cookieToken || !headerToken || !timingSafeEqual(cookieToken, headerToken)) {
+      return csrfForbidden();
     }
   }
 
-  // ─── Paywall: /magazine/[issueId]/reader and /magazine/[issueId]/read ──────
-  const paywallPattern = /^\/magazine\/[^/]+\/(reader|read)(\/.*)?$/;
+  // ── 2. CSP nonce for HTML page routes ─────────────────────────
+  // API routes return JSON — CSP headers are irrelevant there.
+  if (!pathname.startsWith('/api/')) {
+    const nonce = btoa(crypto.randomUUID());
 
-  if (paywallPattern.test(pathname)) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(url);
-    }
+    const cspHeader = [
+      `default-src 'self'`,
+      `script-src 'nonce-${nonce}' 'strict-dynamic'`,
+      `style-src 'self' 'unsafe-inline'`,
+      `img-src 'self' data: blob: https:`,
+      `font-src 'self' https://fonts.gstatic.com`,
+      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://sentry.io https://*.sentry.io`,
+      `media-src 'self'`,
+      `object-src 'none'`,
+      `frame-ancestors 'none'`,
+      `form-action 'self'`,
+      `base-uri 'self'`,
+      `upgrade-insecure-requests`,
+    ].join('; ');
 
-    // Check active/trialing subscription by email
-    const { data: subscriber } = await supabase
-      .from("subscribers")
-      .select("status")
-      .eq("email", user.email!)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-nonce', nonce);
 
-    if (!subscriber) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/subscribe";
-      url.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(url);
-    }
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set('Content-Security-Policy', cspHeader);
+    return response;
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/magazine/:issueId/reader",
-    "/magazine/:issueId/reader/:path*",
-    "/magazine/:issueId/read",
-    "/magazine/:issueId/read/:path*",
+    // Match all routes except static assets and image optimisation
+    {
+      source:
+        '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2)$).*)',
+      missing: [
+        { type: 'header', key: 'next-router-prefetch' },
+        { type: 'header', key: 'purpose', value: 'prefetch' },
+      ],
+    },
   ],
 };

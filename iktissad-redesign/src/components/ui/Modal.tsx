@@ -240,7 +240,7 @@ export function Modal({
                       size="sm"
                       onClick={onClose}
                       aria-label="إغلاق"
-                      className="flex-shrink-0 -mt-1 -ml-1"
+                      className="flex-shrink-0 -mt-1 -me-1"
                     />
                   )}
                 </div>
@@ -420,8 +420,8 @@ const sheetAnimationVariants: Record<SheetPosition, { initial: Record<string, st
 };
 
 const sheetPositionStyles: Record<SheetPosition, string> = {
-  right: 'inset-y-0 left-0',
-  left: 'inset-y-0 right-0',
+  right: 'inset-y-0 end-0',
+  left: 'inset-y-0 start-0',
   top: 'inset-x-0 top-0',
   bottom: 'inset-x-0 bottom-0',
 };

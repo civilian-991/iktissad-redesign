@@ -127,11 +127,11 @@ function RecommendationCard({
           {IMPACT_LABELS[rec.impactLevel]}
         </span>
       </div>
-      <p className="text-white/50 text-xs font-[family-name:var(--font-display)] leading-relaxed pr-9">
+      <p className="text-white/50 text-xs font-[family-name:var(--font-display)] leading-relaxed ps-9">
         {rec.descriptionAr}
       </p>
       {rec.actionable && (
-        <div className="pt-1 pr-9">
+        <div className="pt-1 ps-9">
           <button
             type="button"
             onClick={() => onApply(rec.category)}

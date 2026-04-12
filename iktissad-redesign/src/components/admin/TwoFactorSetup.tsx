@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Loader2, Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
-type SetupStep = 'idle' | 'enrolling' | 'verifying' | 'success';
+type SetupStep = 'idle' | 'enrolling' | 'verifying' | 'success' | 'recovery-codes';
 
 interface EnrollmentData {
   factorId: string;
@@ -25,6 +25,8 @@ export default function TwoFactorSetup() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
   const [secretCopied, setSecretCopied] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [recoveryCodesCopied, setRecoveryCodesCopied] = useState(false);
   const codeInputRef = useRef<HTMLInputElement>(null);
 
   // Load current 2FA status
@@ -128,7 +130,25 @@ export default function TwoFactorSetup() {
 
       setIsEnabled(true);
       setEnrolledFactorId(enrollment.factorId);
-      setStep('success');
+
+      // Generate recovery codes immediately after successful enrollment
+      try {
+        const res = await fetch('/api/auth/2fa/recovery-codes', { method: 'POST' });
+        if (res.ok) {
+          const json = await res.json() as { data?: { codes?: string[] } };
+          if (json.data?.codes) {
+            setRecoveryCodes(json.data.codes);
+            setStep('recovery-codes');
+          } else {
+            setStep('success');
+          }
+        } else {
+          setStep('success');
+        }
+      } catch {
+        setStep('success');
+      }
+
       toast.success('تم تفعيل المصادقة الثنائية بنجاح');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'الرمز غير صحيح، يرجى المحاولة مجدداً';
@@ -156,6 +176,9 @@ export default function TwoFactorSetup() {
       setEnrolledFactorId(null);
       setStep('idle');
       setEnrollment(null);
+      setRecoveryCodes([]);
+      // Delete recovery codes server-side
+      void fetch('/api/auth/2fa/recovery-codes', { method: 'DELETE' }).catch(() => {});
       toast.success('تم تعطيل المصادقة الثنائية');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء تعطيل المصادقة الثنائية';
@@ -194,6 +217,75 @@ export default function TwoFactorSetup() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 size={24} className="animate-spin text-gold" />
+      </div>
+    );
+  }
+
+  // ── RECOVERY CODES STATE ─────────────────────────────────────────────────────
+  if (step === 'recovery-codes' && recoveryCodes.length > 0) {
+    const handleCopyAll = async () => {
+      try {
+        await navigator.clipboard.writeText(recoveryCodes.join('\n'));
+        setRecoveryCodesCopied(true);
+        setTimeout(() => setRecoveryCodesCopied(false), 2000);
+      } catch {
+        toast.error('تعذر النسخ');
+      }
+    };
+
+    return (
+      <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-5">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center shrink-0">
+            <Shield className="text-gold" size={22} />
+          </div>
+          <div className="flex-1">
+            <p className="text-white font-[family-name:var(--font-display)] font-semibold text-base">
+              رموز الاسترداد
+            </p>
+            <p className="text-white/50 text-sm mt-1 font-[family-name:var(--font-display)]">
+              احتفظ بهذه الرموز في مكان آمن. كل رمز يُستخدم مرة واحدة فقط للدخول إذا فقدت الوصول إلى تطبيق المصادقة.
+            </p>
+          </div>
+        </div>
+
+        {/* Recovery codes grid */}
+        <div className="grid grid-cols-2 gap-2">
+          {recoveryCodes.map((c) => (
+            <code
+              key={c}
+              dir="ltr"
+              className="bg-obsidian/60 border border-gold/10 rounded-lg px-3 py-2 text-gold text-sm font-mono tracking-wider text-center select-all"
+            >
+              {c}
+            </code>
+          ))}
+        </div>
+
+        <div className="p-3 bg-gold/10 border border-gold/20 rounded-xl">
+          <p className="text-gold text-xs font-[family-name:var(--font-display)]">
+            ⚠️ هذه الرموز لن تُعرض مرة أخرى. انسخها أو دوّنها الآن.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleCopyAll}
+            className="flex-1 py-2.5 bg-white/10 text-white rounded-xl font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+          >
+            {recoveryCodesCopied ? (
+              <><Check size={14} className="text-profit" /> تم النسخ</>
+            ) : (
+              <><Copy size={14} /> نسخ الكل</>
+            )}
+          </button>
+          <button
+            onClick={() => setStep('success')}
+            className="flex-1 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all"
+          >
+            تم الحفظ
+          </button>
+        </div>
       </div>
     );
   }

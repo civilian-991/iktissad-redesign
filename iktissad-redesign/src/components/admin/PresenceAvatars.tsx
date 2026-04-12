@@ -151,13 +151,13 @@ export default function PresenceAvatars({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.95 }}
             transition={{ duration: 0.12 }}
-            className="absolute bottom-full mb-2 right-0 z-50 px-3 py-2 bg-midnight border border-gold/20 rounded-xl shadow-elevated whitespace-nowrap pointer-events-none"
+            className="absolute bottom-full mb-2 start-0 z-50 px-3 py-2 bg-midnight border border-gold/20 rounded-xl shadow-elevated whitespace-nowrap pointer-events-none"
           >
             <p className="text-white/80 text-xs font-[family-name:var(--font-display)]">
               {allNames}
             </p>
             {/* Arrow */}
-            <div className="absolute top-full right-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gold/20" />
+            <div className="absolute top-full start-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gold/20" />
           </motion.div>
         )}
       </AnimatePresence>

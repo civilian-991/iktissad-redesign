@@ -115,14 +115,14 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
 
     case 'bulletList':
       return (
-        <ul key={keyPrefix} dir="rtl" className="list-disc list-inside space-y-1 mb-4 pr-4 text-zinc-200">
+        <ul key={keyPrefix} dir="rtl" className="list-disc list-inside space-y-1 mb-4 ps-4 text-zinc-200">
           {children}
         </ul>
       )
 
     case 'orderedList':
       return (
-        <ol key={keyPrefix} dir="rtl" className="list-decimal list-inside space-y-1 mb-4 pr-4 text-zinc-200">
+        <ol key={keyPrefix} dir="rtl" className="list-decimal list-inside space-y-1 mb-4 ps-4 text-zinc-200">
           {children}
         </ol>
       )
@@ -139,7 +139,7 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
         <blockquote
           key={keyPrefix}
           dir="rtl"
-          className="border-r-4 border-amber-500 pr-4 my-4 text-zinc-300 italic text-lg"
+          className="border-s-4 border-amber-500 ps-4 my-4 text-zinc-300 italic text-lg"
         >
           {children}
         </blockquote>

@@ -158,7 +158,7 @@ function ResultArea({
           <>
             {state.result}
             {state.loading && (
-              <span className="inline-block w-0.5 h-3 bg-amber-400 animate-pulse mr-0.5 align-middle" />
+              <span className="inline-block w-0.5 h-3 bg-amber-400 animate-pulse ms-0.5 align-middle" />
             )}
           </>
         )}

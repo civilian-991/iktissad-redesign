@@ -129,12 +129,12 @@ function PriceWidget({ data, arabic = false }: PriceWidgetProps) {
         <span className="text-xs text-white/50 leading-none">
           {data.nameAr}
           {data.isStale && (
-            <span className="mr-1 text-white/30 italic">
+            <span className="ms-1 text-white/30 italic">
               {arabic ? ' (بيانات قديمة)' : ' (stale)'}
             </span>
           )}
           {data.isMock && (
-            <span className="mr-1 text-amber-400/60 italic">
+            <span className="ms-1 text-amber-400/60 italic">
               {arabic ? ' (توضيحي)' : ' (sample)'}
             </span>
           )}
@@ -333,7 +333,7 @@ function FullWidget({ data, arabic = false }: FullWidgetProps) {
               </span>
             </div>
           </div>
-          <div className="text-left flex flex-col items-end gap-1">
+          <div className="text-end flex flex-col items-end gap-1">
             <ChangeIndicator change={data.change} changePercent={data.changePercent} arabic={arabic} />
             <span className="text-xs text-white/30">{data.market}</span>
           </div>

@@ -132,9 +132,9 @@
   /* ─────────────────────────────────────────────────────────────────
      TYPOGRAPHY
      ───────────────────────────────────────────────────────────────── */
-  --font-display: 'Tajawal', 'system-ui', sans-serif;
-  --font-body: 'Tajawal', 'system-ui', sans-serif;
-  --font-accent: 'Playfair Display', serif;
+  --font-display: 'Tajawal', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Segoe UI', 'system-ui', sans-serif;
+  --font-body: 'Tajawal', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Segoe UI', 'system-ui', sans-serif;
+  --font-accent: 'Playfair Display', 'Georgia', serif;
 
   /* ─────────────────────────────────────────────────────────────────
      SPACING
@@ -188,7 +188,6 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: 16px;
 }
 
 body {
@@ -197,11 +196,45 @@ body {
   color: var(--color-ink);
   direction: rtl;
   text-align: right;
-  line-height: 1.75;
+  font-size: 1.125rem; /* 18px — minimum for Arabic readability */
+  line-height: 1.85; /* 1.8–2.0 optimal for Arabic script */
   letter-spacing: 0.015em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Arabic ligatures & contextual forms */
+  font-feature-settings: 'liga' 1, 'calt' 1, 'kern' 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* English locale overrides — tighter Latin metrics */
+html[lang="en"] body {
+  font-size: 1rem; /* 16px for Latin */
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BIDIRECTIONAL TEXT
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Isolate embedded LTR text within Arabic content */
+bdi, [dir="ltr"] {
+  unicode-bidi: isolate;
+}
+
+/* English terms / numbers embedded in Arabic article body */
+.article-body-slug bdi[dir="ltr"],
+.article-body-slug span[dir="ltr"] {
+  unicode-bidi: isolate;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* Ensure numbers in article content stay LTR */
+.article-body-slug .num-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -211,8 +244,13 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 800;
-  line-height: 1.45;
+  line-height: 1.5; /* slightly more generous for Arabic diacritics */
   letter-spacing: 0;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+html[lang="en"] :is(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.3;
 }
 
 h1 {
@@ -504,16 +542,16 @@ h3 {
 
 .deco-corner--tl {
   top: 0;
-  right: 0;
+  inset-inline-start: 0;
   border-bottom: none;
-  border-left: none;
+  border-inline-end: none;
 }
 
 .deco-corner--br {
   bottom: 0;
-  left: 0;
+  inset-inline-end: 0;
   border-top: none;
-  border-right: none;
+  border-inline-start: none;
 }
 
 /* Section Border */
@@ -526,7 +564,7 @@ h3 {
   content: '';
   position: absolute;
   top: -1px;
-  right: 0;
+  inset-inline-start: 0;
   width: 60px;
   height: 2px;
   background: var(--color-gold);
@@ -815,7 +853,7 @@ h3 {
   content: '';
   position: absolute;
   bottom: -2px;
-  right: 0;
+  inset-inline-start: 0;
   width: 0;
   height: 1px;
   background: var(--color-gold);
@@ -841,8 +879,8 @@ h3 {
   line-height: 1.8;
   color: var(--color-charcoal);
   position: relative;
-  padding-right: 2rem;
-  border-right: 2px solid var(--color-gold);
+  padding-inline-start: 2rem;
+  border-inline-start: 2px solid var(--color-gold);
 }
 
 .quote-editorial::before {
@@ -852,7 +890,7 @@ h3 {
   color: var(--color-gold);
   position: absolute;
   top: -0.75rem;
-  right: 0.5rem;
+  inset-inline-start: 0.5rem;
   line-height: 1;
   opacity: 0.25;
 }

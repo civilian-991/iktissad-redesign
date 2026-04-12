@@ -79,7 +79,7 @@ export default class WidgetErrorBoundary extends Component<
     return (
       <div
         dir="rtl"
-        className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col items-center justify-center gap-3 min-h-[80px] text-right"
+        className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col items-center justify-center gap-3 min-h-[80px] text-start"
       >
         <p className="text-white/30 font-[family-name:var(--font-display)] text-sm text-center">
           تعذّر تحميل هذا الجزء

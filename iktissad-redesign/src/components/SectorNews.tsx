@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import {
   Factory, Building2, Plane, Car, Leaf, Wheat, ShoppingBag,
   TrendingUp, Shield, Home, Truck, GraduationCap, HeartPulse,
@@ -37,6 +37,7 @@ interface Sector { id: string; name: string; slug: string; }
 
 function SectorCard({ sector }: { sector: Sector }) {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
   const Icon = SECTOR_ICONS[sector.slug] ?? TrendingUp;
 
   const { data } = useSWR<ApiResponse<Article[]>>(
@@ -91,7 +92,7 @@ function SectorCard({ sector }: { sector: Sector }) {
             {featured.publishedAt && (
               <span className="text-white/60 text-sm flex items-center gap-1.5">
                 <Clock size={12} />
-                {new Date(featured.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                {fmtDate(featured.publishedAt)}
               </span>
             )}
           </div>
@@ -120,7 +121,7 @@ function SectorCard({ sector }: { sector: Sector }) {
               {article.publishedAt && (
                 <span className="text-graphite text-sm mt-1.5 flex items-center gap-1">
                   <Clock size={10} />
-                  {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                  {fmtDate(article.publishedAt)}
                 </span>
               )}
             </div>

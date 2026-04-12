@@ -294,12 +294,12 @@ function MessageBubble({
 
           {/* Streaming cursor */}
           {isStreaming && !isUser && (
-            <span className="inline-block w-0.5 h-3.5 bg-amber-400 animate-pulse mr-0.5 align-middle rounded-full" />
+            <span className="inline-block w-0.5 h-3.5 bg-amber-400 animate-pulse ms-0.5 align-middle rounded-full" />
           )}
 
           {/* Copy button for assistant messages */}
           {!isUser && !isStreaming && displayText && (
-            <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 end-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <CopyButton text={displayText} />
             </div>
           )}

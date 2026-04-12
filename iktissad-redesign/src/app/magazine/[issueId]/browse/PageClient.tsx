@@ -51,7 +51,7 @@ const MagazinePage = forwardRef<HTMLDivElement, PageProps>(({ url, num, locked }
         {/* Inner edge shadow */}
         <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/25 to-transparent pointer-events-none" />
         {/* Page number */}
-        <div className="absolute bottom-3 right-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
+        <div className="absolute bottom-3 start-3 text-stone-500/70 text-[10px] font-mono">{num}</div>
 
         {/* Lock overlay for paywalled pages */}
         {locked && (
@@ -345,7 +345,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
                 {issue.title}
               </span>
               {total > 0 && (
-                <span className="text-white/30 text-xs mr-2">
+                <span className="text-white/30 text-xs ms-2">
                   {currentPage + 1}
                   {currentPage + 1 < total ? `–${Math.min(currentPage + 2, total)}` : ''} / {total}
                 </span>
@@ -399,7 +399,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
               {!isSubscriber && (
                 <button
                   onClick={() => setPaywallOpen(true)}
-                  className="px-3 py-1.5 text-xs font-[family-name:var(--font-display)] font-semibold text-stone-900 bg-gold hover:brightness-110 rounded transition-all mr-1"
+                  className="px-3 py-1.5 text-xs font-[family-name:var(--font-display)] font-semibold text-stone-900 bg-gold hover:brightness-110 rounded transition-all ms-1"
                 >
                   اشترك
                 </button>
@@ -495,7 +495,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             className="fixed bottom-0 inset-x-0 z-40 h-10 flex items-center gap-3 px-6"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)' }}
           >
-            <span className="text-white/30 text-[11px] font-mono w-6 text-right tabular-nums">
+            <span className="text-white/30 text-[11px] font-mono w-6 text-start tabular-nums">
               {currentPage + 1}
             </span>
             <div
@@ -513,7 +513,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             >
               <div className="absolute inset-y-0 -top-2 -bottom-2 inset-x-0" />
               <motion.div
-                className="absolute right-0 top-0 h-full bg-gradient-to-l from-amber-700 to-gold"
+                className="absolute start-0 top-0 h-full bg-gradient-to-l from-amber-700 to-gold"
                 animate={{ width: `${readingProgress}%` }}
                 transition={{ ease: 'easeOut' }}
               />

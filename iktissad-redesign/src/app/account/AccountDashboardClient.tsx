@@ -96,7 +96,7 @@ function QuickLinkCard({
         </p>
         <p className="text-pewter text-xs mt-0.5">{description}</p>
       </div>
-      <ArrowUpLeft className="text-pewter group-hover:text-gold transition-colors mr-auto flex-shrink-0" size={16} />
+      <ArrowUpLeft className="text-pewter group-hover:text-gold transition-colors ms-auto flex-shrink-0" size={16} />
     </Link>
   );
 }

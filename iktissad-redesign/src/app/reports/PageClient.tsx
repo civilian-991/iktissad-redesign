@@ -68,7 +68,7 @@ function FeaturedDossierCard({ series }: { series: ArticleSeries }) {
             <Clock size={12} />
             {formatDate(series.createdAt)}
           </span>
-          <span className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold mr-auto flex items-center gap-1 group-hover:underline">
+          <span className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold ms-auto flex items-center gap-1 group-hover:underline">
             تصفح الملف
             <ArrowUpLeft size={14} />
           </span>
@@ -125,7 +125,7 @@ function DossierCard({ series, index }: { series: ArticleSeries; index: number }
               {series.articleCount} مقال
             </span>
           )}
-          <span className="flex items-center gap-1 text-charcoal/40 text-xs font-[family-name:var(--font-display)] mr-auto">
+          <span className="flex items-center gap-1 text-charcoal/40 text-xs font-[family-name:var(--font-display)] ms-auto">
             <Clock size={10} />
             {formatDate(series.createdAt)}
           </span>

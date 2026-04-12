@@ -117,7 +117,7 @@ export default function PreviewClient({ article, isDraft, expiresAt }: PreviewCl
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-lg text-zinc-400 leading-relaxed border-r-4 border-amber-600 pr-4">
+          <p className="text-lg text-zinc-400 leading-relaxed border-s-4 border-amber-600 ps-4">
             {article.excerpt}
           </p>
         )}
@@ -139,7 +139,7 @@ export default function PreviewClient({ article, isDraft, expiresAt }: PreviewCl
         <hr className="border-zinc-800" />
 
         {/* Body */}
-        <div className="prose prose-invert prose-zinc max-w-none text-right">
+        <div className="prose prose-invert prose-zinc max-w-none text-start">
           <TipTapRenderer content={bodyContent} />
         </div>
 

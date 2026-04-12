@@ -1,14 +1,16 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { BookOpen, Eye, ArrowLeft, ArrowUpLeft, Sparkles, Loader2 } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { MagazineIssue, ApiResponse } from '@/types';
 
 export default function FeaturedMagazine() {
   const { t } = useTranslation();
+  const { fmtDate, fmtNumber } = useFormatters();
 
   const { data } = useSWR<ApiResponse<MagazineIssue[]>>(
     '/api/magazines?status=published&pageSize=4',
@@ -109,7 +111,7 @@ export default function FeaturedMagazine() {
                         {latestIssue.views > 0 && (
                           <span className="flex items-center gap-2">
                             <Eye size={16} />
-                            {latestIssue.views.toLocaleString()} {t('components.featuredMagazine.reads')}
+                            {fmtNumber(latestIssue.views)} {t('components.featuredMagazine.reads')}
                           </span>
                         )}
                       </div>
@@ -174,7 +176,9 @@ export default function FeaturedMagazine() {
                   className="flex items-center gap-4 p-3 bg-obsidian/5 backdrop-blur-sm border border-obsidian/10 hover:bg-obsidian/10 hover:border-gold/30 transition-all duration-300 group"
                 >
                   {issue.coverImage ? (
-                    <img src={issue.coverImage} alt={issue.title} className="w-16 h-20 object-cover shadow-lg" />
+                    <div className="relative w-16 h-20 shadow-lg shrink-0">
+                      <Image src={issue.coverImage} alt={issue.title} fill className="object-cover" sizes="64px" />
+                    </div>
                   ) : (
                     <div className="w-16 h-20 bg-obsidian flex items-center justify-center shadow-lg">
                       <BookOpen className="text-gold" size={20} />
@@ -187,7 +191,7 @@ export default function FeaturedMagazine() {
                     {issue.subtitle && <p className="text-graphite text-sm">{issue.subtitle}</p>}
                     {issue.publishDate && (
                       <p className="text-graphite text-xs">
-                        {new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
+                        {fmtDate(issue.publishDate, { year: 'numeric', month: 'long' })}
                       </p>
                     )}
                   </div>

@@ -127,6 +127,18 @@ const BLOCK_LIBRARY: BlockConfig[] = [
     icon: <Minus size={iconSizes.md} />,
     defaultData: { style: 'line' },
   },
+  {
+    type: 'upgrade_cta',
+    label: 'ترقية الاشتراك',
+    description: 'دعوة للمشتركين المجانيين للترقية',
+    icon: <MousePointerClick size={iconSizes.md} />,
+    defaultData: {
+      headline:    'احصل على وصول غير محدود',
+      body:        'اشترك في النسخة المميزة للوصول إلى التحليلات العميقة والتقارير الحصرية.',
+      buttonLabel: 'اشترك الآن',
+      buttonUrl:   '/subscribe',
+    },
+  },
 ];
 
 // ─── Block preview renderers ─────────────────────────────────────
@@ -168,7 +180,7 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
       );
     case 'quote':
       return (
-        <blockquote className="border-r-4 border-gold/60 pr-3">
+        <blockquote className="border-s-4 border-gold/60 ps-3">
           <p className="text-white/80 text-sm italic font-[family-name:var(--font-display)] line-clamp-2">
             {(d.text as string) || 'نص الاقتباس...'}
           </p>
@@ -200,6 +212,20 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
       );
     case 'divider':
       return <hr className="border-white/20" />;
+    case 'upgrade_cta':
+      return (
+        <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 text-center space-y-1">
+          <p className="text-gold font-[family-name:var(--font-display)] font-bold text-sm truncate">
+            {(d.headline as string) || 'احصل على وصول غير محدود'}
+          </p>
+          <p className="text-white/50 text-xs truncate">
+            {(d.body as string) || 'اشترك في النسخة المميزة'}
+          </p>
+          <span className="inline-block mt-1 px-3 py-1 bg-gold/80 text-obsidian text-xs font-bold rounded-sm">
+            {(d.buttonLabel as string) || 'اشترك الآن'}
+          </span>
+        </div>
+      );
     default:
       return null;
   }
@@ -339,6 +365,15 @@ function BlockEditor({
         </p>
       )}
 
+      {block.type === 'upgrade_cta' && (
+        <>
+          {field('headline', 'العنوان الرئيسي', 'text', 'احصل على وصول غير محدود')}
+          {field('body', 'نص الوصف', 'textarea', 'اشترك في النسخة المميزة…')}
+          {field('buttonLabel', 'نص الزر', 'text', 'اشترك الآن')}
+          {field('buttonUrl', 'رابط الزر', 'url', '/subscribe')}
+        </>
+      )}
+
       <button
         onClick={onClose}
         className="w-full text-center text-white/40 hover:text-white/60 text-xs font-[family-name:var(--font-display)] transition-colors"
@@ -389,9 +424,9 @@ function ArticlePickerModal({
               placeholder="ابحث في المقالات..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-12 pl-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 ps-12 pe-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
             />
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40" size={iconSizes.md} />
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-white/40" size={iconSizes.md} />
           </div>
         </div>
 
@@ -410,7 +445,7 @@ function ArticlePickerModal({
               <button
                 key={article.id}
                 onClick={() => onSelect(article)}
-                className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors text-right"
+                className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors text-start"
               >
                 {article.featuredImage ? (
                   <img src={article.featuredImage} alt={article.title} className="w-16 h-12 object-cover rounded-lg flex-shrink-0" />
@@ -419,7 +454,7 @@ function ArticlePickerModal({
                     <FileText size={16} className="text-white/30" />
                   </div>
                 )}
-                <div className="flex-1 min-w-0 text-right">
+                <div className="flex-1 min-w-0 text-start">
                   <p className="text-white text-sm font-[family-name:var(--font-display)] font-semibold line-clamp-1">{article.title}</p>
                   <p className="text-white/50 text-xs line-clamp-1 mt-0.5">{article.excerpt}</p>
                 </div>
@@ -1006,7 +1041,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
         <button
           key={config.type}
           onClick={() => addBlock(config)}
-          className="w-full flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 border border-transparent hover:border-gold/20 rounded-xl transition-all text-right group"
+          className="w-full flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 border border-transparent hover:border-gold/20 rounded-xl transition-all text-start group"
         >
           <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-gold/10 text-gold rounded-lg group-hover:bg-gold/20 transition-colors">
             {config.icon}
@@ -1017,7 +1052,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
             </p>
             <p className="text-white/40 text-xs">{config.description}</p>
           </div>
-          <Plus size={iconSizes.sm} className="flex-shrink-0 text-white/20 group-hover:text-gold transition-colors mr-auto" />
+          <Plus size={iconSizes.sm} className="flex-shrink-0 text-white/20 group-hover:text-gold transition-colors ms-auto" />
         </button>
       ))}
     </div>

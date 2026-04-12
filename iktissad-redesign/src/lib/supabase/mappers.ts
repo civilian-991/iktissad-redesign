@@ -103,6 +103,7 @@ export function mapArticleRow(
     body: (row as any).body ?? undefined,
     isBreaking: (row as any).is_breaking ?? false,
     paywalled: (row as any).is_paywalled ?? false,
+    articlePrice: (row as any).article_price ?? null,
     articleType: (row as any).article_type ?? undefined,
     videoUrl: (row as any).video_url ?? undefined,
     metaTitle: (row as any).meta_title ?? undefined,
@@ -110,6 +111,8 @@ export function mapArticleRow(
     ogImage: (row as any).og_image ?? undefined,
     canonicalUrl: (row as any).canonical_url ?? undefined,
     noIndex: (row as any).no_index ?? false,
+    summary: (row as any).summary ?? null,
+    summaryEn: (row as any).summary_en ?? null,
   };
 }
 

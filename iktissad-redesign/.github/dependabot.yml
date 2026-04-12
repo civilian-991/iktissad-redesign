@@ -1,0 +1,43 @@
+version: 2
+updates:
+  # npm dependencies for the Next.js app
+  - package-ecosystem: "npm"
+    directory: "/iktissad-redesign"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Beirut"
+    open-pull-requests-limit: 10
+    groups:
+      # Batch minor/patch updates into a single PR per week
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "automated"
+    reviewers: []
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # Major version bumps need manual review
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions themselves
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(actions)"

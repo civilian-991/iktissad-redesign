@@ -150,13 +150,13 @@ export default function Newsletter() {
                     if (error) setError(null);
                   }}
                   placeholder={t('newsletter.placeholder')}
-                  className={`w-full px-6 py-4 pr-14 bg-white/5 border text-white font-[family-name:var(--font-display)] placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 transition-colors ${
+                  className={`w-full px-6 py-4 ps-14 bg-white/5 border text-white font-[family-name:var(--font-display)] placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 transition-colors ${
                     error ? 'border-red-400/60' : 'border-gold/20 focus:border-gold/50'
                   }`}
                   required
                   disabled={isLoading || isSubmitted || !turnstileToken}
                 />
-                <Mail className="absolute right-5 top-1/2 -translate-y-1/2 text-gold/50" size={20} />
+                <Mail className="absolute start-5 top-1/2 -translate-y-1/2 text-gold/50" size={20} />
               </div>
 
               <motion.button

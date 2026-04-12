@@ -74,7 +74,7 @@ function SuggestionRow({ suggestion }: SuggestionRowProps) {
     <li className="flex items-center gap-3 rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2.5">
       {/* Article title — takes available space */}
       <span
-        className="flex-1 text-sm text-white leading-snug text-right"
+        className="flex-1 text-sm text-white leading-snug text-start"
         title={suggestion.title}
       >
         {displayTitle}
@@ -180,7 +180,7 @@ export default function SEOInternalLinks({
 
   return (
     <div
-      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-4 text-right"
+      className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-4 text-start"
       dir="rtl"
     >
       {/* Panel header */}
@@ -194,7 +194,7 @@ export default function SEOInternalLinks({
         {loading && (
           <Loader2
             size={13}
-            className="animate-spin text-zinc-500 mr-auto"
+            className="animate-spin text-zinc-500 ms-auto"
           />
         )}
       </div>

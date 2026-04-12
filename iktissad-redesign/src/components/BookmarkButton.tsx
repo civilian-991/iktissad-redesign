@@ -131,11 +131,11 @@ export default function BookmarkButton({
       {/* Login prompt tooltip */}
       {showTooltip && (
         <div
-          className="absolute bottom-full mb-2 right-0 z-50 bg-obsidian text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg"
+          className="absolute bottom-full mb-2 start-0 z-50 bg-obsidian text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg"
           dir="rtl"
         >
           {t('pages.bookmark.loginRequired')}
-          <div className="absolute top-full right-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-obsidian" />
+          <div className="absolute top-full start-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-obsidian" />
         </div>
       )}
     </div>

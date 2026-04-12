@@ -152,14 +152,14 @@ export default function SearchPageClient() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('pages.search.placeholder')}
-                  className="w-full px-6 py-5 pr-14 text-lg bg-white rounded-xl font-[family-name:var(--font-display)] text-navy placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-gold/30 shadow-xl"
+                  className="w-full px-6 py-5 ps-14 text-lg bg-white rounded-xl font-[family-name:var(--font-display)] text-navy placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-gold/30 shadow-xl"
                   autoFocus
                 />
-                <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-gold" size={24} />
+                <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-gold" size={24} />
                 {query && (
                   <button
                     onClick={clearQuery}
-                    className="absolute left-5 top-1/2 -translate-y-1/2 text-slate hover:text-navy"
+                    className="absolute end-5 top-1/2 -translate-y-1/2 text-slate hover:text-navy"
                     aria-label="مسح البحث"
                   >
                     <X size={20} />

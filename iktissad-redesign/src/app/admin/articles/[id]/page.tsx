@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import RichTextEditor from '@/components/admin/RichTextEditor';
+import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
@@ -60,7 +60,8 @@ import PaywallOptimizer from '@/components/admin/PaywallOptimizer';
 import AIPerformanceRecommendations from '@/components/admin/AIPerformanceRecommendations';
 import ArticleVersionPanel from '@/components/admin/ArticleVersionPanel';
 import SharePreviewModal from '@/components/admin/SharePreviewModal';
-import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion } from '@/lib/api-client';
+import FactCheckPanel from '@/components/admin/FactCheckPanel';
+import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion, aiAutoTag, aiSummarize, aiGenerateSocialCards } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
@@ -68,6 +69,16 @@ import type { ArticleTypeConfig } from '@/lib/ai/arabic-editorial';
 import { useArticlePresence } from '@/hooks/useArticlePresence';
 import PresenceAvatars from '@/components/admin/PresenceAvatars';
 import type { MeData } from '@/app/api/auth/me/route';
+
+// TipTap editor is large (~500KB). Dynamic import keeps it out of the initial bundle.
+const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-96 bg-stone-50 border border-stone-200 rounded-lg animate-pulse flex items-center justify-center">
+      <Loader2 className="text-stone-400 animate-spin" size={24} />
+    </div>
+  ),
+});
 
 /**
  * Generate a deterministic color from a userId string.
@@ -161,6 +172,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
+  // Phase 5 AI states
+  const [isAutoTagging, setIsAutoTagging] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isGeneratingSocialCards, setIsGeneratingSocialCards] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -322,6 +337,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       toast.success(t('admin.articles.editor.saveSuccess'));
       // Fire-and-forget version snapshot on every manual save
       void createArticleVersion(id).catch(() => {/* silent — versioning is best-effort */});
+      // 5.3: Auto-generate summary when publishing (fire-and-forget)
+      if (status === 'published' && content.trim()) {
+        void aiSummarize(id, content, title).catch(() => {/* silent — summary is best-effort */});
+      }
     } catch (err: any) {
       toast.error(err.message || t('admin.common.error'));
     } finally {
@@ -403,6 +422,70 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       toast.error(err.message || t('admin.articles.editor.ai.excerptError'));
     } finally {
       setIsGeneratingExcerpt(false);
+    }
+  };
+
+  // Phase 5.1 — AI Auto-Tag
+  const handleAutoTag = async () => {
+    if (!content.trim() && !title.trim()) {
+      toast.error('أضف عنواناً أو محتوى أولاً');
+      return;
+    }
+    setIsAutoTagging(true);
+    try {
+      const res = await aiAutoTag(content || title, title, selectedTags);
+      if (res.data?.tags?.length) {
+        const newTags = res.data.tags.filter((t) => !selectedTags.includes(t));
+        if (newTags.length === 0) {
+          toast.info('لا توجد وسوم جديدة مقترحة');
+        } else {
+          setSelectedTags((prev) => [...prev, ...newTags]);
+          toast.success(`تمت إضافة ${newTags.length} وسوم مقترحة`);
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'فشل اقتراح الوسوم');
+    } finally {
+      setIsAutoTagging(false);
+    }
+  };
+
+  // Phase 5.3 — AI Summarize (also called automatically on publish)
+  const handleSummarize = async () => {
+    if (!content.trim()) {
+      toast.error(t('admin.articles.editor.ai.noContent'));
+      return;
+    }
+    setIsSummarizing(true);
+    try {
+      const res = await aiSummarize(id, content, title);
+      if (res.data?.summary) {
+        toast.success('تم توليد الملخص الذكي وحفظه');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'فشل توليد الملخص');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  // Phase 5.5 — AI Social Card
+  const handleGenerateSocialCards = async () => {
+    if (!title.trim()) {
+      toast.error(t('admin.articles.editor.titleRequired'));
+      return;
+    }
+    setIsGeneratingSocialCards(true);
+    try {
+      const res = await aiGenerateSocialCards(id, title, featuredImage || undefined);
+      if (res.data?.twitter) {
+        setOgImage(res.data.twitter);
+        toast.success('تم توليد البطاقات الاجتماعية — تم تعيين صورة Twitter كـ OG Image');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'فشل توليد البطاقات الاجتماعية');
+    } finally {
+      setIsGeneratingSocialCards(false);
     }
   };
 
@@ -931,10 +1014,21 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             transition={{ delay: 0.3 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
-            <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              <Tag size={14} />
-              {t('admin.articles.editor.tagsLabel')}
-            </label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)]">
+                <Tag size={14} />
+                {t('admin.articles.editor.tagsLabel')}
+              </label>
+              <button
+                onClick={handleAutoTag}
+                disabled={isAutoTagging}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-gold/20 rounded-lg text-gold text-xs font-[family-name:var(--font-display)] hover:bg-gold/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                title="اقتراح وسوم بالذكاء الاصطناعي"
+              >
+                {isAutoTagging ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {isAutoTagging ? 'جارٍ الاقتراح…' : 'اقتراح ذكي'}
+              </button>
+            </div>
             {/* Preset tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {tagKeys.map((tag) => (
@@ -980,6 +1074,42 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 <Plus size={16} />
               </button>
             </div>
+          </motion.div>
+
+          {/* Phase 5.4 — AI Fact-Check Panel */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
+            <FactCheckPanel articleId={id} content={contentText} title={title} />
+          </motion.div>
+
+          {/* Phase 5.3 — AI Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.34 }}
+            className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <Sparkles size={15} className="text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-white text-sm font-[family-name:var(--font-display)] font-semibold">الملخص الذكي (TLDR)</p>
+                  <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">يُعرض للقراء أعلى المقال</p>
+                </div>
+              </div>
+              <button
+                onClick={handleSummarize}
+                disabled={isSummarizing || !content.trim()}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400 text-xs font-[family-name:var(--font-display)] hover:bg-purple-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isSummarizing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {isSummarizing ? 'جارٍ التوليد…' : 'توليد الملخص'}
+              </button>
+            </div>
+            <p className="text-white/30 text-xs font-[family-name:var(--font-display)] leading-relaxed">
+              يُولَّد تلقائياً عند النشر. يمكن توليده يدوياً في أي وقت.
+            </p>
           </motion.div>
 
           {/* SEO Metadata — saveable fields */}
@@ -1029,7 +1159,18 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
               {/* OG Image */}
               <div>
-                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">صورة المشاركة (OG Image)</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">صورة المشاركة (OG Image)</label>
+                  <button
+                    onClick={handleGenerateSocialCards}
+                    disabled={isGeneratingSocialCards || !title.trim()}
+                    className="flex items-center gap-1 px-2 py-1 bg-teal/10 border border-teal/20 rounded-lg text-teal text-[10px] font-[family-name:var(--font-display)] hover:bg-teal/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="توليد بطاقات وسائل التواصل الاجتماعي"
+                  >
+                    {isGeneratingSocialCards ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    {isGeneratingSocialCards ? 'جارٍ التوليد…' : 'توليد بطاقة'}
+                  </button>
+                </div>
                 <input
                   type="url"
                   value={ogImage}

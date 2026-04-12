@@ -179,7 +179,7 @@ function GeoCoverageTab({ countries }: { countries: CountryCoverage[] }) {
                   {c.country}
                 </span>
               </div>
-              <div className="text-left">
+              <div className="text-end">
                 <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
                   {c.articleCount.toLocaleString('ar')}
                 </span>

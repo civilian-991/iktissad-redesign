@@ -168,12 +168,12 @@ function OutlineSectionRow({ section, index }: { section: OutlineSection; index:
     <div className="border border-gold/10 rounded-lg overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 p-3 hover:bg-white/5 transition-colors text-right"
+        className="w-full flex items-center gap-3 p-3 hover:bg-white/5 transition-colors text-start"
       >
         <span className="shrink-0 w-7 h-7 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center text-xs font-[family-name:var(--font-accent)] text-gold font-bold">
           {index + 1}
         </span>
-        <span className="flex-1 text-sm font-[family-name:var(--font-display)] font-semibold text-white text-right">
+        <span className="flex-1 text-sm font-[family-name:var(--font-display)] font-semibold text-white text-start">
           {section.title}
         </span>
         <span className="shrink-0 text-xs text-white/40 font-[family-name:var(--font-display)]">
@@ -479,7 +479,7 @@ export default function ArticleBriefGenerator() {
                 className="block text-sm font-[family-name:var(--font-display)] font-semibold text-white/80 mb-2"
               >
                 نوع المقال
-                <span className="text-white/40 font-normal mr-2">(اختياري)</span>
+                <span className="text-white/40 font-normal ms-2">(اختياري)</span>
               </label>
               <select
                 id="type-select"

@@ -25,6 +25,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { formatRelativeTime } from '@/lib/i18n/format';
 import { iconSizes } from '@/lib/design-tokens';
 import { createClient } from '@/lib/supabase/client';
 
@@ -76,11 +77,7 @@ function getNotificationIcon(type: NotificationType) {
 }
 
 function relativeTime(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} د`;
-  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} س`;
-  return `منذ ${Math.floor(diff / 86400)} ي`;
+  return formatRelativeTime(dateStr, 'ar');
 }
 
 function notificationRoute(type: NotificationType, resourceId: string | null): string | null {
@@ -226,7 +223,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
       >
         <Bell size={iconSizes.md} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 bg-loss text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 bg-loss text-white text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -240,7 +237,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 top-full mt-2 w-80 rounded-xl shadow-2xl overflow-hidden z-50 border border-gold/10 bg-midnight"
+            className="absolute start-0 top-full mt-2 w-80 rounded-xl shadow-2xl overflow-hidden z-50 border border-gold/10 bg-midnight"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gold/10">
@@ -287,7 +284,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
                     <button
                       key={notif.id}
                       onClick={() => handleItemClick(notif)}
-                      className={`w-full text-right flex items-start gap-3 p-4 hover:bg-white/5 transition-colors ${
+                      className={`w-full text-start flex items-start gap-3 p-4 hover:bg-white/5 transition-colors ${
                         !notif.is_read ? 'border-s-2 border-s-gold bg-gold/3' : ''
                       }`}
                     >
@@ -297,7 +294,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
                       </div>
 
                       {/* Content */}
-                      <div className="flex-1 min-w-0 text-right">
+                      <div className="flex-1 min-w-0 text-start">
                         <p className={`text-sm font-[family-name:var(--font-display)] font-semibold leading-tight ${
                           !notif.is_read ? 'text-white' : 'text-white/70'
                         }`}>

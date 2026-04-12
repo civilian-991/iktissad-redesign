@@ -34,6 +34,7 @@ import {
   X,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { formatRelativeTime } from '@/lib/i18n/format';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, AdminUser } from '@/types';
 
@@ -70,11 +71,7 @@ export interface EditorialCommentsProps {
 // ─── Helpers ─────────────────────────────────────────────────────
 
 function relativeTime(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} د`;
-  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} س`;
-  return `منذ ${Math.floor(diff / 86400)} ي`;
+  return formatRelativeTime(dateStr, 'ar');
 }
 
 function Avatar({ author, size = 28 }: { author: NoteAuthor | null; size?: number }) {
@@ -184,14 +181,14 @@ function MentionInput({ value, onChange, onSubmit, submitting, placeholder }: Me
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className="absolute bottom-full mb-1 right-0 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto"
+            className="absolute bottom-full mb-1 inset-x-0 z-50 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto"
           >
             {filtered.slice(0, 8).map((u) => (
               <button
                 key={u.id}
                 type="button"
                 onClick={() => handleMentionSelect(u.name)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-800 transition-colors text-right"
+                className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-800 transition-colors text-start"
               >
                 <Avatar author={{ id: u.id, name: u.name, avatar: (u as AdminUser & { avatar?: string }).avatar ?? null }} size={22} />
                 <span className="text-sm text-white font-[family-name:var(--font-display)]">{u.name}</span>

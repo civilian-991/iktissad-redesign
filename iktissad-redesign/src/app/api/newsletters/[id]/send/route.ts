@@ -29,6 +29,9 @@ function mapNewsletterRow(row: any): Newsletter {
 
 // ─── HTML renderer for newsletter blocks ─────────────────────────
 
+// Arabic-safe font stack for email clients
+const EMAIL_FONT = "'Segoe UI', Tahoma, 'Noto Sans Arabic', Arial, sans-serif";
+
 function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject: string): string {
   const blocksHtml = blocks.map((block) => {
     const d = block.data;
@@ -37,56 +40,85 @@ function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject
         const text = String(d.text ?? "");
         const level = Number(d.level ?? 2);
         const tag = level === 1 ? "h1" : level === 3 ? "h3" : "h2";
-        return `<${tag} style="font-family:Arial,sans-serif;color:#183b4e;margin:24px 0 12px;direction:rtl;text-align:right">${text}</${tag}>`;
+        const size = level === 1 ? "28px" : level === 3 ? "18px" : "22px";
+        return `<${tag} style="font-family:${EMAIL_FONT};color:#183b4e;margin:24px 0 12px;font-size:${size};line-height:1.5;direction:rtl;text-align:right">${text}</${tag}>`;
       }
       case "article_card": {
         const title = String(d.title ?? "");
         const excerpt = String(d.excerpt ?? "");
         const img = d.image
-          ? `<img src="${d.image}" alt="${title}" style="width:100%;height:180px;object-fit:cover;border-radius:8px;display:block;margin-bottom:12px">`
+          ? `<img src="${d.image}" alt="${title}" width="600" style="width:100%;height:180px;object-fit:cover;display:block;margin-bottom:12px">`
           : "";
         const link = d.url
-          ? `<a href="${d.url}" style="color:#dda853;text-decoration:none;font-weight:bold">اقرأ المزيد →</a>`
+          ? `<a href="${d.url}" style="color:#dda853;text-decoration:none;font-weight:bold;font-family:${EMAIL_FONT}">اقرأ المزيد ←</a>`
           : "";
-        return `<div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:16px 0;direction:rtl;text-align:right">${img}<h3 style="font-family:Arial,sans-serif;color:#183b4e;margin:0 0 8px">${title}</h3><p style="font-family:Arial,sans-serif;color:#6b7280;margin:0 0 12px;line-height:1.6">${excerpt}</p>${link}</div>`;
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border:1px solid #e5e7eb"><tr><td style="padding:16px;direction:rtl;text-align:right">${img}<h3 style="font-family:${EMAIL_FONT};color:#183b4e;margin:0 0 8px;font-size:18px;line-height:1.5">${title}</h3><p style="font-family:${EMAIL_FONT};color:#6b7280;margin:0 0 12px;line-height:1.8;font-size:16px">${excerpt}</p>${link}</td></tr></table>`;
       }
       case "text":
-        return `<p style="font-family:Arial,sans-serif;color:#374151;line-height:1.7;margin:16px 0;direction:rtl;text-align:right">${String(d.content ?? "")}</p>`;
+        return `<p style="font-family:${EMAIL_FONT};color:#374151;line-height:1.85;margin:16px 0;font-size:16px;direction:rtl;text-align:right">${String(d.content ?? "")}</p>`;
       case "cta": {
         const text = String(d.text ?? "اقرأ المزيد");
         const url = String(d.url ?? "#");
-        return `<div style="text-align:center;margin:24px 0"><a href="${url}" style="background:#dda853;color:#0a1628;padding:12px 32px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;display:inline-block">${text}</a></div>`;
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td align="center"><a href="${url}" style="background:#dda853;color:#0a1628;padding:14px 36px;text-decoration:none;font-family:${EMAIL_FONT};font-weight:bold;font-size:16px;display:inline-block">${text}</a></td></tr></table>`;
       }
       case "divider":
-        return `<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">`;
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td style="border-top:1px solid #e5e7eb;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
       case "image": {
         const url = String(d.url ?? "");
         const alt = String(d.alt ?? "");
         const caption = d.caption
-          ? `<p style="font-family:Arial,sans-serif;color:#9ca3af;font-size:12px;text-align:center;margin:4px 0">${d.caption}</p>`
+          ? `<p style="font-family:${EMAIL_FONT};color:#9ca3af;font-size:12px;text-align:center;margin:4px 0">${d.caption}</p>`
           : "";
         return url
-          ? `<div style="margin:16px 0"><img src="${url}" alt="${alt}" style="width:100%;max-width:600px;display:block;margin:0 auto;border-radius:8px">${caption}</div>`
+          ? `<div style="margin:16px 0"><img src="${url}" alt="${alt}" width="600" style="width:100%;max-width:600px;display:block;margin:0 auto">${caption}</div>`
           : "";
+      }
+      case "upgrade_cta": {
+        const headline  = String(d.headline   ?? "احصل على وصول غير محدود");
+        const body      = String(d.body       ?? "اشترك في النسخة المميزة.");
+        const btnLabel  = String(d.buttonLabel ?? "اشترك الآن");
+        const btnUrl    = String(d.buttonUrl   ?? "/subscribe");
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td style="background:#183B4E;border:1px solid rgba(221,168,83,0.4);padding:24px;text-align:center;direction:rtl">
+  <h3 style="font-family:${EMAIL_FONT};color:#DDA853;margin:0 0 8px;font-size:18px;line-height:1.5">${headline}</h3>
+  <p style="font-family:${EMAIL_FONT};color:rgba(245,238,220,0.75);margin:0 0 16px;font-size:14px;line-height:1.8">${body}</p>
+  <a href="${btnUrl}" style="background:#DDA853;color:#0a1628;padding:12px 28px;text-decoration:none;font-family:${EMAIL_FONT};font-weight:bold;font-size:14px;display:inline-block">${btnLabel}</a>
+</td></tr></table>`;
       }
       default:
         return "";
     }
   }).join("\n");
 
+  // Table-based email layout for maximum client compatibility (Outlook, Gmail, Apple Mail)
   return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
-<body style="background:#f3f4f6;padding:24px;margin:0;font-family:Arial,sans-serif">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-    <div style="background:#0a1628;padding:24px;text-align:center">
-      <h1 style="color:#dda853;font-family:Arial,sans-serif;margin:0;font-size:24px">إكتساد</h1>
-    </div>
-    <div style="padding:24px">${blocksHtml}</div>
-    <div style="background:#f9fafb;padding:16px;text-align:center;border-top:1px solid #e5e7eb">
-      <p style="color:#9ca3af;font-size:12px;margin:0">لإلغاء الاشتراك <a href="{{{unsubscribeUrl}}}" style="color:#dda853">انقر هنا</a></p>
-    </div>
-  </div>
+<html dir="rtl" lang="ar" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Language" content="ar">
+<title>${subject}</title>
+<!--[if mso]>
+<style>body,table,td{font-family:Tahoma,Arial,sans-serif!important}</style>
+<![endif]-->
+</head>
+<body dir="rtl" style="background:#f3f4f6;padding:0;margin:0;font-family:${EMAIL_FONT};direction:rtl;text-align:right;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6">
+    <tr><td align="center" style="padding:24px">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-collapse:collapse">
+        <!-- Header -->
+        <tr><td style="background:#0a1628;padding:24px;text-align:center">
+          <h1 style="color:#dda853;font-family:${EMAIL_FONT};margin:0;font-size:24px;line-height:1.4;direction:rtl">الإقتصاد والأعمال</h1>
+          <p style="color:rgba(221,168,83,0.6);font-family:${EMAIL_FONT};margin:4px 0 0;font-size:12px">AL-IKTISSAD WAL-AAMAL</p>
+        </td></tr>
+        <!-- Content -->
+        <tr><td style="padding:24px;direction:rtl;text-align:right">${blocksHtml}</td></tr>
+        <!-- Footer -->
+        <tr><td style="background:#f9fafb;padding:16px;text-align:center;border-top:1px solid #e5e7eb">
+          <p style="color:#9ca3af;font-size:12px;font-family:${EMAIL_FONT};margin:0;direction:rtl">لإلغاء الاشتراك <a href="{{{unsubscribeUrl}}}" style="color:#dda853">انقر هنا</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 }
@@ -136,20 +168,28 @@ export async function POST(
     );
   }
 
-  // Count eligible recipients from newsletter_subscribers table
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let recipientQuery = (admin as any)
-    .from("newsletter_subscribers")
-    .select("id", { count: "exact", head: true });
+  // Count eligible recipients based on segment:
+  //   "all"     → all active newsletter_subscribers
+  //   "premium" → active paid subscribers (subscribers table, status=active)
+  //   "free"    → active newsletter_subscribers only (no paid subscription)
+  let recipientCount = 0;
 
-  // Filter by segment if not "all"
   if (existing.segment === "premium") {
-    recipientQuery = recipientQuery.eq("is_premium", true);
-  } else if (existing.segment === "free") {
-    recipientQuery = recipientQuery.eq("is_premium", false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (admin as any)
+      .from("subscribers")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active");
+    recipientCount = count ?? 0;
+  } else {
+    // "all" or "free" → count from newsletter_subscribers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (admin as any)
+      .from("newsletter_subscribers")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active");
+    recipientCount = count ?? 0;
   }
-
-  const { count: recipientCount } = await recipientQuery;
 
   // Update the newsletter to "sent"
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,15 +222,29 @@ export async function POST(
       const sgMail = require("@sendgrid/mail");
       sgMail.setApiKey(sgApiKey);
 
-      // Fetch confirmed subscriber emails
+      // Fetch confirmed subscriber emails based on segment
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let subQuery = (admin as any)
-        .from("newsletter_subscribers")
-        .select("email");
-      if (existing.segment === "premium") subQuery = subQuery.eq("is_premium", true);
-      else if (existing.segment === "free") subQuery = subQuery.eq("is_premium", false);
+      let emailRows: { email: string }[] = [];
 
-      const { data: subscribers } = await subQuery;
+      if (existing.segment === "premium") {
+        // Active paid subscribers
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data } = await (admin as any)
+          .from("subscribers")
+          .select("email")
+          .eq("status", "active");
+        emailRows = data ?? [];
+      } else {
+        // "all" or "free" → newsletter_subscribers
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data } = await (admin as any)
+          .from("newsletter_subscribers")
+          .select("email")
+          .eq("status", "active");
+        emailRows = data ?? [];
+      }
+
+      const subscribers = emailRows;
       const emails: string[] = (subscribers ?? [])
         .map((s: { email: string }) => s.email)
         .filter(Boolean);

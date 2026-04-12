@@ -373,9 +373,9 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
                 value={form.tagsInput}
                 onChange={set('tagsInput')}
                 placeholder="مثال: نفط, طاقة, سياسة نقدية"
-                className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 pr-10 pl-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/25 focus:outline-none focus:border-gold/30 transition-colors text-sm"
+                className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 ps-10 pe-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/25 focus:outline-none focus:border-gold/30 transition-colors text-sm"
               />
-              <Tag size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+              <Tag size={14} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-white/30" />
             </div>
             {parsedTags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -422,7 +422,7 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
                 </button>
               ))}
               {form.reliabilityRating > 0 && (
-                <span className="text-white/50 text-sm font-[family-name:var(--font-display)] mr-2">
+                <span className="text-white/50 text-sm font-[family-name:var(--font-display)] ms-2">
                   {form.reliabilityRating}/5
                 </span>
               )}

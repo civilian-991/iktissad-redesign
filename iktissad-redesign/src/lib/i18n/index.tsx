@@ -250,3 +250,56 @@ export function getLocaleDisplayName(locale: Locale): string {
 
 export { ar, en };
 export type { TranslationKey } from './ar';
+
+// Re-export locale-aware formatting utilities
+export {
+  formatNumber,
+  formatCompactNumber,
+  formatPercent,
+  formatCurrency,
+  formatDate,
+  formatShortDate,
+  formatTime,
+  formatRelativeTime,
+  isolateLtr,
+  isolateRtl,
+  isolateAuto,
+  addBidiIsolation,
+  BIDI,
+} from './format';
+
+import {
+  formatNumber as _fmtNum,
+  formatCompactNumber as _fmtCompact,
+  formatCurrency as _fmtCurrency,
+  formatDate as _fmtDate,
+  formatShortDate as _fmtShort,
+  formatTime as _fmtTime,
+  formatRelativeTime as _fmtRelative,
+} from './format';
+
+/**
+ * Hook that returns locale-bound formatting functions.
+ * Automatically uses the current locale from TranslationProvider.
+ *
+ * @example
+ * const { fmtDate, fmtRelative, fmtNumber } = useFormatters();
+ * fmtDate(article.publishedAt) // "١٥ أبريل ٢٠٢٦" or "April 15, 2026"
+ * fmtRelative(article.publishedAt) // "منذ ٥ دقائق" or "5 minutes ago"
+ */
+export function useFormatters() {
+  const { locale } = useTranslation();
+
+  return useMemo(() => ({
+    fmtNumber: (v: number, opts?: Intl.NumberFormatOptions) => _fmtNum(v, locale, opts),
+    fmtCompact: (v: number) => _fmtCompact(v, locale),
+    fmtCurrency: (v: number, currency?: string) => _fmtCurrency(v, locale, currency),
+    fmtDate: (d: Date | string, opts?: Intl.DateTimeFormatOptions) => _fmtDate(d, locale, opts),
+    fmtShortDate: (d: Date | string) => _fmtShort(d, locale),
+    fmtTime: (d: Date | string) => _fmtTime(d, locale),
+    fmtRelative: (d: Date | string) => _fmtRelative(d, locale),
+    /** Locale string for direct Intl use: 'ar-SA' or 'en-US' */
+    dateLocale: locale === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US',
+    numberLocale: locale === 'ar' ? 'ar-SA' : 'en-US',
+  }), [locale]);
+}

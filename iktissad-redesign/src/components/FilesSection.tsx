@@ -2,19 +2,14 @@
 
 import { motion } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, FolderOpen } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { ArticleSeries, ApiResponse } from '@/types';
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  });
-}
-
 export default function FilesSection() {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
 
   const { data, isLoading } = useSWR<ApiResponse<ArticleSeries[]>>(
     '/api/series?status=active&pageSize=5',
@@ -96,13 +91,13 @@ export default function FilesSection() {
                       )}
                       <span className="inline-flex items-center gap-1.5 text-white/40 text-xs font-[family-name:var(--font-display)]">
                         <Clock size={10} />
-                        {formatDate(featured.createdAt)}
+                        {fmtDate(featured.createdAt, { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-right bg-gold" />
+                <div className="absolute bottom-0 inset-x-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-[inline-start] bg-gold" />
               </motion.a>
             )}
 
@@ -145,7 +140,7 @@ export default function FilesSection() {
                       )}
                       <span className="text-charcoal/40 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
                         <Clock size={10} />
-                        {formatDate(s.createdAt)}
+                        {fmtDate(s.createdAt, { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                   </div>

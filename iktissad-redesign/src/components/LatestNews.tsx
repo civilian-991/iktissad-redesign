@@ -2,13 +2,15 @@
 
 import { motion } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, Newspaper } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
+import { LiveBlogBadge } from '@/components/LiveBlog';
 import type { Article, ApiResponse } from '@/types';
 
 export default function LatestNews() {
   const { t } = useTranslation();
+  const { fmtDate } = useFormatters();
 
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
     '/api/articles?status=published&featured=false&pageSize=6',
@@ -66,10 +68,16 @@ export default function LatestNews() {
                       <Newspaper className="text-sand" size={28} />
                     </div>
                   )}
+                  {/* Live blog badge */}
+                  {article.isBreaking && (
+                    <div className="absolute top-2 start-2 z-10">
+                      <LiveBlogBadge />
+                    </div>
+                  )}
                   {/* Sector badge on image */}
                   {article.sector && (
                     <span
-                      className="absolute bottom-0 right-0 px-2.5 py-1 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wide"
+                      className="absolute bottom-0 start-0 px-2.5 py-1 text-xs font-bold font-[family-name:var(--font-display)] uppercase tracking-wide"
                       style={{
                         background: 'var(--color-gold)',
                         color: 'var(--color-brand-darker)',
@@ -88,16 +96,14 @@ export default function LatestNews() {
                   {article.publishedAt && (
                     <span className="text-charcoal/40 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
                       <Clock size={10} />
-                      {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                      })}
+                      {fmtDate(article.publishedAt, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                   )}
                 </div>
 
                 {/* Bottom gold line reveal */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-right"
+                  className="absolute bottom-0 inset-x-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-[inline-start]"
                   style={{ background: 'var(--color-gold)' }}
                 />
               </motion.a>

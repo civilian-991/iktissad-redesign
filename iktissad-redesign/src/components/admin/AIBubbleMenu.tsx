@@ -115,7 +115,7 @@ function ResultPopover({
   return (
     <div
       dir="rtl"
-      className="absolute top-full mt-2 right-0 z-50 w-80 rounded-xl border border-zinc-700 bg-zinc-800 shadow-2xl shadow-black/50 overflow-hidden"
+      className="absolute top-full mt-2 start-0 z-50 w-80 rounded-xl border border-zinc-700 bg-zinc-800 shadow-2xl shadow-black/50 overflow-hidden"
     >
       {/* Result area */}
       <div className="p-3 max-h-48 overflow-y-auto text-xs text-white/85 leading-relaxed whitespace-pre-wrap">
@@ -132,7 +132,7 @@ function ResultPopover({
           <>
             {state.result}
             {state.loading && (
-              <span className="inline-block w-0.5 h-3 bg-amber-400 animate-pulse ml-0.5 align-middle" />
+              <span className="inline-block w-0.5 h-3 bg-amber-400 animate-pulse me-0.5 align-middle" />
             )}
           </>
         )}

@@ -1,33 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { requireAuth, unauthorizedResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
 import { notifyIndexNow } from "@/lib/indexnow";
+import { autoPostOnPublish } from "@/lib/social-posting";
+import {
+  publicReadLimit,
+  authWriteLimit,
+  getClientIp,
+  rateLimitedResponse,
+} from "@/lib/rate-limit";
 import type { ApiResponse, Article } from "@/types";
-
-// ─── Rate-limit headers helper ───────────────────────────────────
-// Values are stubbed for now. Replace with a real counter (e.g. Redis /
-// Supabase Edge Functions) once you have per-user tracking in place.
-
-const RATE_LIMIT = 100; // requests per 60-second window
-
-function rateLimitHeaders(): HeadersInit {
-  // Window resets at the top of the next minute
-  const now = Math.floor(Date.now() / 1000);
-  const windowSeconds = 60;
-  const resetAt = Math.ceil(now / windowSeconds) * windowSeconds;
-
-  // Stub: assume all slots are still available (replace with real counter)
-  const remaining = RATE_LIMIT;
-
-  return {
-    "X-RateLimit-Limit": String(RATE_LIMIT),
-    "X-RateLimit-Remaining": String(remaining),
-    "X-RateLimit-Reset": String(resetAt),
-  };
-}
 
 const ARTICLE_SELECT = `
   *,
@@ -38,6 +24,11 @@ const ARTICLE_SELECT = `
 `;
 
 export async function GET(request: NextRequest) {
+  // Rate limit: 200 reads/min per IP
+  const ip = getClientIp(request);
+  const rl = publicReadLimit(`articles:get:${ip}`);
+  if (!rl.allowed) return rateLimitedResponse(rl);
+
   const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
@@ -89,6 +80,12 @@ export async function GET(request: NextRequest) {
 
   if (status) {
     query = query.eq("status", status as "published" | "draft" | "review" | "scheduled");
+  }
+
+  // Exclude archived articles by default (Phase 10.5)
+  const includeArchived = searchParams.get("includeArchived") === "true";
+  if (!includeArchived) {
+    query = query.eq("archived", false);
   }
 
   if (featured !== null) {
@@ -161,7 +158,7 @@ export async function GET(request: NextRequest) {
     },
   };
 
-  return NextResponse.json(response, { headers: rateLimitHeaders() });
+  return NextResponse.json(response);
 }
 
 const createArticleSchema = z.object({
@@ -199,10 +196,14 @@ const createArticleSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) {
-    return unauthorizedResponse();
-  }
+  // Rate limit: 60 writes/min per IP
+  const ip = getClientIp(request);
+  const rl = authWriteLimit(`articles:post:${ip}`);
+  if (!rl.allowed) return rateLimitedResponse(rl);
+
+  const auth = await requireAuth(request);
+  if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
 
   let body: unknown;
   try {
@@ -298,8 +299,31 @@ export async function POST(request: NextRequest) {
   // Notify search engines immediately when a new article is published
   if (article.status === 'published' && article.slug) {
     void notifyIndexNow([article.slug]);
+    // Bust ISR cache for listing pages
+    revalidatePath('/');
+    revalidatePath('/articles');
+
+    // Phase 6.1: Auto-trigger push notification for breaking news
+    if (data.isBreaking) {
+      void fetch(new URL('/api/admin/notifications/push/send', request.url), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': request.headers.get('cookie') ?? '',
+        },
+        body: JSON.stringify({
+          title: '🔴 ' + article.title,
+          body: article.excerpt || article.title,
+          url: `/${article.slug}`,
+          articleId: article.id,
+        }),
+      }).catch(console.error);
+    }
+
+    // Phase 10.3: Auto-post to social media on publish
+    void autoPostOnPublish(article.id).catch(console.error);
   }
 
   const response: ApiResponse<Article> = { data: article };
-  return NextResponse.json(response, { status: 201, headers: rateLimitHeaders() });
+  return NextResponse.json(response, { status: 201 });
 }

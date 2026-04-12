@@ -44,3 +44,8 @@ next-env.d.ts
 scripts/migration/progress-*.json
 scripts/progress-*.json
 scripts/drupal-export.json
+
+# next-pwa generated service worker files
+public/sw.js
+public/workbox-*.js
+public/sw.js.map

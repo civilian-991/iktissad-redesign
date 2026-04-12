@@ -275,7 +275,7 @@ export default function MagazinePageClient() {
 
                       {/* Issue number overlay on cover */}
                       <div
-                        className="absolute bottom-3 left-3 px-2 py-1 text-[10px] font-[family-name:var(--font-display)] font-bold"
+                        className="absolute bottom-3 end-3 px-2 py-1 text-[10px] font-[family-name:var(--font-display)] font-bold"
                         style={{
                           background: 'rgba(24,59,78,0.85)',
                           color: '#DDA853',
@@ -317,7 +317,7 @@ export default function MagazinePageClient() {
 
                 {years.length > 1 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <Filter size={14} className="text-[#DDA853] opacity-60 ml-1" />
+                    <Filter size={14} className="text-[#DDA853] opacity-60 me-1" />
                     <button
                       onClick={() => { setSelectedYear(null); setCurrentPage(1); }}
                       className="px-3.5 py-1.5 text-xs font-[family-name:var(--font-display)] font-bold transition-all rounded-[3px]"
@@ -393,7 +393,7 @@ export default function MagazinePageClient() {
 
                       {/* Gold spine accent (right edge — RTL front cover) */}
                       <div
-                        className="absolute inset-y-0 right-0 w-[3px]"
+                        className="absolute inset-y-0 start-0 w-[3px]"
                         style={{
                           background: 'linear-gradient(to bottom, rgba(221,168,83,0.7) 0%, rgba(221,168,83,0.4) 40%, rgba(221,168,83,0.15) 100%)',
                         }}
@@ -401,7 +401,7 @@ export default function MagazinePageClient() {
 
                       {/* Issue number badge — top left */}
                       <div
-                        className="absolute top-2.5 left-2.5 px-2 py-0.5 text-[10px] font-[family-name:var(--font-display)] font-bold tracking-wide"
+                        className="absolute top-2.5 end-2.5 px-2 py-0.5 text-[10px] font-[family-name:var(--font-display)] font-bold tracking-wide"
                         style={{
                           background: 'rgba(24,59,78,0.82)',
                           color: '#DDA853',
@@ -444,7 +444,7 @@ export default function MagazinePageClient() {
                         }}
                       >
                         {/* Gold divider */}
-                        <div className="w-8 h-[2px] bg-[#DDA853] mb-3 mr-auto" />
+                        <div className="w-8 h-[2px] bg-[#DDA853] mb-3 ms-auto" />
                         <h3
                           className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-snug mb-1.5 line-clamp-3"
                         >

@@ -550,6 +550,8 @@ export default function CalendarClient() {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0-indexed
   const [weekAnchor, setWeekAnchor] = useState(today);
   const [sectionFilter, setSectionFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [authorFilter, setAuthorFilter] = useState('');
 
   // Modal state
   const [modalDate, setModalDate] = useState<Date | null>(null);
@@ -593,12 +595,14 @@ export default function CalendarClient() {
     const map: Record<string, CalendarArticle[]> = {};
     for (const a of (data?.data ?? [])) {
       if (sectionFilter && a.section !== sectionFilter) continue;
+      if (statusFilter && a.status !== statusFilter) continue;
+      if (authorFilter && a.author !== authorFilter) continue;
       const key = toDateKey(new Date(a.date));
       if (!map[key]) map[key] = [];
       map[key].push(a);
     }
     return map;
-  }, [data?.data, sectionFilter]);
+  }, [data?.data, sectionFilter, statusFilter, authorFilter]);
 
   // Navigation
   const goToPrevMonth = useCallback(() => {
@@ -699,6 +703,15 @@ export default function CalendarClient() {
     return Array.from(names).sort();
   }, [data?.data]);
 
+  // Author filter options (unique authors from loaded articles)
+  const authorOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const a of (data?.data ?? [])) {
+      if (a.author) names.add(a.author);
+    }
+    return Array.from(names).sort();
+  }, [data?.data]);
+
   // Header label
   const headerLabel = viewMode === 'month'
     ? `${ARABIC_MONTHS[currentMonth]} ${currentYear}`
@@ -773,7 +786,7 @@ export default function CalendarClient() {
             </button>
           </div>
 
-          {/* Section filter */}
+          {/* Filters */}
           <div className="flex items-center gap-3">
             <select
               value={sectionFilter}
@@ -782,6 +795,29 @@ export default function CalendarClient() {
             >
               <option value="" className="bg-midnight">كل الأقسام</option>
               {sectionOptions.map((name) => (
+                <option key={name} value={name} className="bg-midnight">{name}</option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-white/5 border border-gold/10 rounded-xl py-1.5 px-3 text-white/70 font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30 transition-colors"
+            >
+              <option value="" className="bg-midnight">كل الحالات</option>
+              <option value="published" className="bg-midnight">منشور</option>
+              <option value="scheduled" className="bg-midnight">مجدول</option>
+              <option value="review" className="bg-midnight">مراجعة</option>
+              <option value="draft" className="bg-midnight">مسودة</option>
+            </select>
+
+            <select
+              value={authorFilter}
+              onChange={(e) => setAuthorFilter(e.target.value)}
+              className="bg-white/5 border border-gold/10 rounded-xl py-1.5 px-3 text-white/70 font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30 transition-colors"
+            >
+              <option value="" className="bg-midnight">كل الكتّاب</option>
+              {authorOptions.map((name) => (
                 <option key={name} value={name} className="bg-midnight">{name}</option>
               ))}
             </select>

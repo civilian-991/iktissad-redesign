@@ -20,6 +20,7 @@ export interface CalendarArticle {
   title: string;
   status: "draft" | "review" | "scheduled" | "published";
   section: string | null;
+  author: string | null;
   date: string; // ISO date string — the effective calendar date
 }
 
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
   // Fetch articles whose published_at falls in range
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: publishedRows, error: publishedError } = await (admin.from("articles") as any)
-    .select("id, title, status, sections:section_id ( name ), published_at, created_at")
+    .select("id, title, status, sections:section_id ( name ), users:author_id ( name ), published_at, created_at")
     .gte("published_at", startISO)
     .lte("published_at", endISO)
     .order("published_at", { ascending: true })
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
   // Fetch drafts without a published_at whose created_at falls in range
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: draftRows, error: draftError } = await (admin.from("articles") as any)
-    .select("id, title, status, sections:section_id ( name ), published_at, created_at")
+    .select("id, title, status, sections:section_id ( name ), users:author_id ( name ), published_at, created_at")
     .is("published_at", null)
     .eq("status", "draft")
     .gte("created_at", startISO)
@@ -99,6 +100,7 @@ export async function GET(request: NextRequest) {
     title: row.title ?? "",
     status: row.status as CalendarArticle["status"],
     section: row.sections?.name ?? null,
+    author: row.users?.name ?? null,
     date: (row.published_at ?? row.created_at) as string,
   });
 

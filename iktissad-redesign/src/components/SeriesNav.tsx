@@ -122,7 +122,7 @@ export default function SeriesNav({ articleId, className = '' }: SeriesNavProps)
           {nav.next ? (
             <Link
               href={`/${nav.next.slug}`}
-              className="group flex flex-col gap-1 items-end text-right"
+              className="group flex flex-col gap-1 items-end text-start"
             >
               <span className="flex items-center gap-1 text-xs text-white/40 font-[family-name:var(--font-display)]">
                 التالي — الجزء {nav.next.orderIndex + 1}
@@ -133,7 +133,7 @@ export default function SeriesNav({ articleId, className = '' }: SeriesNavProps)
               </span>
             </Link>
           ) : (
-            <p className="text-white/20 text-xs font-[family-name:var(--font-display)] text-left pt-1">
+            <p className="text-white/20 text-xs font-[family-name:var(--font-display)] text-end pt-1">
               هذا هو الجزء الأخير
             </p>
           )}

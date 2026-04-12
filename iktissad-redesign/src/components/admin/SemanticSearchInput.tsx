@@ -222,13 +222,13 @@ export default function SemanticSearchInput({
 
       {/* ── Results list ───────────────────────────────────────────────── */}
       {results.length > 0 && (
-        <ul className="space-y-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gold/20">
+        <ul className="space-y-2 max-h-80 overflow-y-auto ps-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gold/20">
           {results.map((article) => (
             <li key={article.id}>
               <button
                 onClick={() => onSelect?.({ id: article.id, title: article.title, slug: article.slug })}
                 className="
-                  w-full text-right px-3 py-2.5
+                  w-full text-start px-3 py-2.5
                   bg-white/[0.03] hover:bg-white/[0.07]
                   border border-white/5 hover:border-gold/20
                   rounded-lg transition-colors group
@@ -240,13 +240,13 @@ export default function SemanticSearchInput({
                     size={14}
                     className="text-gold/50 group-hover:text-gold mt-0.5 shrink-0 transition-colors"
                   />
-                  <span className="text-sm text-white font-[family-name:var(--font-display)] line-clamp-2 text-right leading-snug">
+                  <span className="text-sm text-white font-[family-name:var(--font-display)] line-clamp-2 text-start leading-snug">
                     {article.title}
                   </span>
                 </div>
 
                 {/* Meta row */}
-                <div className="flex items-center gap-3 mt-1.5 pr-5">
+                <div className="flex items-center gap-3 mt-1.5 ps-5">
                   {article.section && (
                     <span className="text-xs text-gold/60 font-[family-name:var(--font-display)]">
                       {article.section}
@@ -261,7 +261,7 @@ export default function SemanticSearchInput({
 
                 {/* Excerpt */}
                 {article.excerpt && (
-                  <p className="text-xs text-white/40 mt-1 pr-5 line-clamp-2 text-right leading-relaxed font-[family-name:var(--font-display)]">
+                  <p className="text-xs text-white/40 mt-1 ps-5 line-clamp-2 text-start leading-relaxed font-[family-name:var(--font-display)]">
                     {article.excerpt}
                   </p>
                 )}

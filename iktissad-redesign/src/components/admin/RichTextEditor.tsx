@@ -130,7 +130,7 @@ function LinkInput({
   const [url, setUrl] = useState(initialUrl ?? '');
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-obsidian/80 border border-gold/20 rounded-lg absolute top-full mt-1 right-0 z-10 min-w-[320px]">
+    <div className="flex items-center gap-2 p-2 bg-obsidian/80 border border-gold/20 rounded-lg absolute top-full mt-1 start-0 z-10 min-w-[320px]">
       <input
         type="url"
         value={url}

@@ -1,56 +1,80 @@
-import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
-const BASE_URL = 'https://www.iktissadonline.com';
-const SITE_NAME = 'الإقتصاد والأعمال';
+export const revalidate = 3600; // re-generate every hour
+
+const BASE_URL = "https://www.iktissadonline.com";
+const PUBLICATION_NAME = "الإقتصاد والأعمال";
+const PUBLICATION_LANGUAGE = "ar";
 
 export async function GET() {
-  const supabase = await createClient();
-  const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  // Google News sitemap only includes articles published in the last 48 hours
+  const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
-  const { data } = await (supabase as any)
-    .from('articles')
-    .select('slug, title, published_at')
-    .eq('status', 'published')
-    .gte('published_at', twoDaysAgo)
-    .order('published_at', { ascending: false })
-    .limit(1000);
+  let articles: Array<{
+    slug: string;
+    title: string;
+    published_at: string;
+    tags: string[] | null;
+  }> = [];
 
-  const articles: { slug: string; title: string; published_at: string }[] = data ?? [];
+  try {
+    const supabase = await createClient();
+    const { data } = await (supabase as any)
+      .from("articles")
+      .select("slug, title, published_at, tags")
+      .eq("status", "published")
+      .eq("archived", false)
+      .gte("published_at", cutoff)
+      .order("published_at", { ascending: false })
+      .limit(1000);
 
-  const urls = articles
+    if (data) articles = data;
+  } catch {
+    // Supabase not configured — return empty sitemap
+  }
+
+  const urlEntries = articles
     .map((article) => {
-      const pubDate = new Date(article.published_at).toISOString();
-      const escapedTitle = article.title
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
+      const keywords =
+        Array.isArray(article.tags) && article.tags.length > 0
+          ? `<news:keywords>${escapeXml(article.tags.join(", "))}</news:keywords>`
+          : "";
 
       return `  <url>
-    <loc>${BASE_URL}/${article.slug}</loc>
+    <loc>${BASE_URL}/${escapeXml(article.slug)}</loc>
     <news:news>
       <news:publication>
-        <news:name>${SITE_NAME}</news:name>
-        <news:language>ar</news:language>
+        <news:name>${escapeXml(PUBLICATION_NAME)}</news:name>
+        <news:language>${PUBLICATION_LANGUAGE}</news:language>
       </news:publication>
-      <news:publication_date>${pubDate}</news:publication_date>
-      <news:title>${escapedTitle}</news:title>
+      <news:publication_date>${article.published_at}</news:publication_date>
+      <news:title>${escapeXml(article.title)}</news:title>
+      ${keywords}
     </news:news>
   </url>`;
     })
-    .join('\n');
+    .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
-${urls}
+${urlEntries}
 </urlset>`;
 
-  return new Response(xml, {
+  return new NextResponse(xml, {
     headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
     },
   });
+}
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

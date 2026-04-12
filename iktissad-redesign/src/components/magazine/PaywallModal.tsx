@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -12,6 +13,9 @@ interface PaywallModalProps {
   articleCount?: number;
   maxFreeArticles?: number;
   reason: 'article_limit' | 'magazine_gate';
+  /** If provided, show "Buy this article" micropayment CTA */
+  articleId?: string;
+  articlePrice?: number | null;
 }
 
 // ── Pricing tier mini card ────────────────────────────────────────────────────
@@ -94,10 +98,13 @@ export default function PaywallModal({
   articleCount = 0,
   maxFreeArticles = 5,
   reason,
+  articleId,
+  articlePrice,
 }: PaywallModalProps) {
   const router = useRouter();
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusRef = useRef<HTMLButtonElement>(null);
+  const [buyingArticle, setBuyingArticle] = useState(false);
 
   // ── Close on Escape ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -130,6 +137,30 @@ export default function PaywallModal({
     document.addEventListener('keydown', handleTab);
     return () => document.removeEventListener('keydown', handleTab);
   }, [isOpen]);
+
+  const handleBuyArticle = async () => {
+    if (!articleId || buyingArticle) return;
+    setBuyingArticle(true);
+    try {
+      const res = await fetch('/api/checkout/article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error ?? 'تعذّر إنشاء جلسة الدفع');
+        return;
+      }
+      const { payUrl, sessionId } = json.data as { payUrl: string; sessionId: string };
+      // Redirect to MPGS hosted checkout
+      window.location.href = `${payUrl}?session.id=${sessionId}`;
+    } catch {
+      toast.error('حدث خطأ — حاول مرة أخرى');
+    } finally {
+      setBuyingArticle(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -284,6 +315,43 @@ export default function PaywallModal({
               >
                 <span>اشترك الآن</span>
               </button>
+
+              {/* Micropayment: buy this single article */}
+              {articleId && articlePrice != null && articlePrice > 0 && (
+                <button
+                  onClick={handleBuyArticle}
+                  disabled={buyingArticle}
+                  style={{
+                    width: '100%',
+                    marginBottom: '0.75rem',
+                    padding: '0.65rem 1rem',
+                    background: 'none',
+                    border: '1px solid rgba(221,168,83,0.35)',
+                    borderRadius: '3px',
+                    color: '#DDA853',
+                    fontSize: '0.875rem',
+                    fontFamily: 'var(--font-body)',
+                    fontWeight: 600,
+                    cursor: buyingArticle ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'background 0.15s',
+                    opacity: buyingArticle ? 0.6 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!buyingArticle)
+                      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(221,168,83,0.07)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'none';
+                  }}
+                >
+                  {buyingArticle && <Loader2 size={14} className="animate-spin" />}
+                  {buyingArticle ? 'جاري التحويل…' : `اشتري هذا المقال — ${articlePrice} ر.س`}
+                </button>
+              )}
 
               {/* Continue free link */}
               <button

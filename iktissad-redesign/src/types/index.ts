@@ -173,6 +173,8 @@ export interface Article {
   featured: boolean;
   editorChoice: boolean;
   paywalled?: boolean;
+  /** Per-article price for single-article micropayment. null = use global default. */
+  articlePrice?: number | null;
   isBreaking?: boolean;
   /** Editorial article type: news | report | analysis | interview | opinion */
   articleType?: string;
@@ -193,6 +195,10 @@ export interface Article {
   canonicalUrl?: string;
   /** When true, adds noindex,nofollow robots directive. */
   noIndex?: boolean;
+  /** AI-generated 2-3 sentence Arabic summary (TLDR). */
+  summary?: string | null;
+  /** AI-generated 2-3 sentence English summary (TLDR). */
+  summaryEn?: string | null;
 }
 
 export interface ArticleVersion {
@@ -618,6 +624,7 @@ export type NewsletterBlockType =
   | 'cta'
   | 'divider'
   | 'image'
+  | 'upgrade_cta'
 
 export interface NewsletterBlock {
   id: string

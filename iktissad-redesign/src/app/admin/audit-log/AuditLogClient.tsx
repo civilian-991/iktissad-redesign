@@ -23,6 +23,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { formatRelativeTime } from '@/lib/i18n/format';
 import { iconSizes } from '@/lib/design-tokens';
 import { swrFetcher } from '@/lib/api-client';
 import { Button } from '@/components/ui';
@@ -81,11 +82,7 @@ function formatAction(action: string): string {
 }
 
 function relativeTime(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'الآن';
-  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
-  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
-  return `منذ ${Math.floor(diff / 86400)} يوم`;
+  return formatRelativeTime(dateStr, 'ar');
 }
 
 // ─── JSON Diff Component ─────────────────────────────────────────

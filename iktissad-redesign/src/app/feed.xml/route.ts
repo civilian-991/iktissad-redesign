@@ -14,6 +14,7 @@ export async function GET() {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('status', 'published')
+    .eq('archived', false)
     .order('published_at', { ascending: false })
     .limit(50);
 

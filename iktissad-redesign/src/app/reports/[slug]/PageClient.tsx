@@ -67,7 +67,7 @@ function DossierArticleCard({
               {formatDate(article.publishedAt)}
             </span>
           )}
-          <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold mr-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold ms-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             اقرأ المقال
             <ArrowRight size={12} />
           </span>

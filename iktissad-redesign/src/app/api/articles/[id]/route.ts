@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
 import { notifyIndexNow } from "@/lib/indexnow";
+import { autoPostOnPublish } from "@/lib/social-posting";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -89,6 +91,7 @@ const updateArticleSchema = z.object({
   ogImage: z.string().url().optional().or(z.literal('')),
   canonicalUrl: z.string().url().optional().or(z.literal('')),
   noIndex: z.boolean().optional(),
+  autoPost: z.boolean().optional(),
 });
 
 export async function PUT(
@@ -151,6 +154,7 @@ export async function PUT(
   if (data.ogImage !== undefined) updateData.og_image = data.ogImage || null;
   if (data.canonicalUrl !== undefined) updateData.canonical_url = data.canonicalUrl || null;
   if (data.noIndex !== undefined) updateData.no_index = data.noIndex;
+  if (data.autoPost !== undefined) updateData.auto_post = data.autoPost;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {
@@ -205,6 +209,15 @@ export async function PUT(
   // Notify search engines when an article is published or updated while published
   if (article.status === 'published' && article.slug) {
     void notifyIndexNow([article.slug]);
+    // Bust ISR cache for this article page and listing pages
+    revalidatePath(`/${article.slug}`);
+    revalidatePath('/');
+    revalidatePath('/articles');
+
+    // Phase 10.3: Auto-post to social media when status transitions to published
+    if (data.status === 'published') {
+      void autoPostOnPublish(article.id).catch(console.error);
+    }
   }
 
   const response: ApiResponse<Article> = { data: article };

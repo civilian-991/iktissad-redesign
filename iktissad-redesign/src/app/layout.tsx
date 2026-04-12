@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
-import Script from "next/script";
+import { headers } from "next/headers";
 import "./globals.css";
 import { Providers } from "./providers";
 import CookieConsent from "@/components/CookieConsent";
+import ConsentScripts from "@/components/ConsentScripts";
 import SentryUserIdentification from "@/components/SentryUserIdentification";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import WebVitalsReporter from "@/components/WebVitalsReporter";
+import StagingBanner from "@/components/StagingBanner";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -41,6 +43,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  alternates: {
+    canonical: "https://www.iktissadonline.com",
+    languages: {
+      "ar": "https://www.iktissadonline.com",
+      "en": "https://www.iktissadonline.com",
+      "x-default": "https://www.iktissadonline.com",
+    },
   },
   // Google Search Console ownership verification
   // Set NEXT_PUBLIC_GSC_VERIFICATION in your environment variables
@@ -49,47 +61,50 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read the CSP nonce injected by proxy.ts (src/proxy.ts) for this request.
+  // Pass it to Script components so inline scripts are nonce-approved.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
+  const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+    : null;
+
   return (
     <html lang="ar" dir="rtl" className={`${tajawal.variable} ${playfair.variable}`}>
+      <head>
+        {/* Preconnect: establishes early connections to critical origins */}
+        {supabaseHostname && (
+          <link rel="preconnect" href={`https://${supabaseHostname}`} />
+        )}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* DNS-prefetch: hint for third-party domains */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://securepubads.g.doubleclick.net" />
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+      </head>
       <body className="antialiased min-h-screen bg-cream">
+        <StagingBanner />
         <Providers>
           {children}
           <SentryUserIdentification />
         </Providers>
         <CookieConsent />
+        <WebVitalsReporter />
 
-        {/* Google Ad Manager — GPT library + single-request mode init */}
-        {process.env.NEXT_PUBLIC_GAM_NETWORK_CODE && (
-          <>
-            <Script
-              id="gpt-init"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `window.googletag = window.googletag || {cmd: []};
-googletag.cmd.push(function() {
-  googletag.pubads().enableSingleRequest();
-  googletag.pubads().collapseEmptyDivs();
-  googletag.enableServices();
-});`,
-              }}
-            />
-            <Script
-              src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
-              strategy="afterInteractive"
-            />
-          </>
-        )}
+        {/* GA + GAM load only after cookie consent (analytics/advertising) */}
+        <ConsentScripts
+          nonce={nonce}
+          gaMeasurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}
+          gamNetworkCode={process.env.NEXT_PUBLIC_GAM_NETWORK_CODE}
+        />
       </body>
-
-      {/* Google Analytics 4 */}
-      {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
-      )}
     </html>
   );
 }

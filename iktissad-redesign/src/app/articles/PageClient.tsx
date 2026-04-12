@@ -84,7 +84,7 @@ function FeaturedCard({ article }: { article: Article }) {
               {formatDate(article.publishedAt)}
             </span>
           )}
-          <span className="flex items-center gap-1 text-gold text-sm font-[family-name:var(--font-display)] font-semibold mr-auto group-hover:gap-2 transition-all duration-200">
+          <span className="flex items-center gap-1 text-gold text-sm font-[family-name:var(--font-display)] font-semibold ms-auto group-hover:gap-2 transition-all duration-200">
             اقرأ المزيد
             <ArrowUpLeft size={14} />
           </span>

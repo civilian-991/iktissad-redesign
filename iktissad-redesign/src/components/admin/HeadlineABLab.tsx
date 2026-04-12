@@ -72,7 +72,7 @@ function CtrBar({ score }: { score: number }) {
           transition={{ duration: 0.6, ease: 'easeOut' }}
         />
       </div>
-      <span className={`text-xs font-mono font-semibold w-8 text-right ${textClass}`}>
+      <span className={`text-xs font-mono font-semibold w-8 text-start ${textClass}`}>
         {pct}
       </span>
     </div>
@@ -133,13 +133,13 @@ function VariantCard({
       }`}
     >
       {/* Rank badge */}
-      <div className="absolute top-4 left-4 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+      <div className="absolute top-4 end-4 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
         <span className="text-[10px] text-white/50 font-mono font-bold">{index + 1}</span>
       </div>
 
       {/* Active test indicator */}
       {isActiveTest && (
-        <div className="absolute top-4 right-16 flex items-center gap-1.5 text-[10px] text-gold font-[family-name:var(--font-display)]">
+        <div className="absolute top-4 start-16 flex items-center gap-1.5 text-[10px] text-gold font-[family-name:var(--font-display)]">
           <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
           قيد الاختبار
         </div>
@@ -291,7 +291,7 @@ function ABTestPanel({ test, onStop, isStopping }: ABTestPanelProps) {
                 style={{ width: `${test.trafficSplit}%` }}
               />
             </div>
-            <span className="text-xs text-white/40 font-mono w-8 text-right">
+            <span className="text-xs text-white/40 font-mono w-8 text-start">
               {test.trafficSplit}%
             </span>
           </div>
@@ -320,7 +320,7 @@ function ABTestPanel({ test, onStop, isStopping }: ABTestPanelProps) {
                 style={{ width: `${100 - test.trafficSplit}%` }}
               />
             </div>
-            <span className="text-xs text-white/40 font-mono w-8 text-right">
+            <span className="text-xs text-white/40 font-mono w-8 text-start">
               {100 - test.trafficSplit}%
             </span>
           </div>
@@ -558,13 +558,13 @@ export default function HeadlineABLab({
           <div className="relative">
             <button
               onClick={() => setShowArticleList((v) => !v)}
-              className="w-full flex items-center justify-between gap-3 bg-white/5 border border-gold/10 rounded-xl px-4 py-3 text-right hover:border-gold/20 transition-colors"
+              className="w-full flex items-center justify-between gap-3 bg-white/5 border border-gold/10 rounded-xl px-4 py-3 text-start hover:border-gold/20 transition-colors"
             >
               <span className="text-white/50 font-[family-name:var(--font-display)] text-sm">
                 {selectedArticle ? selectedArticle.title : 'اختر مقالاً…'}
               </span>
               {selectedArticle ? (
-                <span className="text-gold font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1 flex-1 text-right">
+                <span className="text-gold font-[family-name:var(--font-display)] text-sm font-medium line-clamp-1 flex-1 text-start">
                   {selectedArticle.title}
                 </span>
               ) : null}
@@ -580,7 +580,7 @@ export default function HeadlineABLab({
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
-                  className="absolute top-full mt-2 left-0 right-0 bg-midnight border border-gold/15 rounded-xl shadow-elevated z-20 overflow-hidden"
+                  className="absolute top-full mt-2 inset-x-0 bg-midnight border border-gold/15 rounded-xl shadow-elevated z-20 overflow-hidden"
                 >
                   {/* Search */}
                   <div className="p-3 border-b border-gold/10">
@@ -590,11 +590,11 @@ export default function HeadlineABLab({
                         placeholder="ابحث عن مقال…"
                         value={articleSearch}
                         onChange={(e) => setArticleSearch(e.target.value)}
-                        className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 pr-10 pl-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30"
+                        className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 ps-10 pe-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30"
                       />
                       <Search
                         size={14}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30"
+                        className="absolute start-3 top-1/2 -translate-y-1/2 text-white/30"
                       />
                     </div>
                   </div>
@@ -616,7 +616,7 @@ export default function HeadlineABLab({
                             setShowArticleList(false)
                             setArticleSearch('')
                           }}
-                          className={`w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-white/5 transition-colors border-b border-gold/5 last:border-0 ${
+                          className={`w-full text-start px-4 py-3 flex items-start gap-3 hover:bg-white/5 transition-colors border-b border-gold/5 last:border-0 ${
                             selectedArticleId === article.id ? 'bg-gold/5' : ''
                           }`}
                         >
@@ -805,7 +805,7 @@ export default function HeadlineABLab({
                 </div>
 
                 {/* Start button */}
-                <div className="mr-auto">
+                <div className="ms-auto">
                   <Button
                     variant="primary"
                     size="sm"

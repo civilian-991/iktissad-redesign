@@ -52,6 +52,8 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
   const [mfaCode, setMfaCode] = useState('');
   const [factorId, setFactorId] = useState('');
   const [challengeId, setChallengeId] = useState('');
+  const [usingRecoveryCode, setUsingRecoveryCode] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState('');
   const mfaInputRef = useRef<HTMLInputElement>(null);
 
   // Forgot password / magic link
@@ -186,7 +188,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
     router.refresh();
   };
 
-  // ── MFA verify ───────────────────────────────────────────────────────────
+  // ── MFA verify (TOTP) ────────────────────────────────────────────────────
   const handleMfaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mfaCode.length !== 6) return;
@@ -204,6 +206,31 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
       setError('الرمز غير صحيح أو انتهت صلاحيته، يرجى المحاولة مجدداً');
       setMfaCode('');
       if (mfaInputRef.current) mfaInputRef.current.focus();
+      setLoading(false);
+      return;
+    }
+
+    router.push(redirectTo ?? '/admin');
+    router.refresh();
+  };
+
+  // ── Recovery code verify ─────────────────────────────────────────────────
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoveryCode.trim()) return;
+    setLoading(true);
+    setError('');
+
+    const res = await fetch('/api/auth/2fa/recover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: recoveryCode.trim() }),
+    });
+
+    if (!res.ok) {
+      const json = await res.json() as { error?: string };
+      setError(json.error ?? 'رمز الاسترداد غير صحيح');
+      setRecoveryCode('');
       setLoading(false);
       return;
     }
@@ -339,81 +366,84 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
 
         {/* ── MFA STEP ── */}
         {step === 'mfa' && (
-          <form
-            onSubmit={handleMfaSubmit}
-            className="bg-midnight border border-gold/10 rounded-2xl p-8 space-y-5 shadow-2xl"
-          >
+          <div className="bg-midnight border border-gold/10 rounded-2xl p-8 space-y-5 shadow-2xl">
             <div className="flex flex-col items-center gap-3 pb-2">
               <div className="w-14 h-14 bg-gold/10 rounded-2xl flex items-center justify-center">
                 <Shield className="text-gold" size={26} />
               </div>
               <p className="text-white/70 text-sm font-[family-name:var(--font-display)] text-center leading-relaxed">
-                أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة الخاص بك
+                {usingRecoveryCode
+                  ? 'أدخل أحد رموز الاسترداد للوصول إلى حسابك'
+                  : 'أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة الخاص بك'}
               </p>
             </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="mfa-code"
-                className="block text-sm font-[family-name:var(--font-display)] text-white/70"
-              >
-                رمز التحقق
-              </label>
-              <input
-                ref={mfaInputRef}
-                id="mfa-code"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                required
-                autoComplete="one-time-code"
-                value={mfaCode}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                  setMfaCode(val);
-                  setError('');
-                }}
-                placeholder="000000"
-                dir="ltr"
-                className="w-full px-4 py-4 rounded-xl bg-white/5 border border-gold/10 text-white placeholder:text-white/30 font-mono text-center text-2xl tracking-[0.5em] focus:outline-none focus:border-gold/40 transition-colors"
-              />
-            </div>
-
-            {error && (
-              <div className="flex items-center gap-2 text-red-400 text-sm font-[family-name:var(--font-display)]">
-                <AlertTriangle size={14} className="shrink-0" />
-                <span>{error}</span>
-              </div>
+            {/* TOTP form */}
+            {!usingRecoveryCode && (
+              <form onSubmit={handleMfaSubmit} className="space-y-4">
+                <input
+                  ref={mfaInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  required
+                  autoComplete="one-time-code"
+                  value={mfaCode}
+                  onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setError(''); }}
+                  placeholder="000000"
+                  dir="ltr"
+                  className="w-full px-4 py-4 rounded-xl bg-white/5 border border-gold/10 text-white placeholder:text-white/30 font-mono text-center text-2xl tracking-[0.5em] focus:outline-none focus:border-gold/40 transition-colors"
+                />
+                {error && (
+                  <div className="flex items-center gap-2 text-red-400 text-sm font-[family-name:var(--font-display)]">
+                    <AlertTriangle size={14} className="shrink-0" /><span>{error}</span>
+                  </div>
+                )}
+                <button type="submit" disabled={loading || mfaCode.length !== 6}
+                  className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /><span>جاري التحقق...</span></> : 'تأكيد'}
+                </button>
+              </form>
             )}
 
-            <button
-              type="submit"
-              disabled={loading || mfaCode.length !== 6}
-              className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>جاري التحقق...</span>
-                </>
-              ) : (
-                'تأكيد'
-              )}
+            {/* Recovery code form */}
+            {usingRecoveryCode && (
+              <form onSubmit={handleRecoverySubmit} className="space-y-4">
+                <input
+                  type="text"
+                  value={recoveryCode}
+                  onChange={(e) => { setRecoveryCode(e.target.value.toUpperCase()); setError(''); }}
+                  placeholder="XXXX-XXXX"
+                  dir="ltr"
+                  autoComplete="off"
+                  className="w-full px-4 py-4 rounded-xl bg-white/5 border border-gold/10 text-white placeholder:text-white/30 font-mono text-center text-xl tracking-wider focus:outline-none focus:border-gold/40 transition-colors"
+                />
+                {error && (
+                  <div className="flex items-center gap-2 text-red-400 text-sm font-[family-name:var(--font-display)]">
+                    <AlertTriangle size={14} className="shrink-0" /><span>{error}</span>
+                  </div>
+                )}
+                <button type="submit" disabled={loading || !recoveryCode.trim()}
+                  className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /><span>جاري التحقق...</span></> : 'استخدام رمز الاسترداد'}
+                </button>
+              </form>
+            )}
+
+            {/* Toggle between TOTP and recovery code */}
+            <button type="button"
+              onClick={() => { setUsingRecoveryCode(!usingRecoveryCode); setError(''); setMfaCode(''); setRecoveryCode(''); }}
+              className="w-full text-center text-gold/60 text-xs font-[family-name:var(--font-display)] hover:text-gold transition-colors">
+              {usingRecoveryCode ? 'استخدام تطبيق المصادقة' : 'لا يمكنك الوصول إلى تطبيق المصادقة؟'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setStep('credentials');
-                setError('');
-                setMfaCode('');
-              }}
-              className="w-full text-center text-white/40 text-sm font-[family-name:var(--font-display)] hover:text-white/70 transition-colors"
-            >
+            <button type="button"
+              onClick={() => { setStep('credentials'); setError(''); setMfaCode(''); setRecoveryCode(''); setUsingRecoveryCode(false); }}
+              className="w-full text-center text-white/40 text-sm font-[family-name:var(--font-display)] hover:text-white/70 transition-colors">
               العودة إلى تسجيل الدخول
             </button>
-          </form>
+          </div>
         )}
 
         {/* ── CREDENTIALS STEP ── */}

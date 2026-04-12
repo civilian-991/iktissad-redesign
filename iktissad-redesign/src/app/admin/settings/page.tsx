@@ -21,7 +21,8 @@ import {
   Eye,
   EyeOff,
   Upload,
-  RefreshCw
+  RefreshCw,
+  Lock as LockIcon,
 } from 'lucide-react';
 import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
 
@@ -30,6 +31,7 @@ const tabs = [
   { id: 'appearance', label: 'المظهر', icon: Palette },
   { id: 'notifications', label: 'الإشعارات', icon: Bell },
   { id: 'security', label: 'الأمان', icon: Shield },
+  { id: 'paywall', label: 'الجدار المدفوع', icon: LockIcon },
   { id: 'email', label: 'البريد', icon: Mail },
   { id: 'backup', label: 'النسخ الاحتياطي', icon: Database },
 ];
@@ -85,6 +87,15 @@ export default function SettingsPage() {
 
   // Backup
   const [autoBackup, setAutoBackup] = useState('weekly');
+
+  // Paywall
+  const [freeArticleLimit, setFreeArticleLimit] = useState(5);
+  const [giftLinksPerMonth, setGiftLinksPerMonth] = useState(5);
+  const [singleArticleDefaultPrice, setSingleArticleDefaultPrice] = useState(5);
+  const [dynamicPaywall, setDynamicPaywall] = useState(false);
+  const [socialBonusArticle, setSocialBonusArticle] = useState(true);
+  const [highEngagementBonus, setHighEngagementBonus] = useState(2);
+  const [highEngagementThreshold, setHighEngagementThreshold] = useState(70);
 
   // Load settings from API on mount
   useEffect(() => {
@@ -142,6 +153,18 @@ export default function SettingsPage() {
           const b = s.backup;
           if (b.autoBackup) setAutoBackup(b.autoBackup);
         }
+
+        // Paywall
+        if (s.paywall) {
+          const p = s.paywall;
+          if (p.freeArticleLimit !== undefined) setFreeArticleLimit(p.freeArticleLimit);
+          if (p.giftLinksPerMonth !== undefined) setGiftLinksPerMonth(p.giftLinksPerMonth);
+          if (p.singleArticleDefaultPrice !== undefined) setSingleArticleDefaultPrice(p.singleArticleDefaultPrice);
+          if (p.dynamicPaywall !== undefined) setDynamicPaywall(p.dynamicPaywall);
+          if (p.socialBonusArticle !== undefined) setSocialBonusArticle(p.socialBonusArticle);
+          if (p.highEngagementBonus !== undefined) setHighEngagementBonus(p.highEngagementBonus);
+          if (p.highEngagementThreshold !== undefined) setHighEngagementThreshold(p.highEngagementThreshold);
+        }
       } catch {
         toast.error('تعذر تحميل الإعدادات');
       } finally {
@@ -167,6 +190,16 @@ export default function SettingsPage() {
         return { smtpHost, smtpPort, smtpUser };
       case 'backup':
         return { autoBackup };
+      case 'paywall':
+        return {
+          freeArticleLimit,
+          giftLinksPerMonth,
+          singleArticleDefaultPrice,
+          dynamicPaywall,
+          socialBonusArticle,
+          highEngagementBonus,
+          highEngagementThreshold,
+        };
       default:
         return {};
     }
@@ -178,6 +211,8 @@ export default function SettingsPage() {
     sessionTimeout,
     smtpHost, smtpPort, smtpUser,
     autoBackup,
+    freeArticleLimit, giftLinksPerMonth, singleArticleDefaultPrice,
+    dynamicPaywall, socialBonusArticle, highEngagementBonus, highEngagementThreshold,
   ]);
 
   const handleSave = useCallback(async () => {
@@ -636,6 +671,142 @@ export default function SettingsPage() {
               <p className="text-gold text-sm font-[family-name:var(--font-display)]">
                 💡 يُنصح بإنشاء نسخة احتياطية قبل إجراء أي تغييرات كبيرة على الموقع
               </p>
+            </div>
+          </div>
+        );
+
+      case 'paywall':
+        return (
+          <div className="space-y-6">
+            {/* Metered access */}
+            <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-5">
+              <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
+                المقالات المجانية
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                    عدد المقالات المجانية شهرياً
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={freeArticleLimit}
+                    onChange={(e) => setFreeArticleLimit(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                  />
+                  <p className="text-white/30 text-xs mt-1">0 = جدار مدفوع فوري</p>
+                </div>
+
+                <div>
+                  <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                    روابط الهدية شهرياً لكل مشترك
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={giftLinksPerMonth}
+                    onChange={(e) => setGiftLinksPerMonth(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Micropayments */}
+            <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-4">
+              <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
+                الدفع المصغّر (مقال واحد)
+              </h3>
+              <div>
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                  سعر المقال الافتراضي (ر.س)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  value={singleArticleDefaultPrice}
+                  onChange={(e) => setSingleArticleDefaultPrice(Number(e.target.value))}
+                  className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                />
+                <p className="text-white/30 text-xs mt-1">يمكن تجاوزه لكل مقال على حدة</p>
+              </div>
+            </div>
+
+            {/* Dynamic paywall */}
+            <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-4">
+              <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
+                الجدار الذكي (4.5)
+              </h3>
+
+              {[
+                {
+                  label: 'تفعيل الجدار الذكي',
+                  desc: 'يعدّل عدد المقالات المجانية تبعاً لتفاعل القارئ',
+                  value: dynamicPaywall,
+                  set: setDynamicPaywall,
+                },
+                {
+                  label: 'مكافأة إحالات التواصل الاجتماعي',
+                  desc: 'يمنح القادمين من وسائل التواصل مقالاً مجانياً إضافياً',
+                  value: socialBonusArticle,
+                  set: setSocialBonusArticle,
+                },
+              ].map(({ label, desc, value, set }) => (
+                <div key={label} className="flex items-center justify-between py-1">
+                  <div>
+                    <p className="text-white text-sm font-[family-name:var(--font-display)]">{label}</p>
+                    <p className="text-white/40 text-xs">{desc}</p>
+                  </div>
+                  <button
+                    onClick={() => set(!value)}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${
+                      value ? 'bg-gold' : 'bg-white/10'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                        value ? 'right-1' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              ))}
+
+              {dynamicPaywall && (
+                <div className="grid md:grid-cols-2 gap-4 pt-2 border-t border-gold/10">
+                  <div>
+                    <label className="block text-white/70 text-xs font-[family-name:var(--font-display)] mb-2">
+                      حد التفاعل العالي (% التمرير)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={highEngagementThreshold}
+                      onChange={(e) => setHighEngagementThreshold(Number(e.target.value))}
+                      className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/70 text-xs font-[family-name:var(--font-display)] mb-2">
+                      مقالات إضافية لعالي التفاعل
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={10}
+                      value={highEngagementBonus}
+                      onChange={(e) => setHighEngagementBonus(Number(e.target.value))}
+                      className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );

@@ -155,7 +155,7 @@ export default function Footer() {
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-gold" />
+                    <div className="absolute -bottom-1 -end-1 w-4 h-4 border-b-2 border-e-2 border-gold" />
                   </div>
                   {/* Logo Text */}
                   <Image
@@ -232,7 +232,7 @@ export default function Footer() {
                       <li key={link.key}>
                         <Link
                           href={link.href}
-                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:ps-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getSectionName(link.key)}
@@ -253,7 +253,7 @@ export default function Footer() {
                       <li key={link.key}>
                         <Link
                           href={link.href}
-                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:ps-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getSectorName(link.key)}
@@ -274,7 +274,7 @@ export default function Footer() {
                       <li key={link.key}>
                         <Link
                           href={link.href}
-                          className="text-sm text-white/70 hover:text-gold hover:pr-2 transition-all duration-200 flex items-center gap-2 group"
+                          className="text-sm text-white/70 hover:text-gold hover:ps-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
                           {getAboutName(link.key)}

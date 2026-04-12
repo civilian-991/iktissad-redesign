@@ -13,12 +13,23 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import RichTextEditor from '@/components/admin/RichTextEditor';
+import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
+import TemplateSelector from '@/components/admin/TemplateSelector';
 import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
 import type { JSONContent } from '@tiptap/core';
+
+// TipTap editor is large (~500KB). Dynamic import keeps it out of the initial bundle.
+const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-96 bg-stone-50 border border-stone-200 rounded-lg animate-pulse flex items-center justify-center">
+      <Loader2 className="text-stone-400 animate-spin" size={24} />
+    </div>
+  ),
+});
 
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
 type TagKey = typeof tagKeys[number];
@@ -363,6 +374,18 @@ export default function NewArticlePage() {
             <input type="text" value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)}
               placeholder="English excerpt"
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+            />
+          </motion.div>
+
+          {/* Phase 6.7 — Template Selector */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <TemplateSelector
+              onSelect={(body) => {
+                if (body) {
+                  setEditorBody(body as JSONContent);
+                  setContent(JSON.stringify(body));
+                }
+              }}
             />
           </motion.div>
 

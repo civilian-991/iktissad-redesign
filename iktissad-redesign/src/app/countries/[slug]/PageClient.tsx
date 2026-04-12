@@ -221,7 +221,7 @@ export default function CountryPageClient() {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
                           {article.sector && (
-                            <span className="absolute top-3 right-3 px-3 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded">
+                            <span className="absolute top-3 start-3 px-3 py-1 bg-gold text-white text-xs font-[family-name:var(--font-display)] font-semibold rounded">
                               {article.sector}
                             </span>
                           )}
