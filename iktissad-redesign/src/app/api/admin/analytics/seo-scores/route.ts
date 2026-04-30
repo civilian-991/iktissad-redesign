@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let scored: ArticleSeoScore[] = (articles ?? []).map((a: any) => {
+    const scored: ArticleSeoScore[] = (articles ?? []).map((a: any) => {
       const { score, checks } = computeSeoScore(a);
       return {
         id: a.id,

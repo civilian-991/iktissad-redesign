@@ -266,7 +266,7 @@ export async function GET() {
       .slice(0, 20)
       .map((a) => a.id);
 
-    let scrollMap: Record<string, number> = {};
+    const scrollMap: Record<string, number> = {};
     if (candidateIds.length > 0) {
       const { data: readRows } = await supabase
         .from("article_reads")

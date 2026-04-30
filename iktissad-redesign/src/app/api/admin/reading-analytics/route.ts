@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -49,6 +50,9 @@ export interface ReadingAnalytics {
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authenticated) return unauthorizedResponse();
+
   const { searchParams } = new URL(request.url);
   const from = searchParams.get("from");
   const to = searchParams.get("to");

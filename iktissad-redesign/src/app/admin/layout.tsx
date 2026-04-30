@@ -8,6 +8,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import AdminLayoutClient from './AdminLayoutClient';
 
 export default async function AdminLayout({
@@ -24,6 +25,19 @@ export default async function AdminLayout({
   // belt-and-suspenders check for the server component rendering phase.
   if (!user) {
     redirect('/login?redirect=/admin');
+  }
+
+  // Verify the user has an admin role in the admin_roles table.
+  // Without this check, any authenticated Supabase user could access /admin.
+  const admin = createAdminClient();
+  const { data: roleRow } = await admin
+    .from('admin_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!roleRow) {
+    redirect('/login?redirect=/admin&error=unauthorized');
   }
 
   const displayName =

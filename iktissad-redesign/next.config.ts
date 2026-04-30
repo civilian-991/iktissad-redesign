@@ -73,6 +73,33 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   async headers() {
+    // Content-Security-Policy
+    // Allowlist for the active third-party stack:
+    //   - Supabase (DB / Storage / Realtime over wss)
+    //   - Sentry (error reports + tunnel via /monitoring)
+    //   - Cloudflare Turnstile (bot protection on public forms)
+    //   - Google Analytics 4 + Google Ad Manager (GAM)
+    //   - Mastercard MPGS / MIGS payment gateway iframes
+    // 'unsafe-inline' on script-src is required by Next.js's inline runtime
+    // bootstrap; 'unsafe-eval' is needed in dev (HMR) and by some libs.
+    // 'unsafe-inline' on style-src is required by Tailwind v4 + next/font.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.googletagmanager.com https://*.google-analytics.com https://*.googletagservices.com https://securepubads.g.doubleclick.net https://*.mastercard.com.au https://*.mastercard.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      "media-src 'self' https:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://challenges.cloudflare.com https://*.google-analytics.com https://*.googletagmanager.com https://*.mastercard.com.au https://*.mastercard.com",
+      "frame-src 'self' https://challenges.cloudflare.com https://*.mastercard.com.au https://*.mastercard.com https://*.youtube.com https://www.youtube-nocookie.com https://securepubads.g.doubleclick.net",
+      "worker-src 'self' blob:",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://*.mastercard.com.au https://*.mastercard.com",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+
     return [
       {
         source: "/(.*)",
@@ -94,6 +121,7 @@ const nextConfig: NextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains",
           },
+          { key: "Content-Security-Policy", value: csp },
         ],
       },
     ];

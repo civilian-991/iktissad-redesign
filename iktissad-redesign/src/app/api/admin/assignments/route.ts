@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -21,6 +22,9 @@ export interface ArticleAssignment {
 // ─── GET /api/admin/assignments ──────────────────────────────────────────────
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (!auth.authenticated) return unauthorizedResponse();
+
   const admin = createAdminClient();
 
   // Fetch articles with author info

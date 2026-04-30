@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient();
   const pollIds = (polls ?? []).map((p: { id: string }) => p.id);
 
-  let voteCounts: Record<string, number> = {};
+  const voteCounts: Record<string, number> = {};
   if (pollIds.length > 0) {
     const { data: votes } = await (admin.from("poll_votes") as any)
       .select("poll_id")

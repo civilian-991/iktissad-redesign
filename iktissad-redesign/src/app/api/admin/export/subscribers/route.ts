@@ -6,9 +6,13 @@
 
 import { NextResponse } from 'next/server';
 import ExcelJS from 'exceljs';
+import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (!auth.authenticated) return unauthorizedResponse();
+
   try {
     const supabase = createAdminClient();
 
