@@ -51,6 +51,8 @@ import {
   Users2,
   FolderOpen,
   Braces,
+  Inbox,
+  AtSign,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -106,10 +108,11 @@ const navigationConfig: NavItem[] = [
 ];
 
 const subscriptionNavConfig: SubNavItem[] = [
-  { key: 'subscribers', href: '/admin/subscribers', icon: Users },
-  { key: 'revenue',     href: '/admin/revenue',     icon: TrendingUp },
-  { key: 'plans',       href: '/admin/plans',        icon: Layers },
-  { key: 'promoCodes',  href: '/admin/promo-codes',  icon: Tag },
+  { key: 'subscribers',          href: '/admin/subscribers',           icon: Users },
+  { key: 'newsletterSubscribers', href: '/admin/newsletter-subscribers', icon: Mail },
+  { key: 'revenue',              href: '/admin/revenue',               icon: TrendingUp },
+  { key: 'plans',                href: '/admin/plans',                 icon: Layers },
+  { key: 'promoCodes',           href: '/admin/promo-codes',           icon: Tag },
 ];
 
 const analyticsNavConfig: SubNavItem[] = [
@@ -119,9 +122,10 @@ const analyticsNavConfig: SubNavItem[] = [
   { key: 'segments',         href: '/admin/segments',           icon: Users2 },
   { key: 'shareAnalytics',   href: '/admin/share-analytics',   icon: Share2 },
   { key: 'seoDashboard',     href: '/admin/seo-dashboard',     icon: Search },
-  { key: 'comments',         href: '/admin/comments',          icon: MessageSquare },
-  { key: 'auditLog',         href: '/admin/audit-log',         icon: ClipboardList },
-  { key: 'notifications',    href: '/admin/notifications',     icon: Bell },
+  { key: 'comments',           href: '/admin/comments',             icon: MessageSquare },
+  { key: 'contactSubmissions', href: '/admin/contact-submissions',  icon: Inbox },
+  { key: 'auditLog',           href: '/admin/audit-log',            icon: ClipboardList },
+  { key: 'notifications',      href: '/admin/notifications',        icon: Bell },
 ];
 
 const adsNavConfig: SubNavItem[] = [
@@ -130,10 +134,11 @@ const adsNavConfig: SubNavItem[] = [
 ];
 
 const settingsNavConfig: SubNavItem[] = [
-  { key: 'webhooks',    href: '/admin/settings/webhooks',    icon: Webhook },
-  { key: 'automations', href: '/admin/settings/automations', icon: Zap },
-  { key: 'mcp',         href: '/admin/settings/mcp',         icon: Cpu },
-  { key: 'graphql',     href: '/admin/settings/graphql',     icon: Braces },
+  { key: 'webhooks',       href: '/admin/settings/webhooks',         icon: Webhook },
+  { key: 'automations',    href: '/admin/settings/automations',      icon: Zap },
+  { key: 'socialAccounts', href: '/admin/settings/social-accounts',  icon: AtSign },
+  { key: 'mcp',            href: '/admin/settings/mcp',              icon: Cpu },
+  { key: 'graphql',        href: '/admin/settings/graphql',          icon: Braces },
 ];
 
 const quickActionsConfig: QuickAction[] = [
@@ -180,17 +185,17 @@ export default function AdminLayoutClient({
     const navKeys: Record<string, string> = {
       dashboard:   t('admin.common.dashboard'),
       articles:    t('admin.common.articles'),
-      assignments: 'لوحة المهام',
-      calendar:    'التقويم التحريري',
-      headlines:   'مختبر A/B للعناوين',
-      distribute:  'التوزيع الاجتماعي',
-      newsletters:         'النشرات البريدية',
-      contentIntelligence: 'ذكاء المحتوى',
-      brief:               'موجز المقال',
-      aiAgent:             'وكيل الذكاء الاصطناعي',
+      assignments: t('admin.common.assignments'),
+      calendar:    t('admin.common.calendar'),
+      headlines:   t('admin.common.headlines'),
+      distribute:  t('admin.common.distribute'),
+      newsletters:         t('admin.common.newsletters'),
+      contentIntelligence: t('admin.common.contentIntelligence'),
+      brief:               t('admin.common.brief'),
+      aiAgent:             t('admin.common.aiAgent'),
       magazine:            t('admin.common.magazine'),
-      series:              'الملفات التحريرية',
-      sources:             'المصادر',
+      series:              t('admin.common.series'),
+      sources:             t('admin.common.sources'),
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),
       settings:    t('admin.common.settings'),
@@ -201,6 +206,7 @@ export default function AdminLayoutClient({
   const getSubNavName = (key: string): string => {
     const subNavKeys: Record<string, string> = {
       subscribers:      t('admin.subscribers.title'),
+      newsletterSubscribers: 'مشتركو النشرة الإخبارية',
       revenue:          t('admin.revenue.title'),
       plans:            t('admin.plans.title'),
       promoCodes:       t('admin.promoCodes.title'),
@@ -211,14 +217,16 @@ export default function AdminLayoutClient({
       shareAnalytics:   t('admin.shareAnalytics.title'),
       seoDashboard:     t('admin.seoDashboard.title'),
       comments:         t('admin.common.comments'),
+      contactSubmissions: 'رسائل التواصل',
       auditLog:         t('admin.common.auditLog'),
       notifications:    t('admin.common.notifications'),
       advertisers:      t('admin.common.advertisers'),
       ads:              t('admin.common.ads'),
-      webhooks:         'Webhooks الصادرة',
-      automations:      'قواعد الأتمتة',
-      mcp:              'خادم MCP',
-      graphql:          'GraphQL API',
+      webhooks:         t('admin.common.webhooks'),
+      automations:      t('admin.common.automations'),
+      socialAccounts:   'الحسابات الاجتماعية',
+      mcp:              t('admin.common.mcp'),
+      graphql:          t('admin.common.graphql'),
     };
     return subNavKeys[key] || key;
   };
@@ -526,7 +534,7 @@ export default function AdminLayoutClient({
                   exit={{ opacity: 0 }}
                   className={`text-xs font-[family-name:var(--font-display)] font-semibold px-4 block mb-2 ${darkMode ? 'text-white/40' : 'text-graphite'}`}
                 >
-                  التكاملات والأتمتة
+                  {t('admin.common.integrationsAndAutomation')}
                 </motion.span>
               )}
             </AnimatePresence>
@@ -683,7 +691,7 @@ export default function AdminLayoutClient({
             {/* ⌘K Command Palette Button */}
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              title="فتح لوحة الأوامر (⌘K)"
+              title={t('admin.common.openCommandPalette')}
               className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-[family-name:var(--font-display)] ${
                 darkMode
                   ? 'bg-white/5 border-gold/10 text-white/50 hover:text-white hover:bg-white/10'

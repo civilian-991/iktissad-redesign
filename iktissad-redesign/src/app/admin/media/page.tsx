@@ -40,21 +40,16 @@ import {
   validateFile,
 } from '@/lib/supabase/storage';
 import { swrFetcher, mediaKey, deleteMedia } from '@/lib/api-client';
+import { useTranslation } from '@/lib/i18n';
 import type { MediaItem, ApiResponse } from '@/types';
 
-// Folders map to storage subfolders within the 'media' bucket
-const folders = ['الكل', 'مقالات', 'أسواق', 'تكنولوجيا', 'طاقة', 'شخصيات', 'تقارير', 'فيديو'];
-const folderSlugMap: Record<string, string> = {
-  'مقالات': 'articles',
-  'أسواق': 'markets',
-  'تكنولوجيا': 'tech',
-  'طاقة': 'energy',
-  'شخصيات': 'profiles',
-  'تقارير': 'reports',
-  'فيديو': 'video',
-};
+// Folder slugs that map to storage subfolders within the 'media' bucket
+// Display labels come from i18n: admin.media.folders.<slug>
+const FOLDER_SLUGS = ['all', 'articles', 'markets', 'tech', 'energy', 'profiles', 'reports', 'video'] as const;
+// Slugs that can be used for upload (excludes 'all')
+const UPLOAD_FOLDER_SLUGS = FOLDER_SLUGS.filter((s) => s !== 'all');
 
-const fileTypes = ['الكل', 'image', 'video', 'document'];
+const FILE_TYPE_SLUGS = ['all', 'image', 'video', 'document'] as const;
 
 const PAGE_SIZE = 20;
 
@@ -74,9 +69,10 @@ function getMediaType(mimeType: string): string {
 }
 
 export default function MediaLibraryPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState('الكل');
-  const [selectedType, setSelectedType] = useState('الكل');
+  const [selectedFolder, setSelectedFolder] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -86,7 +82,7 @@ export default function MediaLibraryPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
-  const [uploadFolder, setUploadFolder] = useState('مقالات');
+  const [uploadFolder, setUploadFolder] = useState('articles');
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
@@ -94,8 +90,8 @@ export default function MediaLibraryPage() {
   const swrKeyParams = {
     page,
     pageSize: PAGE_SIZE,
-    folder: selectedFolder !== 'الكل' ? (folderSlugMap[selectedFolder] ?? selectedFolder) : undefined,
-    mimeType: selectedType !== 'الكل' ? selectedType : undefined,
+    folder: selectedFolder !== 'all' ? selectedFolder : undefined,
+    type: selectedType !== 'all' ? selectedType : undefined,
   };
   const swrKeyValue = mediaKey(swrKeyParams);
 
@@ -140,12 +136,8 @@ export default function MediaLibraryPage() {
 
   const getTypeLabel = (mimeType: string) => {
     const type = getMediaType(mimeType);
-    switch (type) {
-      case 'image': return 'صورة';
-      case 'video': return 'فيديو';
-      case 'document': return 'مستند';
-      default: return 'ملف';
-    }
+    const key = `admin.media.typeLabels.${type === 'image' || type === 'video' || type === 'document' ? type : 'file'}`;
+    return t(key);
   };
 
   // Handle file upload (still uses Supabase Storage directly)
@@ -154,7 +146,7 @@ export default function MediaLibraryPage() {
     setUploadError('');
 
     const fileArray = Array.from(files);
-    const folder = folderSlugMap[uploadFolder] ?? 'general';
+    const folder = uploadFolder;
 
     for (const file of fileArray) {
       const validationError = validateFile(file, { maxSizeMB: 50 });
@@ -178,8 +170,13 @@ export default function MediaLibraryPage() {
     }
   }, [uploadFolder, uploadError, mutate]);
 
-  // Handle deletion via REST API
+  // Handle deletion via REST API with confirmation
   const handleDelete = useCallback(async (ids: string[]) => {
+    const msg = ids.length === 1
+      ? t('admin.media.actions.confirmDelete')
+      : t('admin.media.actions.confirmBulkDelete').replace('{count}', String(ids.length));
+    if (!window.confirm(msg)) return;
+
     setDeletingIds((prev) => [...prev, ...ids]);
     let anyError = false;
 
@@ -188,7 +185,7 @@ export default function MediaLibraryPage() {
         await deleteMedia(id);
       } catch {
         anyError = true;
-        toast.error('فشل حذف الملف');
+        toast.error(t('admin.media.actions.deleteFailed'));
       }
     }
 
@@ -196,11 +193,15 @@ export default function MediaLibraryPage() {
     setSelectedItems((prev) => prev.filter((i) => !ids.includes(i)));
 
     if (!anyError) {
-      toast.success(ids.length === 1 ? 'تم حذف الملف' : `تم حذف ${ids.length} ملفات`);
+      toast.success(
+        ids.length === 1
+          ? t('admin.media.actions.deleted')
+          : t('admin.media.actions.bulkDeleted').replace('{count}', String(ids.length))
+      );
     }
 
     mutate();
-  }, [mutate]);
+  }, [mutate, t]);
 
   // Copy URL to clipboard
   const handleCopyUrl = useCallback((url: string) => {
@@ -217,23 +218,23 @@ export default function MediaLibraryPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-            مكتبة الوسائط
+            {t('admin.media.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {totalCount} ملف • {formatFileSize(totalSize)} إجمالي
+            {totalCount} {t('admin.media.totalFiles')} • {formatFileSize(totalSize)} {t('admin.media.totalSize')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm">
             <FolderPlus size={16} />
-            مجلد جديد
+            {t('admin.media.newFolder')}
           </button>
           <button
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
           >
             <Upload size={18} />
-            رفع ملفات
+            {t('admin.media.upload')}
           </button>
         </div>
       </div>
@@ -241,10 +242,10 @@ export default function MediaLibraryPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'الصور', count: media.filter(m => getMediaType(m.mimeType) === 'image').length, icon: ImageIcon, color: 'from-teal to-emerald-600' },
-          { label: 'الفيديوهات', count: media.filter(m => getMediaType(m.mimeType) === 'video').length, icon: Video, color: 'from-loss to-rose-600' },
-          { label: 'المستندات', count: media.filter(m => getMediaType(m.mimeType) === 'document').length, icon: FileText, color: 'from-gold to-bronze' },
-          { label: 'المجلدات', count: folders.length - 1, icon: Folder, color: 'from-purple-500 to-indigo-600' },
+          { label: t('admin.media.stats.images'), count: media.filter(m => getMediaType(m.mimeType) === 'image').length, icon: ImageIcon, color: 'from-teal to-emerald-600' },
+          { label: t('admin.media.stats.videos'), count: media.filter(m => getMediaType(m.mimeType) === 'video').length, icon: Video, color: 'from-loss to-rose-600' },
+          { label: t('admin.media.stats.documents'), count: media.filter(m => getMediaType(m.mimeType) === 'document').length, icon: FileText, color: 'from-gold to-bronze' },
+          { label: t('admin.media.stats.folders'), count: FOLDER_SLUGS.length - 1, icon: Folder, color: 'from-purple-500 to-indigo-600' },
         ].map((stat) => (
           <motion.div
             key={stat.label}
@@ -267,7 +268,7 @@ export default function MediaLibraryPage() {
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="البحث في الملفات..."
+              placeholder={t('admin.media.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-12 pl-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
@@ -307,7 +308,7 @@ export default function MediaLibraryPage() {
             }`}
           >
             <Filter size={16} />
-            الفلاتر
+            {t('admin.media.filtersLabel')}
             <ChevronDown size={14} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </button>
         </div>
@@ -323,32 +324,32 @@ export default function MediaLibraryPage() {
               <div className="pt-4 mt-4 border-t border-gold/10 grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
-                    المجلد
+                    {t('admin.media.folderLabel')}
                   </label>
                   <select
                     value={selectedFolder}
                     onChange={(e) => { setSelectedFolder(e.target.value); setPage(1); }}
                     className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
-                    {folders.map((folder) => (
-                      <option key={folder} value={folder} className="bg-midnight">
-                        {folder}
+                    {FOLDER_SLUGS.map((slug) => (
+                      <option key={slug} value={slug} className="bg-midnight">
+                        {t(`admin.media.folders.${slug}`)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-2">
-                    نوع الملف
+                    {t('admin.media.fileTypeLabel')}
                   </label>
                   <select
                     value={selectedType}
                     onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
                     className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-4 text-white font-[family-name:var(--font-display)] text-sm focus:outline-none focus:border-gold/30"
                   >
-                    {fileTypes.map((type) => (
-                      <option key={type} value={type} className="bg-midnight">
-                        {type === 'الكل' ? 'الكل' : getTypeLabel(type + '/')}
+                    {FILE_TYPE_SLUGS.map((slug) => (
+                      <option key={slug} value={slug} className="bg-midnight">
+                        {slug === 'all' ? t('admin.media.filters.all') : t(`admin.media.typeLabels.${slug}`)}
                       </option>
                     ))}
                   </select>
@@ -369,12 +370,12 @@ export default function MediaLibraryPage() {
             className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex items-center justify-between"
           >
             <span className="text-gold font-[family-name:var(--font-display)] text-sm">
-              تم تحديد {selectedItems.length} ملف
+              {t('admin.media.actions.selected').replace('{count}', String(selectedItems.length))}
             </span>
             <div className="flex items-center gap-2">
               <button className="px-4 py-2 bg-white/10 text-white rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center gap-2">
                 <Download size={14} />
-                تحميل
+                {t('admin.media.actions.download')}
               </button>
               <button
                 onClick={() => handleDelete(selectedItems)}
@@ -386,13 +387,13 @@ export default function MediaLibraryPage() {
                 ) : (
                   <Trash2 size={14} />
                 )}
-                حذف
+                {t('admin.media.actions.delete')}
               </button>
               <button
                 onClick={() => setSelectedItems([])}
                 className="px-4 py-2 bg-white/5 text-white/70 rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-white/10 transition-colors"
               >
-                إلغاء
+                {t('admin.media.actions.cancel')}
               </button>
             </div>
           </motion.div>
@@ -417,19 +418,19 @@ export default function MediaLibraryPage() {
             <Upload size={36} className="text-white/20" />
           </div>
           <h3 className="text-white/60 text-lg font-[family-name:var(--font-display)] font-semibold mb-2">
-            لا توجد ملفات
+            {t('admin.media.empty')}
           </h3>
           <p className="text-white/30 text-sm font-[family-name:var(--font-display)] mb-6 max-w-xs">
-            {searchQuery || selectedFolder !== 'الكل' || selectedType !== 'الكل'
-              ? 'لا توجد ملفات تطابق معايير البحث الحالية'
-              : 'ابدأ برفع الصور والمستندات لاستخدامها في المقالات والمجلات'}
+            {searchQuery || selectedFolder !== 'all' || selectedType !== 'all'
+              ? t('admin.media.emptyFiltered')
+              : t('admin.media.emptyHint')}
           </p>
           <button
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
           >
             <Upload size={16} />
-            رفع ملفات
+            {t('admin.media.upload')}
           </button>
         </motion.div>
       )}
@@ -523,22 +524,22 @@ export default function MediaLibraryPage() {
             <thead>
               <tr className="border-b border-gold/10 bg-white/5">
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  الملف
+                  {t('admin.media.table.file')}
                 </th>
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  النوع
+                  {t('admin.media.table.type')}
                 </th>
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  الحجم
+                  {t('admin.media.table.size')}
                 </th>
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  المجلد
+                  {t('admin.media.table.folder')}
                 </th>
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  التاريخ
+                  {t('admin.media.table.date')}
                 </th>
                 <th className="text-right p-4 text-white/50 text-xs font-[family-name:var(--font-display)] font-semibold">
-                  إجراءات
+                  {t('admin.media.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -636,7 +637,7 @@ export default function MediaLibraryPage() {
             disabled={page === 1}
             className="px-4 py-2 bg-white/5 border border-gold/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm transition-all"
           >
-            السابق
+            {t('admin.media.pagination.previous')}
           </button>
           <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
             {page} / {totalPages}
@@ -646,7 +647,7 @@ export default function MediaLibraryPage() {
             disabled={page === totalPages}
             className="px-4 py-2 bg-white/5 border border-gold/10 rounded-lg text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm transition-all"
           >
-            التالي
+            {t('admin.media.pagination.next')}
           </button>
         </div>
       )}
@@ -670,7 +671,7 @@ export default function MediaLibraryPage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-white">
-                  رفع ملفات جديدة
+                  {t('admin.media.uploadModal.title')}
                 </h3>
                 <button
                   onClick={() => setShowUploadModal(false)}
@@ -711,17 +712,17 @@ export default function MediaLibraryPage() {
                   <>
                     <Loader2 size={48} className="mx-auto text-gold animate-spin mb-4" />
                     <p className="text-white font-[family-name:var(--font-display)]">
-                      جاري الرفع...
+                      {t('admin.media.uploadModal.uploading')}
                     </p>
                   </>
                 ) : (
                   <>
                     <Upload className="mx-auto text-gold/50 mb-4" size={48} />
                     <p className="text-white font-[family-name:var(--font-display)] mb-2">
-                      اسحب الملفات هنا أو
+                      {t('admin.media.uploadModal.dropzone')}
                     </p>
                     <label className="inline-block px-4 py-2 bg-gold/10 text-gold rounded-lg cursor-pointer hover:bg-gold/20 transition-colors font-[family-name:var(--font-display)] text-sm">
-                      اختر من جهازك
+                      {t('admin.media.uploadModal.browse')}
                       <input
                         type="file"
                         multiple
@@ -734,7 +735,7 @@ export default function MediaLibraryPage() {
                       />
                     </label>
                     <p className="text-white/40 text-xs mt-4">
-                      PNG, JPG, GIF, PDF, MP4 حتى 50MB
+                      {t('admin.media.uploadModal.maxSize')}
                     </p>
                   </>
                 )}
@@ -743,16 +744,16 @@ export default function MediaLibraryPage() {
               {/* Folder Selection */}
               <div className="mt-6">
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  رفع إلى مجلد
+                  {t('admin.media.uploadModal.uploadTo')}
                 </label>
                 <select
                   value={uploadFolder}
                   onChange={(e) => setUploadFolder(e.target.value)}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30"
                 >
-                  {folders.filter(f => f !== 'الكل').map((folder) => (
-                    <option key={folder} value={folder} className="bg-midnight">
-                      {folder}
+                  {UPLOAD_FOLDER_SLUGS.map((slug) => (
+                    <option key={slug} value={slug} className="bg-midnight">
+                      {t(`admin.media.folders.${slug}`)}
                     </option>
                   ))}
                 </select>
@@ -817,7 +818,7 @@ export default function MediaLibraryPage() {
               <div className="p-4 border-t border-gold/10 flex items-center justify-between">
                 <div className="text-white/50 text-sm font-[family-name:var(--font-display)]">
                   {formatFileSize(previewItem.size)} • {previewItem.folder || ''}
-                  {previewItem.uploadedBy ? ` • رفع بواسطة ${previewItem.uploadedBy}` : ''}
+                  {previewItem.uploadedBy ? ` • ${t('admin.media.uploadedBy').replace('{name}', previewItem.uploadedBy)}` : ''}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -825,9 +826,9 @@ export default function MediaLibraryPage() {
                     className="px-4 py-2 bg-white/10 text-white rounded-lg font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center gap-2"
                   >
                     {copiedUrl === previewItem.url ? (
-                      <><CheckCircle size={14} className="text-profit" /> تم النسخ</>
+                      <><CheckCircle size={14} className="text-profit" /> {t('admin.media.actions.copied')}</>
                     ) : (
-                      <><Copy size={14} /> نسخ الرابط</>
+                      <><Copy size={14} /> {t('admin.media.actions.copy')}</>
                     )}
                   </button>
                   <button
@@ -840,7 +841,7 @@ export default function MediaLibraryPage() {
                     ) : (
                       <Trash2 size={14} />
                     )}
-                    حذف
+                    {t('admin.media.actions.delete')}
                   </button>
                 </div>
               </div>

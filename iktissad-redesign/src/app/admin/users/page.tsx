@@ -107,6 +107,40 @@ export default function UsersPage() {
     }
   }, [mutate, t]);
 
+  const handleBulkActivate = useCallback(async () => {
+    let failed = 0;
+    for (const id of selectedUsers) {
+      try {
+        await fetch(`/api/users/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'active' }),
+        });
+      } catch { failed++; }
+    }
+    if (failed > 0) toast.error(t('admin.common.error'));
+    else toast.success(t('admin.users.bulkActions.activate'));
+    setSelectedUsers([]);
+    mutate();
+  }, [selectedUsers, mutate, t]);
+
+  const handleBulkDeactivate = useCallback(async () => {
+    let failed = 0;
+    for (const id of selectedUsers) {
+      try {
+        await fetch(`/api/users/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'inactive' }),
+        });
+      } catch { failed++; }
+    }
+    if (failed > 0) toast.error(t('admin.common.error'));
+    else toast.success(t('admin.users.bulkActions.deactivate'));
+    setSelectedUsers([]);
+    mutate();
+  }, [selectedUsers, mutate, t]);
+
   // Stats data
   const statsConfig: StatConfig[] = [
     { labelKey: 'total', value: total, icon: Users, color: 'from-gold to-bronze' },
@@ -309,10 +343,10 @@ export default function UsersPage() {
               {t('admin.users.bulkActions.selected', { count: selectedUsers.length })}
             </span>
             <div className="flex items-center gap-2">
-              <Button variant="success" size="sm">
+              <Button variant="success" size="sm" onClick={handleBulkActivate}>
                 {t('admin.users.bulkActions.activate')}
               </Button>
-              <Button variant="danger" size="sm">
+              <Button variant="danger" size="sm" onClick={handleBulkDeactivate}>
                 {t('admin.users.bulkActions.deactivate')}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setSelectedUsers([])}>
@@ -487,16 +521,18 @@ export default function UsersPage() {
         {/* Pagination */}
         <div className="p-4 border-t border-gold/10 flex items-center justify-between">
           <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {t('admin.articles.pagination.showing', { from: 1, to: filteredUsers.length, total })}
+            {t('admin.articles.pagination.showing', { from: (page - 1) * pageSize + 1, to: Math.min(page * pageSize, total), total })}
           </span>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
               {t('admin.articles.pagination.previous')}
             </Button>
-            <Button variant="primary" size="sm">
-              1
-            </Button>
-            <Button variant="ghost" size="sm">
+            {Array.from({ length: Math.ceil(total / pageSize) }, (_, i) => i + 1).slice(0, 5).map(p => (
+              <Button key={p} variant={p === page ? 'primary' : 'ghost'} size="sm" onClick={() => setPage(p)}>
+                {p}
+              </Button>
+            ))}
+            <Button variant="ghost" size="sm" onClick={() => setPage(p => Math.min(Math.ceil(total / pageSize), p + 1))} disabled={page >= Math.ceil(total / pageSize)}>
               {t('admin.articles.pagination.next')}
             </Button>
           </div>

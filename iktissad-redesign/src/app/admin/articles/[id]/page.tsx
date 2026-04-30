@@ -352,7 +352,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const handleArticleTypeChange = useCallback(
     (type: ArticleType, config: ArticleTypeConfig) => {
       setArticleType(type);
-      toast.success(`تم تغيير نوع المقال إلى: ${config.arabicLabel}`);
+      toast.success(`${t('admin.articles.editor.articleTypeChanged')} ${config.arabicLabel}`);
       setShowOutlineModal(true);
     },
     []
@@ -378,13 +378,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   };
 
   const handleVersionRestore = useCallback(() => {
-    toast.success('تم استرجاع الإصدار بنجاح');
+    toast.success(t('admin.articles.editor.versionRestored'));
     router.refresh();
   }, [router]);
 
   // Handle image selection from MediaPicker for inline editor insertion
   const handleMediaSelect = useCallback((url: string) => {
-    // The RichTextEditor should provide a way to insert images
+    if (editorRef.current) {
+      editorRef.current.chain().focus().setImage({ src: url, alt: '' }).run();
+    }
   }, []);
 
   const handleTranslateTitle = async () => {
@@ -428,7 +430,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   // Phase 5.1 — AI Auto-Tag
   const handleAutoTag = async () => {
     if (!content.trim() && !title.trim()) {
-      toast.error('أضف عنواناً أو محتوى أولاً');
+      toast.error(t('admin.articles.editor.ai.addTitleOrContent'));
       return;
     }
     setIsAutoTagging(true);
@@ -437,14 +439,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       if (res.data?.tags?.length) {
         const newTags = res.data.tags.filter((t) => !selectedTags.includes(t));
         if (newTags.length === 0) {
-          toast.info('لا توجد وسوم جديدة مقترحة');
+          toast.info(t('admin.articles.editor.ai.noNewTags'));
         } else {
           setSelectedTags((prev) => [...prev, ...newTags]);
-          toast.success(`تمت إضافة ${newTags.length} وسوم مقترحة`);
+          toast.success(t('admin.articles.editor.ai.tagsAdded').replace('{count}', String(newTags.length)));
         }
       }
     } catch (err: any) {
-      toast.error(err.message || 'فشل اقتراح الوسوم');
+      toast.error(err.message || t('admin.articles.editor.ai.tagsFailed'));
     } finally {
       setIsAutoTagging(false);
     }
@@ -460,10 +462,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     try {
       const res = await aiSummarize(id, content, title);
       if (res.data?.summary) {
-        toast.success('تم توليد الملخص الذكي وحفظه');
+        toast.success(t('admin.articles.editor.ai.summarizeSuccess'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'فشل توليد الملخص');
+      toast.error(err.message || t('admin.articles.editor.ai.summarizeFailed'));
     } finally {
       setIsSummarizing(false);
     }
@@ -480,10 +482,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       const res = await aiGenerateSocialCards(id, title, featuredImage || undefined);
       if (res.data?.twitter) {
         setOgImage(res.data.twitter);
-        toast.success('تم توليد البطاقات الاجتماعية — تم تعيين صورة Twitter كـ OG Image');
+        toast.success(t('admin.articles.editor.ai.socialCardsSuccess'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'فشل توليد البطاقات الاجتماعية');
+      toast.error(err.message || t('admin.articles.editor.ai.socialCardsFailed'));
     } finally {
       setIsGeneratingSocialCards(false);
     }
@@ -540,7 +542,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-profit" />
               </span>
               <span className="text-profit text-xs font-[family-name:var(--font-display)] whitespace-nowrap">
-                يشاهد هذا المقال:
+                {t('admin.articles.editor.viewingArticle')}
               </span>
               <PresenceAvatars users={presentUsers} maxVisible={4} size={24} />
             </span>
@@ -574,10 +576,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           <button
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm"
-            title="مشاركة للمراجعة"
+            title={t('admin.articles.editor.shareForReview')}
           >
             <Share2 size={16} />
-            مشاركة
+            {t('admin.articles.editor.share')}
           </button>
           {/* Version history */}
           <button
@@ -587,10 +589,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 ? 'bg-gold/10 border-gold/30 text-gold'
                 : 'bg-white/5 border-gold/10 text-white/70 hover:text-white hover:bg-white/10'
             }`}
-            title="سجل الإصدارات"
+            title={t('admin.articles.editor.versionHistory')}
           >
             <History size={16} />
-            إصدارات
+            {t('admin.articles.editor.versions')}
           </button>
           <button
             onClick={() => setShowDeleteModal(true)}
@@ -604,7 +606,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm"
           >
             <Eye size={16} />
-            معاينة مباشرة
+            {t('admin.articles.editor.livePreview')}
           </button>
           <button
             onClick={() => setEditorialCommentsOpen((v) => !v)}
@@ -613,13 +615,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 ? 'bg-gold/10 border-gold/30 text-gold'
                 : 'bg-white/5 border-gold/10 text-white/70 hover:text-white hover:bg-white/10'
             }`}
-            title="التعليقات التحريرية"
+            title={t('admin.articles.editor.editorialComments')}
           >
             <MessageSquare size={16} />
-            تعليقات
+            {t('admin.articles.editor.comments')}
           </button>
           <a
-            href={`/news/${article.slug}`}
+            href={`/${article.slug}`}
             target="_blank"
             className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-gold/10 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all font-[family-name:var(--font-display)] text-sm"
           >
@@ -711,7 +713,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 type="text"
                 value={titleEn}
                 onChange={(e) => setTitleEn(e.target.value)}
-                placeholder="العنوان بالإنجليزية (EN)"
+                placeholder={t('admin.articles.editor.titleEnPlaceholder')}
                 className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
               />
               <button
@@ -737,7 +739,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
                 <LinkIcon size={14} />
-                الرابط الدائم (Slug)
+                {t('admin.articles.editor.slugLabel')}
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-white/30 text-sm font-[family-name:var(--font-display)] shrink-0">/news/</span>
@@ -754,13 +756,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             {/* Deck / Standfirst */}
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                الديك (مقدمة المقال)
+                {t('admin.articles.editor.deckLabel')}
               </label>
               <input
                 type="text"
                 value={deck}
                 onChange={(e) => setDeck(e.target.value)}
-                placeholder="جملة تمهيدية تظهر أسفل العنوان مباشرة…"
+                placeholder={t('admin.articles.editor.deckPlaceholder')}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
               />
             </div>
@@ -906,7 +908,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             {featuredImage && (
               <div className="mt-4">
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  نقطة التركيز
+                  {t('admin.articles.editor.focalPoint')}
                 </label>
                 <FocalPointSelector
                   imageUrl={featuredImage}
@@ -948,14 +950,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              القطاع
+              {t('admin.articles.editor.sectorLabel')}
             </label>
             <select
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">بدون قطاع</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.noSector')}</option>
               {sectors.map((s) => (
                 <option key={s.slug} value={s.slug} className="bg-midnight">{s.name}</option>
               ))}
@@ -993,14 +995,14 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           >
             <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
               <User size={14} />
-              الكاتب
+              {t('admin.articles.editor.authorLabel')}
             </label>
             <select
               value={selectedAuthorId}
               onChange={(e) => setSelectedAuthorId(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">بدون كاتب</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.noAuthor')}</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>
               ))}
@@ -1023,10 +1025,10 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 onClick={handleAutoTag}
                 disabled={isAutoTagging}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-gold/20 rounded-lg text-gold text-xs font-[family-name:var(--font-display)] hover:bg-gold/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                title="اقتراح وسوم بالذكاء الاصطناعي"
+                title={t('admin.articles.editor.ai.suggestTagsTitle')}
               >
                 {isAutoTagging ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                {isAutoTagging ? 'جارٍ الاقتراح…' : 'اقتراح ذكي'}
+                {isAutoTagging ? t('admin.articles.editor.ai.suggesting') : t('admin.articles.editor.ai.smartSuggest')}
               </button>
             </div>
             {/* Preset tags */}
@@ -1063,7 +1065,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 value={customTagInput}
                 onChange={(e) => setCustomTagInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); }}}
-                placeholder="وسم مخصص…"
+                placeholder={t('admin.articles.editor.customTagPlaceholder')}
                 className="flex-1 bg-white/5 border border-gold/10 rounded-lg py-1.5 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
               />
               <button
@@ -1094,8 +1096,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   <Sparkles size={15} className="text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-[family-name:var(--font-display)] font-semibold">الملخص الذكي (TLDR)</p>
-                  <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">يُعرض للقراء أعلى المقال</p>
+                  <p className="text-white text-sm font-[family-name:var(--font-display)] font-semibold">{t('admin.articles.editor.ai.smartSummaryTitle')}</p>
+                  <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.ai.smartSummaryDesc')}</p>
                 </div>
               </div>
               <button
@@ -1104,11 +1106,11 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400 text-xs font-[family-name:var(--font-display)] hover:bg-purple-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isSummarizing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                {isSummarizing ? 'جارٍ التوليد…' : 'توليد الملخص'}
+                {isSummarizing ? t('admin.articles.editor.ai.generating') : t('admin.articles.editor.ai.generateSummary')}
               </button>
             </div>
             <p className="text-white/30 text-xs font-[family-name:var(--font-display)] leading-relaxed">
-              يُولَّد تلقائياً عند النشر. يمكن توليده يدوياً في أي وقت.
+              {t('admin.articles.editor.ai.smartSummaryHint')}
             </p>
           </motion.div>
 
@@ -1120,13 +1122,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-4">
-              بيانات SEO
+              {t('admin.articles.editor.seo.title')}
             </label>
             <div className="space-y-3">
               {/* Meta title */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">عنوان SEO</label>
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.seo.metaTitle')}</label>
                   <span className={`text-[10px] tabular-nums ${metaTitle.length > 65 ? 'text-loss' : metaTitle.length > 55 ? 'text-gold' : 'text-white/30'}`}>
                     {metaTitle.length}/65
                   </span>
@@ -1135,7 +1137,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   type="text"
                   value={metaTitle}
                   onChange={(e) => setMetaTitle(e.target.value)}
-                  placeholder={title ? `${title} | الإقتصاد والأعمال` : 'عنوان مخصص لمحركات البحث…'}
+                  placeholder={title ? `${title} | ${t('common.brand.name')}` : t('admin.articles.editor.seo.metaTitlePlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
@@ -1143,7 +1145,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               {/* Meta description */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">وصف SEO</label>
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.seo.metaDescription')}</label>
                   <span className={`text-[10px] tabular-nums ${metaDescription.length > 160 ? 'text-loss' : metaDescription.length > 140 ? 'text-gold' : 'text-white/30'}`}>
                     {metaDescription.length}/160
                   </span>
@@ -1151,7 +1153,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 <textarea
                   value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
-                  placeholder={excerpt || 'وصف مخصص لظهوره في نتائج البحث…'}
+                  placeholder={excerpt || t('admin.articles.editor.seo.metaDescPlaceholder')}
                   rows={3}
                   className="w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/20 focus:outline-none focus:border-gold/30 transition-colors resize-none"
                 />
@@ -1160,15 +1162,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               {/* OG Image */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">صورة المشاركة (OG Image)</label>
+                  <label className="text-white/50 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.seo.ogImage')}</label>
                   <button
                     onClick={handleGenerateSocialCards}
                     disabled={isGeneratingSocialCards || !title.trim()}
                     className="flex items-center gap-1 px-2 py-1 bg-teal/10 border border-teal/20 rounded-lg text-teal text-[10px] font-[family-name:var(--font-display)] hover:bg-teal/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="توليد بطاقات وسائل التواصل الاجتماعي"
+                    title={t('admin.articles.editor.seo.generateSocialCards')}
                   >
                     {isGeneratingSocialCards ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
-                    {isGeneratingSocialCards ? 'جارٍ التوليد…' : 'توليد بطاقة'}
+                    {isGeneratingSocialCards ? t('admin.articles.editor.ai.generating') : t('admin.articles.editor.ai.generateCard')}
                   </button>
                 </div>
                 <input
@@ -1186,7 +1188,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
               {/* Canonical URL */}
               <div>
-                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">رابط Canonical</label>
+                <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">{t('admin.articles.editor.seo.canonicalUrl')}</label>
                 <input
                   type="url"
                   value={canonicalUrl}
@@ -1199,15 +1201,15 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
               {/* Google snippet preview */}
               <div className="rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-right" dir="rtl">
-                <p className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2">معاينة نتيجة البحث</p>
+                <p className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2">{t('admin.articles.editor.seo.searchPreview')}</p>
                 <p className="text-[13px] font-medium text-blue-400 leading-snug truncate">
-                  {(metaTitle || title || 'عنوان المقال').slice(0, 65)}
+                  {(metaTitle || title || t('admin.articles.editor.seo.articleTitleFallback')).slice(0, 65)}
                 </p>
                 <p className="text-[11px] text-green-500 mt-0.5 mb-1">
                   iktissadonline.com › {slug || 'article-slug'}
                 </p>
                 <p className="text-[12px] text-zinc-400 leading-relaxed line-clamp-2">
-                  {(metaDescription || excerpt || 'أضف وصفاً تعريفياً ليظهر هنا في نتائج البحث.').slice(0, 160)}
+                  {(metaDescription || excerpt || t('admin.articles.editor.seo.descriptionFallback')).slice(0, 160)}
                 </p>
               </div>
 
@@ -1222,9 +1224,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </div>
                 <div className="flex-1 text-right">
                   <p className={`text-sm font-[family-name:var(--font-display)] font-medium ${noIndex ? 'text-loss' : 'text-white/70'}`}>
-                    إخفاء من محركات البحث (noindex)
+                    {t('admin.articles.editor.noIndexLabel')}
                   </p>
-                  <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">لا يُنصح إلا للمحتوى المؤقت أو المكرر</p>
+                  <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.noIndexHint')}</p>
                 </div>
               </button>
             </div>
@@ -1248,7 +1250,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               onEntityClick={(entity) => {
                 if (!selectedTags.includes(entity)) {
                   setSelectedTags((prev) => [...prev, entity]);
-                  toast.success(`تمت إضافة "${entity}" كوسم`);
+                  toast.success(t('admin.articles.editor.entityAddedAsTag').replace('{entity}', entity));
                 }
               }}
             />
@@ -1319,7 +1321,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             {status === 'scheduled' && (
               <div className="mt-3 pt-3 border-t border-gold/10">
                 <label className="block text-white/50 text-xs font-[family-name:var(--font-display)] mb-1.5">
-                  تاريخ ووقت النشر
+                  {t('admin.articles.editor.scheduleDateLabel')}
                 </label>
                 <input
                   type="datetime-local"
@@ -1339,13 +1341,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              خصائص المقال
+              {t('admin.articles.editor.articleProperties')}
             </label>
             <div className="space-y-2">
               {[
-                { label: 'مقال مميز', desc: 'يظهر في الواجهة الرئيسية', value: featured, set: setFeatured, icon: Star, color: 'text-gold' },
-                { label: 'اختيار المحرر', desc: 'يُعرض في قائمة مختارات المحرر', value: editorChoice, set: setEditorChoice, icon: Check, color: 'text-profit' },
-                { label: 'خبر عاجل', desc: 'يظهر في شريط الأخبار العاجلة', value: isBreaking, set: setIsBreaking, icon: Zap, color: 'text-loss' },
+                { label: t('admin.articles.editor.flagFeatured'), desc: t('admin.articles.editor.flagFeaturedDesc'), value: featured, set: setFeatured, icon: Star, color: 'text-gold' },
+                { label: t('admin.articles.editor.flagEditorChoice'), desc: t('admin.articles.editor.flagEditorChoiceDesc'), value: editorChoice, set: setEditorChoice, icon: Check, color: 'text-profit' },
+                { label: t('admin.articles.editor.flagBreaking'), desc: t('admin.articles.editor.flagBreakingDesc'), value: isBreaking, set: setIsBreaking, icon: Zap, color: 'text-loss' },
               ].map((flag) => (
                 <button
                   key={flag.label}

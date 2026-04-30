@@ -344,11 +344,11 @@ export default function NewArticlePage() {
             </div>
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                Deck (مقدمة)
+                {t('admin.articles.editor.deckLabelShort')}
               </label>
               <input
                 type="text" value={deck} onChange={(e) => setDeck(e.target.value)}
-                placeholder="جملة افتتاحية قصيرة تظهر تحت العنوان..."
+                placeholder={t('admin.articles.editor.deckPlaceholder')}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
               />
             </div>
@@ -420,7 +420,7 @@ export default function NewArticlePage() {
                 <label className="text-white/60 text-xs font-[family-name:var(--font-display)]">Meta Title</label>
                 <span className={`text-xs font-[family-name:var(--font-display)] ${metaTitleLen > 65 ? 'text-loss' : 'text-white/40'}`}>{metaTitleLen}/65</span>
               </div>
-              <input type="text" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder={title || 'سيستخدم عنوان المقال تلقائياً'}
+              <input type="text" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder={title || t('admin.articles.editor.seo.metaTitleAutoPlaceholder')}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors" />
             </div>
             <div>
@@ -428,7 +428,7 @@ export default function NewArticlePage() {
                 <label className="text-white/60 text-xs font-[family-name:var(--font-display)]">Meta Description</label>
                 <span className={`text-xs font-[family-name:var(--font-display)] ${metaDescLen > 160 ? 'text-loss' : 'text-white/40'}`}>{metaDescLen}/160</span>
               </div>
-              <textarea value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} rows={2} placeholder={excerpt || 'سيستخدم المقتطف تلقائياً'}
+              <textarea value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} rows={2} placeholder={excerpt || t('admin.articles.editor.seo.metaDescAutoPlaceholder')}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors resize-none" />
             </div>
             <div>
@@ -446,7 +446,7 @@ export default function NewArticlePage() {
                 className={`w-10 h-5 rounded-full transition-colors flex-shrink-0 ${noIndex ? 'bg-loss' : 'bg-white/10'}`}>
                 <div className={`w-4 h-4 rounded-full bg-white mt-0.5 transition-transform ${noIndex ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
-              <span className="text-white/60 text-xs font-[family-name:var(--font-display)]">No Index (لا تُظهر في محركات البحث)</span>
+              <span className="text-white/60 text-xs font-[family-name:var(--font-display)]">{t('admin.articles.editor.noIndexLabelShort')}</span>
             </label>
           </motion.div>
         </div>
@@ -515,10 +515,10 @@ export default function NewArticlePage() {
           {/* Sector */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6">
-            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">القطاع</label>
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">{t('admin.articles.editor.sectorLabel')}</label>
             <select value={selectedSector} onChange={(e) => setSelectedSector(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors">
-              <option value="" className="bg-midnight">اختر القطاع</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.selectSector')}</option>
               {sectors.map((s) => <option key={s.slug} value={s.slug} className="bg-midnight">{s.name}</option>)}
             </select>
           </motion.div>
@@ -540,11 +540,11 @@ export default function NewArticlePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6">
             <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              <User size={iconSizes.sm} /> الكاتب
+              <User size={iconSizes.sm} /> {t('admin.articles.editor.authorLabel')}
             </label>
             <select value={selectedAuthorId} onChange={(e) => setSelectedAuthorId(e.target.value)}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors">
-              <option value="" className="bg-midnight">اختر الكاتب</option>
+              <option value="" className="bg-midnight">{t('admin.articles.editor.selectAuthor')}</option>
               {users.map((u) => <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>)}
             </select>
           </motion.div>
@@ -572,7 +572,7 @@ export default function NewArticlePage() {
             <div className="flex gap-2 mt-2">
               <input type="text" value={customTagInput} onChange={(e) => setCustomTagInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); } }}
-                placeholder="وسم مخصص..."
+                placeholder={t('admin.articles.editor.customTagPlaceholder')}
                 className="flex-1 bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-xs font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors" />
               <button onClick={addCustomTag} disabled={!customTagInput.trim()}
                 className="p-2 bg-gold/10 border border-gold/20 rounded-lg text-gold hover:bg-gold/20 transition-colors disabled:opacity-40">
@@ -584,11 +584,11 @@ export default function NewArticlePage() {
           {/* Flags */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6 space-y-3">
-            <h3 className="text-white/70 text-sm font-[family-name:var(--font-display)]">خيارات العرض</h3>
+            <h3 className="text-white/70 text-sm font-[family-name:var(--font-display)]">{t('admin.articles.editor.displayOptions')}</h3>
             {([
-              { state: featured, set: setFeatured, label: 'مقال مميز', icon: Star },
-              { state: editorChoice, set: setEditorChoice, label: 'اختيار المحرر', icon: Eye },
-              { state: isBreaking, set: setIsBreaking, label: 'خبر عاجل', icon: Zap },
+              { state: featured, set: setFeatured, label: t('admin.articles.editor.flagFeatured'), icon: Star },
+              { state: editorChoice, set: setEditorChoice, label: t('admin.articles.editor.flagEditorChoice'), icon: Eye },
+              { state: isBreaking, set: setIsBreaking, label: t('admin.articles.editor.flagBreaking'), icon: Zap },
             ] as const).map(({ state, set, label, icon: Icon }) => (
               <button key={label} onClick={() => set(!state)}
                 className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${state ? 'border-gold/30 bg-gold/10' : 'border-gold/10 bg-white/5 hover:bg-white/10'}`}>

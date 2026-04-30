@@ -29,19 +29,17 @@ import {
   Loader2,
 } from 'lucide-react';
 import { swrFetcher, magazinesKey, deleteMagazine } from '@/lib/api-client';
+import { useTranslation } from '@/lib/i18n';
 import type { MagazineIssue, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 
 
 const years = [2026, 2025, 2024, 2023];
-const statuses = [
-  { value: 'all', label: 'الكل' },
-  { value: 'published', label: 'منشور' },
-  { value: 'draft', label: 'مسودة' },
-  { value: 'scheduled', label: 'مجدول' },
-];
+// Labels are resolved at render time via t() — see getStatusFilterLabel()
+const statusValues = ['all', 'published', 'draft', 'scheduled'] as const;
 
 export default function MagazinesPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -89,6 +87,35 @@ export default function MagazinesPage() {
     setMagazineToDelete(null);
   }, [magazineToDelete, mutate]);
 
+  const handleBulkDelete = useCallback(async () => {
+    if (!window.confirm(`هل تريد حذف ${selectedMagazines.length} عدد؟`)) return;
+    let failed = 0;
+    for (const id of selectedMagazines) {
+      try { await deleteMagazine(id); } catch { failed++; }
+    }
+    if (failed > 0) toast.error(`فشل حذف ${failed} أعداد`);
+    else toast.success(`تم حذف ${selectedMagazines.length} عدد`);
+    setSelectedMagazines([]);
+    mutate();
+  }, [selectedMagazines, mutate]);
+
+  const handleBulkFeature = useCallback(async () => {
+    let failed = 0;
+    for (const id of selectedMagazines) {
+      try {
+        await fetch(`/api/magazines/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ featured: true }),
+        });
+      } catch { failed++; }
+    }
+    if (failed > 0) toast.error('حدث خطأ');
+    else toast.success(`تم تعيين ${selectedMagazines.length} عدد كمميز`);
+    setSelectedMagazines([]);
+    mutate();
+  }, [selectedMagazines, mutate]);
+
   const filteredMagazines = magazines.filter(mag => {
     const matchesSearch = mag.title.includes(searchQuery) || mag.subtitle.includes(searchQuery);
     const matchesYear = selectedYear === null || mag.year === selectedYear;
@@ -123,16 +150,8 @@ export default function MagazinesPage() {
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'published':
-        return 'منشور';
-      case 'draft':
-        return 'مسودة';
-      case 'scheduled':
-        return 'مجدول';
-      default:
-        return status;
-    }
+    const key = `admin.magazines.filters.${status}`;
+    return t(key) || status;
   };
 
   return (
@@ -141,10 +160,10 @@ export default function MagazinesPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-            إدارة المجلة
+            {t('admin.magazines.title')}
           </h1>
           <p className="text-white/50 text-sm">
-            إدارة أعداد مجلة الإقتصاد والأعمال
+            {t('admin.magazines.subtitle')}
           </p>
         </div>
 
@@ -154,7 +173,7 @@ export default function MagazinesPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all"
           >
             <Plus size={18} />
-            عدد جديد
+            {t('admin.magazines.newIssue')}
           </Link>
         </div>
       </div>
@@ -222,8 +241,8 @@ export default function MagazinesPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              {statuses.map(status => (
-                <option key={status.value} value={status.value}>{status.label}</option>
+              {statusValues.map(sv => (
+                <option key={sv} value={sv}>{getStatusLabel(sv)}</option>
               ))}
             </select>
 
@@ -255,13 +274,13 @@ export default function MagazinesPage() {
               className="mt-4 pt-4 border-t border-gold/10 flex items-center gap-4"
             >
               <span className="text-white/60 text-sm">
-                تم تحديد {selectedMagazines.length} عدد
+                {t('admin.magazines.bulkActions.selected', { count: selectedMagazines.length })}
               </span>
-              <button className="text-sm text-gold hover:text-gold-muted transition-colors">
-                تعيين كمميز
+              <button onClick={handleBulkFeature} className="text-sm text-gold hover:text-gold-muted transition-colors">
+                {t('admin.magazines.bulkActions.feature')}
               </button>
-              <button className="text-sm text-loss hover:text-loss/80 transition-colors">
-                حذف المحدد
+              <button onClick={handleBulkDelete} className="text-sm text-loss hover:text-loss/80 transition-colors">
+                {t('admin.magazines.bulkActions.delete')}
               </button>
             </motion.div>
           )}

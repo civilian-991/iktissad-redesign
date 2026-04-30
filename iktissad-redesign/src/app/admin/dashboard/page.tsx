@@ -320,7 +320,7 @@ export default function DashboardPage() {
                         <StatusBadge status={article.status} />
                       </td>
                       <td className="py-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                        {article.views.toLocaleString()}
+                        {article.views.toLocaleString('ar')}
                       </td>
                     </tr>
                   ))}

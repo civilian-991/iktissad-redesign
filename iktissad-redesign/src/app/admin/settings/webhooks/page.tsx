@@ -17,20 +17,22 @@ import {
   EyeOff,
   Copy,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import type { Webhook as WebhookType, WebhookDelivery, WebhookEventType } from '@/types';
 
-const ALL_EVENTS: { value: WebhookEventType; label: string }[] = [
-  { value: 'article.published',  label: 'نشر مقال' },
-  { value: 'article.updated',    label: 'تحديث مقال' },
-  { value: 'article.review',     label: 'مقال قيد المراجعة' },
-  { value: 'subscriber.created', label: 'مشترك جديد' },
-  { value: 'subscriber.churned', label: 'إلغاء اشتراك' },
-  { value: 'payment.received',   label: 'دفعة مستلمة' },
-  { value: 'payment.failed',     label: 'فشل الدفع' },
-  { value: 'comment.flagged',    label: 'تعليق مبلغ عنه' },
-];
-
 export default function WebhooksPage() {
+  const { t } = useTranslation();
+
+  const ALL_EVENTS: { value: WebhookEventType; label: string }[] = [
+    { value: 'article.published',  label: t('admin.webhooks.events.article.published') },
+    { value: 'article.updated',    label: t('admin.webhooks.events.article.updated') },
+    { value: 'article.review',     label: t('admin.webhooks.events.article.review') },
+    { value: 'subscriber.created', label: t('admin.webhooks.events.subscriber.created') },
+    { value: 'subscriber.churned', label: t('admin.webhooks.events.subscriber.churned') },
+    { value: 'payment.received',   label: t('admin.webhooks.events.payment.received') },
+    { value: 'payment.failed',     label: t('admin.webhooks.events.payment.failed') },
+    { value: 'comment.flagged',    label: t('admin.webhooks.events.comment.flagged') },
+  ];
   const [webhooks, setWebhooks] = useState<WebhookType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -55,7 +57,7 @@ export default function WebhooksPage() {
       const json = await res.json();
       setWebhooks(json.data ?? []);
     } catch {
-      toast.error('تعذر تحميل الـ Webhooks');
+      toast.error(t('admin.common.error'));
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ export default function WebhooksPage() {
       const json = await res.json();
       setDeliveries((prev) => ({ ...prev, [webhookId]: json.data ?? [] }));
     } catch {
-      toast.error('تعذر تحميل سجل التسليم');
+      toast.error(t('admin.common.error'));
     } finally {
       setLoadingDeliveries(null);
     }
@@ -88,7 +90,7 @@ export default function WebhooksPage() {
 
   const handleCreate = async () => {
     if (!name || !url || !secret || selectedEvents.length === 0) {
-      toast.error('يرجى ملء جميع الحقول واختيار حدث واحد على الأقل');
+      toast.error(t('admin.webhooks.validation.fillAllFields'));
       return;
     }
     setSaving(true);
@@ -99,13 +101,13 @@ export default function WebhooksPage() {
         body: JSON.stringify({ name, url, secret, events: selectedEvents }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'خطأ');
-      toast.success('تم إنشاء الـ Webhook');
+      if (!res.ok) throw new Error(json.error ?? t('admin.common.error'));
+      toast.success(t('admin.webhooks.actions.created'));
       setShowForm(false);
       setName(''); setUrl(''); setSecret(''); setSelectedEvents([]);
       loadWebhooks();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+      toast.error(err instanceof Error ? err.message : t('admin.common.error'));
     } finally {
       setSaving(false);
     }
@@ -121,7 +123,7 @@ export default function WebhooksPage() {
       if (!res.ok) throw new Error('Failed');
       setWebhooks((prev) => prev.map((w) => w.id === wh.id ? { ...w, enabled: !w.enabled } : w));
     } catch {
-      toast.error('تعذر تحديث الحالة');
+      toast.error(t('admin.common.error'));
     }
   };
 
@@ -130,26 +132,26 @@ export default function WebhooksPage() {
     try {
       const res = await fetch(`/api/admin/webhooks/${id}/test`, { method: 'POST' });
       if (!res.ok) throw new Error('Failed');
-      toast.success('تم إرسال طلب تجريبي');
+      toast.success(t('admin.webhooks.actions.testSent'));
       // Clear cached deliveries to reload
       setDeliveries((prev) => { const next = { ...prev }; delete next[id]; return next; });
     } catch {
-      toast.error('تعذر إرسال الطلب التجريبي');
+      toast.error(t('admin.webhooks.actions.testFailed'));
     } finally {
       setTestingId(null);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل تريد حذف هذا الـ Webhook نهائياً؟')) return;
+    if (!confirm(t('admin.webhooks.validation.confirmDelete'))) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/admin/webhooks/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed');
-      toast.success('تم حذف الـ Webhook');
+      toast.success(t('admin.webhooks.actions.deleted'));
       setWebhooks((prev) => prev.filter((w) => w.id !== id));
     } catch {
-      toast.error('تعذر الحذف');
+      toast.error(t('admin.common.error'));
     } finally {
       setDeletingId(null);
     }
@@ -163,7 +165,7 @@ export default function WebhooksPage() {
 
   const copySecret = () => {
     navigator.clipboard.writeText(secret);
-    toast.success('تم نسخ السر');
+    toast.success(t('admin.webhooks.actions.secretCopied'));
   };
 
   return (
@@ -172,10 +174,10 @@ export default function WebhooksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-            Webhooks الصادرة
+            {t('admin.webhooks.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            أرسل أحداث CMS تلقائياً إلى أي نقطة نهاية خارجية
+            {t('admin.webhooks.subtitle')}
           </p>
         </div>
         <button
@@ -183,7 +185,7 @@ export default function WebhooksPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
         >
           <Plus size={16} />
-          إضافة Webhook
+          {t('admin.webhooks.newWebhook')}
         </button>
       </div>
 
@@ -198,21 +200,21 @@ export default function WebhooksPage() {
           >
             <h2 className="text-white font-[family-name:var(--font-display)] font-bold flex items-center gap-2">
               <Webhook size={18} className="text-gold" />
-              Webhook جديد
+              {t('admin.webhooks.newWebhook')}
             </h2>
 
             <div className="grid md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">الاسم</label>
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">{t('admin.webhooks.fields.name')}</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="مثال: Zapier Integration"
+                  placeholder={t('admin.webhooks.fields.namePlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">Endpoint URL</label>
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">{t('admin.webhooks.fields.url')}</label>
                 <input
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
@@ -226,7 +228,7 @@ export default function WebhooksPage() {
             {/* Secret */}
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                مفتاح التوقيع (HMAC Secret)
+                {t('admin.webhooks.fields.secret')}
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -252,14 +254,14 @@ export default function WebhooksPage() {
                   onClick={generateSecret}
                   className="px-3 py-2 bg-white/10 text-white/70 hover:text-white hover:bg-white/20 rounded-xl font-[family-name:var(--font-display)] text-xs transition-colors whitespace-nowrap"
                 >
-                  توليد
+                  {t('admin.webhooks.actions.generate')}
                 </button>
               </div>
             </div>
 
             {/* Events */}
             <div>
-              <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">الأحداث</label>
+              <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">{t('admin.webhooks.fields.events')}</label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {ALL_EVENTS.map((ev) => (
                   <button
@@ -287,13 +289,13 @@ export default function WebhooksPage() {
                 className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
-                حفظ
+                {t('admin.webhooks.actions.create')}
               </button>
               <button
                 onClick={() => setShowForm(false)}
                 className="px-5 py-2.5 bg-white/10 text-white font-[family-name:var(--font-display)] text-sm rounded-xl hover:bg-white/20 transition-colors"
               >
-                إلغاء
+                {t('common.actions.cancel')}
               </button>
             </div>
           </motion.div>
@@ -308,7 +310,7 @@ export default function WebhooksPage() {
       ) : webhooks.length === 0 ? (
         <div className="text-center py-20 text-white/40 font-[family-name:var(--font-display)]">
           <Webhook size={48} className="mx-auto mb-4 opacity-30" />
-          لا توجد Webhooks بعد
+          {t('admin.webhooks.empty')}
         </div>
       ) : (
         <div className="space-y-3">
@@ -352,7 +354,7 @@ export default function WebhooksPage() {
                   <button
                     onClick={() => handleTest(wh.id)}
                     disabled={testingId === wh.id}
-                    title="إرسال تجريبي"
+                    title={t('admin.webhooks.actions.testTitle')}
                     className="p-2 text-white/40 hover:text-gold transition-colors disabled:opacity-50"
                   >
                     {testingId === wh.id ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
@@ -386,7 +388,7 @@ export default function WebhooksPage() {
                   >
                     <div className="p-4">
                       <h3 className="text-white/70 text-xs font-[family-name:var(--font-display)] mb-3">
-                        سجل التسليم (آخر 20)
+                        {t('admin.webhooks.actions.deliveries')}
                       </h3>
                       {loadingDeliveries === wh.id ? (
                         <div className="flex items-center justify-center py-6">
@@ -394,7 +396,7 @@ export default function WebhooksPage() {
                         </div>
                       ) : (deliveries[wh.id] ?? []).length === 0 ? (
                         <p className="text-white/30 text-sm text-center py-4 font-[family-name:var(--font-display)]">
-                          لا توجد تسليمات بعد
+                          {t('admin.webhooks.noDeliveries')}
                         </p>
                       ) : (
                         <div className="space-y-2">

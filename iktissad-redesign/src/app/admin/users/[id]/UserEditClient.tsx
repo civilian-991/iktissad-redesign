@@ -48,12 +48,12 @@ interface UserEditClientProps {
   userId: string;
 }
 
-const ROLE_OPTIONS: { value: AdminRole; label: string }[] = [
-  { value: 'super_admin', label: 'مدير عام' },
-  { value: 'editor', label: 'محرر' },
-  { value: 'writer', label: 'كاتب' },
-  { value: 'finance', label: 'مالية' },
-  { value: 'advertiser_manager', label: 'مدير إعلانات' },
+const ROLE_KEYS: { value: AdminRole; key: string }[] = [
+  { value: 'super_admin', key: 'admin.users.edit.roleSuperAdmin' },
+  { value: 'editor', key: 'admin.users.edit.roleEditor' },
+  { value: 'writer', key: 'admin.users.edit.roleWriter' },
+  { value: 'finance', key: 'admin.users.edit.roleFinance' },
+  { value: 'advertiser_manager', key: 'admin.users.edit.roleAdvertiserManager' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
 
   const handleSaveProfile = async () => {
     if (!name.trim()) {
-      toast.error('الاسم مطلوب');
+      toast.error(t('admin.users.edit.nameRequired'));
       return;
     }
     setIsSaving(true);
@@ -134,9 +134,9 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'فشل الحفظ');
+        throw new Error(err.error || t('admin.users.edit.saveFailed'));
       }
-      toast.success('تم حفظ الملف الشخصي بنجاح');
+      toast.success(t('admin.users.edit.profileSaved'));
       mutateUser();
     } catch (err: unknown) {
       toast.error((err as Error).message || t('admin.common.error'));
@@ -152,7 +152,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
       parsedPermissions = JSON.parse(permissionsJson);
       setPermissionsError('');
     } catch {
-      setPermissionsError('JSON غير صحيح في الصلاحيات');
+      setPermissionsError(t('admin.users.edit.invalidPermissionsJson'));
       return;
     }
 
@@ -169,9 +169,9 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'فشل حفظ الدور');
+        throw new Error(err.error || t('admin.users.edit.roleSaveFailed'));
       }
-      toast.success('تم تحديث الدور بنجاح');
+      toast.success(t('admin.users.edit.roleUpdated'));
       mutateRole();
     } catch (err: unknown) {
       toast.error((err as Error).message || t('admin.common.error'));
@@ -181,15 +181,15 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
   };
 
   const handleRevokeRole = async () => {
-    if (!window.confirm('هل أنت متأكد من إلغاء صلاحيات هذا المستخدم؟')) return;
+    if (!window.confirm(t('admin.users.edit.revokeConfirm'))) return;
     setIsRevokingRole(true);
     try {
       const res = await fetch(`/api/admin/roles/${userId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'فشل إلغاء الدور');
+        throw new Error(err.error || t('admin.users.edit.revokeRoleFailed'));
       }
-      toast.success('تم إلغاء صلاحيات المستخدم');
+      toast.success(t('admin.users.edit.roleRevoked'));
       mutateRole();
     } catch (err: unknown) {
       toast.error((err as Error).message || t('admin.common.error'));
@@ -200,7 +200,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
 
   const handleDeleteUser = async () => {
     if (deleteConfirmEmail !== user?.email) {
-      toast.error('البريد الإلكتروني غير متطابق');
+      toast.error(t('admin.users.edit.emailMismatch'));
       return;
     }
     setIsDeletingUser(true);
@@ -208,9 +208,9 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
       const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || 'فشل حذف المستخدم');
+        throw new Error(err.error || t('admin.users.edit.deleteUserFailed'));
       }
-      toast.success('تم حذف المستخدم بنجاح');
+      toast.success(t('admin.users.edit.userDeleted'));
       router.push('/admin/users');
     } catch (err: unknown) {
       toast.error((err as Error).message || t('admin.common.error'));
@@ -228,8 +228,10 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
     }
   }, []);
 
-  const getRoleLabel = (role: AdminRole) =>
-    ROLE_OPTIONS.find((r) => r.value === role)?.label ?? role;
+  const getRoleLabel = (role: AdminRole) => {
+    const found = ROLE_KEYS.find((r) => r.value === role);
+    return found ? t(found.key) : role;
+  };
 
   const isLoading = userLoading || roleLoading;
 
@@ -248,7 +250,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {t('common.errors.notFound')}
         </p>
         <Link href="/admin/users" className="text-gold hover:underline mt-4 inline-block font-[family-name:var(--font-display)]">
-          العودة للقائمة
+          {t('admin.users.edit.backToList')}
         </Link>
       </div>
     );
@@ -317,7 +319,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
                 </span>
               ) : (
                 <span className="text-xs text-white/40 font-[family-name:var(--font-display)]">
-                  بدون صلاحيات إدارية
+                  {t('admin.users.edit.noAdminRole')}
                 </span>
               )}
               <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-[family-name:var(--font-display)] ${
@@ -329,7 +331,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
                 {t(`admin.users.status.${user.status}`)}
               </span>
               <span className="text-xs text-white/30 font-[family-name:var(--font-display)]">
-                انضم {joinDate}
+                {t('admin.users.edit.joined')} {joinDate}
               </span>
             </div>
           </div>
@@ -340,7 +342,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
               {user.articleCount}
             </p>
             <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">
-              مقال
+              {t('admin.users.edit.articlesCount')}
             </p>
           </div>
         </div>
@@ -355,13 +357,13 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           className="bg-midnight/50 border border-gold/10 rounded-xl p-6 space-y-4"
         >
           <h3 className="text-lg font-[family-name:var(--font-display)] font-bold text-white">
-            الملف الشخصي
+            {t('admin.users.edit.profile')}
           </h3>
 
           {/* Name */}
           <div>
             <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-              الاسم الكامل
+              {t('admin.users.form.fullName')}
             </label>
             <input
               type="text"
@@ -374,8 +376,8 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {/* Email (read-only) */}
           <div>
             <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-              البريد الإلكتروني
-              <span className="text-white/30 ms-1">(للقراءة فقط)</span>
+              {t('admin.users.form.email')}
+              <span className="text-white/30 ms-1">({t('admin.users.edit.readOnly')})</span>
             </label>
             <input
               type="email"
@@ -388,7 +390,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {/* Phone */}
           <div>
             <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-              رقم الهاتف
+              {t('admin.users.form.phone')}
             </label>
             <input
               type="tel"
@@ -402,7 +404,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {/* Avatar */}
           <div>
             <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-              الصورة الشخصية
+              {t('admin.users.form.avatar')}
             </label>
             <ImageUploader
               bucket="avatars"
@@ -410,15 +412,15 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
               currentImage={avatar}
               onUpload={(url) => setAvatar(url)}
               onRemove={() => setAvatar(null)}
-              hintText="اسحب أو انقر لرفع صورة"
-              formatHint="JPG, PNG, WebP · حتى 2MB"
+              hintText={t('admin.users.edit.dragOrClickUpload')}
+              formatHint={t('admin.users.edit.uploadFormatHint')}
             />
           </div>
 
           {/* Account Status Toggle */}
           <div>
             <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-              حالة الحساب
+              {t('admin.users.edit.accountStatus')}
             </label>
             <div className="flex gap-2">
               {(['active', 'inactive', 'suspended'] as const).map((s) => (
@@ -449,7 +451,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
             onClick={handleSaveProfile}
             disabled={isSaving}
           >
-            حفظ الملف الشخصي
+            {t('admin.users.edit.saveProfile')}
           </Button>
         </motion.div>
 
@@ -476,16 +478,16 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
             {/* Role Selector */}
             <div>
               <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-2">
-                الدور الإداري
+                {t('admin.users.edit.role')}
               </label>
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value as AdminRole)}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
               >
-                {ROLE_OPTIONS.map((opt) => (
+                {ROLE_KEYS.map((opt) => (
                   <option key={opt.value} value={opt.value} className="bg-midnight">
-                    {opt.label}
+                    {t(opt.key)}
                   </option>
                 ))}
               </select>
@@ -524,7 +526,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
                 onClick={handleSaveRole}
                 disabled={isSaving}
               >
-                {adminRole ? 'تحديث الدور' : 'تعيين الدور'}
+                {adminRole ? t('admin.users.edit.updateRole') : t('admin.users.edit.assignRole')}
               </Button>
 
               {adminRole && (
@@ -544,17 +546,17 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {/* Subscription Info */}
           <div className="bg-midnight/50 border border-gold/10 rounded-xl p-6">
             <h3 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-3">
-              معلومات الاشتراك
+              {t('admin.users.edit.subscriptionInfo')}
             </h3>
             <p className="text-white/40 text-sm font-[family-name:var(--font-display)]">
-              للاطلاع على بيانات الاشتراك، انتقل إلى صفحة المشتركين وابحث عن البريد الإلكتروني.
+              {t('admin.users.edit.subscriptionHint')}
             </p>
             <Link
               href={`/admin/subscribers?search=${encodeURIComponent(user.email)}`}
               className="inline-flex items-center gap-2 mt-3 text-gold text-sm font-[family-name:var(--font-display)] hover:underline"
             >
               <ExternalLink size={iconSizes.sm} />
-              بحث في المشتركين
+              {t('admin.users.edit.searchSubscribers')}
             </Link>
           </div>
         </motion.div>
@@ -571,7 +573,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
           {t('admin.users.edit.deleteUser')}
         </h3>
         <p className="text-white/50 text-sm font-[family-name:var(--font-display)] mb-4">
-          هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بيانات المستخدم نهائياً.
+          {t('admin.users.edit.deleteWarning')}
         </p>
 
         {!showDeleteModal ? (
@@ -581,7 +583,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
             leftIcon={<Trash2 size={iconSizes.md} />}
             onClick={() => setShowDeleteModal(true)}
           >
-            حذف المستخدم
+            {t('admin.users.edit.deleteUser')}
           </Button>
         ) : (
           <div className="space-y-3">
@@ -604,14 +606,14 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
                 onClick={handleDeleteUser}
                 disabled={isDeletingUser || deleteConfirmEmail !== user.email}
               >
-                تأكيد الحذف
+                {t('admin.users.edit.confirmDelete')}
               </Button>
               <Button
                 variant="ghost"
                 size="md"
                 onClick={() => { setShowDeleteModal(false); setDeleteConfirmEmail(''); }}
               >
-                إلغاء
+                {t('common.actions.cancel')}
               </Button>
             </div>
           </div>

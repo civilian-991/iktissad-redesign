@@ -30,6 +30,7 @@ import {
   AlertCircle,
   Images,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import type { ApiResponse, MagazineIssue } from '@/types';
 import { swrFetcher, updateMagazine, deleteMagazine } from '@/lib/api-client';
 import { uploadFile } from '@/lib/supabase/storage';
@@ -37,14 +38,14 @@ import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
 
 type ConversionStep = 'idle' | 'uploading-pdf' | 'converting' | 'done' | 'error';
 
-const months = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-];
+const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
 export default function EditMagazinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useTranslation();
   const router = useRouter();
+
+  const months = monthKeys.map(k => t(`admin.magazines.form.months.${k}`));
 
   const { data, isLoading } = useSWR<ApiResponse<MagazineIssue>>(
     `/api/magazines/${id}`,
@@ -115,7 +116,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
     setIsSaving(true);
     try {
       await updateMagazine(id, {
-        title: `العدد ${issueNumber}`,
+        title: `${t('admin.magazines.create.issueLabel')} ${issueNumber}`,
         titleEn: `Issue ${issueNumber}`,
         issueNumber: Number(issueNumber),
         coverImage: coverImage || '',
@@ -126,9 +127,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
         pages: pages ? Number(pages) : undefined,
         highlights: highlights.filter(h => h.trim()),
       });
-      toast.success('تم حفظ التغييرات بنجاح');
+      toast.success(t('admin.magazines.edit.savedSuccess'));
     } catch (err: any) {
-      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+      toast.error(err.message || t('admin.magazines.edit.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -137,10 +138,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   const handleDelete = async () => {
     try {
       await deleteMagazine(id);
-      toast.success('تم حذف العدد بنجاح');
+      toast.success(t('admin.magazines.edit.deletedSuccess'));
       router.push('/admin/magazines');
     } catch (err: any) {
-      toast.error(err.message || 'حدث خطأ أثناء الحذف');
+      toast.error(err.message || t('admin.magazines.edit.deleteError'));
       setShowDeleteModal(false);
     }
   };
@@ -148,7 +149,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   const handleConvert = async () => {
     const source = newPdfFileObj ?? pdfFile;
     if (!source) {
-      toast.error('لا يوجد ملف PDF للتحويل');
+      toast.error(t('admin.magazines.edit.noPdfToConvert'));
       return;
     }
 
@@ -183,11 +184,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       setPages(String(pageUrls.length));
       setNewPdfFileObj(null);
       setConversionStep('done');
-      toast.success(`تم تحويل ${pageUrls.length} صفحة بنجاح`);
+      toast.success(t('admin.magazines.edit.convertedSuccess').replace('{count}', String(pageUrls.length)));
     } catch (err: any) {
       setConversionStep('error');
-      setConversionError(err.message || 'حدث خطأ أثناء التحويل');
-      toast.error(err.message || 'حدث خطأ أثناء التحويل');
+      setConversionError(err.message || t('admin.magazines.edit.convertError'));
+      toast.error(err.message || t('admin.magazines.edit.convertError'));
     }
   };
 
@@ -204,11 +205,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <BookOpen size={48} className="text-white/20 mb-4" />
         <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-white mb-2">
-          العدد غير موجود
+          {t('admin.magazines.notFound')}
         </h2>
-        <p className="text-white/50 mb-4">لم يتم العثور على العدد المطلوب</p>
+        <p className="text-white/50 mb-4">{t('admin.magazines.notFoundDesc')}</p>
         <Link href="/admin/magazines" className="text-gold hover:underline">
-          العودة إلى قائمة الأعداد
+          {t('admin.magazines.backToList')}
         </Link>
       </div>
     );
@@ -227,11 +228,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
           </Link>
           <div>
             <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-              تعديل العدد {issueNumber}
+              {t('admin.magazines.edit.title')} {issueNumber}
             </h1>
             <p className="text-white/50 text-sm">
               {magazine?.updatedAt
-                ? `آخر تحديث: ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}`
+                ? `${t('admin.magazines.edit.lastUpdate')} ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}`
                 : ''}
             </p>
           </div>
@@ -244,14 +245,14 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
           >
             <ExternalLink size={18} />
-            عرض على الموقع
+            {t('admin.magazines.edit.viewOnSite')}
           </Link>
           <button
             onClick={() => setShowDeleteModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 text-loss hover:bg-loss/10 rounded-xl transition-colors"
           >
             <Trash2 size={18} />
-            حذف
+            {t('admin.magazines.actions.delete')}
           </button>
           <button
             onClick={handleSave}
@@ -263,7 +264,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             ) : (
               <Save size={18} />
             )}
-            حفظ التغييرات
+            {t('admin.magazines.edit.saveChanges')}
           </button>
         </div>
       </div>
@@ -271,11 +272,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       {/* Tab Navigation */}
       <div className="flex items-center gap-1 border-b border-gold/10 overflow-x-auto">
         {[
-          { href: `/admin/magazines/${id}`, label: 'نظرة عامة' },
-          { href: `/admin/magazines/${id}/board`, label: 'لوحة التحرير' },
-          { href: `/admin/magazines/${id}/sections`, label: 'الأقسام' },
-          { href: `/admin/magazines/${id}/spreads`, label: 'المحتوى' },
-          { href: `/admin/magazines/${id}/analytics`, label: 'التحليلات' },
+          { href: `/admin/magazines/${id}`, label: t('admin.magazines.tabs.overview') },
+          { href: `/admin/magazines/${id}/board`, label: t('admin.magazines.tabs.editBoard') },
+          { href: `/admin/magazines/${id}/sections`, label: t('admin.magazines.tabs.sections') },
+          { href: `/admin/magazines/${id}/spreads`, label: t('admin.magazines.tabs.content') },
+          { href: `/admin/magazines/${id}/analytics`, label: t('admin.magazines.tabs.analytics') },
         ].map((tab) => (
           <Link
             key={tab.href}
@@ -294,10 +295,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'المشاهدات', value: (magazine?.views ?? 0).toLocaleString(), icon: Eye, trend: null },
-          { label: 'التحميلات', value: (magazine?.downloads ?? 0).toLocaleString(), icon: Download, trend: null },
-          { label: 'الصفحات', value: magazine?.pages ?? 0, icon: FileText, trend: null },
-          { label: 'الحالة', value: status === 'published' ? 'منشور' : 'مسودة', icon: BookOpen, trend: null },
+          { label: t('admin.magazines.edit.views'), value: (magazine?.views ?? 0).toLocaleString(), icon: Eye, trend: null },
+          { label: t('admin.magazines.edit.downloads'), value: (magazine?.downloads ?? 0).toLocaleString(), icon: Download, trend: null },
+          { label: t('admin.magazines.edit.pages'), value: magazine?.pages ?? 0, icon: FileText, trend: null },
+          { label: t('admin.magazines.edit.statusLabel'), value: status === 'published' ? t('admin.magazines.form.statusPublished') : t('admin.magazines.form.statusDraft'), icon: BookOpen, trend: null },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -331,20 +332,20 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <BookOpen size={20} className="text-gold" />
-              معلومات العدد
+              {t('admin.magazines.form.issueInfo')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Issue Number */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  رقم العدد
+                  {t('admin.magazines.form.issueNumber')}
                 </label>
                 <input
                   type="text"
                   value={issueNumber}
                   onChange={(e) => setIssueNumber(e.target.value)}
-                  placeholder="مثال: 543"
+                  placeholder={t('admin.magazines.form.issueNumberPlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
@@ -352,7 +353,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               {/* Year */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  السنة
+                  {t('admin.magazines.form.year')}
                 </label>
                 <select
                   value={year}
@@ -368,7 +369,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               {/* Month */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  الشهر
+                  {t('admin.magazines.form.month')}
                 </label>
                 <select
                   value={month}
@@ -384,13 +385,13 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               {/* Pages */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  عدد الصفحات
+                  {t('admin.magazines.form.pageCount')}
                 </label>
                 <input
                   type="number"
                   value={pages}
                   onChange={(e) => setPages(e.target.value)}
-                  placeholder="مثال: 84"
+                  placeholder={t('admin.magazines.form.pageCountEditPlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
@@ -406,7 +407,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <ImageIcon size={20} className="text-gold" />
-              صورة الغلاف
+              {t('admin.magazines.form.coverImage')}
             </h2>
 
             <div className="flex items-start gap-6">
@@ -433,10 +434,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <Upload size={32} className="text-gold/50 mb-3" />
                 )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  {isUploadingCover ? 'جاري الرفع...' : coverImage ? 'استبدال الصورة' : 'رفع صورة الغلاف'}
+                  {isUploadingCover ? t('admin.magazines.form.uploading') : coverImage ? t('admin.magazines.form.replaceCover') : t('admin.magazines.form.uploadCover')}
                 </span>
                 <span className="text-white/40 text-sm mt-1">
-                  PNG, JPG أو WebP
+                  {t('admin.magazines.form.coverFormats')}
                 </span>
                 <input
                   type="file"
@@ -449,9 +450,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                     try {
                       const { publicUrl } = await uploadFile('magazines', file, 'covers');
                       setCoverImage(publicUrl);
-                      toast.success('تم رفع صورة الغلاف');
+                      toast.success(t('admin.magazines.form.coverUploaded'));
                     } catch (err: any) {
-                      toast.error(err.message || 'فشل رفع الصورة');
+                      toast.error(err.message || t('admin.magazines.form.coverUploadFailed'));
                     } finally {
                       setIsUploadingCover(false);
                     }
@@ -470,7 +471,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <FileText size={20} className="text-gold" />
-              ملف PDF
+              {t('admin.magazines.form.pdfFile')}
             </h2>
 
             {pdfFile ? (
@@ -478,9 +479,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 <FileText size={32} className="text-gold" />
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-[family-name:var(--font-display)] font-semibold truncate">
-                    {pdfFile.split('/').pop() ?? 'ملف PDF'}
+                    {pdfFile.split('/').pop() ?? t('admin.magazines.edit.pdfLabel')}
                   </p>
-                  <p className="text-white/50 text-sm">ملف PDF جاهز للقراءة</p>
+                  <p className="text-white/50 text-sm">{t('admin.magazines.form.pdfReady')}</p>
                 </div>
                 <button
                   onClick={() => setPdfFile(null)}
@@ -497,7 +498,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <Upload size={24} className="text-gold/50 mb-2" />
                 )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  {isUploadingPdf ? 'جاري الرفع...' : 'اضغط لرفع ملف PDF'}
+                  {isUploadingPdf ? t('admin.magazines.form.uploading') : t('admin.magazines.form.clickToUploadPdf')}
                 </span>
                 <input
                   type="file"
@@ -510,9 +511,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                     try {
                       const { publicUrl } = await uploadFile('magazines', file, 'pdfs');
                       setPdfFile(publicUrl);
-                      toast.success('تم رفع ملف PDF');
+                      toast.success(t('admin.magazines.form.pdfUploaded'));
                     } catch (err: any) {
-                      toast.error(err.message || 'فشل رفع الملف');
+                      toast.error(err.message || t('admin.magazines.form.pdfUploadFailed'));
                     } finally {
                       setIsUploadingPdf(false);
                     }
@@ -532,17 +533,17 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white flex items-center gap-2">
                 <Images size={20} className="text-gold" />
-                صفحات المجلة
+                {t('admin.magazines.edit.magazinePages')}
               </h2>
               {/* Status badge */}
               {magazine?.pagesReady ? (
                 <span className="flex items-center gap-1.5 px-3 py-1 bg-profit/15 text-profit text-xs font-semibold rounded-full">
                   <CheckCircle2 size={12} />
-                  {(magazine.pagesImages?.length ?? 0)} صفحة جاهزة
+                  {t('admin.magazines.edit.pagesReady').replace('{count}', String(magazine.pagesImages?.length ?? 0))}
                 </span>
               ) : (
                 <span className="px-3 py-1 bg-white/10 text-white/50 text-xs rounded-full">
-                  غير محوّل
+                  {t('admin.magazines.edit.notConverted')}
                 </span>
               )}
             </div>
@@ -554,7 +555,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <img
                     key={i}
                     src={url}
-                    alt={`صفحة ${i + 1}`}
+                    alt={`${t('admin.magazines.edit.pageAlt')} ${i + 1}`}
                     className="h-24 w-auto rounded-lg shrink-0 object-cover border border-gold/10"
                   />
                 ))}
@@ -573,10 +574,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <Loader2 size={16} className="text-gold animate-spin" />
                   <span className="text-white text-sm font-[family-name:var(--font-display)]">
                     {conversionStep === 'uploading-pdf'
-                      ? 'جاري رفع ملف PDF...'
+                      ? t('admin.magazines.edit.uploadingPdf')
                       : conversionProgress.total > 0
-                        ? `جاري التحويل... ${conversionProgress.current} / ${conversionProgress.total} صفحة`
-                        : 'جاري التهيئة...'}
+                        ? t('admin.magazines.edit.convertingProgress').replace('{current}', String(conversionProgress.current)).replace('{total}', String(conversionProgress.total))
+                        : t('admin.magazines.edit.initializing')}
                   </span>
                 </div>
                 {conversionStep === 'converting' && conversionProgress.total > 0 && (
@@ -617,7 +618,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
               ) : (
                 <label className="flex items-center gap-3 px-4 py-3 border border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors text-white/50 hover:text-white/70">
                   <Upload size={16} />
-                  <span className="text-sm font-[family-name:var(--font-display)]">رفع PDF جديد للتحويل</span>
+                  <span className="text-sm font-[family-name:var(--font-display)]">{t('admin.magazines.edit.uploadNewPdf')}</span>
                   <input
                     type="file"
                     accept=".pdf"
@@ -643,7 +644,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 ) : (
                   <RefreshCw size={18} />
                 )}
-                {newPdfFileObj ? 'رفع وتحويل الصفحات' : 'إعادة تحويل الصفحات'}
+                {newPdfFileObj ? t('admin.magazines.edit.uploadAndConvert') : t('admin.magazines.edit.reconvertPages')}
               </button>
             </div>
           </motion.div>
@@ -658,14 +659,14 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white flex items-center gap-2">
                 <Star size={20} className="text-gold" />
-                أبرز المواضيع
+                {t('admin.magazines.form.highlights')}
               </h2>
               <button
                 onClick={addHighlight}
                 className="flex items-center gap-2 px-3 py-1.5 text-gold hover:bg-gold/10 rounded-lg transition-colors text-sm"
               >
                 <Plus size={16} />
-                إضافة
+                {t('admin.magazines.form.addHighlight')}
               </button>
             </div>
 
@@ -679,7 +680,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                     type="text"
                     value={highlight}
                     onChange={(e) => updateHighlight(index, e.target.value)}
-                    placeholder="عنوان الموضوع..."
+                    placeholder={t('admin.magazines.form.highlightPlaceholder')}
                     className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                   />
                   {highlights.length > 1 && (
@@ -706,29 +707,29 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6">
-              إعدادات النشر
+              {t('admin.magazines.form.publishSettings')}
             </h2>
 
             {/* Status */}
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                الحالة
+                {t('admin.magazines.form.status')}
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
               >
-                <option value="draft">مسودة</option>
-                <option value="scheduled">مجدول</option>
-                <option value="published">منشور</option>
+                <option value="draft">{t('admin.magazines.form.statusDraft')}</option>
+                <option value="scheduled">{t('admin.magazines.form.statusScheduled')}</option>
+                <option value="published">{t('admin.magazines.form.statusPublished')}</option>
               </select>
             </div>
 
             {/* Publish Date */}
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                تاريخ النشر
+                {t('admin.magazines.form.publishDate')}
               </label>
               <div className="relative">
                 <input
@@ -747,10 +748,10 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 <Star size={20} className={featured ? 'text-gold fill-gold' : 'text-white/40'} />
                 <div>
                   <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    عدد مميز
+                    {t('admin.magazines.form.featuredIssue')}
                   </p>
                   <p className="text-white/50 text-xs">
-                    يظهر في الصفحة الرئيسية
+                    {t('admin.magazines.form.featuredDesc')}
                   </p>
                 </div>
               </div>
@@ -777,7 +778,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-4 flex items-center gap-2">
               <History size={18} className="text-gold" />
-              سجل النشاط
+              {t('admin.magazines.edit.activityLog')}
             </h2>
 
             <div className="space-y-4">
@@ -785,7 +786,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 <div className="flex items-start gap-3 text-sm">
                   <div className="w-2 h-2 mt-2 rounded-full bg-gold/50" />
                   <div>
-                    <p className="text-white/80">تم تحديث العدد</p>
+                    <p className="text-white/80">{t('admin.magazines.edit.issueUpdated')}</p>
                     <p className="text-white/40 text-xs">
                       {new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                     </p>
@@ -796,7 +797,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 <div className="flex items-start gap-3 text-sm">
                   <div className="w-2 h-2 mt-2 rounded-full bg-gold/50" />
                   <div>
-                    <p className="text-white/80">تم إنشاء العدد</p>
+                    <p className="text-white/80">{t('admin.magazines.edit.issueCreated')}</p>
                     <p className="text-white/40 text-xs">
                       {new Date(magazine.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
                     </p>
@@ -814,7 +815,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-4">
-              إجراءات
+              {t('admin.magazines.edit.quickActions')}
             </h2>
 
             <div className="space-y-2">
@@ -824,11 +825,11 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
               >
                 <Eye size={18} />
-                <span className="font-[family-name:var(--font-display)]">معاينة على الموقع</span>
+                <span className="font-[family-name:var(--font-display)]">{t('admin.magazines.edit.previewOnSite')}</span>
               </Link>
               <button className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
                 <BarChart3 size={18} />
-                <span className="font-[family-name:var(--font-display)]">عرض الإحصائيات</span>
+                <span className="font-[family-name:var(--font-display)]">{t('admin.magazines.actions.viewStats')}</span>
               </button>
               <button
                 onClick={handleSave}
@@ -836,7 +837,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors"
               >
                 {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                <span className="font-[family-name:var(--font-display)]">حفظ التغييرات</span>
+                <span className="font-[family-name:var(--font-display)]">{t('admin.magazines.edit.saveChanges')}</span>
               </button>
             </div>
           </motion.div>
@@ -865,23 +866,23 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <Trash2 size={32} className="text-loss" />
                 </div>
                 <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-white mb-2">
-                  حذف العدد {issueNumber}؟
+                  {t('admin.magazines.edit.deleteIssueTitle').replace('{number}', issueNumber)}
                 </h3>
                 <p className="text-white/60 mb-6">
-                  هل أنت متأكد من حذف هذا العدد؟ سيتم حذف جميع البيانات المرتبطة به ولا يمكن التراجع عن هذا الإجراء.
+                  {t('admin.magazines.edit.deleteIssueConfirm')}
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
                     className="flex-1 px-4 py-3 bg-white/10 text-white font-[family-name:var(--font-display)] font-semibold rounded-xl hover:bg-white/20 transition-colors"
                   >
-                    إلغاء
+                    {t('admin.magazines.edit.cancel')}
                   </button>
                   <button
                     onClick={handleDelete}
                     className="flex-1 px-4 py-3 bg-loss text-white font-[family-name:var(--font-display)] font-semibold rounded-xl hover:bg-loss/80 transition-colors"
                   >
-                    حذف
+                    {t('admin.magazines.actions.delete')}
                   </button>
                 </div>
               </div>

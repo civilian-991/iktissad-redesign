@@ -6,7 +6,7 @@
  * and spread dwell horizontal bar charts.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import {
@@ -114,20 +114,22 @@ export default function ReadingAnalyticsClient() {
   const [sortCol, setSortCol] = useState<'reads' | 'avgTimeOnPage' | 'avgScrollDepth' | 'readThroughRate'>('reads');
   const [sortAsc, setSortAsc] = useState(false);
 
-  // Build query params
-  const getParams = () => {
+  // Build query params — memoized so the SWR key only changes when filters do.
+  // Without useMemo, Date.now() ran on every render, defeating SWR caching.
+  const params = useMemo(() => {
     if (dateRange === 'custom' && customFrom && customTo) {
       return `?from=${customFrom}&to=${customTo}`;
     }
     if (dateRange !== 'custom') {
+      // eslint-disable-next-line react-hooks/purity
       const from = new Date(Date.now() - parseInt(dateRange) * 86400000).toISOString();
       return `?from=${from}`;
     }
     return '';
-  };
+  }, [dateRange, customFrom, customTo]);
 
   const { data: res, isLoading, error } = useSWR<ApiResponse<ReadingAnalytics>>(
-    `/api/admin/reading-analytics${getParams()}`,
+    `/api/admin/reading-analytics${params}`,
     swrFetcher,
     { revalidateOnFocus: false }
   );

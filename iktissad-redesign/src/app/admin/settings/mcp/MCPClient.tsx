@@ -9,6 +9,7 @@
  */
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
   Cpu,
@@ -151,7 +152,7 @@ export default function MCPClient({ apiKeys }: MCPClientProps) {
         {apiKeys.length === 0 ? (
           <div className="p-4 bg-white/5 border border-gold/10 rounded-xl text-white/50 text-sm font-[family-name:var(--font-display)]">
             لا توجد مفاتيح API نشطة. أنشئ مفتاحاً من صفحة{' '}
-            <a href="/admin/settings" className="text-gold hover:underline">الإعدادات → API</a>.
+            <Link href="/admin/settings" className="text-gold hover:underline">الإعدادات → API</Link>.
           </div>
         ) : (
           <div className="space-y-3">

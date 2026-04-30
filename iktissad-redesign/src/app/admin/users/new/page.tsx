@@ -21,27 +21,29 @@ import {
   Loader2
 } from 'lucide-react';
 import { createUser } from '@/lib/api-client';
-
-const roles = [
-  { value: 'admin', label: 'مدير', description: 'صلاحيات كاملة للنظام' },
-  { value: 'editor', label: 'محرر', description: 'تعديل ونشر المقالات' },
-  { value: 'author', label: 'كاتب', description: 'كتابة وتقديم المقالات' },
-  { value: 'contributor', label: 'مساهم', description: 'كتابة المقالات فقط' },
-];
-
-const departments = [
-  'الإدارة',
-  'التحرير',
-  'الاقتصاد',
-  'الأسواق',
-  'الشركات',
-  'التكنولوجيا',
-  'الطاقة',
-  'الرأي',
-];
+import { useTranslation } from '@/lib/i18n';
 
 export default function NewUserPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const roleOptions = [
+    { value: 'admin', label: t('admin.users.roles.admin'), description: t('admin.users.roles.adminDesc') },
+    { value: 'editor', label: t('admin.users.roles.editor'), description: t('admin.users.roles.editorDesc') },
+    { value: 'author', label: t('admin.users.roles.writer'), description: t('admin.users.roles.writerDesc') },
+    { value: 'contributor', label: t('admin.users.roles.contributor'), description: t('admin.users.roles.contributorDesc') },
+  ];
+
+  const departmentOptions = [
+    { value: 'management', label: t('admin.users.departments.management') },
+    { value: 'editorial', label: t('admin.users.departments.editorial') },
+    { value: 'economy', label: t('admin.users.departments.economy') },
+    { value: 'markets', label: t('admin.users.departments.markets') },
+    { value: 'companies', label: t('admin.users.departments.companies') },
+    { value: 'tech', label: t('admin.users.departments.tech') },
+    { value: 'energy', label: t('admin.users.departments.energy') },
+    { value: 'opinion', label: t('admin.users.departments.opinion') },
+  ];
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -56,15 +58,15 @@ export default function NewUserPage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error('يرجى إدخال الاسم الكامل');
+      toast.error(t('admin.users.form.validation.nameRequired'));
       return;
     }
     if (!email.trim()) {
-      toast.error('يرجى إدخال البريد الإلكتروني');
+      toast.error(t('admin.users.form.validation.emailRequired'));
       return;
     }
     if (password && password !== confirmPassword) {
-      toast.error('كلمتا المرور غير متطابقتين');
+      toast.error(t('admin.users.form.validation.passwordMismatch'));
       return;
     }
     setIsSaving(true);
@@ -79,10 +81,10 @@ export default function NewUserPage() {
         avatar: avatar || undefined,
         status: 'active',
       });
-      toast.success('تم إنشاء المستخدم بنجاح');
+      toast.success(t('admin.users.form.success'));
       router.push('/admin/users');
     } catch (err: any) {
-      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+      toast.error(err.message || t('admin.users.form.error'));
     } finally {
       setIsSaving(false);
     }
@@ -101,10 +103,10 @@ export default function NewUserPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-              مستخدم جديد
+              {t('admin.users.form.newTitle')}
             </h1>
             <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-              إضافة مستخدم جديد للنظام
+              {t('admin.users.form.newSubtitle')}
             </p>
           </div>
         </div>
@@ -118,7 +120,7 @@ export default function NewUserPage() {
           ) : (
             <Save size={16} />
           )}
-          حفظ المستخدم
+          {t('admin.users.form.save')}
         </button>
       </div>
 
@@ -133,21 +135,21 @@ export default function NewUserPage() {
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <User size={18} className="text-gold" />
-              المعلومات الأساسية
+              {t('admin.users.form.basicInfo')}
             </h2>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Name */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  الاسم الكامل <span className="text-loss">*</span>
+                  {t('admin.users.form.fullName')} <span className="text-loss">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="أدخل الاسم الكامل"
+                    placeholder={t('admin.users.form.fullNamePlaceholder')}
                     className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-12 pl-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                   />
                   <User className="absolute right-4 top-1/2 -translate-y-1/2 text-gold/50" size={18} />
@@ -157,7 +159,7 @@ export default function NewUserPage() {
               {/* Email */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  البريد الإلكتروني <span className="text-loss">*</span>
+                  {t('admin.users.form.email')} <span className="text-loss">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -174,7 +176,7 @@ export default function NewUserPage() {
               {/* Phone */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  رقم الهاتف
+                  {t('admin.users.form.phone')}
                 </label>
                 <div className="relative">
                   <input
@@ -192,7 +194,7 @@ export default function NewUserPage() {
               {/* Department */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  القسم
+                  {t('admin.users.form.department')}
                 </label>
                 <div className="relative">
                   <select
@@ -200,10 +202,10 @@ export default function NewUserPage() {
                     onChange={(e) => setDepartment(e.target.value)}
                     className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-12 pl-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors appearance-none"
                   >
-                    <option value="" className="bg-midnight">اختر القسم</option>
-                    {departments.map((dept) => (
-                      <option key={dept} value={dept} className="bg-midnight">
-                        {dept}
+                    <option value="" className="bg-midnight">{t('admin.users.form.departmentPlaceholder')}</option>
+                    {departmentOptions.map((dept) => (
+                      <option key={dept.value} value={dept.label} className="bg-midnight">
+                        {dept.label}
                       </option>
                     ))}
                   </select>
@@ -222,14 +224,14 @@ export default function NewUserPage() {
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <Lock size={18} className="text-gold" />
-              كلمة المرور
+              {t('admin.users.form.password')}
             </h2>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Password */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  كلمة المرور
+                  {t('admin.users.form.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -253,7 +255,7 @@ export default function NewUserPage() {
               {/* Confirm Password */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  تأكيد كلمة المرور
+                  {t('admin.users.form.confirmPassword')}
                 </label>
                 <div className="relative">
                   <input
@@ -299,10 +301,10 @@ export default function NewUserPage() {
               </div>
               <div>
                 <span className="text-white font-[family-name:var(--font-display)] text-sm">
-                  إرسال دعوة بالبريد الإلكتروني
+                  {t('admin.users.form.sendInvite')}
                 </span>
                 <p className="text-white/40 text-xs">
-                  سيتم إرسال رسالة للمستخدم لتعيين كلمة المرور
+                  {t('admin.users.form.sendInviteDesc')}
                 </p>
               </div>
             </label>
@@ -319,7 +321,7 @@ export default function NewUserPage() {
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-              الصورة الشخصية
+              {t('admin.users.form.avatar')}
             </label>
             {avatar ? (
               <div className="relative group">
@@ -339,10 +341,10 @@ export default function NewUserPage() {
               <label className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors">
                 <Upload className="text-gold/50 mb-2" size={32} />
                 <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-                  اضغط لرفع صورة
+                  {t('admin.users.form.avatarUpload')}
                 </span>
                 <span className="text-white/30 text-xs mt-1">
-                  PNG أو JPG
+                  {t('admin.users.form.avatarFormat')}
                 </span>
                 <input
                   type="file"
@@ -368,10 +370,10 @@ export default function NewUserPage() {
           >
             <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-4">
               <Shield size={14} className="text-gold" />
-              دور المستخدم
+              {t('admin.users.form.role')}
             </label>
             <div className="space-y-2">
-              {roles.map((r) => (
+              {roleOptions.map((r) => (
                 <label
                   key={r.value}
                   className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${

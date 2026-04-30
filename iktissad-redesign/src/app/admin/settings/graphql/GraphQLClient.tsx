@@ -8,6 +8,7 @@
  */
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
   Braces,
@@ -267,9 +268,9 @@ export default function GraphQLClient({ apiKeys }: GraphQLClientProps) {
         {apiKeys.length === 0 ? (
           <div className="p-4 bg-white/5 border border-gold/10 rounded-xl text-white/50 text-sm font-[family-name:var(--font-display)]">
             لا توجد مفاتيح API نشطة. أنشئ مفتاحاً من صفحة{' '}
-            <a href="/admin/settings" className="text-gold hover:underline">
+            <Link href="/admin/settings" className="text-gold hover:underline">
               الإعدادات → API
-            </a>
+            </Link>
             .
           </div>
         ) : (

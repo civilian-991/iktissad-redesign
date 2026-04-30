@@ -25,16 +25,7 @@ import {
   Lock as LockIcon,
 } from 'lucide-react';
 import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
-
-const tabs = [
-  { id: 'general', label: 'عام', icon: Settings },
-  { id: 'appearance', label: 'المظهر', icon: Palette },
-  { id: 'notifications', label: 'الإشعارات', icon: Bell },
-  { id: 'security', label: 'الأمان', icon: Shield },
-  { id: 'paywall', label: 'الجدار المدفوع', icon: LockIcon },
-  { id: 'email', label: 'البريد', icon: Mail },
-  { id: 'backup', label: 'النسخ الاحتياطي', icon: Database },
-];
+import { useTranslation } from '@/lib/i18n';
 
 const languages = [
   { code: 'ar', name: 'العربية' },
@@ -49,6 +40,18 @@ const timezones = [
 ];
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
+
+  const tabs = [
+    { id: 'general', label: t('admin.settings.tabs.general'), icon: Settings },
+    { id: 'appearance', label: t('admin.settings.tabs.appearance'), icon: Palette },
+    { id: 'notifications', label: t('admin.settings.tabs.notifications'), icon: Bell },
+    { id: 'security', label: t('admin.settings.tabs.security'), icon: Shield },
+    { id: 'paywall', label: t('admin.settings.tabs.paywall'), icon: LockIcon },
+    { id: 'email', label: t('admin.settings.tabs.email'), icon: Mail },
+    { id: 'backup', label: t('admin.settings.tabs.backup'), icon: Database },
+  ];
+
   const [activeTab, setActiveTab] = useState('general');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,7 +169,7 @@ export default function SettingsPage() {
           if (p.highEngagementThreshold !== undefined) setHighEngagementThreshold(p.highEngagementThreshold);
         }
       } catch {
-        toast.error('تعذر تحميل الإعدادات');
+        toast.error(t('admin.settings.loadError'));
       } finally {
         setIsLoading(false);
       }
@@ -225,11 +228,11 @@ export default function SettingsPage() {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.error ?? 'خطأ غير معروف');
+        throw new Error(json.error ?? t('admin.settings.unknownError'));
       }
-      toast.success('تم حفظ الإعدادات بنجاح');
+      toast.success(t('admin.settings.saveSuccess'));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ الإعدادات';
+      const msg = err instanceof Error ? err.message : t('admin.settings.saveError');
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -238,15 +241,15 @@ export default function SettingsPage() {
 
   const handleChangePassword = useCallback(async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error('يرجى ملء جميع حقول كلمة المرور');
+      toast.error(t('admin.settings.security.fillAllFields'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('كلمة المرور الجديدة وتأكيدها غير متطابقتين');
+      toast.error(t('admin.settings.security.passwordMismatch'));
       return;
     }
     if (newPassword.length < 8) {
-      toast.error('يجب أن تكون كلمة المرور الجديدة 8 أحرف على الأقل');
+      toast.error(t('admin.settings.security.passwordTooShort'));
       return;
     }
 
@@ -258,13 +261,13 @@ export default function SettingsPage() {
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'خطأ غير معروف');
-      toast.success('تم تحديث كلمة المرور بنجاح');
+      if (!res.ok) throw new Error(json.error ?? t('admin.settings.unknownError'));
+      toast.success(t('admin.settings.security.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث كلمة المرور';
+      const msg = err instanceof Error ? err.message : t('admin.settings.security.passwordUpdateError');
       toast.error(msg);
     } finally {
       setIsChangingPassword(false);
@@ -286,7 +289,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                اسم الموقع
+                {t('admin.settings.general.siteName')}
               </label>
               <input
                 type="text"
@@ -298,7 +301,7 @@ export default function SettingsPage() {
 
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                وصف الموقع
+                {t('admin.settings.general.siteDescription')}
               </label>
               <textarea
                 value={siteDescription}
@@ -311,7 +314,7 @@ export default function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  اللغة الافتراضية
+                  {t('admin.settings.general.language')}
                 </label>
                 <div className="relative">
                   <select
@@ -331,7 +334,7 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  المنطقة الزمنية
+                  {t('admin.settings.general.timezone')}
                 </label>
                 <select
                   value={timezone}
@@ -349,7 +352,7 @@ export default function SettingsPage() {
 
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-                شعار الموقع
+                {t('admin.settings.general.logo')}
               </label>
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-gold via-gold-muted to-bronze rounded-xl flex items-center justify-center">
@@ -357,7 +360,7 @@ export default function SettingsPage() {
                 </div>
                 <label className="px-4 py-2 bg-white/10 text-white rounded-lg cursor-pointer hover:bg-white/20 transition-colors font-[family-name:var(--font-display)] text-sm flex items-center gap-2">
                   <Upload size={16} />
-                  تغيير الشعار
+                  {t('admin.settings.general.changeLogo')}
                   <input type="file" accept="image/*" className="hidden" />
                 </label>
               </div>
@@ -370,7 +373,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-                الوضع الافتراضي
+                {t('admin.settings.appearance.defaultMode')}
               </label>
               <div className="flex gap-4">
                 <button
@@ -382,7 +385,7 @@ export default function SettingsPage() {
                   }`}
                 >
                   <Sun size={20} />
-                  <span className="font-[family-name:var(--font-display)]">فاتح</span>
+                  <span className="font-[family-name:var(--font-display)]">{t('admin.settings.appearance.light')}</span>
                 </button>
                 <button
                   onClick={() => setDarkMode(true)}
@@ -393,14 +396,14 @@ export default function SettingsPage() {
                   }`}
                 >
                   <Moon size={20} />
-                  <span className="font-[family-name:var(--font-display)]">داكن</span>
+                  <span className="font-[family-name:var(--font-display)]">{t('admin.settings.appearance.dark')}</span>
                 </button>
               </div>
             </div>
 
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-                اللون الرئيسي
+                {t('admin.settings.appearance.accentColor')}
               </label>
               <div className="flex items-center gap-4">
                 {['#f59e0b', '#005B9F', '#059669', '#dc2626', '#0d9488'].map((color) => (
@@ -428,13 +431,13 @@ export default function SettingsPage() {
 
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-                حجم الخط
+                {t('admin.settings.appearance.fontSize')}
               </label>
               <div className="flex gap-2">
                 {[
-                  { value: 'small', label: 'صغير' },
-                  { value: 'medium', label: 'متوسط' },
-                  { value: 'large', label: 'كبير' },
+                  { value: 'small', label: t('admin.settings.appearance.small') },
+                  { value: 'medium', label: t('admin.settings.appearance.medium') },
+                  { value: 'large', label: t('admin.settings.appearance.large') },
                 ].map((size) => (
                   <button
                     key={size.value}
@@ -457,11 +460,11 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4">
             {[
-              { key: 'emailNotifications', label: 'تفعيل الإشعارات بالبريد', desc: 'استلام الإشعارات عبر البريد الإلكتروني', value: emailNotifications, setter: setEmailNotifications },
-              { key: 'newArticleNotify', label: 'مقال جديد', desc: 'إشعار عند نشر مقال جديد', value: newArticleNotify, setter: setNewArticleNotify },
-              { key: 'newCommentNotify', label: 'تعليق جديد', desc: 'إشعار عند إضافة تعليق جديد', value: newCommentNotify, setter: setNewCommentNotify },
-              { key: 'newUserNotify', label: 'مستخدم جديد', desc: 'إشعار عند تسجيل مستخدم جديد', value: newUserNotify, setter: setNewUserNotify },
-              { key: 'weeklyReport', label: 'التقرير الأسبوعي', desc: 'استلام تقرير أسبوعي بالإحصائيات', value: weeklyReport, setter: setWeeklyReport },
+              { key: 'emailNotifications', label: t('admin.settings.notifications.emailNotifications'), desc: t('admin.settings.notifications.emailNotificationsDesc'), value: emailNotifications, setter: setEmailNotifications },
+              { key: 'newArticleNotify', label: t('admin.settings.notifications.newArticle'), desc: t('admin.settings.notifications.newArticleDesc'), value: newArticleNotify, setter: setNewArticleNotify },
+              { key: 'newCommentNotify', label: t('admin.settings.notifications.newComment'), desc: t('admin.settings.notifications.newCommentDesc'), value: newCommentNotify, setter: setNewCommentNotify },
+              { key: 'newUserNotify', label: t('admin.settings.notifications.newUser'), desc: t('admin.settings.notifications.newUserDesc'), value: newUserNotify, setter: setNewUserNotify },
+              { key: 'weeklyReport', label: t('admin.settings.notifications.weeklyReport'), desc: t('admin.settings.notifications.weeklyReportDesc'), value: weeklyReport, setter: setWeeklyReport },
             ].map((item) => (
               <div
                 key={item.key}
@@ -500,17 +503,17 @@ export default function SettingsPage() {
             {/* Session Timeout */}
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                انتهاء الجلسة (بالدقائق)
+                {t('admin.settings.security.sessionTimeout')}
               </label>
               <select
                 value={sessionTimeout}
                 onChange={(e) => setSessionTimeout(e.target.value)}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
               >
-                <option value="15" className="bg-midnight">15 دقيقة</option>
-                <option value="30" className="bg-midnight">30 دقيقة</option>
-                <option value="60" className="bg-midnight">ساعة</option>
-                <option value="120" className="bg-midnight">ساعتين</option>
+                <option value="15" className="bg-midnight">{t('admin.settings.security.minutes15')}</option>
+                <option value="30" className="bg-midnight">{t('admin.settings.security.minutes30')}</option>
+                <option value="60" className="bg-midnight">{t('admin.settings.security.hour1')}</option>
+                <option value="120" className="bg-midnight">{t('admin.settings.security.hours2')}</option>
               </select>
             </div>
 
@@ -518,7 +521,7 @@ export default function SettingsPage() {
             <div className="p-4 bg-white/5 border border-gold/10 rounded-xl">
               <h3 className="text-white font-[family-name:var(--font-display)] font-semibold mb-4 flex items-center gap-2">
                 <Lock size={16} className="text-gold" />
-                تغيير كلمة المرور
+                {t('admin.settings.security.changePassword')}
               </h3>
               <div className="space-y-4">
                 <div className="relative">
@@ -526,7 +529,7 @@ export default function SettingsPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="كلمة المرور الحالية"
+                    placeholder={t('admin.settings.security.currentPassword')}
                     className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 pr-4 pl-12 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                   />
                   <button
@@ -541,14 +544,14 @@ export default function SettingsPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="كلمة المرور الجديدة"
+                  placeholder={t('admin.settings.security.newPassword')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="تأكيد كلمة المرور الجديدة"
+                  placeholder={t('admin.settings.security.confirmPassword')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
                 <button
@@ -557,7 +560,7 @@ export default function SettingsPage() {
                   className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {isChangingPassword && <Loader2 size={14} className="animate-spin" />}
-                  تحديث كلمة المرور
+                  {t('admin.settings.security.updatePassword')}
                 </button>
               </div>
             </div>
@@ -570,7 +573,7 @@ export default function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  SMTP Host
+                  {t('admin.settings.smtp.host')}
                 </label>
                 <input
                   type="text"
@@ -581,7 +584,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  SMTP Port
+                  {t('admin.settings.smtp.port')}
                 </label>
                 <input
                   type="text"
@@ -592,7 +595,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  SMTP Username
+                  {t('admin.settings.smtp.user')}
                 </label>
                 <input
                   type="text"
@@ -603,7 +606,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  SMTP Password
+                  {t('admin.settings.smtp.password')}
                 </label>
                 <input
                   type="password"
@@ -617,7 +620,7 @@ export default function SettingsPage() {
 
             <button className="px-4 py-2.5 bg-white/10 text-white rounded-xl font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center gap-2">
               <Mail size={16} />
-              إرسال بريد تجريبي
+              {t('admin.settings.smtp.testEmail')}
             </button>
           </div>
         );
@@ -632,44 +635,44 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    النسخ الاحتياطي
+                    {t('admin.settings.backup.title')}
                   </p>
                   <p className="text-white/50 text-sm">
-                    آخر نسخة: 15 يناير 2024، 10:30 ص
+                    {t('admin.settings.backup.lastBackup')}
                   </p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <button className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all flex items-center gap-2">
                   <Database size={16} />
-                  إنشاء نسخة احتياطية
+                  {t('admin.settings.backup.createBackup')}
                 </button>
                 <button className="px-4 py-2.5 bg-white/10 text-white rounded-xl font-[family-name:var(--font-display)] text-sm hover:bg-white/20 transition-colors flex items-center gap-2">
                   <RefreshCw size={16} />
-                  استعادة
+                  {t('admin.settings.backup.restore')}
                 </button>
               </div>
             </div>
 
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
-                النسخ الاحتياطي التلقائي
+                {t('admin.settings.backup.autoBackup')}
               </label>
               <select
                 value={autoBackup}
                 onChange={(e) => setAutoBackup(e.target.value)}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
               >
-                <option value="daily" className="bg-midnight">يومياً</option>
-                <option value="weekly" className="bg-midnight">أسبوعياً</option>
-                <option value="monthly" className="bg-midnight">شهرياً</option>
-                <option value="disabled" className="bg-midnight">معطّل</option>
+                <option value="daily" className="bg-midnight">{t('admin.settings.backup.daily')}</option>
+                <option value="weekly" className="bg-midnight">{t('admin.settings.backup.weekly')}</option>
+                <option value="monthly" className="bg-midnight">{t('admin.settings.backup.monthly')}</option>
+                <option value="disabled" className="bg-midnight">{t('admin.settings.backup.disabled')}</option>
               </select>
             </div>
 
             <div className="p-4 bg-gold/10 border border-gold/20 rounded-xl">
               <p className="text-gold text-sm font-[family-name:var(--font-display)]">
-                💡 يُنصح بإنشاء نسخة احتياطية قبل إجراء أي تغييرات كبيرة على الموقع
+                {t('admin.settings.backup.tip')}
               </p>
             </div>
           </div>
@@ -681,13 +684,13 @@ export default function SettingsPage() {
             {/* Metered access */}
             <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-5">
               <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
-                المقالات المجانية
+                {t('admin.settings.paywall.freeArticles')}
               </h3>
 
               <div className="grid md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                    عدد المقالات المجانية شهرياً
+                    {t('admin.settings.paywall.freeLimitMonthly')}
                   </label>
                   <input
                     type="number"
@@ -697,12 +700,12 @@ export default function SettingsPage() {
                     onChange={(e) => setFreeArticleLimit(Number(e.target.value))}
                     className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
                   />
-                  <p className="text-white/30 text-xs mt-1">0 = جدار مدفوع فوري</p>
+                  <p className="text-white/30 text-xs mt-1">{t('admin.settings.paywall.freeLimitHint')}</p>
                 </div>
 
                 <div>
                   <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                    روابط الهدية شهرياً لكل مشترك
+                    {t('admin.settings.paywall.giftLinksMonthly')}
                   </label>
                   <input
                     type="number"
@@ -719,11 +722,11 @@ export default function SettingsPage() {
             {/* Micropayments */}
             <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-4">
               <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
-                الدفع المصغّر (مقال واحد)
+                {t('admin.settings.paywall.micropayment')}
               </h3>
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  سعر المقال الافتراضي (ر.س)
+                  {t('admin.settings.paywall.defaultArticlePrice')}
                 </label>
                 <input
                   type="number"
@@ -733,26 +736,26 @@ export default function SettingsPage() {
                   onChange={(e) => setSingleArticleDefaultPrice(Number(e.target.value))}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
                 />
-                <p className="text-white/30 text-xs mt-1">يمكن تجاوزه لكل مقال على حدة</p>
+                <p className="text-white/30 text-xs mt-1">{t('admin.settings.paywall.priceOverrideHint')}</p>
               </div>
             </div>
 
             {/* Dynamic paywall */}
             <div className="p-5 bg-white/5 border border-gold/10 rounded-xl space-y-4">
               <h3 className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
-                الجدار الذكي (4.5)
+                {t('admin.settings.paywall.smartPaywall')}
               </h3>
 
               {[
                 {
-                  label: 'تفعيل الجدار الذكي',
-                  desc: 'يعدّل عدد المقالات المجانية تبعاً لتفاعل القارئ',
+                  label: t('admin.settings.paywall.enableSmartPaywall'),
+                  desc: t('admin.settings.paywall.enableSmartPaywallDesc'),
                   value: dynamicPaywall,
                   set: setDynamicPaywall,
                 },
                 {
-                  label: 'مكافأة إحالات التواصل الاجتماعي',
-                  desc: 'يمنح القادمين من وسائل التواصل مقالاً مجانياً إضافياً',
+                  label: t('admin.settings.paywall.socialBonus'),
+                  desc: t('admin.settings.paywall.socialBonusDesc'),
                   value: socialBonusArticle,
                   set: setSocialBonusArticle,
                 },
@@ -781,7 +784,7 @@ export default function SettingsPage() {
                 <div className="grid md:grid-cols-2 gap-4 pt-2 border-t border-gold/10">
                   <div>
                     <label className="block text-white/70 text-xs font-[family-name:var(--font-display)] mb-2">
-                      حد التفاعل العالي (% التمرير)
+                      {t('admin.settings.paywall.highEngagementThreshold')}
                     </label>
                     <input
                       type="number"
@@ -794,7 +797,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-white/70 text-xs font-[family-name:var(--font-display)] mb-2">
-                      مقالات إضافية لعالي التفاعل
+                      {t('admin.settings.paywall.highEngagementBonus')}
                     </label>
                     <input
                       type="number"
@@ -822,10 +825,10 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-            الإعدادات
+            {t('admin.settings.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            إدارة إعدادات الموقع والتفضيلات
+            {t('admin.settings.subtitle')}
           </p>
         </div>
         <button
@@ -838,7 +841,7 @@ export default function SettingsPage() {
           ) : (
             <Save size={16} />
           )}
-          حفظ التغييرات
+          {t('admin.settings.saveChanges')}
         </button>
       </div>
 
@@ -876,15 +879,15 @@ export default function SettingsPage() {
         >
           <div className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6">
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
-              {tabs.find(t => t.id === activeTab)?.icon && (
+              {tabs.find(tab => tab.id === activeTab)?.icon && (
                 <span className="text-gold">
                   {(() => {
-                    const Icon = tabs.find(t => t.id === activeTab)?.icon;
+                    const Icon = tabs.find(tab => tab.id === activeTab)?.icon;
                     return Icon ? <Icon size={18} /> : null;
                   })()}
                 </span>
               )}
-              {tabs.find(t => t.id === activeTab)?.label}
+              {tabs.find(tab => tab.id === activeTab)?.label}
             </h2>
             {renderTabContent()}
           </div>

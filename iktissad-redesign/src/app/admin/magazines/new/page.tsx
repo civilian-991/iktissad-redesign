@@ -22,19 +22,21 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import { createMagazine, updateMagazine } from '@/lib/api-client';
 import { uploadFile } from '@/lib/supabase/storage';
 import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
 
-const months = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-];
+const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
 type ConversionStep = 'idle' | 'creating' | 'uploading-pdf' | 'converting' | 'done' | 'error';
 
 export default function NewMagazinePage() {
+  const { t } = useTranslation();
   const router = useRouter();
+
+  const months = monthKeys.map(k => t(`admin.magazines.form.months.${k}`));
+
   const [issueNumber, setIssueNumber] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(months[new Date().getMonth()]);
@@ -66,7 +68,7 @@ export default function NewMagazinePage() {
 
   const handleSave = async (saveStatus?: string) => {
     if (!issueNumber.trim()) {
-      toast.error('يرجى إدخال رقم العدد');
+      toast.error(t('admin.magazines.create.enterIssueNumber'));
       return;
     }
 
@@ -76,7 +78,7 @@ export default function NewMagazinePage() {
       // ── Step 1: Create magazine record (get the ID) ──────────────────────────
       setConversionStep('creating');
       const res = await createMagazine({
-        title: `العدد ${issueNumber}`,
+        title: `${t('admin.magazines.create.issueLabel')} ${issueNumber}`,
         titleEn: `Issue ${issueNumber}`,
         issueNumber: Number(issueNumber),
         coverImage: coverImage || '',
@@ -89,7 +91,7 @@ export default function NewMagazinePage() {
       });
 
       const issueId = res.data?.id;
-      if (!issueId) throw new Error('لم يتم استلام معرّف العدد من الخادم');
+      if (!issueId) throw new Error(t('admin.magazines.create.noIssueId'));
 
       // ── Step 2: Upload original PDF (for download button) ───────────────────
       let pdfUrl = '';
@@ -118,24 +120,24 @@ export default function NewMagazinePage() {
       }
 
       setConversionStep('done');
-      toast.success('تم حفظ العدد وتحويل الصفحات بنجاح');
+      toast.success(t('admin.magazines.create.savedSuccess'));
       router.push(`/admin/magazines/${issueId}`);
     } catch (err: any) {
       setConversionStep('error');
-      setConversionError(err.message || 'حدث خطأ أثناء الحفظ');
-      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+      setConversionError(err.message || t('admin.magazines.create.saveError'));
+      toast.error(err.message || t('admin.magazines.create.saveError'));
     }
   };
 
   const stepLabel: Record<ConversionStep, string> = {
     idle: '',
-    creating: 'جاري حفظ العدد...',
-    'uploading-pdf': 'جاري رفع ملف PDF...',
+    creating: t('admin.magazines.conversion.saving'),
+    'uploading-pdf': t('admin.magazines.conversion.uploadingPdf'),
     converting: conversionProgress.total > 0
-      ? `جاري التحويل... ${conversionProgress.current} / ${conversionProgress.total} صفحة`
-      : 'جاري التهيئة...',
-    done: 'تم بنجاح',
-    error: 'حدث خطأ',
+      ? t('admin.magazines.conversion.convertingProgress').replace('{current}', String(conversionProgress.current)).replace('{total}', String(conversionProgress.total))
+      : t('admin.magazines.conversion.initializing'),
+    done: t('admin.magazines.conversion.done'),
+    error: t('admin.magazines.conversion.error'),
   };
 
   return (
@@ -151,10 +153,10 @@ export default function NewMagazinePage() {
           </Link>
           <div>
             <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-white mb-1">
-              عدد جديد
+              {t('admin.magazines.create.title')}
             </h1>
             <p className="text-white/50 text-sm">
-              إضافة عدد جديد من المجلة
+              {t('admin.magazines.create.subtitle')}
             </p>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function NewMagazinePage() {
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
             <Eye size={18} />
-            معاينة
+            {t('admin.magazines.create.preview')}
           </button>
           <button
             onClick={() => handleSave()}
@@ -174,7 +176,7 @@ export default function NewMagazinePage() {
             ) : (
               <Save size={18} />
             )}
-            حفظ العدد
+            {t('admin.magazines.create.saveIssue')}
           </button>
         </div>
       </div>
@@ -228,26 +230,26 @@ export default function NewMagazinePage() {
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <BookOpen size={20} className="text-gold" />
-              معلومات العدد
+              {t('admin.magazines.form.issueInfo')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  رقم العدد
+                  {t('admin.magazines.form.issueNumber')}
                 </label>
                 <input
                   type="text"
                   value={issueNumber}
                   onChange={(e) => setIssueNumber(e.target.value)}
-                  placeholder="مثال: 543"
+                  placeholder={t('admin.magazines.form.issueNumberPlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
 
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  السنة
+                  {t('admin.magazines.form.year')}
                 </label>
                 <select
                   value={year}
@@ -262,7 +264,7 @@ export default function NewMagazinePage() {
 
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  الشهر
+                  {t('admin.magazines.form.month')}
                 </label>
                 <select
                   value={month}
@@ -277,13 +279,13 @@ export default function NewMagazinePage() {
 
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  عدد الصفحات
+                  {t('admin.magazines.form.pageCount')}
                 </label>
                 <input
                   type="number"
                   value={pages}
                   onChange={(e) => setPages(e.target.value)}
-                  placeholder="يُحسب تلقائياً عند التحويل"
+                  placeholder={t('admin.magazines.form.pageCountPlaceholder')}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
@@ -299,7 +301,7 @@ export default function NewMagazinePage() {
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6 flex items-center gap-2">
               <ImageIcon size={20} className="text-gold" />
-              صورة الغلاف
+              {t('admin.magazines.form.coverImage')}
             </h2>
 
             {coverImage ? (
@@ -324,10 +326,10 @@ export default function NewMagazinePage() {
                   <Upload size={32} className="text-gold/50 mb-3" />
                 )}
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  {isUploadingCover ? 'جاري الرفع...' : 'اضغط لرفع صورة الغلاف'}
+                  {isUploadingCover ? t('admin.magazines.form.uploading') : t('admin.magazines.form.clickToUploadCover')}
                 </span>
                 <span className="text-white/40 text-sm mt-1">
-                  PNG, JPG أو WebP (الحجم الموصى به: 400×560)
+                  {t('admin.magazines.form.coverRecommendedSize')}
                 </span>
                 <input
                   type="file"
@@ -340,9 +342,9 @@ export default function NewMagazinePage() {
                     try {
                       const { publicUrl } = await uploadFile('magazines', file, 'covers');
                       setCoverImage(publicUrl);
-                      toast.success('تم رفع صورة الغلاف');
+                      toast.success(t('admin.magazines.form.coverUploaded'));
                     } catch (err: any) {
-                      toast.error(err.message || 'فشل رفع الصورة');
+                      toast.error(err.message || t('admin.magazines.form.coverUploadFailed'));
                     } finally {
                       setIsUploadingCover(false);
                     }
@@ -361,10 +363,10 @@ export default function NewMagazinePage() {
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-2 flex items-center gap-2">
               <FileText size={20} className="text-gold" />
-              ملف PDF
+              {t('admin.magazines.form.pdfFile')}
             </h2>
             <p className="text-white/40 text-sm font-[family-name:var(--font-display)] mb-6">
-              سيتم تحويل الصفحات تلقائياً إلى صور عند الحفظ
+              {t('admin.magazines.form.pdfAutoConvert')}
             </p>
 
             {pdfFileObj ? (
@@ -377,7 +379,7 @@ export default function NewMagazinePage() {
                     {pdfFileObj.name}
                   </p>
                   <p className="text-white/50 text-sm">
-                    {(pdfFileObj.size / (1024 * 1024)).toFixed(1)} MB — سيتم تحويله عند الحفظ
+                    {(pdfFileObj.size / (1024 * 1024)).toFixed(1)} MB — {t('admin.magazines.form.willConvertOnSave')}
                   </p>
                 </div>
                 <button
@@ -391,7 +393,7 @@ export default function NewMagazinePage() {
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gold/20 rounded-xl cursor-pointer hover:border-gold/40 transition-colors bg-white/5">
                 <Upload size={24} className="text-gold/50 mb-2" />
                 <span className="text-white/60 font-[family-name:var(--font-display)]">
-                  اضغط لاختيار ملف PDF
+                  {t('admin.magazines.form.clickToSelectPdf')}
                 </span>
                 <input
                   type="file"
@@ -416,14 +418,14 @@ export default function NewMagazinePage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white flex items-center gap-2">
                 <Star size={20} className="text-gold" />
-                أبرز المواضيع
+                {t('admin.magazines.form.highlights')}
               </h2>
               <button
                 onClick={addHighlight}
                 className="flex items-center gap-2 px-3 py-1.5 text-gold hover:bg-gold/10 rounded-lg transition-colors text-sm"
               >
                 <Plus size={16} />
-                إضافة
+                {t('admin.magazines.form.addHighlight')}
               </button>
             </div>
 
@@ -437,7 +439,7 @@ export default function NewMagazinePage() {
                     type="text"
                     value={highlight}
                     onChange={(e) => updateHighlight(index, e.target.value)}
-                    placeholder="عنوان الموضوع..."
+                    placeholder={t('admin.magazines.form.highlightPlaceholder')}
                     className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                   />
                   {highlights.length > 1 && (
@@ -464,27 +466,27 @@ export default function NewMagazinePage() {
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-6">
-              إعدادات النشر
+              {t('admin.magazines.form.publishSettings')}
             </h2>
 
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                الحالة
+                {t('admin.magazines.form.status')}
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
               >
-                <option value="draft">مسودة</option>
-                <option value="scheduled">مجدول</option>
-                <option value="published">منشور</option>
+                <option value="draft">{t('admin.magazines.form.statusDraft')}</option>
+                <option value="scheduled">{t('admin.magazines.form.statusScheduled')}</option>
+                <option value="published">{t('admin.magazines.form.statusPublished')}</option>
               </select>
             </div>
 
             <div className="mb-4">
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                تاريخ النشر
+                {t('admin.magazines.form.publishDate')}
               </label>
               <div className="relative">
                 <input
@@ -502,10 +504,10 @@ export default function NewMagazinePage() {
                 <Star size={20} className={featured ? 'text-gold fill-gold' : 'text-white/40'} />
                 <div>
                   <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                    عدد مميز
+                    {t('admin.magazines.form.featuredIssue')}
                   </p>
                   <p className="text-white/50 text-xs">
-                    يظهر في الصفحة الرئيسية
+                    {t('admin.magazines.form.featuredDesc')}
                   </p>
                 </div>
               </div>
@@ -529,7 +531,7 @@ export default function NewMagazinePage() {
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-4">
-              معاينة
+              {t('admin.magazines.create.preview')}
             </h2>
 
             <div className="bg-gradient-to-br from-navy to-navy-light rounded-xl p-4">
@@ -543,18 +545,18 @@ export default function NewMagazinePage() {
                 )}
                 {featured && (
                   <div className="absolute top-2 right-2 px-2 py-1 bg-gold text-obsidian text-xs font-bold rounded">
-                    مميز
+                    {t('admin.magazines.create.featured')}
                   </div>
                 )}
               </div>
               <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
-                العدد {issueNumber || '---'}
+                {t('admin.magazines.create.issueLabel')} {issueNumber || '---'}
               </h3>
               <p className="text-gold text-sm">{month} {year}</p>
               {pdfFileObj && (
                 <div className="mt-2 flex items-center gap-1.5 text-white/50 text-xs">
                   <CheckCircle2 size={12} className="text-profit" />
-                  <span>PDF جاهز للتحويل</span>
+                  <span>{t('admin.magazines.form.pdfReadyForConversion')}</span>
                 </div>
               )}
             </div>
@@ -568,7 +570,7 @@ export default function NewMagazinePage() {
             className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl p-6"
           >
             <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-white mb-4">
-              إجراءات
+              {t('admin.magazines.create.quickActions')}
             </h2>
 
             <div className="space-y-2">
@@ -578,7 +580,7 @@ export default function NewMagazinePage() {
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gold/10 text-gold hover:bg-gold/20 rounded-xl transition-colors disabled:opacity-50"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                <span className="font-[family-name:var(--font-display)]">حفظ كمسودة</span>
+                <span className="font-[family-name:var(--font-display)]">{t('admin.magazines.create.saveAsDraft')}</span>
               </button>
             </div>
           </motion.div>
