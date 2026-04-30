@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 
   // Fetch article counts per source in a separate query (avoid heavy subquery)
   const sourceIds: string[] = (rows ?? []).map((r: { id: string }) => r.id);
-  let articleCountMap: Record<string, number> = {};
+  const articleCountMap: Record<string, number> = {};
   if (sourceIds.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: linkRows } = await (supabase as any)

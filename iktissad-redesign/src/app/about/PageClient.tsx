@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { Globe, Newspaper, Mic2, Layers, ExternalLink } from 'lucide-react';
 import NextImage from 'next/image';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -241,12 +242,12 @@ export default function AboutPageClient() {
                     <p className="text-slate text-sm mb-4 leading-relaxed">
                       المجلة الاقتصادية الأولى في العالم العربي — تحليلات استراتيجية ودراسات قطاعية منذ عام 1977.
                     </p>
-                    <a
+                    <Link
                       href="/magazine"
                       className="inline-flex items-center gap-1.5 text-gold text-sm font-semibold hover:gap-2.5 transition-all"
                     >
                       تصفح الأعداد <ExternalLink size={14} />
-                    </a>
+                    </Link>
                   </div>
                 </motion.div>
 

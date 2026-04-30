@@ -63,7 +63,7 @@ const updateArticleSchema = z.object({
    * - object/array → TipTap JSON or ArticleBlock[], stored as JSONB in body column
    */
   // Accepts string (legacy HTML) or object/array (TipTap JSON / ArticleBlock[])
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   body: (z.any() as z.ZodType<string | Record<string, unknown> | unknown[]>).optional(),
   deck: z.string().optional(),
   deckEn: z.string().optional(),

@@ -145,7 +145,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [isFullscreen]);
 
   function toggleFs() {

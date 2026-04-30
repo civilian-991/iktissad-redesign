@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ExternalLink, BookOpen, Building, Users, Award } from 'lucide-react';
 import Header from '@/components/Header';
@@ -282,12 +283,12 @@ export default function GroupPageClient() {
               <p className="text-white/80 mb-8 max-w-2xl mx-auto">
                 {t('pages.group.ctaDesc')}
               </p>
-              <a
+              <Link
                 href="/contact"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gold rounded-lg font-[family-name:var(--font-display)] font-bold hover:bg-navy hover:text-white transition-colors"
               >
                 {t('pages.contact.title')}
-              </a>
+              </Link>
             </motion.div>
           </div>
         </section>

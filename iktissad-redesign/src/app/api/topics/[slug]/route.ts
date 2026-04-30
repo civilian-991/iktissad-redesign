@@ -42,7 +42,7 @@ export async function GET(
   const start = (page - 1) * pageSize;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sectionRowAny = sectionRow as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: articleRows, count, error: articlesError } = await (supabase
     .from("articles")
     .select(ARTICLE_SELECT, { count: "exact" })

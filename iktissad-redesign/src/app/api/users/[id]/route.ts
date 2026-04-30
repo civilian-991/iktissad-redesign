@@ -16,7 +16,7 @@ export async function GET(
   }
 
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: row, error } = await admin
     .from("users")
     .select("*")

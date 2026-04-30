@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BookOpen, Lock } from 'lucide-react';
 import Header from '@/components/Header';
@@ -89,19 +90,19 @@ export default function MagazineTeaserClient({
 
                 {/* Subscribe CTA (prominent, in hero) */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mt-4">
-                  <a
+                  <Link
                     href="/subscribe"
                     className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gold text-white rounded-xl font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors text-sm"
                   >
                     {t('magazine.teaser_subscribe')}
-                  </a>
+                  </Link>
                   {!isLoggedIn && (
-                    <a
+                    <Link
                       href="/login"
                       className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border-2 border-white/30 text-white rounded-xl font-[family-name:var(--font-display)] font-bold hover:border-white/60 transition-colors text-sm"
                     >
                       {t('magazine.teaser_login')}
-                    </a>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -202,19 +203,19 @@ export default function MagazineTeaserClient({
                 {t('magazine.teaser_subheading')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
+                <Link
                   href="/subscribe"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-white rounded-xl font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
                 >
                   {t('magazine.teaser_subscribe')}
-                </a>
+                </Link>
                 {!isLoggedIn && (
-                  <a
+                  <Link
                     href="/login"
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white rounded-xl font-[family-name:var(--font-display)] font-bold hover:border-white/60 transition-colors"
                   >
                     {t('magazine.teaser_login')}
-                  </a>
+                  </Link>
                 )}
               </div>
             </motion.div>

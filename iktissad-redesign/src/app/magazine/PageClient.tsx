@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BookOpen, Eye, Download, Filter, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -516,12 +517,12 @@ export default function MagazinePageClient() {
               <p className="text-white/70 mb-8">
                 احصل على وصول غير محدود لجميع أعداد المجلة الحالية والسابقة
               </p>
-              <a
+              <Link
                 href="/subscribe"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-white rounded-xl font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
               >
                 {t('common.actions.subscribe')}
-              </a>
+              </Link>
             </motion.div>
           </div>
         </section>

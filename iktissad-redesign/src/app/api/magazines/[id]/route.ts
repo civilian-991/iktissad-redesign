@@ -22,7 +22,7 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: row, error } = await supabase
     .from("magazine_issues")
     .select()
@@ -37,7 +37,7 @@ export async function GET(
   }
 
   // Fetch linked articles
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: links } = await supabase
     .from("magazine_articles")
     .select("article_id")
@@ -47,7 +47,7 @@ export async function GET(
   let articles: Article[] = [];
   if (links && links.length > 0) {
     const articleIds = links.map((l) => l.article_id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: articleRows } = await supabase
       .from("articles")
       .select(ARTICLE_SELECT)

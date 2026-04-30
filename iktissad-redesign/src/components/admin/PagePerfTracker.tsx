@@ -19,31 +19,31 @@
  * SSR-safe: all Performance API calls are guarded by typeof window checks.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { reportSlowRender } from '@/lib/perf';
 
 const TTI_THRESHOLD_MS = 3_000;
 
 export default function PagePerfTracker() {
-  // Capture mount time as close to module evaluation as possible.
-  // useRef initial value runs synchronously during render.
-  const mountTimeRef = useRef<number>(
-    typeof window !== 'undefined' ? performance.now() : 0
+  // Capture mount time via useState lazy initializer — React's documented
+  // pattern for impure init reads (compiler purity rule allows it here).
+  const [mountTime] = useState(() =>
+    typeof window !== 'undefined' ? performance.now() : 0,
   );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     // At this point the page is interactive (useEffect fires after paint).
-    const tti = performance.now() - mountTimeRef.current;
+    const tti = performance.now() - mountTime;
 
     if (process.env.NODE_ENV === 'development') {
       console.debug(`[perf] TTI for ${window.location.pathname}: ${Math.round(tti)}ms`);
     }
 
     reportSlowRender('AdminPage:TTI', tti, TTI_THRESHOLD_MS);
-    // Only runs on mount — empty dep array is intentional
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Runs once after first paint — mountTime is stable across renders
+  }, [mountTime]);
 
   return null;
 }

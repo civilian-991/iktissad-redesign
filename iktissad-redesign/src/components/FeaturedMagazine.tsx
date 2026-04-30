@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BookOpen, Eye, ArrowLeft, ArrowUpLeft, Sparkles, Loader2 } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -35,10 +36,10 @@ export default function FeaturedMagazine() {
               {t('nav.group.magazine')}
             </h2>
           </div>
-          <a href="/magazine" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
+          <Link href="/magazine" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
             <span>{t('pages.magazine.allIssues')}</span>
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {!data ? (
@@ -133,19 +134,19 @@ export default function FeaturedMagazine() {
                       )}
 
                       <div className="flex gap-3">
-                        <a
+                        <Link
                           href={`/magazine/${latestIssue.id}/browse`}
                           className="flex items-center gap-2 px-6 py-3 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
                         >
                           <BookOpen size={18} />
                           {t('components.featuredMagazine.browseIssue')}
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                           href="/magazine"
                           className="flex items-center gap-2 px-6 py-3 border border-obsidian text-obsidian font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
                         >
                           {t('components.featuredMagazine.archive')}
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -199,9 +200,9 @@ export default function FeaturedMagazine() {
                 </motion.a>
               ))}
 
-              <a href="/magazine" className="block text-center py-3 text-gold hover:text-gold-dark font-[family-name:var(--font-display)] font-semibold transition-colors">
+              <Link href="/magazine" className="block text-center py-3 text-gold hover:text-gold-dark font-[family-name:var(--font-display)] font-semibold transition-colors">
                 {t('components.featuredMagazine.viewAllIssues')}
-              </a>
+              </Link>
             </motion.div>
           </div>
         )}

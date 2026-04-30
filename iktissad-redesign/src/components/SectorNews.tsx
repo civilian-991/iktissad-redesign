@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import {
@@ -183,10 +184,10 @@ export default function SectorNews() {
                 </motion.button>
               </div>
             )}
-            <a href="/industries" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
+            <Link href="/industries" className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline">
               <span>{t('components.sectorNews.allSectors')}</span>
               <ArrowUpLeft size={13} />
-            </a>
+            </Link>
           </div>
         </div>
 

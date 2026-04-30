@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Clock, Loader2, FolderOpen, ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
@@ -111,13 +112,13 @@ export default function DossierPageClient({ slug }: { slug: string }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <a
+              <Link
                 href="/reports"
                 className="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm font-[family-name:var(--font-display)] mb-6 transition-colors"
               >
                 <ArrowRight size={14} />
                 الملفات
-              </a>
+              </Link>
               <span className="text-gold font-[family-name:var(--font-display)] text-xs font-bold tracking-[0.2em] uppercase block mb-3">
                 ملف تحريري
               </span>
@@ -163,12 +164,12 @@ export default function DossierPageClient({ slug }: { slug: string }) {
                 <p className="text-charcoal/60 text-lg font-[family-name:var(--font-display)]">
                   لم يتم العثور على هذا الملف.
                 </p>
-                <a
+                <Link
                   href="/reports"
                   className="mt-3 inline-block text-navy text-sm font-[family-name:var(--font-display)] hover:underline"
                 >
                   العودة إلى الملفات
-                </a>
+                </Link>
               </div>
             ) : articles.length === 0 ? (
               <div className="text-center py-24">

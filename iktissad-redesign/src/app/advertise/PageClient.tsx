@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Users, Eye, TrendingUp, Target, Monitor, Smartphone, Mail, Newspaper, Award } from 'lucide-react';
 import Header from '@/components/Header';
@@ -233,9 +234,9 @@ export default function AdvertisePageClient() {
                     ads@iktissadonline.com
                   </a>
                 </div>
-                <a href="/contact" className="btn-gold mt-8 inline-block">
+                <Link href="/contact" className="btn-gold mt-8 inline-block">
                   {t('pages.advertise.requestQuote')}
-                </a>
+                </Link>
               </motion.div>
             </div>
           </div>

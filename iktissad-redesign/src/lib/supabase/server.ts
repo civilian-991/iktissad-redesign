@@ -41,7 +41,7 @@ function wrapClientWithTiming<T extends Record<string, any>>(client: T): T {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return function (table: string, ...args: any[]) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const builder: any = (value as Function).call(target, table, ...args);
+        const builder: any = (value as (...a: unknown[]) => unknown).call(target, table, ...args);
 
         return new Proxy(builder, {
           get(bTarget, bProp, bReceiver) {

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowUpLeft, Loader2, UserCircle2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -30,13 +31,13 @@ export default function FeaturedProfiles() {
               {t('components.featuredProfiles.sectionTitle')}
             </h2>
           </div>
-          <a
+          <Link
             href="/profiles"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {/* Grid */}

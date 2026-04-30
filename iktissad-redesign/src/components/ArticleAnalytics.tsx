@@ -125,7 +125,7 @@ export default function ArticleAnalytics({ articleId }: ArticleAnalyticsProps) {
       observerRef.current?.disconnect();
       sendData(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [articleId]);
 
   return null;

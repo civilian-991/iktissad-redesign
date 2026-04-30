@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -469,7 +470,7 @@ export default function ReaderClient({ issue, spreads, sections }: ReaderClientP
               'linear-gradient(to bottom, rgba(14,35,48,0.9) 0%, transparent 100%)',
           }}
         >
-          <a
+          <Link
             href="/magazine"
             style={{
               color: 'rgba(245,238,220,0.6)',
@@ -485,7 +486,7 @@ export default function ReaderClient({ issue, spreads, sections }: ReaderClientP
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             </svg>
             {t('pages.magazine.allIssuesLink')}
-          </a>
+          </Link>
 
           <span
             style={{

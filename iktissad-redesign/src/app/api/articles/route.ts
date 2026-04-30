@@ -169,7 +169,7 @@ const createArticleSchema = z.object({
   excerptEn: z.string().optional().default(""),
   content: z.string().optional().default(""),
   contentEn: z.string().optional().default(""),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   body: (z.any() as z.ZodType<string | Record<string, unknown> | unknown[]>).optional(),
   deck: z.string().optional(),
   deckEn: z.string().optional(),

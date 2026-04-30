@@ -203,7 +203,7 @@ async function getSeries(args: Record<string, unknown>): Promise<MCPToolResult> 
 
   if (linksErr) return err(linksErr.message);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const articles = (links ?? [])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((l: any) => l.articles?.status === "published")

@@ -22,7 +22,7 @@ export async function GET(
 
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: row, error } = await supabase
     .from("sections")
     .select()

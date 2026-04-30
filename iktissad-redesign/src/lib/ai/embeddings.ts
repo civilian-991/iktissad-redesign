@@ -84,7 +84,7 @@ export async function findSimilarArticles(
   );
 
   if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return rpcData.map((row: {
       id: string;
       title: string;
@@ -179,7 +179,7 @@ export async function hybridSearch(
   );
 
   if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const results: HybridSearchResult[] = rpcData.map((row: {
       id: string;
       title: string;

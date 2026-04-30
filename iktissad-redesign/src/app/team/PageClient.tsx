@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import NextImage from 'next/image';
+import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import useSWR from 'swr';
 import Header from '@/components/Header';
@@ -305,9 +306,9 @@ export default function TeamPageClient() {
               <p className="text-white/70 mb-8 max-w-2xl mx-auto">
                 نبحث دائماً عن صحفيين ومحررين موهوبين للانضمام إلى فريقنا
               </p>
-              <a href="/contact" className="btn-gold inline-block">
+              <Link href="/contact" className="btn-gold inline-block">
                 {t('pages.contact.title')}
-              </a>
+              </Link>
             </motion.div>
           </div>
         </section>

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Building2, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -31,13 +32,13 @@ export default function CompaniesSection() {
               شركات
             </h2>
           </div>
-          <a
+          <Link
             href="/topics/companies"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {isLoading ? (

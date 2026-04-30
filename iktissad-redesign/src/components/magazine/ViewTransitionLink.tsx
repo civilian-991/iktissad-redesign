@@ -52,7 +52,6 @@ export function ViewTransitionLink({
 
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       e.preventDefault()
-      // @ts-ignore — View Transitions API (not yet in TypeScript lib)
       document.startViewTransition(() => {
         router.push(href)
       })

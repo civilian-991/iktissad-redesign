@@ -18,7 +18,7 @@ export async function GET(
   const { slug } = await params;
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: row, error } = await supabase
     .from("countries")
     .select()
@@ -33,7 +33,7 @@ export async function GET(
   }
 
   // Also fetch articles for this country
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: articleRows } = await supabase
     .from("articles")
     .select(ARTICLE_SELECT)

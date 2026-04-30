@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, FolderOpen } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -33,13 +34,13 @@ export default function FilesSection() {
               ملفات
             </h2>
           </div>
-          <a
+          <Link
             href="/reports"
             className="text-navy text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {isLoading ? (
@@ -147,13 +148,13 @@ export default function FilesSection() {
                 </motion.a>
               ))}
 
-              <a
+              <Link
                 href="/reports"
                 className="flex items-center justify-center gap-2 py-3 border border-dashed border-navy/30 text-navy text-sm font-[family-name:var(--font-display)] font-semibold hover:border-navy hover:bg-navy/5 transition-all duration-200"
               >
                 عرض جميع الملفات
                 <ArrowUpLeft size={14} />
-              </a>
+              </Link>
             </div>
 
           </div>

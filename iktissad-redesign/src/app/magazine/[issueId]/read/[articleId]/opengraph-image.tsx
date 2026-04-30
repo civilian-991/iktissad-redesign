@@ -61,7 +61,7 @@ export default async function OGImage({
       >
         {/* Background article image (blurred overlay) */}
         {articleImage && (
-          // eslint-disable-next-line @next/next/no-img-element
+           
           <img
             src={articleImage}
             alt=""

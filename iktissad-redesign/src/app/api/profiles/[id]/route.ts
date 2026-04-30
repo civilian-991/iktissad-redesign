@@ -19,7 +19,7 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: row, error } = await supabase
     .from("profiles")
     .select(PROFILE_SELECT)

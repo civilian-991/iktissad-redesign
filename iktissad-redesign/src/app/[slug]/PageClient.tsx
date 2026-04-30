@@ -368,7 +368,7 @@ export default function ArticlePageClient({
         <Header />
         <main className="min-h-screen bg-paper flex flex-col items-center justify-center gap-4">
           <h1 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian">المقال غير موجود</h1>
-          <a href="/" className="text-sm text-gold hover:underline font-[family-name:var(--font-display)]">العودة إلى الرئيسية</a>
+          <Link href="/" className="text-sm text-gold hover:underline font-[family-name:var(--font-display)]">العودة إلى الرئيسية</Link>
         </main>
         <Footer />
       </>
@@ -396,9 +396,9 @@ export default function ArticlePageClient({
           {/* ── Breadcrumb ── */}
           <div className="py-3 border-b border-sand/60">
             <nav className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
-              <a href="/" className="hover:text-gold transition-colors flex items-center gap-1">
+              <Link href="/" className="hover:text-gold transition-colors flex items-center gap-1">
                 الرئيسية
-              </a>
+              </Link>
               {article.section && (
                 <>
                   <ChevronLeft size={9} />

@@ -76,7 +76,7 @@ export async function GET(
 
   // Get article assignments
   const articleIds = (links ?? []).map((l: { article_id: string }) => l.article_id);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: assignments } = articleIds.length
     ? await (supabase as any)
         .from("article_assignments")
@@ -102,7 +102,7 @@ export async function GET(
   }
 
   // Get due dates from article_assignments
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data: dueDates } = articleIds.length
     ? await (supabase as any)
         .from("article_assignments")

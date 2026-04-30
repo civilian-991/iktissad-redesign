@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   let query = supabase
     .from("profiles")
     .select(PROFILE_SELECT, { count: "exact" }) as any;

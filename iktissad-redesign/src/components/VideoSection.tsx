@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, ArrowUpLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -73,13 +74,13 @@ export default function VideoSection() {
                 </button>
               </div>
             )}
-            <a
+            <Link
               href="/topics/videos"
               className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:text-gold-light transition-colors"
             >
               <span>{t('components.videoSection.allVideos')}</span>
               <ArrowUpLeft size={13} />
-            </a>
+            </Link>
           </div>
         </div>
 

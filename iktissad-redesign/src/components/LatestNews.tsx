@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, Newspaper } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -30,13 +31,13 @@ export default function LatestNews() {
               آخر الأخبار
             </h2>
           </div>
-          <a
+          <Link
             href="/articles"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {/* Articles */}

@@ -223,11 +223,13 @@ export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
       if (sessionId && payUrl) {
         // MPGS Hosted Checkout: redirect to the gateway pay page with the session
         const gatewayUrl = `${payUrl}?sessionId=${encodeURIComponent(sessionId)}`;
+        // eslint-disable-next-line react-hooks/immutability
         window.location.href = gatewayUrl;
       } else {
         // Fallback (e.g. test / mock mode): use any paymentUrl returned
         const fallback = json.data?.paymentUrl;
         if (fallback) {
+          // eslint-disable-next-line react-hooks/immutability
           window.location.href = fallback;
         } else {
           setCheckoutError(t('pages.subscribe.checkout.errorGeneral'));

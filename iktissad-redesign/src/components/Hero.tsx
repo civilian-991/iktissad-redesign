@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2, TrendingUp } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -131,10 +132,10 @@ export default function Hero() {
             {/* All 5 articles list — active one highlighted */}
             <div className="lg:col-span-5 flex flex-col bg-paper">
               <div className="bg-obsidian px-4 py-3 flex items-center justify-end">
-                <a href="/articles?featured=true" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
+                <Link href="/articles?featured=true" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
                   {t('common.actions.viewMore')}
                   <ArrowUpLeft size={11} />
-                </a>
+                </Link>
               </div>
 
               {articles.length === 0 ? (

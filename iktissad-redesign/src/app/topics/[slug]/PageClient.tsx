@@ -1,6 +1,7 @@
 'use client';
 
 import { use } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Calendar, ArrowUpLeft, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -67,9 +68,9 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <a href="/topics" className="text-gold/70 hover:text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider transition-colors">
+              <Link href="/topics" className="text-gold/70 hover:text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider transition-colors">
                 {t('pages.sections.title')}
-              </a>
+              </Link>
               <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4">
                 {isInitialLoading ? '...' : sectionMeta?.name ?? slug}
               </h1>

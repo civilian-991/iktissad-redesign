@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -187,13 +188,13 @@ export default function CountryNews() {
               {t('components.countryNews.title')}
             </h2>
           </div>
-          <a
+          <Link
             href="/countries"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {/* Region tabs */}

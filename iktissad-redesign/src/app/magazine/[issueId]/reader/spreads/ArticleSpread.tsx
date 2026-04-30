@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import type { MagazineSpread, Article, ArticleBlock } from '@/types';
 
 // Lazy import BlockRenderer — gracefully handle if Agent 4B hasn't created it yet
-let BlockRendererModule: { BlockRenderer: React.ComponentType<{ blocks: ArticleBlock[] }> } | null = null;
+const BlockRendererModule: { BlockRenderer: React.ComponentType<{ blocks: ArticleBlock[] }> } | null = null;
 
 interface ArticleSpreadProps {
   article?: Partial<Article> | null;

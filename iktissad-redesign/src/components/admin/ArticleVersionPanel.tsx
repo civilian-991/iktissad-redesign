@@ -486,7 +486,7 @@ export default function ArticleVersionPanel({
                   لا توجد إصدارات محفوظة بعد
                 </p>
                 <p className="text-white/20 text-[10px] font-[family-name:var(--font-display)] mt-1">
-                  اضغط "حفظ نسخة الآن" لحفظ النسخة الحالية
+                  اضغط &ldquo;حفظ نسخة الآن&rdquo; لحفظ النسخة الحالية
                 </p>
               </div>
             ) : (

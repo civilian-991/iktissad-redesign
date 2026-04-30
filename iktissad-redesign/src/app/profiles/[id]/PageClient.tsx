@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Quote, MapPin, Briefcase, Award, ArrowUpLeft, Clock, Share2, Facebook, Twitter, Linkedin, BookOpen, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -106,7 +107,7 @@ export default function ProfileDetailPageClient() {
                 <div className="bg-ivory rounded-xl p-4 border-r-4 border-gold">
                   <Quote size={20} className="text-gold mb-2" />
                   <p className="text-navy italic font-[family-name:var(--font-display)]">
-                    "{profile.quote}"
+                    &ldquo;{profile.quote}&rdquo;
                   </p>
                 </div>
 
@@ -271,13 +272,13 @@ export default function ProfileDetailPageClient() {
                     </div>
                   )}
 
-                  <a
+                  <Link
                     href="/profiles"
                     className="flex items-center justify-center gap-2 w-full mt-6 py-3 rounded-lg border-2 border-dashed border-gold/30 text-gold font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/10 transition-colors"
                   >
                     {t('pages.profiles.allProfiles')}
                     <ArrowUpLeft size={16} />
-                  </a>
+                  </Link>
                 </motion.div>
               </aside>
             </div>

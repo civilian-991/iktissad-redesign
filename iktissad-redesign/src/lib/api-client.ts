@@ -354,7 +354,7 @@ async function api<T>(
   init?: RequestInit & { signal?: AbortSignal }
 ): Promise<ApiResponse<T>> {
   const method = (init?.method ?? "GET").toUpperCase();
-  let extraHeaders: Record<string, string> = {};
+  const extraHeaders: Record<string, string> = {};
 
   // Automatically include CSRF token for all mutation requests
   if (MUTATION_METHODS.has(method)) {
@@ -539,7 +539,7 @@ export interface MediaListParams {
   page?: number;
   pageSize?: number;
   folder?: string;
-  mimeType?: string;
+  type?: string;
 }
 
 export function mediaKey(params: MediaListParams = {}): string {

@@ -161,11 +161,11 @@ function ZoneCell({
             style={{ color: content.color ?? undefined }}
           >
             {zone.type === 'pull-quote' && (
-              <span className="text-gold text-2xl leading-none">"</span>
+              <span className="text-gold text-2xl leading-none">&ldquo;</span>
             )}
             <span className="line-clamp-6">{content.text}</span>
             {zone.type === 'pull-quote' && (
-              <span className="text-gold text-2xl leading-none float-left">"</span>
+              <span className="text-gold text-2xl leading-none float-left">&rdquo;</span>
             )}
           </div>
         )}

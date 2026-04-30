@@ -3,7 +3,7 @@
 import { AlertTriangle, RefreshCw, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
+export default function ErrorPage({ reset }: { error: Error; reset: () => void }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="text-center max-w-md">

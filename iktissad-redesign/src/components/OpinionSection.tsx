@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowUpLeft, Loader2, UserCircle2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -30,13 +31,13 @@ export default function OpinionSection() {
               رأي
             </h2>
           </div>
-          <a
+          <Link
             href="/topics/opinion"
             className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
-          </a>
+          </Link>
         </div>
 
         {isLoading ? (
@@ -59,7 +60,7 @@ export default function OpinionSection() {
                   className="absolute top-3 left-4 font-[family-name:var(--font-display)] font-bold leading-none select-none pointer-events-none"
                   style={{ fontSize: '4rem', color: 'var(--color-gold)', opacity: 0.08 }}
                 >
-                  "
+                  &ldquo;
                 </span>
 
                 {/* Author avatar */}

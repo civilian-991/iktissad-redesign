@@ -218,12 +218,11 @@ export async function POST(
 
   if (sgApiKey) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const sgMail = require("@sendgrid/mail");
+      const sgMail = (await import("@sendgrid/mail")).default;
       sgMail.setApiKey(sgApiKey);
 
       // Fetch confirmed subscriber emails based on segment
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       let emailRows: { email: string }[] = [];
 
       if (existing.segment === "premium") {
