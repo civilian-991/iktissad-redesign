@@ -1697,6 +1697,102 @@ export type Database = {
         };
         Relationships: [];
       };
+      // ── Phase 11: Bookmarks ──────────────────────────────────────────────
+      bookmarks: {
+        Row: {
+          id: string;
+          user_id: string;
+          article_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          article_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          article_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      // ── Phase 11: Contact form submissions ───────────────────────────────
+      contact_submissions: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          subject: string;
+          message: string;
+          ip: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          subject: string;
+          message: string;
+          ip?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          subject?: string;
+          message?: string;
+          ip?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      // ── Phase 10: Social accounts (Twitter / LinkedIn / Telegram tokens) ─
+      social_accounts: {
+        Row: {
+          id: string;
+          platform: "twitter" | "linkedin" | "telegram";
+          account_name: string;
+          access_token: string;
+          refresh_token: string | null;
+          token_expires_at: string | null;
+          active: boolean;
+          metadata: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          platform: "twitter" | "linkedin" | "telegram";
+          account_name?: string;
+          access_token?: string;
+          refresh_token?: string | null;
+          token_expires_at?: string | null;
+          active?: boolean;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          platform?: "twitter" | "linkedin" | "telegram";
+          account_name?: string;
+          access_token?: string;
+          refresh_token?: string | null;
+          token_expires_at?: string | null;
+          active?: boolean;
+          metadata?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -1858,3 +1954,17 @@ export type AdCampaignUpdate = Tables["ad_campaigns"]["Update"];
 export type AdRow    = Tables["ads"]["Row"];
 export type AdInsert = Tables["ads"]["Insert"];
 export type AdUpdate = Tables["ads"]["Update"];
+
+// ── Phase 11: Bookmarks & contact + Phase 10: Social ─────────────────────────
+
+export type BookmarkRow    = Tables["bookmarks"]["Row"];
+export type BookmarkInsert = Tables["bookmarks"]["Insert"];
+export type BookmarkUpdate = Tables["bookmarks"]["Update"];
+
+export type ContactSubmissionRow    = Tables["contact_submissions"]["Row"];
+export type ContactSubmissionInsert = Tables["contact_submissions"]["Insert"];
+export type ContactSubmissionUpdate = Tables["contact_submissions"]["Update"];
+
+export type SocialAccountRow    = Tables["social_accounts"]["Row"];
+export type SocialAccountInsert = Tables["social_accounts"]["Insert"];
+export type SocialAccountUpdate = Tables["social_accounts"]["Update"];
