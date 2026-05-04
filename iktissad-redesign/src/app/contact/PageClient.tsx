@@ -68,11 +68,25 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
     subtitle: t(`pages.contact.cards.${i}.subtitle`),
   }));
 
-  const offices = (contactInfo?.offices ?? []).map((office, i) => ({
+  // Country slug → localized display name. Keep in sync with the countries table.
+  const countryNames: Record<string, { ar: string; en: string }> = {
+    lebanon: { ar: 'لبنان', en: 'Lebanon' },
+    uae: { ar: 'الإمارات', en: 'UAE' },
+    'saudi-arabia': { ar: 'المملكة العربية السعودية', en: 'Saudi Arabia' },
+    qatar: { ar: 'قطر', en: 'Qatar' },
+    kuwait: { ar: 'الكويت', en: 'Kuwait' },
+    egypt: { ar: 'مصر', en: 'Egypt' },
+    tunisia: { ar: 'تونس', en: 'Tunisia' },
+    turkey: { ar: 'تركيا', en: 'Turkey' },
+  };
+  const offices = (contactInfo?.offices ?? []).map((office) => ({
     city: locale === 'ar' ? office.city : (office.cityEn || office.city),
-    country: t(`pages.contact.offices.${i}.country`),
-    address: t(`pages.contact.offices.${i}.address`),
+    country: office.country
+      ? (locale === 'ar' ? countryNames[office.country]?.ar : countryNames[office.country]?.en) ?? office.country
+      : '',
     phone: office.phone,
+    email: office.email,
+    headquarters: office.headquarters,
   }));
 
   return (
@@ -278,10 +292,19 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                         <div>
                           <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
                             {office.city}
+                            {office.headquarters && (
+                              <span className="ms-2 text-xs text-gold font-semibold align-middle">
+                                ★ {locale === 'ar' ? 'المقر الرئيسي' : 'HQ'}
+                              </span>
+                            )}
                           </h3>
                           <p className="text-gold text-sm font-semibold mb-2">{office.country}</p>
-                          <p className="text-slate text-sm mb-1">{office.address}</p>
-                          <p className="text-charcoal text-sm font-semibold">{office.phone}</p>
+                          <p className="text-charcoal text-sm font-semibold" dir="ltr">{office.phone}</p>
+                          {office.email && (
+                            <a href={`mailto:${office.email}`} className="text-slate text-sm hover:text-gold transition-colors" dir="ltr">
+                              {office.email}
+                            </a>
+                          )}
                         </div>
                         <MapPin className="text-gold flex-shrink-0" size={20} />
                       </div>

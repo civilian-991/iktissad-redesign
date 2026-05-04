@@ -11,6 +11,8 @@ export interface ContactOffice {
   cityEn?: string;
   country?: string;
   phone: string;
+  email?: string;
+  headquarters?: boolean;
 }
 
 export interface ContactInfo {
