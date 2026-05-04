@@ -291,15 +291,16 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
-                            {office.city}
-                            {office.headquarters && (
-                              <span className="ms-2 text-xs text-gold font-semibold align-middle">
-                                ★ {locale === 'ar' ? 'المقر الرئيسي' : 'HQ'}
-                              </span>
-                            )}
+                            {office.headquarters
+                              ? (locale === 'ar' ? 'المقر الرئيسي' : 'Headquarters')
+                              : office.city}
                           </h3>
-                          <p className="text-gold text-sm font-semibold mb-2">{office.country}</p>
-                          <p className="text-charcoal text-sm font-semibold" dir="ltr">{office.phone}</p>
+                          {!office.headquarters && (
+                            <p className="text-gold text-sm font-semibold mb-2">{office.country}</p>
+                          )}
+                          {office.phone && (
+                            <p className="text-charcoal text-sm font-semibold" dir="ltr">{office.phone}</p>
+                          )}
                           {office.email && (
                             <a href={`mailto:${office.email}`} className="text-slate text-sm hover:text-gold transition-colors" dir="ltr">
                               {office.email}
