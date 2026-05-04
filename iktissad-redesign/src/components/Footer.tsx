@@ -158,11 +158,11 @@ export default function Footer() {
                   </div>
                   <span className="text-sm">info@iktissadonline.com</span>
                 </a>
-                <a href="tel:+9611000000" className="flex items-center gap-4 text-white/70 hover:text-gold transition-colors group">
+                <a href="tel:+9611353577" className="flex items-center gap-4 text-white/70 hover:text-gold transition-colors group">
                   <div className="w-10 h-10 border border-gold/20 flex items-center justify-center group-hover:border-gold transition-colors">
                     <Phone size={iconSizes.md} className="text-gold" />
                   </div>
-                  <span className="text-sm" dir="ltr">+961 1 000 000</span>
+                  <span className="text-sm" dir="ltr">+961 1 353 577</span>
                 </a>
                 <div className="flex items-center gap-4 text-white/70">
                   <div className="w-10 h-10 border border-gold/20 flex items-center justify-center">
