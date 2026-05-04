@@ -262,7 +262,7 @@ export default function Header() {
         animate={{ y: 0 }}
         className={`sticky top-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? 'glass-light shadow-elevated'
+            ? 'bg-paper shadow-elevated'
             : 'bg-paper'
         }`}
       >

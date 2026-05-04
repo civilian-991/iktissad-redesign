@@ -6,7 +6,6 @@ import { Clock, ArrowUpLeft, Loader2, Newspaper } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
-import { LiveBlogBadge } from '@/components/LiveBlog';
 import type { Article, ApiResponse } from '@/types';
 
 export default function LatestNews() {
@@ -67,12 +66,6 @@ export default function LatestNews() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Newspaper className="text-sand" size={28} />
-                    </div>
-                  )}
-                  {/* Live blog badge */}
-                  {article.isBreaking && (
-                    <div className="absolute top-2 start-2 z-10">
-                      <LiveBlogBadge />
                     </div>
                   )}
                   {/* Sector badge on image */}

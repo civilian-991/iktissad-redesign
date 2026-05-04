@@ -1,0 +1,2347 @@
+{
+  "iktissad:3682": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "world"
+  },
+  "iktissad:3046": {
+    "section": "economy",
+    "sector": "health",
+    "country": "uae"
+  },
+  "iktissad:3752": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "world"
+  },
+  "iktissad:3496": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:3017": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:3846": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:5491": {
+    "section": "technology",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:5494": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:4125": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:5520": {
+    "section": "opinion",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:5547": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:5696": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "world"
+  },
+  "iktissad:5530": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "saudi-arabia"
+  },
+  "iktissad:5551": {
+    "section": "technology",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:5534": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:5768": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:5767": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:5749": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:5784": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": null
+  },
+  "iktissad:5789": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "world"
+  },
+  "iktissad:5870": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:5943": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:5820": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:5890": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:5824": {
+    "section": null,
+    "sector": "tourism-entertainment",
+    "country": "lebanon"
+  },
+  "iktissad:5972": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "kuwait"
+  },
+  "iktissad:6005": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:5982": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "saudi-arabia"
+  },
+  "iktissad:5993": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:5964": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:6086": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:6087": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:6235": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:6191": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:6078": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "saudi-arabia"
+  },
+  "iktissad:6334": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:6319": {
+    "section": "opinion",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:6236": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "lebanon"
+  },
+  "iktissad:6330": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "algeria"
+  },
+  "iktissad:6332": {
+    "section": "files",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:6353": {
+    "section": "technology",
+    "sector": "education",
+    "country": "lebanon"
+  },
+  "iktissad:6692": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "world"
+  },
+  "iktissad:6562": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:6468": {
+    "section": "technology",
+    "sector": "entrepreneurship",
+    "country": "lebanon"
+  },
+  "iktissad:6475": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:6728": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:6770": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "world"
+  },
+  "iktissad:6746": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:6758": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:6723": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:6777": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:6809": {
+    "section": "companies",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:6789": {
+    "section": "opinion",
+    "sector": "entrepreneurship",
+    "country": null
+  },
+  "iktissad:6850": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:6788": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:6913": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:6944": {
+    "section": "technology",
+    "sector": "education",
+    "country": "lebanon"
+  },
+  "iktissad:6956": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:6890": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "lebanon"
+  },
+  "iktissad:6862": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:7174": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:6972": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:7118": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:6985": {
+    "section": "technology",
+    "sector": "industry",
+    "country": "china"
+  },
+  "iktissad:7142": {
+    "section": "technology",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:7176": {
+    "section": "companies",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:7192": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7251": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7261": {
+    "section": "companies",
+    "sector": "trade",
+    "country": null
+  },
+  "iktissad:7195": {
+    "section": "economy",
+    "sector": "automotive",
+    "country": "lebanon"
+  },
+  "iktissad:7347": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7356": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "usa"
+  },
+  "iktissad:7316": {
+    "section": "economy",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7280": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7312": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:7449": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "qatar"
+  },
+  "iktissad:7359": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:7436": {
+    "section": "technology",
+    "sector": "transport",
+    "country": "lebanon"
+  },
+  "iktissad:7422": {
+    "section": "opinion",
+    "sector": null,
+    "country": "uae"
+  },
+  "iktissad:7444": {
+    "section": "technology",
+    "sector": "automotive",
+    "country": null
+  },
+  "iktissad:7836": {
+    "section": "companies",
+    "sector": "insurance",
+    "country": "lebanon"
+  },
+  "iktissad:7893": {
+    "section": "technology",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:7562": {
+    "section": "companies",
+    "sector": "finance",
+    "country": null
+  },
+  "iktissad:7759": {
+    "section": "markets",
+    "sector": "investment",
+    "country": "world"
+  },
+  "iktissad:7472": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "uae"
+  },
+  "iktissad:10568": {
+    "section": "technology",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:8862": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": null
+  },
+  "iktissad:8225": {
+    "section": "economy",
+    "sector": "investment",
+    "country": null
+  },
+  "iktissad:8700": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "china"
+  },
+  "iktissad:8908": {
+    "section": "opinion",
+    "sector": "wealth",
+    "country": "world"
+  },
+  "iktissad:11302": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:11469": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "world"
+  },
+  "iktissad:11374": {
+    "section": "technology",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11727": {
+    "section": "companies",
+    "sector": "investment",
+    "country": null
+  },
+  "iktissad:10705": {
+    "section": "companies",
+    "sector": "entrepreneurship",
+    "country": null
+  },
+  "iktissad:11732": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11731": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11729": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "lebanon"
+  },
+  "iktissad:11730": {
+    "section": "opinion",
+    "sector": "insurance",
+    "country": "world"
+  },
+  "iktissad:11728": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "usa"
+  },
+  "iktissad:11736": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11738": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11737": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11733": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11734": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "uae"
+  },
+  "iktissad:11741": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "kuwait"
+  },
+  "iktissad:11742": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11739": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11743": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "egypt"
+  },
+  "iktissad:11740": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11748": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "uae"
+  },
+  "iktissad:11746": {
+    "section": "markets",
+    "sector": "investment",
+    "country": "world"
+  },
+  "iktissad:11744": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11747": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11745": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11749": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11753": {
+    "section": "economy",
+    "sector": "wealth",
+    "country": "uae"
+  },
+  "iktissad:11752": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11751": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11750": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11754": {
+    "section": "markets",
+    "sector": "agriculture",
+    "country": "world"
+  },
+  "iktissad:11757": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11755": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11758": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11756": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11763": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11760": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11761": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11762": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "algeria"
+  },
+  "iktissad:11759": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11764": {
+    "section": "companies",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "iktissad:11768": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11765": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11767": {
+    "section": null,
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11766": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11770": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11771": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11772": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11773": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11769": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11776": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "usa"
+  },
+  "iktissad:11778": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "iktissad:11774": {
+    "section": "opinion",
+    "sector": "transport",
+    "country": null
+  },
+  "iktissad:11777": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11775": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "iktissad:11780": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11779": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11783": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11781": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "france"
+  },
+  "iktissad:11782": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "china"
+  },
+  "iktissad:11787": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:11785": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11784": {
+    "section": "economy",
+    "sector": "health",
+    "country": "lebanon"
+  },
+  "iktissad:11788": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11786": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11791": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": null
+  },
+  "iktissad:11793": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11789": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11790": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11792": {
+    "section": null,
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11798": {
+    "section": "companies",
+    "sector": "industry",
+    "country": null
+  },
+  "iktissad:11795": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11794": {
+    "section": "companies",
+    "sector": "education",
+    "country": "world"
+  },
+  "iktissad:11796": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "world"
+  },
+  "iktissad:11797": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11800": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11803": {
+    "section": "technology",
+    "sector": "education",
+    "country": "world"
+  },
+  "iktissad:11799": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11801": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11802": {
+    "section": "opinion",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:11804": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "iktissad:11806": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11807": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11808": {
+    "section": "economy",
+    "sector": "health",
+    "country": "lebanon"
+  },
+  "iktissad:11805": {
+    "section": "economy",
+    "sector": "industry",
+    "country": null
+  },
+  "iktissad:11810": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11814": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11809": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11813": {
+    "section": "technology",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11812": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11815": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11816": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11818": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "lebanon"
+  },
+  "iktissad:11820": {
+    "section": "economy",
+    "sector": null,
+    "country": "tunisia"
+  },
+  "iktissad:11817": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11824": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "lebanon"
+  },
+  "iktissad:11822": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11825": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11823": {
+    "section": "economy",
+    "sector": null,
+    "country": "iraq"
+  },
+  "iktissad:11821": {
+    "section": "opinion",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:11829": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:11828": {
+    "section": "opinion",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:11826": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "world"
+  },
+  "iktissad:11827": {
+    "section": "economy",
+    "sector": "health",
+    "country": "world"
+  },
+  "iktissad:11830": {
+    "section": null,
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11833": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "egypt"
+  },
+  "iktissad:11835": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11832": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "iktissad:11834": {
+    "section": "technology",
+    "sector": "industry",
+    "country": "world"
+  },
+  "iktissad:11831": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11838": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11837": {
+    "section": "opinion",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:11839": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11836": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "france"
+  },
+  "iktissad:11840": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11843": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11841": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "egypt"
+  },
+  "iktissad:11842": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11844": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11845": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11847": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11848": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11846": {
+    "section": "economy",
+    "sector": "entrepreneurship",
+    "country": "uae"
+  },
+  "iktissad:11850": {
+    "section": "technology",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11849": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11855": {
+    "section": "companies",
+    "sector": "automotive",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11853": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:11851": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "egypt"
+  },
+  "iktissad:11852": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11854": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "uae"
+  },
+  "iktissad:11857": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:11858": {
+    "section": "companies",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "iktissad:11856": {
+    "section": "companies",
+    "sector": "health",
+    "country": "lebanon"
+  },
+  "iktissad:11860": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11859": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11862": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11863": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "iktissad:11865": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "algeria"
+  },
+  "iktissad:11861": {
+    "section": "companies",
+    "sector": "health",
+    "country": "lebanon"
+  },
+  "iktissad:11864": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11868": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11866": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11867": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11869": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11870": {
+    "section": "companies",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:11874": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11871": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11872": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11873": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11875": {
+    "section": "companies",
+    "sector": "trade",
+    "country": "egypt"
+  },
+  "iktissad:11878": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11876": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "libya"
+  },
+  "iktissad:11877": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "oman"
+  },
+  "iktissad:11879": {
+    "section": "technology",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11880": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "uae"
+  },
+  "iktissad:11884": {
+    "section": null,
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11881": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11882": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11885": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11883": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11889": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11890": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11886": {
+    "section": "companies",
+    "sector": "health",
+    "country": "world"
+  },
+  "iktissad:11887": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11888": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11893": {
+    "section": "economy",
+    "sector": "agriculture",
+    "country": "lebanon"
+  },
+  "iktissad:11894": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11892": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11891": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11895": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "world"
+  },
+  "iktissad:11896": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11899": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11897": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11898": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11900": {
+    "section": "technology",
+    "sector": "education",
+    "country": null
+  },
+  "iktissad:11903": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11904": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "bahrain"
+  },
+  "iktissad:11905": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11902": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "qatar"
+  },
+  "iktissad:11901": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11906": {
+    "section": "companies",
+    "sector": "trade",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11907": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11909": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11911": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11908": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "france"
+  },
+  "iktissad:11914": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "turkey"
+  },
+  "iktissad:11915": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:11912": {
+    "section": "companies",
+    "sector": "insurance",
+    "country": null
+  },
+  "iktissad:11913": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11916": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "qatar"
+  },
+  "iktissad:11921": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:11917": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "iktissad:11918": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11920": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11919": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11924": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "egypt"
+  },
+  "iktissad:11926": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11925": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11923": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11922": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "egypt"
+  },
+  "iktissad:11927": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "egypt"
+  },
+  "iktissad:11931": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "france"
+  },
+  "iktissad:11928": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "syria"
+  },
+  "iktissad:11930": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11929": {
+    "section": "technology",
+    "sector": "education",
+    "country": null
+  },
+  "iktissad:11932": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11933": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:11935": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11934": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:11936": {
+    "section": "economy",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11941": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11939": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "lebanon"
+  },
+  "iktissad:11938": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11940": {
+    "section": "companies",
+    "sector": "energy-environment",
+    "country": null
+  },
+  "iktissad:11937": {
+    "section": "economy",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "iktissad:11943": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "egypt"
+  },
+  "iktissad:11945": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11942": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:11944": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11946": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": null
+  },
+  "iktissad:11949": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11951": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "egypt"
+  },
+  "iktissad:11947": {
+    "section": "economy",
+    "sector": "agriculture",
+    "country": "lebanon"
+  },
+  "iktissad:11950": {
+    "section": null,
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11948": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "world"
+  },
+  "iktissad:11952": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11956": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11953": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11954": {
+    "section": null,
+    "sector": null,
+    "country": null
+  },
+  "iktissad:11955": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11960": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "iktissad:11958": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11961": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "world"
+  },
+  "iktissad:11957": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11959": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11966": {
+    "section": "energy-innovation",
+    "sector": "agriculture",
+    "country": "uae"
+  },
+  "iktissad:11964": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11962": {
+    "section": "economy",
+    "sector": "health",
+    "country": "lebanon"
+  },
+  "iktissad:11965": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11963": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "world"
+  },
+  "iktissad:11971": {
+    "section": "technology",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:11967": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "egypt"
+  },
+  "iktissad:11969": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "syria"
+  },
+  "iktissad:11968": {
+    "section": "economy",
+    "sector": "investment",
+    "country": "china"
+  },
+  "iktissad:11970": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:11974": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11976": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:11973": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "qatar"
+  },
+  "iktissad:11972": {
+    "section": "technology",
+    "sector": "entrepreneurship",
+    "country": "egypt"
+  },
+  "iktissad:11975": {
+    "section": "technology",
+    "sector": null,
+    "country": "uae"
+  },
+  "iktissad:11978": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11979": {
+    "section": "economy",
+    "sector": "entrepreneurship",
+    "country": "uae"
+  },
+  "iktissad:11981": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:11980": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "egypt"
+  },
+  "iktissad:11977": {
+    "section": "opinion",
+    "sector": null,
+    "country": null
+  },
+  "iktissad:11983": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "iktissad:11982": {
+    "section": "opinion",
+    "sector": null,
+    "country": "world"
+  },
+  "iktissad:11985": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "iktissad:11986": {
+    "section": "economy",
+    "sector": "education",
+    "country": "lebanon"
+  },
+  "iktissad:11984": {
+    "section": "economy",
+    "sector": null,
+    "country": "egypt"
+  },
+  "iktissad:11990": {
+    "section": "companies",
+    "sector": "education",
+    "country": "uae"
+  },
+  "iktissad:11988": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "iktissad:11987": {
+    "section": "opinion",
+    "sector": "education",
+    "country": null
+  },
+  "iktissad:11991": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "world"
+  },
+  "iktissad:11989": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "lebanon"
+  },
+  "iktissad:11997": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "iraq"
+  },
+  "iktissad:11992": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "iktissad:11995": {
+    "section": "economy",
+    "sector": null,
+    "country": "egypt"
+  },
+  "iktissad:11994": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "iktissad:11996": {
+    "section": null,
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:12000": {
+    "section": "markets",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "iktissad:12001": {
+    "section": "economy",
+    "sector": "trade",
+    "country": "lebanon"
+  },
+  "iktissad:11998": {
+    "section": "markets",
+    "sector": "investment",
+    "country": "world"
+  },
+  "iktissad:11999": {
+    "section": "companies",
+    "sector": "entrepreneurship",
+    "country": "saudi-arabia"
+  },
+  "iktissad:12002": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:12007": {
+    "section": "companies",
+    "sector": "trade",
+    "country": "egypt"
+  },
+  "iktissad:12003": {
+    "section": "economy",
+    "sector": "agriculture",
+    "country": "lebanon"
+  },
+  "iktissad:12005": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:12004": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "kuwait"
+  },
+  "iktissad:12006": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "saudi-arabia"
+  },
+  "iktissad:12012": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:12010": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "egypt"
+  },
+  "iktissad:12009": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "world"
+  },
+  "iktissad:12008": {
+    "section": "economy",
+    "sector": "agriculture",
+    "country": "lebanon"
+  },
+  "iktissad:12013": {
+    "section": "technology",
+    "sector": "industry",
+    "country": "world"
+  },
+  "iktissad:12017": {
+    "section": "opinion",
+    "sector": null,
+    "country": "lebanon"
+  },
+  "iktissad:12014": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:12015": {
+    "section": "economy",
+    "sector": "real-estate",
+    "country": "egypt"
+  },
+  "iktissad:12016": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "iktissad:12018": {
+    "section": "technology",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "iktissad:12020": {
+    "section": "opinion",
+    "sector": null,
+    "country": "saudi-arabia"
+  },
+  "iktissad:12022": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "jordan"
+  },
+  "iktissad:12021": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "qatar"
+  },
+  "iktissad:12019": {
+    "section": "economy",
+    "sector": "entrepreneurship",
+    "country": "world"
+  },
+  "awalan:9125": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "awalan:9087": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:7471": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:9218": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:7509": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:12415": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:11555": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:12400": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:9367": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:12822": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:12990": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:14935": {
+    "section": "companies",
+    "sector": "luxury",
+    "country": "world"
+  },
+  "awalan:23806": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "usa"
+  },
+  "awalan:13633": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:14957": {
+    "section": "technology",
+    "sector": null,
+    "country": "saudi-arabia"
+  },
+  "awalan:23817": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "saudi-arabia"
+  },
+  "awalan:23814": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23816": {
+    "section": "companies",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "awalan:23807": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23811": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23826": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "awalan:23822": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23825": {
+    "section": "companies",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "awalan:23829": {
+    "section": "economy",
+    "sector": "transport",
+    "country": "world"
+  },
+  "awalan:23821": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "awalan:23837": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23833": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23831": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "awalan:23830": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23836": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23843": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23841": {
+    "section": "companies",
+    "sector": "energy-environment",
+    "country": "uae"
+  },
+  "awalan:23838": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23842": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23839": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "world"
+  },
+  "awalan:23846": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23847": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23851": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23845": {
+    "section": "opinion",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23848": {
+    "section": "opinion",
+    "sector": "finance",
+    "country": "lebanon"
+  },
+  "awalan:23857": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23855": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "egypt"
+  },
+  "awalan:23852": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "saudi-arabia"
+  },
+  "awalan:23854": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "saudi-arabia"
+  },
+  "awalan:23856": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23859": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23860": {
+    "section": "companies",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "awalan:23861": {
+    "section": "companies",
+    "sector": "insurance",
+    "country": "saudi-arabia"
+  },
+  "awalan:23862": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "awalan:23863": {
+    "section": "markets",
+    "sector": "real-estate",
+    "country": null
+  },
+  "awalan:23865": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23864": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23869": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "awalan:23870": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23868": {
+    "section": "energy-innovation",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23872": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23871": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23873": {
+    "section": "technology",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23876": {
+    "section": "companies",
+    "sector": "insurance",
+    "country": "saudi-arabia"
+  },
+  "awalan:23874": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23879": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23882": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "egypt"
+  },
+  "awalan:23881": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23883": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "awalan:23877": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "awalan:23887": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23888": {
+    "section": "markets",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23884": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "world"
+  },
+  "awalan:23885": {
+    "section": "economy",
+    "sector": "energy-environment",
+    "country": "world"
+  },
+  "awalan:23886": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "world"
+  },
+  "awalan:23889": {
+    "section": "companies",
+    "sector": "real-estate",
+    "country": "uae"
+  },
+  "awalan:23891": {
+    "section": "economy",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23890": {
+    "section": "technology",
+    "sector": null,
+    "country": "uae"
+  },
+  "awalan:23892": {
+    "section": "economy",
+    "sector": "tourism-entertainment",
+    "country": "saudi-arabia"
+  },
+  "awalan:23893": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "awalan:23898": {
+    "section": "companies",
+    "sector": "industry",
+    "country": "saudi-arabia"
+  },
+  "awalan:23899": {
+    "section": "companies",
+    "sector": "transport",
+    "country": "uae"
+  },
+  "awalan:23896": {
+    "section": "energy-innovation",
+    "sector": "energy-environment",
+    "country": null
+  },
+  "awalan:23900": {
+    "section": "companies",
+    "sector": null,
+    "country": "uae"
+  },
+  "awalan:23901": {
+    "section": "companies",
+    "sector": "trade",
+    "country": "kuwait"
+  },
+  "awalan:23905": {
+    "section": "markets",
+    "sector": "investment",
+    "country": "uae"
+  },
+  "awalan:23906": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "uae"
+  },
+  "awalan:23904": {
+    "section": "technology",
+    "sector": null,
+    "country": "world"
+  },
+  "awalan:23908": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "jordan"
+  },
+  "awalan:23903": {
+    "section": "companies",
+    "sector": "finance",
+    "country": "world"
+  }
+}
