@@ -68,15 +68,17 @@ export function proxy(request: NextRequest) {
 
     const cspHeader = [
       `default-src 'self'`,
-      `script-src 'nonce-${nonce}' 'strict-dynamic'`,
-      `style-src 'self' 'unsafe-inline'`,
+      `script-src 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://*.googletagmanager.com https://*.google-analytics.com https://*.googletagservices.com https://securepubads.g.doubleclick.net https://*.mastercard.com.au https://*.mastercard.com`,
+      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
       `img-src 'self' data: blob: https:`,
-      `font-src 'self' https://fonts.gstatic.com`,
-      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://sentry.io https://*.sentry.io`,
-      `media-src 'self'`,
+      `font-src 'self' data: https://fonts.gstatic.com`,
+      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://sentry.io https://*.sentry.io https://*.mastercard.com.au https://*.mastercard.com`,
+      `frame-src 'self' https://challenges.cloudflare.com https://*.mastercard.com.au https://*.mastercard.com https://*.youtube.com https://www.youtube-nocookie.com https://securepubads.g.doubleclick.net`,
+      `media-src 'self' https:`,
+      `worker-src 'self' blob:`,
       `object-src 'none'`,
       `frame-ancestors 'none'`,
-      `form-action 'self'`,
+      `form-action 'self' https://*.mastercard.com.au https://*.mastercard.com`,
       `base-uri 'self'`,
       `upgrade-insecure-requests`,
     ].join('; ');
