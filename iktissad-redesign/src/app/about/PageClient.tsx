@@ -6,6 +6,11 @@ import NextImage from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import type { AboutStats } from '@/lib/site-settings';
+
+// Editorial copy below is intentionally hardcoded — it's brand-voice manifesto
+// content, not routine data. Conference stats are pulled from site_settings
+// (about_stats key) so the numbers can be updated without a deploy.
 
 const sections = [
   {
@@ -55,13 +60,21 @@ const sections = [
   },
 ];
 
-const conferenceStats = [
+// Default conference stats used when site_settings has no override.
+const DEFAULT_CONFERENCE_STATS = [
   { value: '+350', label: 'مؤتمراً' },
   { value: '25', label: 'دولة' },
   { value: '+50', label: 'عاماً من الخبرة' },
 ];
 
-export default function AboutPageClient() {
+interface AboutPageClientProps {
+  aboutStats?: AboutStats | null;
+}
+
+export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
+  const conferenceStats = aboutStats?.conferenceStats?.length
+    ? aboutStats.conferenceStats.map(s => ({ value: s.value, label: s.labelAr }))
+    : DEFAULT_CONFERENCE_STATS;
   return (
     <>
       <Header />

@@ -7,12 +7,16 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import type { ContactInfo } from '@/lib/site-settings';
 
 const contactCardIcons = [MapPin, Phone, Mail, Clock];
-const officePhones = ['+961 1 000 000', '+971 4 000 0000', '+966 11 000 0000', '+20 2 0000 0000'];
 
-export default function ContactPageClient() {
-  const { t } = useTranslation();
+interface ContactPageClientProps {
+  contactInfo?: ContactInfo | null;
+}
+
+export default function ContactPageClient({ contactInfo }: ContactPageClientProps) {
+  const { t, locale } = useTranslation();
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -57,18 +61,18 @@ export default function ContactPageClient() {
     }
   };
 
-  const contactInfo = contactCardIcons.map((icon, i) => ({
+  const contactCards = contactCardIcons.map((icon, i) => ({
     icon,
     title: t(`pages.contact.cards.${i}.title`),
     value: t(`pages.contact.cards.${i}.value`),
     subtitle: t(`pages.contact.cards.${i}.subtitle`),
   }));
 
-  const offices = officePhones.map((phone, i) => ({
-    city: t(`pages.contact.offices.${i}.city`),
+  const offices = (contactInfo?.offices ?? []).map((office, i) => ({
+    city: locale === 'ar' ? office.city : (office.cityEn || office.city),
     country: t(`pages.contact.offices.${i}.country`),
     address: t(`pages.contact.offices.${i}.address`),
-    phone,
+    phone: office.phone,
   }));
 
   return (
@@ -99,7 +103,7 @@ export default function ContactPageClient() {
         <section className="py-12 -mt-8">
           <div className="container-luxury">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {contactInfo.map((info, index) => (
+              {contactCards.map((info, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}

@@ -1,66 +1,60 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
+import { Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
-import type { Article, ApiResponse } from '@/types';
+import type { Article, ApiResponse, Country as DBCountry } from '@/types';
 
-const regions = [
-  {
-    id: 'gulf',
-    name: 'الخليج',
-    countries: [
-      { id: 'saudi',   name: 'السعودية', slug: 'saudi-arabia', flag: 'https://flagcdn.com/w40/sa.png' },
-      { id: 'uae',     name: 'الإمارات', slug: 'uae',          flag: 'https://flagcdn.com/w40/ae.png' },
-      { id: 'qatar',   name: 'قطر',      slug: 'qatar',        flag: 'https://flagcdn.com/w40/qa.png' },
-      { id: 'kuwait',  name: 'الكويت',   slug: 'kuwait',       flag: 'https://flagcdn.com/w40/kw.png' },
-      { id: 'bahrain', name: 'البحرين',  slug: 'bahrain',      flag: 'https://flagcdn.com/w40/bh.png' },
-      { id: 'oman',    name: 'عُمان',    slug: 'oman',         flag: 'https://flagcdn.com/w40/om.png' },
-    ],
-  },
-  {
-    id: 'mashreq',
-    name: 'المشرق',
-    countries: [
-      { id: 'lebanon', name: 'لبنان',  slug: 'lebanon', flag: 'https://flagcdn.com/w40/lb.png' },
-      { id: 'syria',   name: 'سوريا',  slug: 'syria',   flag: 'https://flagcdn.com/w40/sy.png' },
-      { id: 'jordan',  name: 'الأردن', slug: 'jordan',  flag: 'https://flagcdn.com/w40/jo.png' },
-      { id: 'iraq',    name: 'العراق', slug: 'iraq',    flag: 'https://flagcdn.com/w40/iq.png' },
-    ],
-  },
-  {
-    id: 'northafrica',
-    name: 'شمال أفريقيا',
-    countries: [
-      { id: 'egypt',   name: 'مصر',     slug: 'egypt',   flag: 'https://flagcdn.com/w40/eg.png' },
-      { id: 'morocco', name: 'المغرب',  slug: 'morocco', flag: 'https://flagcdn.com/w40/ma.png' },
-      { id: 'algeria', name: 'الجزائر', slug: 'algeria', flag: 'https://flagcdn.com/w40/dz.png' },
-      { id: 'tunisia', name: 'تونس',    slug: 'tunisia', flag: 'https://flagcdn.com/w40/tn.png' },
-      { id: 'libya',   name: 'ليبيا',   slug: 'libya',   flag: 'https://flagcdn.com/w40/ly.png' },
-    ],
-  },
-  {
-    id: 'world',
-    name: 'العالم',
-    countries: [
-      { id: 'usa',          name: 'أمريكا', slug: 'usa',    flag: 'https://flagcdn.com/w40/us.png' },
-      { id: 'china',        name: 'الصين',  slug: 'china',  flag: 'https://flagcdn.com/w40/cn.png' },
-      { id: 'france',       name: 'فرنسا',  slug: 'france', flag: 'https://flagcdn.com/w40/fr.png' },
-      { id: 'india',        name: 'الهند',  slug: 'india',  flag: 'https://flagcdn.com/w40/in.png' },
-      { id: 'turkey',       name: 'تركيا',  slug: 'turkey', flag: 'https://flagcdn.com/w40/tr.png' },
-      { id: 'international',name: 'دولي',   slug: 'world',  flag: 'https://flagcdn.com/w40/un.png' },
-    ],
-  },
-];
+// Region grouping is derived from country slug. When the DB grows a `region`
+// column, swap this for `country.region` from the API response.
+const SLUG_TO_REGION: Record<string, string> = {
+  'saudi-arabia': 'gulf', uae: 'gulf', qatar: 'gulf', kuwait: 'gulf',
+  bahrain: 'gulf', oman: 'gulf',
+  lebanon: 'mashreq', syria: 'mashreq', jordan: 'mashreq', iraq: 'mashreq',
+  egypt: 'northafrica', morocco: 'northafrica', algeria: 'northafrica',
+  tunisia: 'northafrica', libya: 'northafrica',
+  // everything else (usa, china, france, india, turkey, world) → world
+};
 
-type Country = typeof regions[0]['countries'][0];
+// Country slug → flag CDN ISO2 code. 'world' uses the UN flag.
+const SLUG_TO_FLAG: Record<string, string> = {
+  'saudi-arabia': 'sa', uae: 'ae', qatar: 'qa', kuwait: 'kw', bahrain: 'bh', oman: 'om',
+  lebanon: 'lb', syria: 'sy', jordan: 'jo', iraq: 'iq',
+  egypt: 'eg', morocco: 'ma', algeria: 'dz', tunisia: 'tn', libya: 'ly',
+  usa: 'us', china: 'cn', france: 'fr', india: 'in', turkey: 'tr', world: 'un',
+};
 
-function CountryContent({ country }: { country: Country }) {
+const REGION_ORDER = ['gulf', 'mashreq', 'northafrica', 'world'];
+const REGION_NAMES_AR: Record<string, string> = {
+  gulf: 'الخليج',
+  mashreq: 'المشرق',
+  northafrica: 'شمال أفريقيا',
+  world: 'العالم',
+};
+const REGION_NAMES_EN: Record<string, string> = {
+  gulf: 'Gulf',
+  mashreq: 'Mashreq',
+  northafrica: 'North Africa',
+  world: 'World',
+};
+
+interface RegionGroup {
+  id: string;
+  name: string;
+  countries: ViewCountry[];
+}
+interface ViewCountry {
+  slug: string;
+  name: string;
+  flag: string;
+}
+
+function CountryContent({ country }: { country: ViewCountry }) {
   const { t } = useTranslation();
   const { fmtDate } = useFormatters();
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
@@ -89,26 +83,14 @@ function CountryContent({ country }: { country: Country }) {
 
   return (
     <div className="grid lg:grid-cols-2 gap-px bg-sand/40 border border-sand/40">
-      {/* Featured — full bleed image with overlay */}
-      <a
-        href={`/${featured.slug}`}
-        className="relative overflow-hidden group block"
-        style={{ minHeight: '18rem' }}
-      >
+      {/* Featured */}
+      <a href={`/${featured.slug}`} className="relative overflow-hidden group block" style={{ minHeight: '18rem' }}>
         {featured.featuredImage ? (
-          <img
-            src={featured.featuredImage}
-            alt={featured.title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+          <img src={featured.featuredImage} alt={featured.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         ) : (
           <div className="absolute inset-0" style={{ background: 'var(--color-brand-800)' }} />
         )}
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, rgba(12,30,42,0.88) 0%, rgba(12,30,42,0.2) 60%, transparent 100%)' }}
-        />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(12,30,42,0.88) 0%, rgba(12,30,42,0.2) 60%, transparent 100%)' }} />
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <div className="flex items-center gap-2 mb-2">
             <Image src={country.flag} alt={country.name} width={24} height={16} className="object-cover" />
@@ -126,21 +108,12 @@ function CountryContent({ country }: { country: Country }) {
         </div>
       </a>
 
-      {/* Article list */}
       <div className="bg-paper flex flex-col divide-y divide-sand">
         {rest.map((article) => (
-          <a
-            key={article.id}
-            href={`/${article.slug}`}
-            className="group flex gap-4 p-4 hover:bg-cream transition-colors flex-1"
-          >
+          <a key={article.id} href={`/${article.slug}`} className="group flex gap-4 p-4 hover:bg-cream transition-colors flex-1">
             {article.featuredImage && (
               <div className="flex-shrink-0 overflow-hidden" style={{ width: '4.5rem', height: '3.25rem' }}>
-                <img
-                  src={article.featuredImage}
-                  alt={article.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
+                <img src={article.featuredImage} alt={article.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
               </div>
             )}
             <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -156,10 +129,7 @@ function CountryContent({ country }: { country: Country }) {
             </div>
           </a>
         ))}
-        <a
-          href={`/countries/${country.slug}`}
-          className="flex items-center justify-center gap-1 py-3 text-gold text-xs font-bold font-[family-name:var(--font-display)] hover:bg-cream transition-colors"
-        >
+        <a href={`/countries/${country.slug}`} className="flex items-center justify-center gap-1 py-3 text-gold text-xs font-bold font-[family-name:var(--font-display)] hover:bg-cream transition-colors">
           {t('components.countryNews.viewAllNews', { country: country.name })}
           <ArrowUpLeft size={13} />
         </a>
@@ -169,20 +139,71 @@ function CountryContent({ country }: { country: Country }) {
 }
 
 export default function CountryNews() {
-  const { t } = useTranslation();
-  const [activeRegion, setActiveRegion] = useState(regions[0]);
-  const [activeCountry, setActiveCountry] = useState(regions[0].countries[0]);
+  const { t, locale } = useTranslation();
+  const { data: countriesResp } = useSWR<ApiResponse<DBCountry[]>>(
+    '/api/countries', swrFetcher,
+    { revalidateOnFocus: false, dedupingInterval: 5 * 60 * 1000 }
+  );
 
-  function handleRegionChange(region: typeof regions[0]) {
-    setActiveRegion(region);
-    setActiveCountry(region.countries[0]);
+  const regions: RegionGroup[] = useMemo(() => {
+    const all = countriesResp?.data ?? [];
+    const byRegion: Record<string, ViewCountry[]> = {};
+    for (const c of all) {
+      const region = SLUG_TO_REGION[c.slug] || 'world';
+      const flagCode = SLUG_TO_FLAG[c.slug] || 'un';
+      if (!byRegion[region]) byRegion[region] = [];
+      byRegion[region].push({
+        slug: c.slug,
+        name: locale === 'ar' ? c.name : (c.nameEn || c.name),
+        flag: c.flag || `https://flagcdn.com/w40/${flagCode}.png`,
+      });
+    }
+    return REGION_ORDER
+      .filter(r => byRegion[r] && byRegion[r].length > 0)
+      .map(r => ({
+        id: r,
+        name: locale === 'ar' ? REGION_NAMES_AR[r] : REGION_NAMES_EN[r],
+        countries: byRegion[r],
+      }));
+  }, [countriesResp, locale]);
+
+  const [activeRegionId, setActiveRegionId] = useState<string | null>(null);
+  const [activeCountrySlug, setActiveCountrySlug] = useState<string | null>(null);
+
+  // Initialise / re-sync selection once the data arrives
+  useEffect(() => {
+    if (regions.length === 0) return;
+    if (!activeRegionId || !regions.find(r => r.id === activeRegionId)) {
+      setActiveRegionId(regions[0].id);
+      setActiveCountrySlug(regions[0].countries[0]?.slug ?? null);
+    }
+  }, [regions, activeRegionId]);
+
+  const activeRegion = regions.find(r => r.id === activeRegionId) ?? regions[0];
+  const activeCountry =
+    activeRegion?.countries.find(c => c.slug === activeCountrySlug) ?? activeRegion?.countries[0];
+
+  function handleRegionChange(region: RegionGroup) {
+    setActiveRegionId(region.id);
+    setActiveCountrySlug(region.countries[0]?.slug ?? null);
+  }
+
+  if (regions.length === 0 || !activeRegion || !activeCountry) {
+    return (
+      <section className="bg-paper py-8 border-t border-charcoal/10">
+        <div className="container-editorial">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="text-gold animate-spin" size={28} />
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
     <section className="bg-paper py-8 border-t border-charcoal/10">
       <div className="container-editorial">
 
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
@@ -199,7 +220,6 @@ export default function CountryNews() {
           </Link>
         </div>
 
-        {/* Region tabs */}
         <div className="flex flex-wrap gap-0 border-b border-sand mb-4">
           {regions.map((region) => (
             <button
@@ -216,7 +236,6 @@ export default function CountryNews() {
           ))}
         </div>
 
-        {/* Country pills */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeRegion.id}
@@ -228,10 +247,10 @@ export default function CountryNews() {
           >
             {activeRegion.countries.map((country) => (
               <button
-                key={country.id}
-                onClick={() => setActiveCountry(country)}
+                key={country.slug}
+                onClick={() => setActiveCountrySlug(country.slug)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-display)] border transition-all duration-200 ${
-                  activeCountry.id === country.id
+                  activeCountry.slug === country.slug
                     ? 'bg-obsidian text-white border-obsidian'
                     : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-obsidian'
                 }`}
@@ -243,10 +262,9 @@ export default function CountryNews() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Articles */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeCountry.id}
+            key={activeCountry.slug}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

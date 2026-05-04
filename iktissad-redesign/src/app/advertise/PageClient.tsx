@@ -6,9 +6,9 @@ import { Users, Eye, TrendingUp, Target, Monitor, Smartphone, Mail, Newspaper, A
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import type { AdvertiseStats } from '@/lib/site-settings';
 
 const statsIcons = [Users, Eye, TrendingUp, Target];
-const statsValues = ['+2M', '+10M', '68%', '85%'];
 
 const adFormatIcons = [Monitor, Newspaper, Mail, Smartphone];
 
@@ -20,16 +20,25 @@ const adFormatsFeatures = [
   ['Interstitial', 'Native Ads', 'Push Notifications', 'In-App Ads'],
 ];
 
-const audiencePercentages = [35, 25, 20, 12, 8];
+interface AdvertisePageClientProps {
+  advertiseStats?: AdvertiseStats | null;
+}
 
-export default function AdvertisePageClient() {
-  const { t } = useTranslation();
+export default function AdvertisePageClient({ advertiseStats }: AdvertisePageClientProps) {
+  const { t, locale } = useTranslation();
 
-  const stats = statsValues.map((value, i) => ({
-    icon: statsIcons[i],
-    value,
-    label: t(`pages.advertise.stats.${i}.label`),
-  }));
+  const statsFromDb = advertiseStats?.stats ?? [];
+  const stats = statsIcons.map((icon, i) => {
+    const dbStat = statsFromDb[i];
+    return {
+      icon,
+      value: dbStat?.value ?? '',
+      // Prefer DB-provided localized label; fall back to existing i18n key
+      label: dbStat ? (locale === 'ar' ? dbStat.label.ar : dbStat.label.en) : t(`pages.advertise.stats.${i}.label`),
+    };
+  });
+
+  const audiencePercentages = advertiseStats?.audiencePercentages ?? [35, 25, 20, 12, 8];
 
   const adFormats = adFormatIcons.map((icon, i) => ({
     icon,

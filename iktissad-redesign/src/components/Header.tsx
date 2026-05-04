@@ -8,11 +8,13 @@
 
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import type { Article } from '@/types';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import type { Article, Section, Sector, ApiResponse } from '@/types';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import useSWR from 'swr';
+import { swrFetcher } from '@/lib/api-client';
 import {
   Menu,
   X,
@@ -32,55 +34,18 @@ import PushNotificationToggle from '@/components/PushNotificationToggle';
 // NAVIGATION DATA
 // ═══════════════════════════════════════════════════════════════
 
+interface NavSubItem {
+  key: string;
+  href: string;
+  label?: string; // pre-resolved label (when sourced from DB)
+}
+
 interface NavItem {
   key: string;
   href: string;
   wide?: boolean;
-  submenu?: { key: string; href: string }[];
+  submenu?: NavSubItem[];
 }
-
-const navigationConfig: NavItem[] = [
-  { key: 'home', href: '/' },
-  {
-    key: 'sections',
-    href: '/topics',
-    submenu: [
-      { key: 'economy', href: '/topics/economy' },
-      { key: 'companies', href: '/topics/companies' },
-      { key: 'markets', href: '/topics/markets' },
-      { key: 'technology', href: '/topics/technology' },
-      { key: 'energy', href: '/topics/energy-innovation' },
-      { key: 'opinion', href: '/topics/opinion' },
-      { key: 'files', href: '/topics/files' },
-      { key: 'video', href: '/topics/video' },
-    ]
-  },
-  {
-    key: 'sectors',
-    href: '/industries',
-    wide: true,
-    submenu: [
-      { key: 'industry', href: '/industries/industry' },
-      { key: 'agriculture', href: '/industries/agriculture' },
-      { key: 'trade', href: '/industries/trade' },
-      { key: 'banking', href: '/industries/finance' },
-      { key: 'investment', href: '/industries/investment' },
-      { key: 'insurance', href: '/industries/insurance' },
-      { key: 'realEstate', href: '/industries/real-estate' },
-      { key: 'transport', href: '/industries/transport' },
-      { key: 'automotive', href: '/industries/automotive' },
-      { key: 'tourism', href: '/industries/tourism-entertainment' },
-      { key: 'education', href: '/industries/education' },
-      { key: 'health', href: '/industries/health' },
-      { key: 'energyEnv', href: '/industries/energy-environment' },
-      { key: 'innovation', href: '/industries/entrepreneurship' },
-      { key: 'luxury', href: '/industries/luxury' },
-      { key: 'wealth', href: '/industries/wealth' },
-    ]
-  },
-  { key: 'magazine', href: '/magazine' },
-  { key: 'group', href: '/about' },
-];
 
 const socialLinks = [
   { icon: Facebook, href: 'https://facebook.com/iktissad', label: 'Facebook' },
@@ -107,6 +72,33 @@ export default function Header() {
   const [isSearching, setIsSearching] = useState(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fetch sections + sectors from DB. Long deduping interval — these change rarely.
+  const swrOpts = { revalidateOnFocus: false, dedupingInterval: 5 * 60 * 1000 };
+  const { data: sectionsResp } = useSWR<ApiResponse<Section[]>>('/api/sections', swrFetcher, swrOpts);
+  const { data: sectorsResp }  = useSWR<ApiResponse<Sector[]>>('/api/sectors',  swrFetcher, swrOpts);
+
+  const dynamicSections: NavSubItem[] = useMemo(() =>
+    (sectionsResp?.data ?? []).map(s => ({
+      key: s.slug,
+      href: `/topics/${s.slug}`,
+      label: locale === 'ar' ? s.name : (s.nameEn || s.name),
+    })), [sectionsResp, locale]);
+
+  const dynamicSectors: NavSubItem[] = useMemo(() =>
+    (sectorsResp?.data ?? []).map(s => ({
+      key: s.slug,
+      href: `/industries/${s.slug}`,
+      label: locale === 'ar' ? s.name : (s.nameEn || s.name),
+    })), [sectorsResp, locale]);
+
+  const navigationConfig: NavItem[] = useMemo(() => [
+    { key: 'home', href: '/' },
+    { key: 'sections', href: '/topics',     submenu: dynamicSections },
+    { key: 'sectors',  href: '/industries', wide: true, submenu: dynamicSectors },
+    { key: 'magazine', href: '/magazine' },
+    { key: 'group',    href: '/about' },
+  ], [dynamicSections, dynamicSectors]);
+
   // Get navigation item name from translations
   const getNavName = (key: string): string => {
     const navKeys: Record<string, string> = {
@@ -119,44 +111,8 @@ export default function Header() {
     return navKeys[key] || key;
   };
 
-  // Get submenu item name from translations
-  const getSubmenuName = (parentKey: string, itemKey: string): string => {
-    if (parentKey === 'sections') {
-      const sectionKeys: Record<string, string> = {
-        economy: t('nav.sections.economy'),
-        companies: t('nav.sections.companies'),
-        markets: t('nav.sections.markets'),
-        technology: t('nav.sections.technology'),
-        energy: t('nav.sections.energy'),
-        opinion: t('nav.sections.opinion'),
-        files: t('nav.sections.files'),
-        video: t('nav.sections.video'),
-      };
-      return sectionKeys[itemKey] || itemKey;
-    }
-    if (parentKey === 'sectors') {
-      const sectorKeys: Record<string, string> = {
-        industry: t('nav.sectors.industry'),
-        agriculture: t('nav.sectors.agriculture'),
-        trade: t('nav.sectors.trade'),
-        banking: t('nav.sectors.banking'),
-        investment: t('nav.sectors.investment'),
-        insurance: t('nav.sectors.insurance'),
-        realEstate: t('nav.sectors.realEstate'),
-        transport: t('nav.sectors.transport'),
-        automotive: t('nav.sectors.automotive'),
-        tourism: t('nav.sectors.tourism'),
-        education: t('nav.sectors.education'),
-        health: t('nav.sectors.health'),
-        energyEnv: t('nav.sectors.energyEnv'),
-        innovation: t('nav.sectors.innovation'),
-        luxury: t('nav.sectors.luxury'),
-        wealth: t('nav.sectors.wealth'),
-      };
-      return sectorKeys[itemKey] || itemKey;
-    }
-    return itemKey;
-  };
+  // Submenu label: prefer DB-provided label, else fall back to slug
+  const getSubmenuName = (item: NavSubItem): string => item.label || item.key;
 
   useEffect(() => {
     const dateLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
@@ -361,7 +317,7 @@ export default function Header() {
                                 href={subItem.href}
                                 className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:ps-7 transition-all duration-200"
                               >
-                                {getSubmenuName(item.key, subItem.key)}
+                                {getSubmenuName(subItem)}
                               </Link>
                             </motion.div>
                           ))}
@@ -442,7 +398,7 @@ export default function Header() {
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="block px-8 py-2.5 text-sm text-charcoal hover:text-gold transition-colors"
                           >
-                            {getSubmenuName(item.key, subItem.key)}
+                            {getSubmenuName(subItem)}
                           </Link>
                         ))}
                         {item.submenu.length > 6 && (

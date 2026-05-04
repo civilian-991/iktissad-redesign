@@ -8,9 +8,13 @@
 
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import useSWR from 'swr';
+import { swrFetcher } from '@/lib/api-client';
+import type { Section, Sector, ApiResponse } from '@/types';
 import {
   Facebook,
   Twitter,
@@ -33,37 +37,16 @@ import { iconSizes } from '@/lib/design-tokens';
 interface FooterLink {
   key: string;
   href: string;
+  label?: string;
   external?: boolean;
 }
 
-const footerLinksConfig = {
-  sections: [
-    { key: 'economy', href: '/topics/economy' },
-    { key: 'companies', href: '/topics/companies' },
-    { key: 'markets', href: '/topics/markets' },
-    { key: 'technology', href: '/topics/technology' },
-    { key: 'energy', href: '/topics/energy-innovation' },
-    { key: 'opinion', href: '/topics/opinion' },
-    { key: 'files', href: '/topics/files' },
-    { key: 'video', href: '/topics/video' },
-  ],
-  sectors: [
-    { key: 'industry', href: '/industries/industry' },
-    { key: 'agriculture', href: '/industries/agriculture' },
-    { key: 'trade', href: '/industries/trade' },
-    { key: 'banking', href: '/industries/finance' },
-    { key: 'investment', href: '/industries/investment' },
-    { key: 'realEstate', href: '/industries/real-estate' },
-    { key: 'tourism', href: '/industries/tourism-entertainment' },
-    { key: 'energyEnv', href: '/industries/energy-environment' },
-  ],
-  about: [
-    { key: 'aboutUs', href: '/about' },
-    { key: 'team', href: '/team' },
-    { key: 'contactUs', href: '/contact' },
-    { key: 'advertise', href: '/advertise' },
-  ]
-};
+const aboutLinks: FooterLink[] = [
+  { key: 'aboutUs', href: '/about' },
+  { key: 'team', href: '/team' },
+  { key: 'contactUs', href: '/contact' },
+  { key: 'advertise', href: '/advertise' },
+];
 
 const socialLinks = [
   { icon: Facebook, href: 'https://facebook.com/iktissad', label: 'Facebook' },
@@ -78,41 +61,36 @@ const socialLinks = [
 // ═══════════════════════════════════════════════════════════════
 
 export default function Footer() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Get section link name from translations
-  const getSectionName = (key: string): string => {
-    const sectionKeys: Record<string, string> = {
-      economy: t('nav.sections.economy'),
-      companies: t('nav.sections.companies'),
-      markets: t('nav.sections.markets'),
-      technology: t('nav.sections.technology'),
-      energy: t('nav.sections.energy'),
-      opinion: t('nav.sections.opinion'),
-      files: t('nav.sections.files'),
-      video: t('nav.sections.video'),
-    };
-    return sectionKeys[key] || key;
-  };
+  const swrOpts = { revalidateOnFocus: false, dedupingInterval: 5 * 60 * 1000 };
+  const { data: sectionsResp } = useSWR<ApiResponse<Section[]>>('/api/sections', swrFetcher, swrOpts);
+  const { data: sectorsResp }  = useSWR<ApiResponse<Sector[]>>('/api/sectors',  swrFetcher, swrOpts);
 
-  // Get sector link name from translations
-  const getSectorName = (key: string): string => {
-    const sectorKeys: Record<string, string> = {
-      industry: t('nav.sectors.industry'),
-      agriculture: t('nav.sectors.agriculture'),
-      trade: t('nav.sectors.trade'),
-      banking: t('nav.sectors.banking'),
-      investment: t('nav.sectors.investment'),
-      realEstate: t('nav.sectors.realEstate'),
-      tourism: t('nav.sectors.tourism'),
-      energyEnv: t('nav.sectors.energyEnv'),
-    };
-    return sectorKeys[key] || key;
-  };
+  const sectionLinks: FooterLink[] = useMemo(() =>
+    (sectionsResp?.data ?? []).map(s => ({
+      key: s.slug,
+      href: `/topics/${s.slug}`,
+      label: locale === 'ar' ? s.name : (s.nameEn || s.name),
+    })), [sectionsResp, locale]);
+
+  // Footer shows a curated subset of sectors (top 8 by article count if available)
+  const sectorLinks: FooterLink[] = useMemo(() => {
+    const all = sectorsResp?.data ?? [];
+    const top = [...all].sort((a, b) => (b.articleCount ?? 0) - (a.articleCount ?? 0)).slice(0, 8);
+    return top.map(s => ({
+      key: s.slug,
+      href: `/industries/${s.slug}`,
+      label: locale === 'ar' ? s.name : (s.nameEn || s.name),
+    }));
+  }, [sectorsResp, locale]);
+
+  // Resolve label for a footer link, falling back to slug
+  const getLinkLabel = (link: FooterLink): string => link.label || link.key;
 
   // Get about link name from translations
   const getAboutName = (key: string): string => {
@@ -228,14 +206,14 @@ export default function Footer() {
                     <span className="text-gold">{t('nav.main.sections')}</span>
                   </h4>
                   <ul className="space-y-3">
-                    {footerLinksConfig.sections.map((link) => (
+                    {sectionLinks.map((link) => (
                       <li key={link.key}>
                         <Link
                           href={link.href}
                           className="text-sm text-white/70 hover:text-gold hover:ps-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
-                          {getSectionName(link.key)}
+                          {getLinkLabel(link)}
                         </Link>
                       </li>
                     ))}
@@ -249,14 +227,14 @@ export default function Footer() {
                     <span className="text-gold">{t('nav.main.sectors')}</span>
                   </h4>
                   <ul className="space-y-3">
-                    {footerLinksConfig.sectors.map((link) => (
+                    {sectorLinks.map((link) => (
                       <li key={link.key}>
                         <Link
                           href={link.href}
                           className="text-sm text-white/70 hover:text-gold hover:ps-2 transition-all duration-200 flex items-center gap-2 group"
                         >
                           <span className="w-1 h-1 bg-gold/30 group-hover:bg-gold transition-colors" />
-                          {getSectorName(link.key)}
+                          {getLinkLabel(link)}
                         </Link>
                       </li>
                     ))}
@@ -270,7 +248,7 @@ export default function Footer() {
                     <span className="text-gold">{t('nav.footer.aboutUs')}</span>
                   </h4>
                   <ul className="space-y-3">
-                    {footerLinksConfig.about.map((link) => (
+                    {aboutLinks.map((link) => (
                       <li key={link.key}>
                         <Link
                           href={link.href}
