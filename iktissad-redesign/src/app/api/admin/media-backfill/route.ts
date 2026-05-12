@@ -42,11 +42,39 @@ export async function POST(request: NextRequest) {
   const bucketParam = searchParams.get("bucket");
   const dryRun = searchParams.get("dryRun") === "1";
   const dedupe = searchParams.get("dedupe") === "1";
+  const wipe = searchParams.get("wipe") === "1";
   const targetBuckets: Bucket[] = bucketParam && (BUCKETS as readonly string[]).includes(bucketParam)
     ? [bucketParam as Bucket]
     : [...BUCKETS];
 
   const admin = createAdminClient();
+
+  // ── Wipe mode: delete every media row pointing at our storage origin ──
+  // Use to reset before a clean re-backfill if duplicates got introduced.
+  if (wipe) {
+    let deleted = 0;
+    if (!dryRun) {
+      // Loop because PostgREST deletes return what they processed; we want
+      // to keep going until nothing matches.
+      while (true) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (admin.from("media") as any)
+          .delete()
+          .like("url", "%supabase.co/storage/%")
+          .select("id");
+        if (error) {
+          return NextResponse.json(
+            { error: `Wipe failed: ${error.message}` } satisfies ApiResponse<never>,
+            { status: 500 }
+          );
+        }
+        const n = (data as Array<{ id: string }> | null)?.length ?? 0;
+        deleted += n;
+        if (n === 0) break;
+      }
+    }
+    return NextResponse.json({ data: { mode: "wipe", dryRun, deleted } });
+  }
 
   // ── Dedupe mode: delete duplicate media rows (keep the oldest per url) ──
   if (dedupe) {
@@ -57,7 +85,7 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: rows } = await (admin.from("media") as any)
         .select("id, url, created_at")
-        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
         .range(off, off + chunk - 1);
       const list = (rows ?? []) as Array<{ id: string; url: string; created_at: string }>;
       for (const r of list) {
@@ -109,6 +137,7 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: rows } = await (admin.from("media") as any)
         .select("url")
+        .order("id", { ascending: true })
         .range(off, off + chunk - 1);
       const list = (rows ?? []) as Array<{ url: string }>;
       for (const r of list) knownUrls.add(r.url);
