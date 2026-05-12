@@ -169,7 +169,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const { data: sectorsRes } = useSWR<any>('/api/sectors', swrFetcher, { revalidateOnFocus: false });
   const sectors: { slug: string; name: string }[] = sectorsRes?.data ?? [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: usersRes } = useSWR<any>('/api/users', swrFetcher, { revalidateOnFocus: false });
+  const { data: usersRes } = useSWR<any>('/api/users?pageSize=500', swrFetcher, { revalidateOnFocus: false });
   const users: { id: string; name: string }[] = usersRes?.data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -1434,7 +1434,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           onClose={() => setShowAddAuthor(false)}
           onCreated={(author) => {
             setSelectedAuthorId(author.id);
-            void globalMutate('/api/users');
+            void globalMutate('/api/users?pageSize=500');
           }}
         />
       )}

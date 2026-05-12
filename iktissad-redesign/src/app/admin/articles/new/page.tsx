@@ -92,7 +92,7 @@ export default function NewArticlePage() {
   const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
   const countries: { slug: string; name: string }[] = countriesRes?.data ?? [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: usersRes } = useSWR<any>('/api/users', swrFetcher, { revalidateOnFocus: false });
+  const { data: usersRes } = useSWR<any>('/api/users?pageSize=500', swrFetcher, { revalidateOnFocus: false });
   const users: { id: string; name: string }[] = usersRes?.data ?? [];
 
   // ── UI state ───────────────────────────────────────────────────
@@ -645,7 +645,7 @@ export default function NewArticlePage() {
           onClose={() => setShowAddAuthor(false)}
           onCreated={(author) => {
             setSelectedAuthorId(author.id);
-            void globalMutate('/api/users');
+            void globalMutate('/api/users?pageSize=500');
           }}
         />
       )}
