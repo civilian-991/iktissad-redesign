@@ -85,8 +85,15 @@ function reconstructFromBody(title: string, body: string): string | null {
 
     // Search body for a word that starts with left, ends with right, isn't
     // just the concatenation (the original word had at least one missing char).
+    // Limit the bridge gap to 4 chars — a U+FFFD only consumed 1-2 chars of
+    // the original Arabic word; anything wider is likely a coincidental match.
+    const maxBridge = 4;
     const matches = bodyWords.filter(
-      (w) => w.length > left.length + right.length && w.startsWith(left) && w.endsWith(right)
+      (w) =>
+        w.length > left.length + right.length &&
+        w.length - left.length - right.length <= maxBridge &&
+        w.startsWith(left) &&
+        w.endsWith(right)
     );
     if (!matches.length) continue;
     // Pick the shortest unique match — that's the most conservative guess.
