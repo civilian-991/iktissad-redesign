@@ -28,7 +28,9 @@ export interface StorageFile {
 }
 
 /**
- * Upload a file to a Supabase Storage bucket.
+ * Upload a file to a Supabase Storage bucket and register it in the
+ * `media` table so it shows in /admin/media. The registration is
+ * fire-and-forget — a failed POST never breaks the upload.
  */
 export async function uploadFile(
   bucket: StorageBucket,
@@ -57,10 +59,59 @@ export async function uploadFile(
 
   const publicUrl = getPublicUrl(bucket, data.path);
 
+  void registerInMediaTable({
+    url: publicUrl,
+    filename: file.name,
+    mimeType: file.type,
+    size: file.size,
+    folder: folder || bucket,
+  });
+
   return {
     path: data.path,
     publicUrl,
   };
+}
+
+interface MediaRegistrationInput {
+  url: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  folder: string;
+}
+
+async function registerInMediaTable(input: MediaRegistrationInput): Promise<void> {
+  try {
+    // Need a CSRF token because /api/media POST is a mutation.
+    let token = readCookie('csrf-token');
+    if (!token) {
+      const r = await fetch('/api/auth/csrf');
+      if (r.ok) {
+        const json = (await r.json()) as { csrfToken?: string };
+        token = json.csrfToken ?? readCookie('csrf-token') ?? '';
+      }
+    }
+    if (!token) return;
+
+    await fetch('/api/media', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': token,
+      },
+      body: JSON.stringify(input),
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('Media table registration failed:', err);
+  }
+}
+
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
 /**

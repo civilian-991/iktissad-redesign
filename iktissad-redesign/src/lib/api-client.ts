@@ -554,6 +554,23 @@ export async function deleteMedia(
   });
 }
 
+export interface CreateMediaInput {
+  url: string;
+  filename: string;
+  mimeType?: string;
+  size?: number;
+  alt?: string;
+  altEn?: string;
+  folder?: string;
+}
+
+export async function createMedia(input: CreateMediaInput): Promise<ApiResponse<MediaItem>> {
+  return api<MediaItem>("/api/media", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 // ─── Sections / Sectors / Countries (read-only for admin) ──────
 
 export function sectionsKey(): string {
