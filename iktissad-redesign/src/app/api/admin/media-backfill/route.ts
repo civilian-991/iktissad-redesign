@@ -60,43 +60,53 @@ export async function POST(request: NextRequest) {
     const stat = { scanned: 0, inserted: 0, skipped: 0 };
     const toInsert: Record<string, unknown>[] = [];
 
-    // Recursively walk the bucket folder tree.
+    // Recursively walk the bucket folder tree, paginating within each folder.
     const queue: string[] = [""];
+    const pageSize = 1000;
     while (queue.length) {
       const prefix = queue.shift()!;
-      const { data: entries, error } = await admin.storage.from(bucket).list(prefix, {
-        limit: 1000,
-        sortBy: { column: "name", order: "asc" },
-      });
-      if (error) break;
-
-      for (const entry of (entries ?? []) as StorageObject[]) {
-        if (entry.name === ".emptyFolderPlaceholder") continue;
-        const fullPath = prefix ? `${prefix}/${entry.name}` : entry.name;
-
-        // Folders have no metadata.size — recurse into them.
-        if (!entry.metadata) {
-          queue.push(fullPath);
-          continue;
-        }
-
-        stat.scanned++;
-        const { data: urlData } = admin.storage.from(bucket).getPublicUrl(fullPath);
-        const publicUrl = urlData.publicUrl;
-        if (knownUrls.has(publicUrl)) {
-          stat.skipped++;
-          continue;
-        }
-        knownUrls.add(publicUrl);
-        toInsert.push({
-          url: publicUrl,
-          filename: entry.name,
-          mime_type: entry.metadata.mimetype || guessMime(entry.name),
-          size: entry.metadata.size ?? 0,
-          alt: "",
-          alt_en: "",
-          folder: prefix || bucket,
+      let offset = 0;
+      while (true) {
+        const { data: entries, error } = await admin.storage.from(bucket).list(prefix, {
+          limit: pageSize,
+          offset,
+          sortBy: { column: "name", order: "asc" },
         });
+        if (error) break;
+        const rows = (entries ?? []) as StorageObject[];
+        if (rows.length === 0) break;
+
+        for (const entry of rows) {
+          if (entry.name === ".emptyFolderPlaceholder") continue;
+          const fullPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+
+          // Folders have no metadata.size — recurse into them.
+          if (!entry.metadata) {
+            queue.push(fullPath);
+            continue;
+          }
+
+          stat.scanned++;
+          const { data: urlData } = admin.storage.from(bucket).getPublicUrl(fullPath);
+          const publicUrl = urlData.publicUrl;
+          if (knownUrls.has(publicUrl)) {
+            stat.skipped++;
+            continue;
+          }
+          knownUrls.add(publicUrl);
+          toInsert.push({
+            url: publicUrl,
+            filename: entry.name,
+            mime_type: entry.metadata.mimetype || guessMime(entry.name),
+            size: entry.metadata.size ?? 0,
+            alt: "",
+            alt_en: "",
+            folder: prefix || bucket,
+          });
+        }
+
+        if (rows.length < pageSize) break;
+        offset += pageSize;
       }
     }
 
