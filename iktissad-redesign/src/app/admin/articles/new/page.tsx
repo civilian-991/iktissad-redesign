@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import useSWR from 'swr';
+import useSWR, { mutate as globalMutate } from 'swr';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,7 @@ import { iconSizes } from '@/lib/design-tokens';
 import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
+import AddAuthorModal from '@/components/admin/AddAuthorModal';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
 import TemplateSelector from '@/components/admin/TemplateSelector';
 import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
@@ -99,6 +100,7 @@ export default function NewArticlePage() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [showAddAuthor, setShowAddAuthor] = useState(false);
   const editorInsertImageRef = useRef<((url: string, alt?: string) => void) | null>(null);
 
   // ── Auto-save ──────────────────────────────────────────────────
@@ -543,11 +545,22 @@ export default function NewArticlePage() {
             <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
               <User size={iconSizes.sm} /> {t('admin.articles.editor.authorLabel')}
             </label>
-            <select value={selectedAuthorId} onChange={(e) => setSelectedAuthorId(e.target.value)}
-              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors">
-              <option value="" className="bg-midnight">{t('admin.articles.editor.selectAuthor')}</option>
-              {users.map((u) => <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>)}
-            </select>
+            <div className="flex items-center gap-2">
+              <select value={selectedAuthorId} onChange={(e) => setSelectedAuthorId(e.target.value)}
+                className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors">
+                <option value="" className="bg-midnight">{t('admin.articles.editor.selectAuthor')}</option>
+                {users.map((u) => <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>)}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowAddAuthor(true)}
+                title={t('admin.articles.editor.addAuthor')}
+                aria-label={t('admin.articles.editor.addAuthor')}
+                className="shrink-0 p-3 bg-gold/10 border border-gold/20 rounded-xl text-gold hover:bg-gold/20 transition-colors"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
           </motion.div>
 
           {/* Tags */}
@@ -626,6 +639,16 @@ export default function NewArticlePage() {
       <MediaPicker open={showMediaPicker} onClose={() => setShowMediaPicker(false)}
         onSelect={(url, name) => { if (editorInsertImageRef.current) editorInsertImageRef.current(url, name); }}
         bucket="articles" folder="content" />
+
+      {showAddAuthor && (
+        <AddAuthorModal
+          onClose={() => setShowAddAuthor(false)}
+          onCreated={(author) => {
+            setSelectedAuthorId(author.id);
+            void globalMutate('/api/users');
+          }}
+        />
+      )}
     </div>
   );
 }

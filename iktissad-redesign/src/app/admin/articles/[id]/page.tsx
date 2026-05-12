@@ -13,7 +13,7 @@ import { use } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
+import useSWR, { mutate as globalMutate } from 'swr';
 import { toast } from 'sonner';
 import {
   ArrowRight,
@@ -46,6 +46,7 @@ import { iconSizes } from '@/lib/design-tokens';
 import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
+import AddAuthorModal from '@/components/admin/AddAuthorModal';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
 import ArticleAnalyticsPanel from '@/components/admin/ArticleAnalyticsPanel';
 import ArticleTypeSelector from '@/components/admin/ArticleTypeSelector';
@@ -179,6 +180,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const [isGeneratingSocialCards, setIsGeneratingSocialCards] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [showAddAuthor, setShowAddAuthor] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   // Article type selector + outline modal
@@ -998,16 +1000,27 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               <User size={14} />
               {t('admin.articles.editor.authorLabel')}
             </label>
-            <select
-              value={selectedAuthorId}
-              onChange={(e) => setSelectedAuthorId(e.target.value)}
-              className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
-            >
-              <option value="" className="bg-midnight">{t('admin.articles.editor.noAuthor')}</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedAuthorId}
+                onChange={(e) => setSelectedAuthorId(e.target.value)}
+                className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+              >
+                <option value="" className="bg-midnight">{t('admin.articles.editor.noAuthor')}</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id} className="bg-midnight">{u.name}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowAddAuthor(true)}
+                title={t('admin.articles.editor.addAuthor')}
+                aria-label={t('admin.articles.editor.addAuthor')}
+                className="shrink-0 p-3 bg-gold/10 border border-gold/20 rounded-xl text-gold hover:bg-gold/20 transition-colors"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
           </motion.div>
 
           {/* Tags */}
@@ -1414,6 +1427,17 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         bucket="articles"
         folder="content"
       />
+
+      {/* Add Author Modal */}
+      {showAddAuthor && (
+        <AddAuthorModal
+          onClose={() => setShowAddAuthor(false)}
+          onCreated={(author) => {
+            setSelectedAuthorId(author.id);
+            void globalMutate('/api/users');
+          }}
+        />
+      )}
 
       {/* Delete Modal */}
       {showDeleteModal && (
