@@ -21,14 +21,33 @@ export const maxDuration = 600;
  *   ?limit=<n> — process at most n articles
  */
 
-// Heuristic: titles with isolated short Arabic-letter clusters (1-2 chars)
-// adjacent to other short Arabic clusters separated by a single space —
-// almost always a damaged word from the U+FFFD → space replacement.
+// Heuristic for titles damaged by the FFFD→space cleanup. The damaged
+// pattern is "<short Arabic cluster> SPACE <short Arabic cluster>" where
+// neither cluster is a common Arabic word — normal Arabic prose has many
+// 2-letter words (في، من، إلى) so we explicitly skip those.
+const ARABIC_STOPWORDS = new Set([
+  "في","من","إلى","على","عن","ما","لا","لم","لن","قد","هل","أو","لو",
+  "ال","و","ب","ف","ك","ل","فى","الى","يا","يأ","يس",
+]);
 function looksDamaged(title: string): boolean {
   if (!title) return false;
-  // Look for the pattern: short Arabic cluster (1-2 letters), space, short cluster
-  // Match within the title body (not at edges).
-  return /(^|[^ا-ي])[ا-ي]{1,2}\s[ا-ي]{1,3}(?=$|[^ا-ي])/.test(title);
+  // Each pair-of-short-clusters candidate; verify it's not two real stopwords.
+  const re = /(^|[^ا-ي])([ا-ي]{1,3})\s([ا-ي]{1,3})(?=$|[^ا-ي])/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(title)) !== null) {
+    const left = m[2];
+    const right = m[3];
+    // If either side is a single Arabic letter that's not a 1-letter
+    // preposition (و، ف، ل، ب، ك) or both sides are short non-words,
+    // it's likely damage.
+    const leftIsWord = ARABIC_STOPWORDS.has(left);
+    const rightIsWord = ARABIC_STOPWORDS.has(right);
+    if (leftIsWord && rightIsWord) continue;
+    if (left.length === 1 && !"وفلبك".includes(left)) return true;
+    if (right.length === 1 && !"وفلبك".includes(right)) return true;
+    if (!leftIsWord && !rightIsWord && left.length <= 2 && right.length <= 2) return true;
+  }
+  return false;
 }
 
 function stripHtml(s: string): string {
@@ -51,7 +70,10 @@ async function callClaude(prompt: string, apiKey: string): Promise<string> {
       messages: [{ role: "user", content: prompt }],
     }),
   });
-  if (!res.ok) throw new Error(`Claude ${res.status}`);
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => "");
+    throw new Error(`Claude ${res.status}: ${errBody.slice(0, 200)}`);
+  }
   const data = await res.json();
   const text: string = data?.content?.[0]?.type === "text" ? data.content[0].text : "";
   return text.trim();
@@ -72,10 +94,32 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") === "1";
   const limit = Math.max(0, parseInt(searchParams.get("limit") || "0", 10));
+  // Narrow to articles whose updated_at is more recent than this cutoff.
+  // Default: 1 day ago — captures recently-cleaned articles, skips the
+  // long tail of clean ones that happen to match the heuristic.
+  const sinceHoursParam = parseInt(searchParams.get("sinceHours") || "24", 10);
+  const sinceHours = Number.isFinite(sinceHoursParam) && sinceHoursParam > 0 ? sinceHoursParam : 24;
+  const sinceIso = new Date(Date.now() - sinceHours * 3600 * 1000).toISOString();
 
   const admin = createAdminClient();
 
-  // 1) Drain all articles for slug-uniqueness check.
+  // 1) Pull every existing slug (cheap — just one column) for uniqueness check.
+  const slugOwner = new Map<string, string>();
+  {
+    const chunk = 1000;
+    for (let off = 0; ; off += chunk) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (admin.from("articles") as any)
+        .select("id, slug")
+        .order("id", { ascending: true })
+        .range(off, off + chunk - 1);
+      const list = (data ?? []) as Array<{ id: string; slug: string }>;
+      for (const r of list) slugOwner.set(r.slug, r.id);
+      if (list.length < chunk) break;
+    }
+  }
+
+  // 2) Pull only recently-touched rows for candidate evaluation.
   const rows: Array<{ id: string; slug: string; title: string; content: string | null; source_id: number | null }> = [];
   {
     const chunk = 1000;
@@ -83,6 +127,7 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data } = await (admin.from("articles") as any)
         .select("id, slug, title, content, source_id")
+        .gte("updated_at", sinceIso)
         .order("id", { ascending: true })
         .range(off, off + chunk - 1);
       const list = (data ?? []) as typeof rows;
@@ -91,10 +136,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const slugOwner = new Map<string, string>();
-  for (const r of rows) slugOwner.set(r.slug, r.id);
-
-  // 2) Pick candidates.
   const candidates = rows.filter((r) => looksDamaged(r.title));
   const target = limit > 0 ? candidates.slice(0, limit) : candidates;
 
@@ -199,6 +240,8 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     data: {
       dryRun,
+      sinceIso,
+      recentRows: rows.length,
       candidates: candidates.length,
       attempted: results.length,
       accepted: results.filter((r) => r.aiAccepted).length,
