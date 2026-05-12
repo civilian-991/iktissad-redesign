@@ -32,7 +32,8 @@ const ARABIC_STOPWORDS = new Set([
 function looksDamaged(title: string): boolean {
   if (!title) return false;
   // Each pair-of-short-clusters candidate; verify it's not two real stopwords.
-  const re = /(^|[^ا-ي])([ا-ي]{1,3})\s([ا-ي]{1,3})(?=$|[^ا-ي])/g;
+  // Lookahead on the right half so consecutive pairs all get evaluated.
+  const re = /(^|[^ا-ي])([ا-ي]{1,3})\s(?=([ا-ي]{1,3})(?:$|[^ا-ي]))/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(title)) !== null) {
     const left = m[2];
@@ -70,7 +71,9 @@ function reconstructFromBody(title: string, body: string): string | null {
 
   // Walk the title — each `${left} ${right}` pair where both halves are
   // short and at least one is not a stopword.
-  const pairRe = /([ء-ي]{1,3})\s([ء-ي]{1,3})/g;
+  // Lookahead so consecutive overlapping pairs (e.g. `يار دول ر` matches
+// both `يار دول` and `دول ر`) all get a chance.
+const pairRe = /([ء-ي]{1,3})\s(?=([ء-ي]{1,3}))/g;
   let m: RegExpExecArray | null;
   const replacements: Array<{ from: string; to: string }> = [];
   while ((m = pairRe.exec(title)) !== null) {
