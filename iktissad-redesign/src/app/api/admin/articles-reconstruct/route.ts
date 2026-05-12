@@ -54,6 +54,61 @@ function stripHtml(s: string): string {
   return s.replace(/<\/?[a-zA-Z][^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+// Algorithmic reconstruction: for each candidate "<left> <right>" pair in
+// the title that looks damaged, search the body for a single Arabic word
+// that starts with `left` and ends with `right`. If found, substitute it
+// back. Returns the rewritten title (or null if no substitutions made).
+function reconstructFromBody(title: string, body: string): string | null {
+  const bodyText = stripHtml(body || "");
+  if (!bodyText) return null;
+  // Pull every Arabic-letter run from the body (with diacritics + hamza forms).
+  const bodyWords = bodyText.match(/[ء-ي٠-٩]+/g) || [];
+  if (!bodyWords.length) return null;
+
+  let out = title;
+  let changed = false;
+
+  // Walk the title — each `${left} ${right}` pair where both halves are
+  // short and at least one is not a stopword.
+  const pairRe = /([ء-ي]{1,3})\s([ء-ي]{1,3})/g;
+  let m: RegExpExecArray | null;
+  const replacements: Array<{ from: string; to: string }> = [];
+  while ((m = pairRe.exec(title)) !== null) {
+    const left = m[1];
+    const right = m[2];
+    const leftIsWord = ARABIC_STOPWORDS.has(left);
+    const rightIsWord = ARABIC_STOPWORDS.has(right);
+    if (leftIsWord && rightIsWord) continue;
+    // 1-letter prepositions (و، ف، ل، ب، ك) are valid on their own — skip.
+    if (left.length === 1 && "وفلبك".includes(left) && !rightIsWord && right.length >= 3) continue;
+    if (right.length === 1 && "وفلبك".includes(right)) continue;
+
+    // Search body for a word that starts with left, ends with right, isn't
+    // just the concatenation (the original word had at least one missing char).
+    const matches = bodyWords.filter(
+      (w) => w.length > left.length + right.length && w.startsWith(left) && w.endsWith(right)
+    );
+    if (!matches.length) continue;
+    // Pick the shortest unique match — that's the most conservative guess.
+    matches.sort((a, b) => a.length - b.length);
+    const pick = matches[0];
+
+    replacements.push({ from: `${left} ${right}`, to: pick });
+  }
+
+  // Apply replacements (longest from-string first so longer pairs win when
+  // they overlap).
+  replacements.sort((a, b) => b.from.length - a.from.length);
+  for (const r of replacements) {
+    if (out.includes(r.from)) {
+      out = out.replace(r.from, r.to);
+      changed = true;
+    }
+  }
+
+  return changed ? out : null;
+}
+
 async function callClaude(prompt: string, apiKey: string): Promise<string> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -97,6 +152,9 @@ export async function POST(request: NextRequest) {
   // Punch-list mode: skip Claude entirely, just return every damaged
   // candidate with an excerpt for manual correction.
   const punchList = searchParams.get("punchList") === "1";
+  // Algorithmic mode: reconstruct titles by searching the body for a
+  // word matching the broken left/right halves — no AI call needed.
+  const algo = searchParams.get("algo") === "1";
   // Narrow to articles whose updated_at is more recent than this cutoff.
   // Default: 1 day ago — captures recently-cleaned articles, skips the
   // long tail of clean ones that happen to match the heuristic.
@@ -161,6 +219,77 @@ export async function POST(request: NextRequest) {
   }
 
   const target = limit > 0 ? candidates.slice(0, limit) : candidates;
+
+  // Algorithmic mode: no Claude calls, search body for matching words.
+  if (algo) {
+    const algoResults: Array<{
+      id: string;
+      titleBefore: string;
+      titleAfter: string;
+      slugBefore: string;
+      slugAfter: string;
+      accepted: boolean;
+    }> = [];
+    let applied = 0;
+    for (const r of target) {
+      const newTitle = reconstructFromBody(r.title, r.content || "");
+      if (!newTitle || newTitle === r.title) {
+        algoResults.push({
+          id: r.id, titleBefore: r.title, titleAfter: r.title,
+          slugBefore: r.slug, slugAfter: r.slug, accepted: false,
+        });
+        continue;
+      }
+      // Regenerate slug, resolve collisions.
+      let newSlug = slugify(newTitle) || r.slug;
+      if (newSlug !== r.slug) {
+        const owner = slugOwner.get(newSlug);
+        if (owner && owner !== r.id) {
+          const tail = r.source_id != null ? String(r.source_id) : r.id.slice(0, 8);
+          newSlug = `${newSlug}-${tail}`;
+        }
+      }
+      algoResults.push({
+        id: r.id, titleBefore: r.title, titleAfter: newTitle,
+        slugBefore: r.slug, slugAfter: newSlug, accepted: true,
+      });
+      if (newSlug !== r.slug) {
+        slugOwner.delete(r.slug);
+        slugOwner.set(newSlug, r.id);
+      }
+      if (!dryRun) {
+        const patch: Record<string, unknown> = { title: newTitle };
+        if (newSlug !== r.slug) patch.slug = newSlug;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (admin.from("articles") as any).update(patch).eq("id", r.id);
+        if (error) {
+          return NextResponse.json(
+            { error: `Update failed for ${r.id}: ${error.message} (applied: ${applied})` } satisfies ApiResponse<never>,
+            { status: 500 }
+          );
+        }
+        applied++;
+      }
+    }
+    return NextResponse.json({
+      data: {
+        mode: "algorithmic",
+        dryRun,
+        candidates: candidates.length,
+        attempted: algoResults.length,
+        accepted: algoResults.filter((r) => r.accepted).length,
+        rejected: algoResults.filter((r) => !r.accepted).length,
+        applied,
+        sample: algoResults.slice(0, 15).map((r) => ({
+          id: r.id,
+          titleBefore: r.titleBefore.slice(0, 130),
+          titleAfter: r.titleAfter.slice(0, 130),
+          slugAfter: r.slugAfter.slice(0, 130),
+          accepted: r.accepted,
+        })),
+      },
+    });
+  }
 
   // 3) Reconstruct.
   const results: Array<{
