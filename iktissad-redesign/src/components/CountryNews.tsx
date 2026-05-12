@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
@@ -62,7 +61,7 @@ function CountryContent({ country }: { country: ViewCountry }) {
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(12,30,42,0.88) 0%, rgba(12,30,42,0.2) 60%, transparent 100%)' }} />
         <div className="absolute bottom-0 left-0 right-0 p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Image src={country.flag} alt={country.name} width={24} height={16} className="object-cover" />
+            {country.flag && <span aria-hidden className="text-lg leading-none">{country.flag}</span>}
             <span className="text-white/70 font-[family-name:var(--font-display)] text-xs">{country.name}</span>
           </div>
           <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-base leading-snug line-clamp-3 group-hover:text-gold-light transition-colors duration-300 mb-2">
@@ -123,7 +122,7 @@ export default function CountryNews() {
       byRegion[region].push({
         slug: c.slug,
         name: locale === 'ar' ? c.name : (c.nameEn || c.name),
-        flag: c.flag || 'https://flagcdn.com/w40/un.png',
+        flag: c.flag || '',
       });
     }
     // Order known regions first, then any extras the DB has (alphabetical)
@@ -226,7 +225,7 @@ export default function CountryNews() {
                     : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-obsidian'
                 }`}
               >
-                <Image src={country.flag} alt={country.name} width={20} height={14} className="object-cover" />
+                {country.flag && <span aria-hidden className="text-base leading-none">{country.flag}</span>}
                 {country.name}
               </button>
             ))}
