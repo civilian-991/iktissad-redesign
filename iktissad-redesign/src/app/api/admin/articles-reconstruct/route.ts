@@ -94,6 +94,9 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") === "1";
   const limit = Math.max(0, parseInt(searchParams.get("limit") || "0", 10));
+  // Punch-list mode: skip Claude entirely, just return every damaged
+  // candidate with an excerpt for manual correction.
+  const punchList = searchParams.get("punchList") === "1";
   // Narrow to articles whose updated_at is more recent than this cutoff.
   // Default: 1 day ago — captures recently-cleaned articles, skips the
   // long tail of clean ones that happen to match the heuristic.
@@ -137,6 +140,26 @@ export async function POST(request: NextRequest) {
   }
 
   const candidates = rows.filter((r) => looksDamaged(r.title));
+
+  // Punch-list mode: return all candidates with body excerpts; no AI calls.
+  if (punchList) {
+    return NextResponse.json({
+      data: {
+        sinceIso,
+        recentRows: rows.length,
+        candidates: candidates.length,
+        items: candidates.map((r) => ({
+          id: r.id,
+          slug: r.slug,
+          title: r.title,
+          excerpt: stripHtml(r.content || "").slice(0, 240),
+          editUrl: `/admin/articles/${r.id}`,
+          publicUrl: `/${r.slug}`,
+        })),
+      },
+    });
+  }
+
   const target = limit > 0 ? candidates.slice(0, limit) : candidates;
 
   // 3) Reconstruct.
