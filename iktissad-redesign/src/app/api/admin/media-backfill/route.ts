@@ -41,18 +41,80 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const bucketParam = searchParams.get("bucket");
   const dryRun = searchParams.get("dryRun") === "1";
+  const dedupe = searchParams.get("dedupe") === "1";
   const targetBuckets: Bucket[] = bucketParam && (BUCKETS as readonly string[]).includes(bucketParam)
     ? [bucketParam as Bucket]
     : [...BUCKETS];
 
   const admin = createAdminClient();
 
+  // ── Dedupe mode: delete duplicate media rows (keep the oldest per url) ──
+  if (dedupe) {
+    const firstByUrl = new Map<string, { id: string; createdAt: string }>();
+    const toDelete: string[] = [];
+    const chunk = 1000;
+    for (let off = 0; ; off += chunk) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: rows } = await (admin.from("media") as any)
+        .select("id, url, created_at")
+        .order("created_at", { ascending: true })
+        .range(off, off + chunk - 1);
+      const list = (rows ?? []) as Array<{ id: string; url: string; created_at: string }>;
+      for (const r of list) {
+        const seen = firstByUrl.get(r.url);
+        if (!seen) {
+          firstByUrl.set(r.url, { id: r.id, createdAt: r.created_at });
+        } else {
+          toDelete.push(r.id);
+        }
+      }
+      if (list.length < chunk) break;
+    }
+
+    let deleted = 0;
+    if (!dryRun && toDelete.length) {
+      const batchSize = 500;
+      for (let i = 0; i < toDelete.length; i += batchSize) {
+        const batch = toDelete.slice(i, i + batchSize);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (admin.from("media") as any).delete().in("id", batch);
+        if (error) {
+          return NextResponse.json(
+            { error: `Dedupe delete failed: ${error.message}` } satisfies ApiResponse<never>,
+            { status: 500 }
+          );
+        }
+        deleted += batch.length;
+      }
+    }
+
+    return NextResponse.json({
+      data: {
+        mode: "dedupe",
+        dryRun,
+        uniqueUrls: firstByUrl.size,
+        duplicatesFound: toDelete.length,
+        deleted,
+      },
+    });
+  }
+
   // Pull every existing url so we can skip duplicates without N round-trips.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existingRows } = await (admin.from("media") as any)
-    .select("url")
-    .limit(50000);
-  const knownUrls = new Set<string>((existingRows ?? []).map((r: { url: string }) => r.url));
+  // PostgREST caps a single SELECT at 1000 rows regardless of .limit() —
+  // paginate with .range() until we've drained the table.
+  const knownUrls = new Set<string>();
+  {
+    const chunk = 1000;
+    for (let off = 0; ; off += chunk) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: rows } = await (admin.from("media") as any)
+        .select("url")
+        .range(off, off + chunk - 1);
+      const list = (rows ?? []) as Array<{ url: string }>;
+      for (const r of list) knownUrls.add(r.url);
+      if (list.length < chunk) break;
+    }
+  }
 
   const summary: Record<string, { scanned: number; inserted: number; skipped: number }> = {};
 
