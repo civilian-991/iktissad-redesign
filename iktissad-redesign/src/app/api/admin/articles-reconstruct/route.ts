@@ -79,9 +79,13 @@ function reconstructFromBody(title: string, body: string): string | null {
     const leftIsWord = ARABIC_STOPWORDS.has(left);
     const rightIsWord = ARABIC_STOPWORDS.has(right);
     if (leftIsWord && rightIsWord) continue;
-    // 1-letter prepositions (و، ف، ل، ب، ك) are valid on their own — skip.
-    if (left.length === 1 && "وفلبك".includes(left) && !rightIsWord && right.length >= 3) continue;
+    // 1-letter Arabic prepositions (و، ف، ل، ب، ك) are valid on their own.
+    // If either side IS one, treat the pair as two real words, not damage.
+    if (left.length === 1 && "وفلبك".includes(left)) continue;
     if (right.length === 1 && "وفلبك".includes(right)) continue;
+    // Reject if the picked body word is itself a common conjugated stopword
+    // ending in attached pronouns (ها/هم/كم/نا/كما/هما) — those are very
+    // common and rarely the real reconstruction target.
 
     // Search body for a word that starts with left, ends with right, isn't
     // just the concatenation (the original word had at least one missing char).
@@ -99,6 +103,9 @@ function reconstructFromBody(title: string, body: string): string | null {
     // Pick the shortest unique match — that's the most conservative guess.
     matches.sort((a, b) => a.length - b.length);
     const pick = matches[0];
+    // Reject picks ending in attached pronoun suffixes — these are common
+    // conjugated forms that match by coincidence, not actual reconstructions.
+    if (/(ها|هم|كم|نا|كما|هما|هن|كن)$/.test(pick)) continue;
 
     replacements.push({ from: `${left} ${right}`, to: pick });
   }
