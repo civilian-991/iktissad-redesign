@@ -2227,6 +2227,7 @@ export const en = {
   components: {
     hero: {
       badge: 'Breaking',
+      sectionTitle: 'Top Topics',
       mainHeadline: 'Top Stories',
       subHeadline: 'Latest economic and financial developments',
       readMore: 'Read More',
@@ -2235,6 +2236,21 @@ export const en = {
       topStory: 'Top Story',
       storyLabel: 'Story {number}',
       moreStories: 'More Stories',
+    },
+    latestNews: {
+      title: 'Latest News',
+    },
+    companiesSection: {
+      title: 'Companies',
+    },
+    opinionSection: {
+      title: 'Opinion',
+    },
+    filesSection: {
+      title: 'Dossiers',
+      dossierBadge: 'Dossier',
+      viewAllFiles: 'View All Dossiers',
+      articlesCount: '{count} articles',
     },
     sectorNews: {
       title: 'Sector News',
@@ -2301,6 +2317,12 @@ export const en = {
       allCountries: 'All Countries',
       noNews: 'No news currently available for this country',
       economicIndicators: 'Economic Indicators',
+      regions: {
+        gulf: 'Gulf',
+        mashreq: 'Mashreq',
+        northafrica: 'North Africa',
+        world: 'World',
+      },
     },
     marketTicker: {
       title: 'Market Indicators',

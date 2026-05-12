@@ -2227,6 +2227,7 @@ export const ar = {
   components: {
     hero: {
       badge: 'عاجل',
+      sectionTitle: 'مواضيع رئيسية',
       mainHeadline: 'أهم الأخبار',
       subHeadline: 'آخر التطورات الاقتصادية والمالية',
       readMore: 'اقرأ المزيد',
@@ -2235,6 +2236,21 @@ export const ar = {
       topStory: 'الخبر الرئيسي',
       storyLabel: 'الخبر {number}',
       moreStories: 'المزيد من الأخبار',
+    },
+    latestNews: {
+      title: 'آخر الأخبار',
+    },
+    companiesSection: {
+      title: 'شركات',
+    },
+    opinionSection: {
+      title: 'رأي',
+    },
+    filesSection: {
+      title: 'ملفات',
+      dossierBadge: 'ملف',
+      viewAllFiles: 'عرض جميع الملفات',
+      articlesCount: '{count} مقال',
     },
     sectorNews: {
       title: 'أخبار القطاعات',
@@ -2301,6 +2317,12 @@ export const ar = {
       allCountries: 'جميع الدول',
       noNews: 'لا توجد أخبار متاحة لهذه الدولة حالياً',
       economicIndicators: 'المؤشرات الاقتصادية',
+      regions: {
+        gulf: 'الخليج',
+        mashreq: 'المشرق',
+        northafrica: 'شمال أفريقيا',
+        world: 'العالم',
+      },
     },
     marketTicker: {
       title: 'مؤشرات الأسواق',

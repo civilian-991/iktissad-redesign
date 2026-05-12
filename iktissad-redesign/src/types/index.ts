@@ -291,6 +291,7 @@ export interface Country {
   name: string;
   nameEn: string;
   flag: string;
+  region: string;
   economicOverview: string;
   economicOverviewEn: string;
   keyIndicators: Record<string, string | number>;

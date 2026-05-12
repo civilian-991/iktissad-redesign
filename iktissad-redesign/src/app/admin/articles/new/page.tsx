@@ -19,6 +19,7 @@ import MediaPicker from '@/components/admin/MediaPicker';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
 import TemplateSelector from '@/components/admin/TemplateSelector';
 import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
+import { slugify } from '@/lib/slugify';
 import type { JSONContent } from '@tiptap/core';
 
 // TipTap editor is large (~500KB). Dynamic import keeps it out of the initial bundle.
@@ -110,14 +111,14 @@ export default function NewArticlePage() {
   // Auto-generate slug from title (unless manually edited)
   useEffect(() => {
     if (!slugManual && title) {
-      setSlug(title.trim().replace(/\s+/g, '-').toLowerCase() + '-' + Date.now());
+      setSlug(slugify(title) + '-' + Date.now());
     }
   }, [title, slugManual]);
 
   const buildPayload = useCallback(() => ({
     title,
     titleEn,
-    slug: slug || title.trim().replace(/\s+/g, '-').toLowerCase() + '-' + Date.now(),
+    slug: slug || slugify(title) + '-' + Date.now(),
     deck: deck || undefined,
     excerpt,
     excerptEn: excerptEn || undefined,

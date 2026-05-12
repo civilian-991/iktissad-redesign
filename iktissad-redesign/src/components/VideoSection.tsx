@@ -61,14 +61,14 @@ export default function VideoSection() {
                 <button
                   onClick={next}
                   className="w-7 h-7 border border-white/20 hover:border-gold text-white/60 hover:text-gold flex items-center justify-center transition-colors"
-                  aria-label="السابق"
+                  aria-label={t('common.actions.previous')}
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   onClick={prev}
                   className="w-7 h-7 border border-white/20 hover:border-gold text-white/60 hover:text-gold flex items-center justify-center transition-colors"
-                  aria-label="التالي"
+                  aria-label={t('common.actions.next')}
                 >
                   <ChevronLeft size={14} />
                 </button>

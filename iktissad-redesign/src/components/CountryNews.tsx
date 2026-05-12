@@ -10,38 +10,7 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse, Country as DBCountry } from '@/types';
 
-// Region grouping is derived from country slug. When the DB grows a `region`
-// column, swap this for `country.region` from the API response.
-const SLUG_TO_REGION: Record<string, string> = {
-  'saudi-arabia': 'gulf', uae: 'gulf', qatar: 'gulf', kuwait: 'gulf',
-  bahrain: 'gulf', oman: 'gulf',
-  lebanon: 'mashreq', syria: 'mashreq', jordan: 'mashreq', iraq: 'mashreq',
-  egypt: 'northafrica', morocco: 'northafrica', algeria: 'northafrica',
-  tunisia: 'northafrica', libya: 'northafrica',
-  // everything else (usa, china, france, india, turkey, world) → world
-};
-
-// Country slug → flag CDN ISO2 code. 'world' uses the UN flag.
-const SLUG_TO_FLAG: Record<string, string> = {
-  'saudi-arabia': 'sa', uae: 'ae', qatar: 'qa', kuwait: 'kw', bahrain: 'bh', oman: 'om',
-  lebanon: 'lb', syria: 'sy', jordan: 'jo', iraq: 'iq',
-  egypt: 'eg', morocco: 'ma', algeria: 'dz', tunisia: 'tn', libya: 'ly',
-  usa: 'us', china: 'cn', france: 'fr', india: 'in', turkey: 'tr', world: 'un',
-};
-
 const REGION_ORDER = ['gulf', 'mashreq', 'northafrica', 'world'];
-const REGION_NAMES_AR: Record<string, string> = {
-  gulf: 'الخليج',
-  mashreq: 'المشرق',
-  northafrica: 'شمال أفريقيا',
-  world: 'العالم',
-};
-const REGION_NAMES_EN: Record<string, string> = {
-  gulf: 'Gulf',
-  mashreq: 'Mashreq',
-  northafrica: 'North Africa',
-  world: 'World',
-};
 
 interface RegionGroup {
   id: string;
@@ -76,7 +45,7 @@ function CountryContent({ country }: { country: ViewCountry }) {
   if (!featured) {
     return (
       <div className="text-center py-16">
-        <p className="text-charcoal/50 font-[family-name:var(--font-display)]">لا توجد مقالات لهذا البلد حالياً.</p>
+        <p className="text-charcoal/50 font-[family-name:var(--font-display)]">{t('components.countryNews.noNews')}</p>
       </div>
     );
   }
@@ -149,23 +118,25 @@ export default function CountryNews() {
     const all = countriesResp?.data ?? [];
     const byRegion: Record<string, ViewCountry[]> = {};
     for (const c of all) {
-      const region = SLUG_TO_REGION[c.slug] || 'world';
-      const flagCode = SLUG_TO_FLAG[c.slug] || 'un';
+      const region = c.region || 'world';
       if (!byRegion[region]) byRegion[region] = [];
       byRegion[region].push({
         slug: c.slug,
         name: locale === 'ar' ? c.name : (c.nameEn || c.name),
-        flag: c.flag || `https://flagcdn.com/w40/${flagCode}.png`,
+        flag: c.flag || 'https://flagcdn.com/w40/un.png',
       });
     }
-    return REGION_ORDER
+    // Order known regions first, then any extras the DB has (alphabetical)
+    const known = new Set(REGION_ORDER);
+    const extras = Object.keys(byRegion).filter(r => !known.has(r)).sort();
+    return [...REGION_ORDER, ...extras]
       .filter(r => byRegion[r] && byRegion[r].length > 0)
       .map(r => ({
         id: r,
-        name: locale === 'ar' ? REGION_NAMES_AR[r] : REGION_NAMES_EN[r],
+        name: t(`components.countryNews.regions.${r}`) || r,
         countries: byRegion[r],
       }));
-  }, [countriesResp, locale]);
+  }, [countriesResp, locale, t]);
 
   const [activeRegionId, setActiveRegionId] = useState<string | null>(null);
   const [activeCountrySlug, setActiveCountrySlug] = useState<string | null>(null);

@@ -95,6 +95,7 @@ export type Database = {
           name: string;
           name_en: string;
           flag: string;
+          region: string;
           economic_overview: string;
           economic_overview_en: string;
           key_indicators: Json;
@@ -107,6 +108,7 @@ export type Database = {
           name: string;
           name_en?: string;
           flag?: string;
+          region?: string;
           economic_overview?: string;
           economic_overview_en?: string;
           key_indicators?: Json;
@@ -119,6 +121,7 @@ export type Database = {
           name?: string;
           name_en?: string;
           flag?: string;
+          region?: string;
           economic_overview?: string;
           economic_overview_en?: string;
           key_indicators?: Json;

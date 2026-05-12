@@ -27,7 +27,7 @@ export default function LatestNews() {
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
             <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
-              آخر الأخبار
+              {t('components.latestNews.title')}
             </h2>
           </div>
           <Link

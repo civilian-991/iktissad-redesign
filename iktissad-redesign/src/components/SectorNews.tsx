@@ -100,7 +100,7 @@ function SectorCard({ sector }: { sector: Sector }) {
         </a>
       ) : (
         <div className="h-52 flex items-center justify-center bg-cream">
-          <p className="text-graphite text-sm">لا توجد مقالات</p>
+          <p className="text-graphite text-sm">{t('components.sectorNews.noNews')}</p>
         </div>
       )}
 

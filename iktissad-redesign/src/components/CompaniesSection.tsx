@@ -29,7 +29,7 @@ export default function CompaniesSection() {
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
             <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
-              شركات
+              {t('components.companiesSection.title')}
             </h2>
           </div>
           <Link

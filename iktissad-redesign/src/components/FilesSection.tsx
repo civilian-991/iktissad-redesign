@@ -31,7 +31,7 @@ export default function FilesSection() {
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-navy" />
             <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-lg">
-              ملفات
+              {t('components.filesSection.title')}
             </h2>
           </div>
           <Link
@@ -72,7 +72,7 @@ export default function FilesSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
                   {/* Badge */}
                   <span className="absolute top-3 end-3 px-3 py-1 text-xs font-bold font-[family-name:var(--font-display)] bg-white/10 border border-white/20 text-white backdrop-blur-sm">
-                    ملف
+                    {t('components.filesSection.dossierBadge')}
                   </span>
                   {/* Title overlay */}
                   <div className="absolute bottom-0 inset-x-0 p-6">
@@ -87,7 +87,7 @@ export default function FilesSection() {
                     <div className="flex items-center gap-3 mt-3">
                       {featured.articleCount !== undefined && featured.articleCount > 0 && (
                         <span className="text-white/50 text-xs font-[family-name:var(--font-display)]">
-                          {featured.articleCount} مقال
+                          {t('components.filesSection.articlesCount', { count: featured.articleCount })}
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1.5 text-white/40 text-xs font-[family-name:var(--font-display)]">
@@ -136,7 +136,7 @@ export default function FilesSection() {
                     <div className="flex items-center gap-2">
                       {s.articleCount !== undefined && s.articleCount > 0 && (
                         <span className="text-navy/60 text-xs font-[family-name:var(--font-display)] font-semibold">
-                          {s.articleCount} مقال
+                          {t('components.filesSection.articlesCount', { count: s.articleCount })}
                         </span>
                       )}
                       <span className="text-charcoal/40 text-xs flex items-center gap-1 font-[family-name:var(--font-display)]">
@@ -152,7 +152,7 @@ export default function FilesSection() {
                 href="/reports"
                 className="flex items-center justify-center gap-2 py-3 border border-dashed border-navy/30 text-navy text-sm font-[family-name:var(--font-display)] font-semibold hover:border-navy hover:bg-navy/5 transition-all duration-200"
               >
-                عرض جميع الملفات
+                {t('components.filesSection.viewAllFiles')}
                 <ArrowUpLeft size={14} />
               </Link>
             </div>

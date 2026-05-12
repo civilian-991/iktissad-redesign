@@ -220,6 +220,7 @@ export function mapCountryRow(row: CountryRow & { article_count?: any }): Countr
     name: row.name,
     nameEn: row.name_en,
     flag: row.flag,
+    region: row.region ?? 'world',
     economicOverview: row.economic_overview,
     economicOverviewEn: row.economic_overview_en,
     keyIndicators: row.key_indicators as Record<string, string | number>,

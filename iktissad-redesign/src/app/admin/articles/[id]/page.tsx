@@ -62,6 +62,7 @@ import ArticleVersionPanel from '@/components/admin/ArticleVersionPanel';
 import SharePreviewModal from '@/components/admin/SharePreviewModal';
 import FactCheckPanel from '@/components/admin/FactCheckPanel';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion, aiAutoTag, aiSummarize, aiGenerateSocialCards } from '@/lib/api-client';
+import { slugify } from '@/lib/slugify';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
@@ -746,7 +747,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 <input
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-\u0600-\u06FF]/g, ''))}
+                  onChange={(e) => setSlug(slugify(e.target.value))}
                   placeholder="article-slug"
                   dir="ltr"
                   className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-mono placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
