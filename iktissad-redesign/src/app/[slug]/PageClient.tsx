@@ -939,17 +939,6 @@ export default function ArticlePageClient({
         .article-body-slug .article-body-slug-tiptap img {
           border: 1px solid #E8E0D0;
         }
-        .article-body-slug > p:first-of-type::first-letter {
-          font-family: var(--font-display), system-ui, sans-serif;
-          font-size: 3.5rem;
-          font-weight: 900;
-          color: #DDA853;
-          float: right;
-          line-height: 0.82;
-          margin-inline-end: 0.12em;
-          margin-bottom: -0.08em;
-          margin-top: 0.08em;
-        }
         .article-body-slug p { margin-bottom: 1.6rem; }
         .article-body-slug h2 {
           font-family: var(--font-display), system-ui, sans-serif;

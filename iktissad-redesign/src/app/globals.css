@@ -999,23 +999,6 @@ h3 {
 .magazine-heading-3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
 
 /**
- * Drop cap — Arabic gold ornament before first paragraph.
- *
- * NOTE: ::first-letter is intentionally NOT used here because Arabic connected
- * letterforms (kashida) break when the initial letter is isolated via CSS.
- * Instead we use a ::before ornament on the first paragraph.
- */
-.magazine-article-body > p:first-of-type::before {
-  content: '❧';
-  float: inline-start;
-  font-size: 3.5em;
-  line-height: 0.8;
-  margin-inline-end: 0.1em;
-  color: #DDA853;
-  font-family: var(--font-accent, 'Playfair Display', serif);
-}
-
-/**
  * Running head — sticky top bar showing issue number + section name.
  * Used in the magazine reader shell (ReaderClient / ArticleSpread).
  */
