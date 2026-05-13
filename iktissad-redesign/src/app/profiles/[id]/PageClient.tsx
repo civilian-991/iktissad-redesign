@@ -104,7 +104,7 @@ export default function ProfileDetailPageClient() {
                 </p>
 
                 {/* Quote */}
-                <div className="bg-ivory rounded-xl p-4 border-r-4 border-gold">
+                <div className="bg-ivory rounded-xl p-5 border border-sand">
                   <Quote size={20} className="text-gold mb-2" />
                   <p className="text-navy italic font-[family-name:var(--font-display)]">
                     &ldquo;{profile.quote}&rdquo;
@@ -193,7 +193,7 @@ export default function ProfileDetailPageClient() {
                     {profile.positions.map((position, index) => (
                       <div
                         key={index}
-                        className="bg-white rounded-xl p-4 shadow-sm border-r-4 border-gold"
+                        className="bg-white rounded-xl p-4 shadow-sm border border-sand"
                       >
                         <h3 className="font-[family-name:var(--font-display)] font-semibold text-navy">
                           {position.title}
@@ -210,7 +210,7 @@ export default function ProfileDetailPageClient() {
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="bg-white rounded-2xl shadow-lg p-6 sticky top-24"
+                  className="bg-white rounded-2xl shadow-lg p-6 sticky top-[calc(var(--header-offset-public)+1rem)]"
                 >
                   <h3 className="font-[family-name:var(--font-display)] font-bold text-xl text-navy mb-6 pb-4 border-b border-sand">
                     {t('profile.articles_by')}

@@ -369,7 +369,7 @@ export default function SourceDetailClient({ id }: Props) {
                     </p>
                   )}
                   {link.quoteExcerpt && (
-                    <p className="text-white/50 text-xs font-[family-name:var(--font-display)] mt-1.5 italic border-r-2 border-gold/20 pr-2">
+                    <p className="text-white/50 text-xs font-[family-name:var(--font-display)] mt-1.5 italic">
                       &ldquo;{link.quoteExcerpt}&rdquo;
                     </p>
                   )}

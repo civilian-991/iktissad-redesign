@@ -152,7 +152,7 @@ export default function ArticleLinkModal({ sourceId, onClose, onSave }: Props) {
                       onClick={() => setSelectedArticle(article)}
                       className={`w-full flex items-start gap-3 p-3 text-right transition-colors ${
                         selectedArticle?.id === article.id
-                          ? 'bg-gold/10 border-r-2 border-gold'
+                          ? 'bg-gold/15'
                           : 'hover:bg-white/5'
                       }`}
                     >

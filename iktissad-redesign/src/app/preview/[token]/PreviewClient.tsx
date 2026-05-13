@@ -117,7 +117,7 @@ export default function PreviewClient({ article, isDraft, expiresAt }: PreviewCl
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-lg text-zinc-400 leading-relaxed border-s-4 border-amber-600 ps-4">
+          <p className="text-xl text-zinc-300 leading-relaxed italic font-[family-name:var(--font-accent)]">
             {article.excerpt}
           </p>
         )}

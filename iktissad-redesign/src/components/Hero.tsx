@@ -149,7 +149,7 @@ export default function Hero() {
                     onClick={() => setActive(i)}
                     className={`flex-1 flex gap-3 p-4 text-start transition-colors group w-full ${
                       i !== articles.length - 1 ? 'border-b border-charcoal/10' : ''
-                    } ${i === active ? 'bg-gold/8 border-s-2 border-s-gold' : 'hover:bg-gold/5'}`}
+                    } ${i === active ? 'bg-gold/15' : 'hover:bg-gold/5'}`}
                   >
                     {/* Thumb */}
                     {article.featuredImage && (

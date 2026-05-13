@@ -142,6 +142,12 @@
   --spacing-section: 6rem;
   --spacing-container: 2rem;
 
+  /* Sticky offsets — keep sidebars/filters out from under the sticky chrome.
+     Public header: mobile ≈ 7rem (no top-bar); ≥lg ≈ 9.5rem (top-bar + logo + nav).
+     Admin header is a flat 5rem (h-20). */
+  --header-offset-public: 7rem;
+  --header-offset-admin: 5rem;
+
   /* ─────────────────────────────────────────────────────────────────
      SHADOWS — Warm, neutral (never blue-tinted)
      ───────────────────────────────────────────────────────────────── */
@@ -181,6 +187,13 @@
 /* ═══════════════════════════════════════════════════════════════
    BASE STYLES
    ═══════════════════════════════════════════════════════════════ */
+
+/* Bump the public-header offset on ≥lg where the top-bar row is visible. */
+@media (min-width: 1024px) {
+  :root {
+    --header-offset-public: 9.5rem;
+  }
+}
 
 * {
   box-sizing: border-box;
@@ -273,10 +286,7 @@ h3 {
   font-size: clamp(3rem, 6vw, 5.5rem);
   line-height: 1.3;
   letter-spacing: 0;
-  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-champagne) 50%, var(--color-gold) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-gold);
 }
 
 /* Accent Text - For English/numbers */

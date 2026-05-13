@@ -180,8 +180,8 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
       );
     case 'quote':
       return (
-        <blockquote className="border-s-4 border-gold/60 ps-3">
-          <p className="text-white/80 text-sm italic font-[family-name:var(--font-display)] line-clamp-2">
+        <blockquote className="ps-5 pe-2">
+          <p className="text-white/85 text-base italic font-[family-name:var(--font-accent)] leading-relaxed line-clamp-2">
             {(d.text as string) || 'نص الاقتباس...'}
           </p>
           {(d.attribution as string) && (
@@ -1186,7 +1186,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
             activeTab === 'library' ? 'block' : 'hidden'
           } lg:block`}
         >
-          <div className="bg-midnight/50 border border-gold/10 rounded-xl p-4 sticky top-4">
+          <div className="bg-midnight/50 border border-gold/10 rounded-xl p-4 sticky top-[calc(var(--header-offset-admin)+1rem)]">
             <h2 className="text-white/70 text-xs font-[family-name:var(--font-display)] font-semibold uppercase tracking-widest mb-4 flex items-center gap-2">
               <LayoutTemplate size={12} className="text-gold" />
               مكتبة الكتل
@@ -1223,7 +1223,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
             activeTab === 'settings' ? 'block' : 'hidden'
           } lg:block`}
         >
-          <div className="sticky top-4">
+          <div className="sticky top-[calc(var(--header-offset-admin)+1rem)]">
             <SettingsPanel
               values={settings}
               onChange={(v) => setSettings((prev) => ({ ...prev, ...v }))}

@@ -63,7 +63,7 @@ export default function ProfilesPageClient() {
         </section>
 
         {/* Search */}
-        <section className="py-6 bg-ivory sticky top-16 z-20 border-b border-sand">
+        <section className="py-6 bg-ivory sticky top-[var(--header-offset-public)] z-20 border-b border-sand">
           <div className="container-luxury">
             <div className="relative w-full md:w-96 mx-auto">
               <input

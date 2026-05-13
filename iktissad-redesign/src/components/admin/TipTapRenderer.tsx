@@ -139,7 +139,7 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
         <blockquote
           key={keyPrefix}
           dir="rtl"
-          className="border-s-4 border-amber-500 ps-4 my-4 text-zinc-300 italic text-lg"
+          className="my-6 ps-6 pe-2 text-zinc-200 italic text-xl font-[family-name:var(--font-accent)] leading-relaxed"
         >
           {children}
         </blockquote>

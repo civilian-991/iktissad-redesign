@@ -285,7 +285,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
                       key={notif.id}
                       onClick={() => handleItemClick(notif)}
                       className={`w-full text-start flex items-start gap-3 p-4 hover:bg-white/5 transition-colors ${
-                        !notif.is_read ? 'border-s-2 border-s-gold bg-gold/3' : ''
+                        !notif.is_read ? 'bg-gold/5' : ''
                       }`}
                     >
                       {/* Icon */}

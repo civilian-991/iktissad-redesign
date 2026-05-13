@@ -638,8 +638,8 @@ export default function ArticlePageClient({
               {/* Excerpt */}
               {article.excerpt && (
                 <p
-                  className="font-[family-name:var(--font-display)] font-semibold text-navy/80 mb-8 leading-loose border-r-[3px] border-gold pr-4"
-                  style={{ fontSize: '1.05rem', lineHeight: 1.95 }}
+                  className="font-[family-name:var(--font-display)] font-semibold text-navy/80 mb-8 leading-loose"
+                  style={{ fontSize: '1.15rem', lineHeight: 1.95, letterSpacing: '0.005em' }}
                 >
                   {article.excerpt}
                 </p>
@@ -800,7 +800,7 @@ export default function ArticlePageClient({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="sticky top-6 space-y-6">
+              <div className="sticky top-[calc(var(--header-offset-public)+1rem)] space-y-6">
 
                 {/* Related articles — F2.5: semantic similar with AI indicator */}
                 {relatedArticles.length > 0 && (

@@ -115,8 +115,8 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
               <p className="text-white/85 text-lg leading-relaxed mb-8">
                 في هذه المساحة بين الخبر والقرار، تعمل الاقتصاد والأعمال منذ عام 1977.
               </p>
-              <div className="border-r-4 border-gold pr-6 space-y-2">
-                <p className="text-white font-semibold text-xl">نحن لا ننقل الخبر.</p>
+              <div className="pt-6 mt-6 border-t border-gold/40 space-y-2">
+                <p className="text-white font-semibold text-2xl tracking-tight">نحن لا ننقل الخبر.</p>
                 <p className="text-white/90 text-lg">نفسّره. نضعه في سياقه. ونستبق اتجاهه.</p>
               </div>
               <p className="text-gold font-[family-name:var(--font-display)] font-bold text-xl mt-6">

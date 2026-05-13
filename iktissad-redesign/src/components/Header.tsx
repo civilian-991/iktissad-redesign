@@ -390,7 +390,7 @@ export default function Header() {
                       {item.submenu && <ChevronDown size={iconSizes.sm} className="text-gold/50" />}
                     </Link>
                     {item.submenu && (
-                      <div className="bg-cream/50 border-s-2 border-gold/20 ms-4">
+                      <div className="bg-cream/50 ms-4">
                         {item.submenu.slice(0, 6).map((subItem) => (
                           <Link
                             key={subItem.key}
