@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "api.awalan.com",
+      },
+      {
+        protocol: "https",
         hostname: "flagcdn.com",
       },
       // Supabase Storage: signed object URLs
