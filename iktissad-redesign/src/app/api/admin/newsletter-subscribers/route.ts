@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthFromRequest, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse } from '@/types';
 
@@ -30,8 +30,10 @@ function mapRow(row: NewsletterSubscriberRow): NewsletterSubscriber {
 // List free-tier newsletter subscribers (the `newsletter_subscribers`
 // table — distinct from the paid `subscribers` table at /admin/subscribers).
 export async function GET(request: NextRequest) {
-  const auth = await requireAuthFromRequest(request);
+  const auth = await requireRole(request, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const { searchParams } = new URL(request.url);
   const search = searchParams.get('search');

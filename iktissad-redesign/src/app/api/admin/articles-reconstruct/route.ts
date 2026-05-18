@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/slugify";
 import type { ApiResponse } from "@/types";
@@ -152,8 +152,10 @@ async function callClaude(prompt: string, apiKey: string): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {

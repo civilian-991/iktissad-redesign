@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse, ApiKey, ApiKeyScope } from '@/types';
 
@@ -51,8 +51,10 @@ type RouteContext = { params: Promise<{ id: string }> };
 // ---------------------------------------------------------------------------
 
 export async function GET(_request: NextRequest, { params }: RouteContext) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const { id } = await params;
   const admin = createAdminClient();
@@ -80,8 +82,10 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
 // ---------------------------------------------------------------------------
 
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const { id } = await params;
 
@@ -133,8 +137,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 // ---------------------------------------------------------------------------
 
 export async function DELETE(_request: NextRequest, { params }: RouteContext) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const { id } = await params;
   const admin = createAdminClient();

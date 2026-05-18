@@ -11,7 +11,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import type { ApiResponse } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -135,8 +135,10 @@ function buildSuggestions(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin", "editor", "writer"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const supabase = await createClient();
 

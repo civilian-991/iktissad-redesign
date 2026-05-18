@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -54,8 +54,10 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin"]);
   if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const { userId } = await params;
 
@@ -101,8 +103,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin"]);
   if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const callerRole = await getCallerRole(auth.userId);
   if (callerRole !== "super_admin") {
@@ -164,8 +168,10 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin"]);
   if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const callerRole = await getCallerRole(auth.userId);
   if (callerRole !== "super_admin") {

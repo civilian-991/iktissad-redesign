@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -16,8 +16,10 @@ import type { ApiResponse } from "@/types";
  * List all polls (admin view with vote counts).
  */
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const ip = getClientIp(request);
   const rl = publicReadLimit(`admin-polls:get:${ip}`);
@@ -70,8 +72,10 @@ const createPollSchema = z.object({
  * Create a new poll.
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const ip = getClientIp(request);
   const rl = authWriteLimit(`admin-polls:post:${ip}`);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse, AutomationRule } from '@/types';
 
@@ -19,8 +19,10 @@ function mapRow(row: Record<string, unknown>): AutomationRule {
 }
 
 export async function GET() {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const admin = createAdminClient();
   const { data, error } = await admin

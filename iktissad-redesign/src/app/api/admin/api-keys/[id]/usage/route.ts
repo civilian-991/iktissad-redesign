@@ -11,15 +11,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse, ApiKeyUsageStats } from '@/types';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: RouteContext) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const { id } = await params;
   const admin = createAdminClient();

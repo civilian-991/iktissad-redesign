@@ -6,12 +6,14 @@
 
 import { NextResponse } from 'next/server';
 import ExcelJS from 'exceljs';
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function GET() {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   try {
     const supabase = createAdminClient();

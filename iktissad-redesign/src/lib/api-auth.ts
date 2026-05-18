@@ -223,3 +223,97 @@ export function unauthorizedResponse() {
     { status: 401 }
   );
 }
+
+/** Return a 403 response for role-authorization failures. */
+export function forbiddenResponse(message = "Forbidden"): NextResponse {
+  return NextResponse.json({ error: message }, { status: 403 });
+}
+
+/**
+ * Role-based authorization gate for admin API routes.
+ *
+ * Performs the full `requireAuth` flow (session + CSRF if `request` is given),
+ * then loads the caller's row from `admin_roles` and verifies the role is in
+ * `allowedRoles`. `super_admin` is NOT auto-bypassed at the helper level —
+ * callers must include it in `allowedRoles` when they want super_admin access.
+ *
+ * Returns:
+ *   - `{ authenticated: true, userId, role }` on success
+ *   - `{ authenticated: true, userId, csrfFailed: true }` on CSRF failure
+ *   - `{ authenticated: true, userId, role, forbidden: true }` when the user
+ *     has a row in admin_roles but the role isn't allowed
+ *   - `{ authenticated: false }` when there's no session OR no admin_roles row
+ *
+ * Typical usage in a route handler:
+ *
+ *   const auth = await requireRole(request, ["super_admin", "editor"]);
+ *   if (!auth.authenticated) return unauthorizedResponse();
+ *   if (auth.csrfFailed) return csrfForbiddenResponse();
+ *   if (auth.forbidden) return forbiddenResponse();
+ */
+export async function requireRole(
+  request: Request | undefined,
+  allowedRoles: string[]
+): Promise<{
+  authenticated: boolean;
+  userId?: string;
+  role?: string;
+  csrfFailed?: boolean;
+  forbidden?: boolean;
+}> {
+  // 1. Establish identity. If a request is provided we also accept
+  //    Authorization: Bearer <service-role-key> or <user-jwt> for
+  //    server-to-server and CLI callers, mirroring requireAuthFromRequest.
+  let userId: string | undefined;
+  let csrfFailed = false;
+
+  const cookieAuth = await requireAuth(request);
+  if (cookieAuth.authenticated && cookieAuth.userId) {
+    userId = cookieAuth.userId;
+    csrfFailed = !!cookieAuth.csrfFailed;
+  } else if (request) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (serviceKey && token === serviceKey) {
+        userId = "service-role";
+      } else {
+        const supabase = createAdminClient();
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        if (!error && user) userId = user.id;
+      }
+    }
+  }
+
+  if (!userId) return { authenticated: false };
+  if (csrfFailed) return { authenticated: true, userId, csrfFailed: true };
+
+  // 2. Service-role calls bypass admin_roles checks — they're trusted callers.
+  if (userId === "service-role") {
+    return { authenticated: true, userId, role: "super_admin" };
+  }
+
+  // 3. Look up the caller's admin_roles row.
+  try {
+    const admin = createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (admin.from("admin_roles") as any)
+      .select("role")
+      .eq("user_id", userId)
+      .single();
+
+    const role = (data as { role: string } | null)?.role;
+    if (!role) {
+      // Authenticated Supabase user but not an admin — treat as forbidden so
+      // the caller can return 403 (clearer than 401 for a logged-in user).
+      return { authenticated: true, userId, forbidden: true };
+    }
+    if (!allowedRoles.includes(role)) {
+      return { authenticated: true, userId, role, forbidden: true };
+    }
+    return { authenticated: true, userId, role };
+  } catch {
+    return { authenticated: false };
+  }
+}
