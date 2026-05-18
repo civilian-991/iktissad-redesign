@@ -1700,6 +1700,43 @@ export type Database = {
         };
         Relationships: [];
       };
+      // ── Automation run log (migration 041) ───────────────────────────────
+      automation_runs: {
+        Row: {
+          id: string;
+          automation_id: string | null;
+          rule_key: string | null;
+          event: string;
+          action: string;
+          status: "success" | "failed" | "skipped";
+          error: string | null;
+          payload: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          automation_id?: string | null;
+          rule_key?: string | null;
+          event: string;
+          action: string;
+          status: "success" | "failed" | "skipped";
+          error?: string | null;
+          payload?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          automation_id?: string | null;
+          rule_key?: string | null;
+          event?: string;
+          action?: string;
+          status?: "success" | "failed" | "skipped";
+          error?: string | null;
+          payload?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       // ── Phase 11: Bookmarks ──────────────────────────────────────────────
       bookmarks: {
         Row: {

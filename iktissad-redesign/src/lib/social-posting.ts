@@ -279,13 +279,22 @@ async function postToLinkedIn(
 
 /**
  * Post to Telegram via Bot API
+ *
+ * Exported so other server-side surfaces (e.g. the automation engine in
+ * `src/lib/automations/engine.ts`) can reuse the same transport without
+ * duplicating the fetch dance.
  */
-async function postToTelegram(
+export async function postToTelegram(
   botToken: string,
   text: string,
-  channelName: string
+  channelName: string,
+  parseMode: 'HTML' | 'MarkdownV2' | 'Markdown' | undefined = 'HTML'
 ): Promise<PostResult> {
-  const chatId = channelName.startsWith('@') ? channelName : `@${channelName}`;
+  // Accept either a channel handle (@channel), a raw handle (channel) or a
+  // numeric chat_id ("-1001234567890"). Only prefix '@' for word-style handles.
+  const chatId = channelName.startsWith('@') || /^-?\d+$/.test(channelName)
+    ? channelName
+    : `@${channelName}`;
 
   const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
@@ -293,7 +302,7 @@ async function postToTelegram(
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: 'HTML',
+      parse_mode: parseMode,
       disable_web_page_preview: false,
     }),
   });
