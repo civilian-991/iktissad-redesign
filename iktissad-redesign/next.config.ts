@@ -85,14 +85,44 @@ const nextConfig: NextConfig = {
     //   - Google Analytics 4 + Google Ad Manager (GAM)
     //   - Mastercard MPGS / MIGS payment gateway iframes
     // 'unsafe-inline' on script-src is required by Next.js's inline runtime
-    // bootstrap; 'unsafe-eval' is needed in dev (HMR) and by some libs.
+    // bootstrap; 'unsafe-eval' is needed in dev (HMR) and by some libs —
+    // but is dropped in production to harden against XSS.
     // 'unsafe-inline' on style-src is required by Tailwind v4 + next/font.
+    const isDev = process.env.NODE_ENV !== "production";
+
+    // Keep img-src in lockstep with `images.remotePatterns` above so we don't
+    // open up the whole web. `data:` and `blob:` are needed by next/image.
+    const imgHosts = [
+      "https://images.unsplash.com",
+      "https://www.defaiya.com",
+      "https://www.iktissadonline.com",
+      "https://api.awalan.com",
+      "https://flagcdn.com",
+      "https://*.supabase.co",
+    ].join(" ");
+
+    const scriptSrc = [
+      "script-src",
+      "'self'",
+      "'unsafe-inline'",
+      isDev ? "'unsafe-eval'" : null,
+      "https://challenges.cloudflare.com",
+      "https://*.googletagmanager.com",
+      "https://*.google-analytics.com",
+      "https://*.googletagservices.com",
+      "https://securepubads.g.doubleclick.net",
+      "https://*.mastercard.com.au",
+      "https://*.mastercard.com",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.googletagmanager.com https://*.google-analytics.com https://*.googletagservices.com https://securepubads.g.doubleclick.net https://*.mastercard.com.au https://*.mastercard.com",
+      scriptSrc,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https:",
+      `img-src 'self' data: blob: ${imgHosts}`,
       "media-src 'self' https:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://challenges.cloudflare.com https://*.google-analytics.com https://*.googletagmanager.com https://*.mastercard.com.au https://*.mastercard.com",
       "frame-src 'self' https://challenges.cloudflare.com https://*.mastercard.com.au https://*.mastercard.com https://*.youtube.com https://www.youtube-nocookie.com https://securepubads.g.doubleclick.net",
