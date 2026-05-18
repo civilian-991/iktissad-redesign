@@ -1324,3 +1324,404 @@ export const shareAnalyticsKey = (period?: string) =>
 
 export const seoScoresKey = (params: { page?: number; pageSize?: number; sortBy?: string } = {}) =>
   buildQuery('/api/admin/analytics/seo-scores', params);
+
+// ─── Admin: API Keys (Phase 10.2) ────────────────────────────────────────────
+
+import type {
+  ApiKey,
+  ApiKeyScope,
+  ApiKeyUsageStats,
+  Webhook as WebhookType,
+  WebhookDelivery,
+  WebhookEventType,
+  AutomationRule,
+  Source,
+} from '@/types';
+
+export const apiKeysKey = () => '/api/admin/api-keys';
+export const apiKeyUsageKey = (id: string) => `/api/admin/api-keys/${id}/usage`;
+
+export async function getApiKeys(): Promise<ApiResponse<ApiKey[]>> {
+  return api<ApiKey[]>('/api/admin/api-keys');
+}
+
+export async function getApiKeyUsage(
+  id: string
+): Promise<ApiResponse<ApiKeyUsageStats>> {
+  return api<ApiKeyUsageStats>(`/api/admin/api-keys/${id}/usage`);
+}
+
+export interface CreateApiKeyInput {
+  name: string;
+  scopes: ApiKeyScope[];
+  rateLimitPerMinute: number;
+}
+
+export async function createApiKey(
+  data: CreateApiKeyInput
+): Promise<ApiResponse<ApiKey> & { rawKey?: string }> {
+  return api<ApiKey>('/api/admin/api-keys', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }) as Promise<ApiResponse<ApiKey> & { rawKey?: string }>;
+}
+
+export async function updateApiKey(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<ApiKey>> {
+  return api<ApiKey>(`/api/admin/api-keys/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteApiKey(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/admin/api-keys/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ─── Admin: Webhooks ─────────────────────────────────────────────────────────
+
+export const webhooksKey = () => '/api/admin/webhooks';
+export const webhookDeliveriesKey = (id: string) =>
+  `/api/admin/webhooks/${id}/deliveries`;
+
+export async function getWebhooks(): Promise<ApiResponse<WebhookType[]>> {
+  return api<WebhookType[]>('/api/admin/webhooks');
+}
+
+export async function getWebhookDeliveries(
+  id: string
+): Promise<ApiResponse<WebhookDelivery[]>> {
+  return api<WebhookDelivery[]>(`/api/admin/webhooks/${id}/deliveries`);
+}
+
+export interface CreateWebhookInput {
+  name: string;
+  url: string;
+  secret: string;
+  events: WebhookEventType[];
+}
+
+export async function createWebhook(
+  data: CreateWebhookInput
+): Promise<ApiResponse<WebhookType>> {
+  return api<WebhookType>('/api/admin/webhooks', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateWebhook(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<WebhookType>> {
+  return api<WebhookType>(`/api/admin/webhooks/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteWebhook(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/admin/webhooks/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function testWebhook(
+  id: string
+): Promise<ApiResponse<{ success: boolean }>> {
+  return api<{ success: boolean }>(`/api/admin/webhooks/${id}/test`, {
+    method: 'POST',
+  });
+}
+
+// ─── Admin: Automations ──────────────────────────────────────────────────────
+
+export const automationsKey = () => '/api/admin/automations';
+
+export async function getAutomations(): Promise<ApiResponse<AutomationRule[]>> {
+  return api<AutomationRule[]>('/api/admin/automations');
+}
+
+export async function updateAutomation(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<AutomationRule>> {
+  return api<AutomationRule>(`/api/admin/automations/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Admin: Social Accounts (Phase 10.3) ─────────────────────────────────────
+
+import type { SocialAccount } from '@/app/api/admin/social-accounts/route';
+
+export const socialAccountsKey = () => '/api/admin/social-accounts';
+
+export async function getSocialAccounts(): Promise<ApiResponse<SocialAccount[]>> {
+  return api<SocialAccount[]>('/api/admin/social-accounts');
+}
+
+export interface CreateSocialAccountInput {
+  platform: 'twitter' | 'linkedin' | 'telegram';
+  accountName: string;
+  accessToken: string;
+  refreshToken?: string;
+  tokenExpiresAt?: string;
+}
+
+export async function createSocialAccount(
+  data: CreateSocialAccountInput
+): Promise<ApiResponse<SocialAccount>> {
+  return api<SocialAccount>('/api/admin/social-accounts', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateSocialAccount(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<SocialAccount>> {
+  return api<SocialAccount>(`/api/admin/social-accounts/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteSocialAccount(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/admin/social-accounts/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ─── Admin: Contact Submissions ──────────────────────────────────────────────
+
+import type { ContactSubmission } from '@/app/api/admin/contact-submissions/route';
+
+export interface ContactSubmissionsListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export function contactSubmissionsKey(params: ContactSubmissionsListParams = {}): string {
+  return buildQuery('/api/admin/contact-submissions', params);
+}
+
+export async function deleteContactSubmission(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/admin/contact-submissions/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Type re-export so consumers can use it via api-client
+export type { ContactSubmission };
+
+// ─── Admin: Newsletter Subscribers (free tier) ───────────────────────────────
+
+import type { NewsletterSubscriber } from '@/app/api/admin/newsletter-subscribers/route';
+
+export interface NewsletterSubscribersListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'active' | 'unsubscribed' | '';
+}
+
+export function newsletterSubscribersKey(
+  params: NewsletterSubscribersListParams = {}
+): string {
+  return buildQuery('/api/admin/newsletter-subscribers', params);
+}
+
+export async function updateNewsletterSubscriber(
+  id: string,
+  data: { status: 'active' | 'unsubscribed' }
+): Promise<ApiResponse<NewsletterSubscriber>> {
+  return api<NewsletterSubscriber>(`/api/admin/newsletter-subscribers/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteNewsletterSubscriber(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/admin/newsletter-subscribers/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export type { NewsletterSubscriber };
+
+// ─── Admin: Notifications ────────────────────────────────────────────────────
+
+export const adminNotificationsKey = () => '/api/admin/notifications';
+
+export async function getAdminNotifications<T = unknown>(): Promise<ApiResponse<T[]>> {
+  return api<T[]>('/api/admin/notifications');
+}
+
+export async function markAdminNotificationRead(
+  id: string
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>(`/api/admin/notifications/${id}`, { method: 'PUT' });
+}
+
+export async function markAllAdminNotificationsRead(): Promise<ApiResponse<unknown>> {
+  return api<unknown>('/api/admin/notifications', { method: 'PUT' });
+}
+
+// ─── Admin: A/B Tests (Headlines) ────────────────────────────────────────────
+
+export interface CreateAbTestInput {
+  articleId: string;
+  variantA: string;
+  variantB: string;
+  durationHours: number;
+  trafficSplit: number;
+}
+
+export async function createAbTest(
+  data: CreateAbTestInput
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>('/api/admin/ab-tests', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateAbTest(
+  data: { id: string; status: string }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>('/api/admin/ab-tests', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Live Blogs ──────────────────────────────────────────────────────────────
+
+export const liveBlogsKey = () => '/api/live-blogs';
+export const liveBlogKey = (id: string) => `/api/live-blogs/${id}`;
+
+export async function createLiveBlog(
+  data: { articleId: string }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>('/api/live-blogs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateLiveBlog(
+  id: string,
+  data: { status: 'active' | 'ended' }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>(`/api/live-blogs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function postLiveBlogUpdate(
+  blogId: string,
+  data: { content: string }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>(`/api/live-blogs/${blogId}/updates`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Series (extra mutations needed beyond existing helpers) ────────────────
+// createSeries / updateSeries / deleteSeries / addArticleToSeries /
+// reorderSeriesArticles / removeArticleFromSeries already exist above.
+
+// ─── Comments ────────────────────────────────────────────────────────────────
+
+export async function updateComment(
+  id: string,
+  data: { status: 'approved' | 'rejected' | 'spam' }
+): Promise<ApiResponse<unknown>> {
+  return api<unknown>(`/api/comments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteComment(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/comments/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ─── Sources (extra: delete) ─────────────────────────────────────────────────
+
+export async function deleteSource(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/sources/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ─── Advertisers ─────────────────────────────────────────────────────────────
+
+import type { Advertiser } from '@/app/api/advertisers/route';
+
+export interface AdvertiserListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}
+
+export function advertisersKey(params: AdvertiserListParams = {}): string {
+  return buildQuery('/api/advertisers', params);
+}
+
+export async function createAdvertiser(
+  data: Record<string, unknown>
+): Promise<ApiResponse<Advertiser>> {
+  return api<Advertiser>('/api/advertisers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateAdvertiser(
+  id: string,
+  data: Record<string, unknown>
+): Promise<ApiResponse<Advertiser>> {
+  return api<Advertiser>(`/api/advertisers/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteAdvertiser(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/advertisers/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Silence "unused" for re-exported source type
+export type { Source };
+

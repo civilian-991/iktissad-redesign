@@ -17,7 +17,7 @@ import {
   X,
   BookOpen,
 } from 'lucide-react';
-import { swrFetcher } from '@/lib/api-client';
+import { swrFetcher, createSeries, deleteSeries } from '@/lib/api-client';
 import { iconSizes } from '@/lib/design-tokens';
 import type { ApiResponse, ArticleSeries } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
@@ -88,13 +88,8 @@ function SeriesFormModal({ onClose, onCreated }: SeriesFormModalProps) {
     }
     setSaving(true);
     try {
-      const res = await fetch('/api/series', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, titleEn, slug, description }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'حدث خطأ');
+      const json = await createSeries({ title, titleEn, slug, description });
+      if (!json.data) throw new Error(json.error || 'حدث خطأ');
       toast.success('تم إنشاء الملف بنجاح');
       onCreated();
       onClose();
@@ -305,9 +300,7 @@ export default function SeriesClient() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/series/${deleteTarget.slug}`, { method: 'DELETE' });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'حدث خطأ');
+      await deleteSeries(deleteTarget.slug);
       toast.success('تم حذف الملف');
       mutate();
       setDeleteTarget(null);

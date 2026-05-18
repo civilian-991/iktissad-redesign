@@ -34,6 +34,13 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import type { ApiKey, ApiKeyScope, ApiKeyUsageStats } from '@/types';
+import {
+  getApiKeys,
+  getApiKeyUsage,
+  createApiKey,
+  updateApiKey,
+  deleteApiKey,
+} from '@/lib/api-client';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -154,8 +161,7 @@ function UsagePanel({ keyId, keyName }: UsagePanelProps) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/api-keys/${keyId}/usage`);
-      const json = await res.json();
+      const json = await getApiKeyUsage(keyId);
       setStats(json.data ?? null);
     } catch {
       toast.error('تعذر تحميل إحصاءات الاستخدام');
@@ -273,13 +279,12 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
 
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), scopes, rateLimitPerMinute: rateLimit }),
+      const json = await createApiKey({
+        name: name.trim(),
+        scopes,
+        rateLimitPerMinute: rateLimit,
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'حدث خطأ');
+      if (!json.data) throw new Error(json.error ?? 'حدث خطأ');
       onCreated(json.data as ApiKey, json.rawKey as string);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
@@ -405,8 +410,7 @@ export default function ApiKeysClient() {
   const loadKeys = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/api-keys');
-      const json = await res.json();
+      const json = await getApiKeys();
       setKeys(json.data ?? []);
     } catch {
       toast.error('تعذر تحميل مفاتيح API');
@@ -427,12 +431,7 @@ export default function ApiKeysClient() {
   const handleToggleActive = async (key: ApiKey) => {
     setTogglingId(key.id);
     try {
-      const res = await fetch(`/api/admin/api-keys/${key.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !key.isActive }),
-      });
-      if (!res.ok) throw new Error('Failed');
+      await updateApiKey(key.id, { isActive: !key.isActive });
       setKeys((prev) => prev.map((k) => k.id === key.id ? { ...k, isActive: !k.isActive } : k));
       toast.success(key.isActive ? 'تم تعطيل المفتاح' : 'تم تفعيل المفتاح');
     } catch {
@@ -446,8 +445,7 @@ export default function ApiKeysClient() {
     if (!confirm(`هل تريد حذف مفتاح "${name}" نهائياً؟`)) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/api-keys/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
+      await deleteApiKey(id);
       setKeys((prev) => prev.filter((k) => k.id !== id));
       if (expandedId === id) setExpandedId(null);
       toast.success('تم حذف المفتاح');

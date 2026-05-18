@@ -28,6 +28,11 @@ import { useTranslation } from '@/lib/i18n';
 import { formatRelativeTime } from '@/lib/i18n/format';
 import { iconSizes } from '@/lib/design-tokens';
 import { createClient } from '@/lib/supabase/client';
+import {
+  getAdminNotifications,
+  markAdminNotificationRead,
+  markAllAdminNotificationsRead,
+} from '@/lib/api-client';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -122,13 +127,10 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/notifications');
-      if (res.ok) {
-        const json = await res.json();
-        const items: AdminNotification[] = json.data ?? [];
-        setNotifications(items);
-        setUnreadCount(items.filter((n) => !n.is_read).length);
-      }
+      const json = await getAdminNotifications<AdminNotification>();
+      const items: AdminNotification[] = json.data ?? [];
+      setNotifications(items);
+      setUnreadCount(items.filter((n) => !n.is_read).length);
     } catch {
       // Silent fail
     } finally {
@@ -174,7 +176,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
   // Mark individual as read
   const markRead = useCallback(async (id: string) => {
     try {
-      await fetch(`/api/admin/notifications/${id}`, { method: 'PUT' });
+      await markAdminNotificationRead(id);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
@@ -187,7 +189,7 @@ export default function NotificationBell({ darkMode = true }: NotificationBellPr
   // Mark all as read
   const markAllRead = useCallback(async () => {
     try {
-      await fetch('/api/admin/notifications', { method: 'PUT' });
+      await markAllAdminNotificationsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
       toast.success(t('admin.notifications.markedAllRead'));

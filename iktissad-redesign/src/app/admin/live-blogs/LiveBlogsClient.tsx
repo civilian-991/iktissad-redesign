@@ -5,7 +5,12 @@ import useSWR from 'swr';
 import { toast } from 'sonner';
 import { Radio, Plus, Square, Send, Clock, User, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { swrFetcher } from '@/lib/api-client';
+import {
+  swrFetcher,
+  createLiveBlog,
+  updateLiveBlog,
+  postLiveBlogUpdate,
+} from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
 import type { ApiResponse } from '@/types';
 
@@ -54,22 +59,13 @@ export default function LiveBlogsClient() {
     if (!articleId.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch('/api/live-blogs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articleId: articleId.trim() }),
-      });
-      if (res.ok) {
-        toast.success('تم بدء البث المباشر');
-        setShowCreate(false);
-        setArticleId('');
-        mutate();
-      } else {
-        const err = await res.json();
-        toast.error(err.error || 'فشل في بدء البث');
-      }
-    } catch {
-      toast.error('خطأ في الاتصال');
+      await createLiveBlog({ articleId: articleId.trim() });
+      toast.success('تم بدء البث المباشر');
+      setShowCreate(false);
+      setArticleId('');
+      mutate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'فشل في بدء البث');
     } finally {
       setCreating(false);
     }
@@ -77,16 +73,10 @@ export default function LiveBlogsClient() {
 
   const handleEnd = useCallback(async (blogId: string) => {
     try {
-      const res = await fetch(`/api/live-blogs/${blogId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'ended' }),
-      });
-      if (res.ok) {
-        toast.success('تم إنهاء البث المباشر');
-        mutate();
-        if (selectedBlog === blogId) mutateBlog();
-      }
+      await updateLiveBlog(blogId, { status: 'ended' });
+      toast.success('تم إنهاء البث المباشر');
+      mutate();
+      if (selectedBlog === blogId) mutateBlog();
     } catch {
       toast.error('خطأ في الاتصال');
     }
@@ -96,21 +86,12 @@ export default function LiveBlogsClient() {
     if (!selectedBlog || !updateContent.trim()) return;
     setPosting(true);
     try {
-      const res = await fetch(`/api/live-blogs/${selectedBlog}/updates`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: updateContent.trim() }),
-      });
-      if (res.ok) {
-        setUpdateContent('');
-        mutateBlog();
-        toast.success('تم نشر التحديث');
-      } else {
-        const err = await res.json();
-        toast.error(err.error || 'فشل نشر التحديث');
-      }
-    } catch {
-      toast.error('خطأ في الاتصال');
+      await postLiveBlogUpdate(selectedBlog, { content: updateContent.trim() });
+      setUpdateContent('');
+      mutateBlog();
+      toast.success('تم نشر التحديث');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'فشل نشر التحديث');
     } finally {
       setPosting(false);
     }

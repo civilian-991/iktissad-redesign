@@ -23,7 +23,13 @@ import {
 } from 'lucide-react';
 import { useFormatters } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { swrFetcher } from '@/lib/api-client';
+import {
+  swrFetcher,
+  socialAccountsKey,
+  createSocialAccount,
+  updateSocialAccount,
+  deleteSocialAccount,
+} from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type { SocialAccount } from '@/app/api/admin/social-accounts/route';
 
@@ -58,7 +64,7 @@ export default function SocialAccountsClient() {
   const [saving, setSaving] = useState(false);
 
   const { data, isLoading, mutate } = useSWR<ApiResponse<SocialAccount[]>>(
-    '/api/admin/social-accounts',
+    socialAccountsKey(),
     swrFetcher,
     { revalidateOnFocus: false },
   );
@@ -73,21 +79,13 @@ export default function SocialAccountsClient() {
     }
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/social-accounts', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          platform: form.platform,
-          accountName: form.accountName.trim(),
-          accessToken: form.accessToken.trim(),
-          refreshToken: form.refreshToken.trim() || undefined,
-          tokenExpiresAt: form.tokenExpiresAt || undefined,
-        }),
+      await createSocialAccount({
+        platform: form.platform,
+        accountName: form.accountName.trim(),
+        accessToken: form.accessToken.trim(),
+        refreshToken: form.refreshToken.trim() || undefined,
+        tokenExpiresAt: form.tokenExpiresAt || undefined,
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? 'failed');
-      }
       toast.success('تم ربط الحساب');
       setForm(EMPTY_FORM);
       setModalOpen(false);
@@ -101,12 +99,7 @@ export default function SocialAccountsClient() {
 
   const handleToggleActive = async (acc: SocialAccount) => {
     try {
-      const res = await fetch(`/api/admin/social-accounts/${acc.id}`, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ active: !acc.active }),
-      });
-      if (!res.ok) throw new Error();
+      await updateSocialAccount(acc.id, { active: !acc.active });
       toast.success(acc.active ? 'تم إيقاف الحساب' : 'تم تفعيل الحساب');
       mutate();
     } catch {
@@ -117,8 +110,7 @@ export default function SocialAccountsClient() {
   const handleDelete = async (id: string) => {
     if (!confirm('حذف هذا الحساب الاجتماعي؟ سيتوقف النشر التلقائي عليه فوراً.')) return;
     try {
-      const res = await fetch(`/api/admin/social-accounts/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await deleteSocialAccount(id);
       toast.success('تم الحذف');
       mutate();
     } catch {

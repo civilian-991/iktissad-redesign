@@ -28,7 +28,7 @@ import {
   ChevronDown,
   Search,
 } from 'lucide-react'
-import { swrFetcher, articlesKey } from '@/lib/api-client'
+import { swrFetcher, articlesKey, createAbTest, updateAbTest } from '@/lib/api-client'
 import { iconSizes } from '@/lib/design-tokens'
 import { Button } from '@/components/ui'
 import type { Article, ApiResponse } from '@/types'
@@ -486,22 +486,13 @@ export default function HeadlineABLab({
 
     setIsStartingTest(true)
     try {
-      const res = await fetch('/api/admin/ab-tests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          articleId: selectedArticleId,
-          variantA: currentTitle,
-          variantB: activeTestVariant,
-          durationHours: testDuration,
-          trafficSplit: 50,
-        }),
+      await createAbTest({
+        articleId: selectedArticleId,
+        variantA: currentTitle,
+        variantB: activeTestVariant,
+        durationHours: testDuration,
+        trafficSplit: 50,
       })
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'خطأ' }))
-        throw new Error(err.error || `HTTP ${res.status}`)
-      }
 
       await mutateTests()
       setActiveTestVariant(null)
@@ -520,16 +511,7 @@ export default function HeadlineABLab({
 
     setIsStoppingTest(true)
     try {
-      const res = await fetch('/api/admin/ab-tests', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: activeTest.id, status: 'stopped' }),
-      })
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'خطأ' }))
-        throw new Error(err.error || `HTTP ${res.status}`)
-      }
+      await updateAbTest({ id: activeTest.id, status: 'stopped' })
 
       await mutateTests()
       toast.success('تم إيقاف الاختبار')

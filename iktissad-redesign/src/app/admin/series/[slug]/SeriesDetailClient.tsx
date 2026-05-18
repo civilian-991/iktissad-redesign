@@ -46,7 +46,13 @@ import {
   X,
   Save,
 } from 'lucide-react';
-import { swrFetcher } from '@/lib/api-client';
+import {
+  swrFetcher,
+  addArticleToSeries,
+  updateSeries,
+  reorderSeriesArticles,
+  removeArticleFromSeries,
+} from '@/lib/api-client';
 import { iconSizes } from '@/lib/design-tokens';
 import type { ApiResponse, ArticleSeries, SeriesArticle, Article } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
@@ -180,13 +186,8 @@ function ArticleSearchModal({
   const handleAdd = async (articleId: string) => {
     setAdding(articleId);
     try {
-      const res = await fetch(`/api/series/${seriesSlug}/articles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articleId }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'حدث خطأ');
+      const json = await addArticleToSeries(seriesSlug, articleId);
+      if (!json.data) throw new Error(json.error || 'حدث خطأ');
       toast.success('تمت إضافة المقالة إلى الملف');
       onAdded();
     } catch (err: unknown) {
@@ -311,13 +312,15 @@ function EditSeriesModal({ series, onClose, onSaved }: EditSeriesModalProps) {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch(`/api/series/${series.slug}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, titleEn, description, descriptionEn, coverImage, status }),
+      const json = await updateSeries(series.slug, {
+        title,
+        titleEn,
+        description,
+        descriptionEn,
+        coverImage,
+        status,
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'حدث خطأ');
+      if (!json.data) throw new Error(json.error || 'حدث خطأ');
       toast.success('تم حفظ التغييرات');
       onSaved();
       onClose();
@@ -468,17 +471,10 @@ export default function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
       setReordering(true);
 
       try {
-        const res = await fetch(`/api/series/${slug}/articles`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order: reordered.map(i => ({ id: i.id, orderIndex: i.orderIndex })),
-          }),
-        });
-        if (!res.ok) {
-          const json = await res.json();
-          throw new Error(json.error || 'حدث خطأ');
-        }
+        await reorderSeriesArticles(
+          slug,
+          reordered.map(i => ({ id: i.id, orderIndex: i.orderIndex }))
+        );
         toast.success('تم حفظ الترتيب');
       } catch (err: unknown) {
         toast.error(err instanceof Error ? err.message : 'فشل حفظ الترتيب');
@@ -498,14 +494,7 @@ export default function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
       setLocalItems(prev => (prev ?? items).filter(i => i.id !== seriesArticleId));
 
       try {
-        const res = await fetch(
-          `/api/series/${slug}/articles?seriesArticleId=${seriesArticleId}`,
-          { method: 'DELETE' }
-        );
-        if (!res.ok) {
-          const json = await res.json();
-          throw new Error(json.error || 'حدث خطأ');
-        }
+        await removeArticleFromSeries(slug, seriesArticleId);
         toast.success('تمت الإزالة من الملف');
         mutateArticles();
       } catch (err: unknown) {

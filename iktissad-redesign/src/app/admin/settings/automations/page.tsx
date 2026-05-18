@@ -16,6 +16,7 @@ import {
   Bell,
 } from 'lucide-react';
 import type { AutomationRule } from '@/types';
+import { getAutomations, updateAutomation } from '@/lib/api-client';
 
 const ACTION_ICONS: Record<string, React.ElementType> = {
   post_telegram: Send,
@@ -36,8 +37,7 @@ export default function AutomationsPage() {
   const loadRules = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/automations');
-      const json = await res.json();
+      const json = await getAutomations();
       setRules(json.data ?? []);
     } catch {
       toast.error('تعذر تحميل قواعد الأتمتة');
@@ -51,12 +51,7 @@ export default function AutomationsPage() {
   const handleToggle = async (rule: AutomationRule) => {
     setTogglingId(rule.id);
     try {
-      const res = await fetch(`/api/admin/automations/${rule.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !rule.enabled }),
-      });
-      if (!res.ok) throw new Error('Failed');
+      await updateAutomation(rule.id, { enabled: !rule.enabled });
       setRules((prev) => prev.map((r) => r.id === rule.id ? { ...r, enabled: !r.enabled } : r));
       toast.success(rule.enabled ? 'تم تعطيل القاعدة' : 'تم تفعيل القاعدة');
     } catch {
@@ -93,12 +88,7 @@ export default function AutomationsPage() {
         else parsedConfig[k] = v;
       }
 
-      const res = await fetch(`/api/admin/automations/${rule.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config: parsedConfig }),
-      });
-      if (!res.ok) throw new Error('Failed');
+      await updateAutomation(rule.id, { config: parsedConfig });
       setRules((prev) => prev.map((r) => r.id === rule.id ? { ...r, config: parsedConfig } : r));
       toast.success('تم حفظ الإعدادات');
       setExpandedId(null);
