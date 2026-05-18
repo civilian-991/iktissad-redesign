@@ -96,7 +96,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       setHighlights(magazine.highlights?.length ? magazine.highlights : ['']);
       setInitialized(true);
     }
-  }, [magazine, initialized]);
+  }, [magazine, initialized, months]);
 
   const addHighlight = () => {
     setHighlights([...highlights, '']);

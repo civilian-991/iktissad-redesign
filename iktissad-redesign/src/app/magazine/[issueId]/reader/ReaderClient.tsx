@@ -27,7 +27,7 @@ interface ReaderClientProps {
 
 function SpreadRenderer({
   spread,
-  index,
+  index: _index,
   issue,
   sections,
   onNavigate,
@@ -103,8 +103,6 @@ export default function ReaderClient({ issue, spreads, sections }: ReaderClientP
   const [pageAnnouncement, setPageAnnouncement] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
   const prevSpreadRef = useRef(0);
-
-  const totalSpreads = spreads.length;
 
   // ── Embla Carousel — RTL direction ────────────────────────────────────────
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -187,7 +185,7 @@ export default function ReaderClient({ issue, spreads, sections }: ReaderClientP
 
     emblaApi.on('select', onSelect);
     return () => { emblaApi.off('select', onSelect); };
-  }, [emblaApi, triggerFlipAnimation]);
+  }, [emblaApi, triggerFlipAnimation, spreads.length]);
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {

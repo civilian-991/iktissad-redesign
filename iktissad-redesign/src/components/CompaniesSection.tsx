@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Building2, Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
+import { Clock, ArrowUpLeft, Loader2 } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';

@@ -103,7 +103,6 @@ async function registerInMediaTable(input: MediaRegistrationInput): Promise<void
       body: JSON.stringify(input),
     });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.warn('Media table registration failed:', err);
   }
 }

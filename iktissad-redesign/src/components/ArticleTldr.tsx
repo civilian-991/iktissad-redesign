@@ -14,7 +14,7 @@ interface ArticleTldrProps {
  * Collapsible, bilingual (AR primary, EN secondary).
  */
 export default function ArticleTldr({ summary, summaryEn }: ArticleTldrProps) {
-  const { t, locale } = useTranslation();
+  const { locale } = useTranslation();
   const [expanded, setExpanded] = useState(true);
   const [showEn, setShowEn] = useState(false);
 

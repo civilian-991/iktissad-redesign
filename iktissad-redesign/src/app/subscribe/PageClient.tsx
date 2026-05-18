@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Check, X, Crown, Star, Zap, Shield, CreditCard, Tag, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -123,7 +122,7 @@ function CellValue({ val }: { val: boolean | string }) {
   return <span className="text-sm text-charcoal font-semibold">{val}</span>;
 }
 
-export default function SubscribePageClient({ plans = [], redirectTo }: Props) {
+export default function SubscribePageClient({ plans = [], redirectTo: _redirectTo }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');

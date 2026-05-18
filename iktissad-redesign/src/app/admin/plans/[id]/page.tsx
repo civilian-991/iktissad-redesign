@@ -4,9 +4,7 @@
 import type { Metadata } from 'next';
 import PlanEditFormClient from './PlanFormClient';
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> }
-): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return { title: 'تعديل خطة الاشتراك | لوحة الإدارة' };
 }
 

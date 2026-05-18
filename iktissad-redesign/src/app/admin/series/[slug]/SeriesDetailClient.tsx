@@ -12,7 +12,7 @@
  * - DELETE /api/series/[slug]/articles?seriesArticleId=... for removal
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -443,7 +443,7 @@ export default function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
   );
 
   const series = seriesData?.data;
-  const items = localItems ?? articlesData?.data ?? [];
+  const items = useMemo(() => localItems ?? articlesData?.data ?? [], [localItems, articlesData]);
 
   const existingIds = new Set(items.map(i => i.articleId));
 

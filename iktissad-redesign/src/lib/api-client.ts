@@ -24,9 +24,6 @@ import type {
   MagazineIssue,
   AdminUser,
   MediaItem,
-  Section,
-  Sector,
-  Country,
   MagazineSpread,
   SpreadRevision,
   Newsletter,
@@ -205,12 +202,13 @@ function showRateLimitToast(waitSeconds: number | null): void {
 /**
  * Drain the request queue after a rate-limit window expires.
  * Each entry's `run()` re-invokes the fetch; errors surface to the original caller.
+ * Kept for future use — currently scheduled internally via setTimeout only.
  */
-function drainQueue(): void {
+function _drainQueue(): void {
   const now = Date.now();
   if (rateLimitResumeAt !== null && now < rateLimitResumeAt) {
     // Still in the window – schedule another drain attempt
-    setTimeout(drainQueue, rateLimitResumeAt - now + 50);
+    setTimeout(_drainQueue, rateLimitResumeAt - now + 50);
     return;
   }
   rateLimitResumeAt = null;

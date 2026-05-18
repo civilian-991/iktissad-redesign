@@ -42,7 +42,6 @@ import {
   Plus,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-import { iconSizes } from '@/lib/design-tokens';
 import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
 import MediaPicker from '@/components/admin/MediaPicker';
@@ -113,7 +112,6 @@ function extractText(node: JSONContent | null | undefined): string {
 }
 
 const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
-type TagKey = typeof tagKeys[number];
 
 
 export default function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
@@ -358,7 +356,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       toast.success(`${t('admin.articles.editor.articleTypeChanged')} ${config.arabicLabel}`);
       setShowOutlineModal(true);
     },
-    []
+    [t]
   );
 
   /** Insert the outline HTML into TipTap. Closes modal. */
@@ -383,7 +381,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   const handleVersionRestore = useCallback(() => {
     toast.success(t('admin.articles.editor.versionRestored'));
     router.refresh();
-  }, [router]);
+  }, [router, t]);
 
   // Handle image selection from MediaPicker for inline editor insertion
   const handleMediaSelect = useCallback((url: string) => {

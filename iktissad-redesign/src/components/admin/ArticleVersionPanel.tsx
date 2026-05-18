@@ -15,7 +15,7 @@
  *  - Loading skeletons and empty state
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -358,7 +358,7 @@ export default function ArticleVersionPanel({
     { revalidateOnFocus: false }
   );
 
-  const versions = versionsRes?.data ?? [];
+  const versions = useMemo(() => versionsRes?.data ?? [], [versionsRes]);
 
   const [savingSnapshot, setSavingSnapshot] = useState(false);
 

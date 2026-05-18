@@ -10,7 +10,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import NextImage from 'next/image';
 import {
   X,
   Search,

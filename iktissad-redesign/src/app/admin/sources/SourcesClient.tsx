@@ -25,7 +25,6 @@ import {
   FileText,
   Trash2,
   Edit,
-  Loader2,
 } from 'lucide-react';
 import { iconSizes } from '@/lib/design-tokens';
 import { swrFetcher, deleteSource } from '@/lib/api-client';

@@ -14,16 +14,12 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import {
   ArrowRight,
-  User,
-  Mail,
   Phone,
   Globe,
   Calendar,
   CreditCard,
   Loader2,
   AlertTriangle,
-  BookOpen,
-  BarChart2,
   CheckCircle,
   Trash2,
   Save,
@@ -124,7 +120,7 @@ export default function SubscriberProfileClient({ id }: Props) {
         setSaving(null);
       }
     },
-    [id, mutate]
+    [id, mutate, t]
   );
 
   const handleGrantFreeAccess = useCallback(async () => {
@@ -139,7 +135,7 @@ export default function SubscriberProfileClient({ id }: Props) {
     } catch {
       toast.error(t('admin.subscribers.profile.deleteError'));
     }
-  }, [id, router]);
+  }, [id, router, t]);
 
   // ─── Loading / Error ──────────────────────────────────────
   if (isLoading) {

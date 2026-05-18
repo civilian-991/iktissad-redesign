@@ -26,19 +26,14 @@ jobs:
           cache-dependency-path: iktissad-redesign/package-lock.json
       - run: npm ci
         working-directory: iktissad-redesign
-      # --max-warnings caps the warning count at the current baseline so the
-      # number can only ever shrink. The baseline below is a conservative
-      # ceiling derived from: ~614 `any` usages (each potentially triggers
-      # `@typescript-eslint/no-explicit-any` — surfaced as a warning per
-      # eslint.config.mjs because postgrest-js v2.95.3 requires `as any`
-      # casts), plus the React Compiler advisories
-      # (`react-hooks/set-state-in-effect`, `react-hooks/preserve-manual-memoization`)
-      # also demoted to warnings. The local dev box (Node 25) currently can't
-      # run ESLint 9.39 due to an ajv/eslintrc incompatibility, so this number
-      # MUST be tightened to the exact count produced by the first green CI
-      # run on Node 24. Tracking comment owner: whoever lands the next
-      # warning-reducing PR — please drop this cap to the real number.
-      - run: npm run lint -- --max-warnings 800
+      # Lint budget (May 2026 baseline): 326 warnings remaining after the
+      # post-launch lint cleanup pass. Breakdown:
+      #   239 @typescript-eslint/no-explicit-any  — postgrest-js v2.95.3 type-inference workaround (see CLAUDE.md)
+      #    68 @next/next/no-img-element           — admin previews + email-renderer <img> usage (not user-facing perf)
+      #    16 react-hooks/set-state-in-effect     — React Compiler advisories on client-only mount patterns
+      #     2 react-hooks/preserve-manual-memoization, 1 react-hooks/incompatible-library — compiler advisories
+      # New warnings must be fixed before merge or the budget bumped intentionally.
+      - run: npm run lint -- --max-warnings 326
         working-directory: iktissad-redesign
 
   type-check:

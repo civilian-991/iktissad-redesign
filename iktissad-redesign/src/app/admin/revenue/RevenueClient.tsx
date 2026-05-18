@@ -32,7 +32,6 @@ import {
   DollarSign,
   UserPlus,
   AlertCircle,
-  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { swrFetcher } from '@/lib/api-client';

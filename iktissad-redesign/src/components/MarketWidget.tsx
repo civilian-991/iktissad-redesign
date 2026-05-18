@@ -164,10 +164,6 @@ interface ChartWidgetProps {
   arabic?: boolean
 }
 
-interface TooltipPayloadItem {
-  value: number
-}
-
 function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
   const isPositive = data.change >= 0
   const lineColor = isPositive ? '#22c55e' : '#ef4444'

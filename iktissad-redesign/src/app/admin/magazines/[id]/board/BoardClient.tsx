@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { toast } from 'sonner';
@@ -199,7 +199,7 @@ export function BoardClient({ issueId }: { issueId: string }) {
   const [activeArticle, setActiveArticle] = useState<BoardArticle | null>(null);
 
   // Use local articles state when available (after optimistic update), else use SWR data
-  const displayArticles = articles ?? data?.data ?? [];
+  const displayArticles = useMemo(() => articles ?? data?.data ?? [], [articles, data]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })

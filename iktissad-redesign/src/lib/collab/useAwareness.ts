@@ -20,7 +20,8 @@ export function useAwareness(provider: SupabaseProvider | null): AwarenessState[
 
   useEffect(() => {
     if (!provider) {
-      setStates([]);
+      // Only reset when we actually have stale state — avoids cascading re-renders
+      setStates((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 

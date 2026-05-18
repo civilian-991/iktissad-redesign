@@ -1,10 +1,10 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { MagazineSpread, Article, ArticleBlock } from '@/types';
 
 // Lazy import BlockRenderer — gracefully handle if Agent 4B hasn't created it yet
-const BlockRendererModule: { BlockRenderer: React.ComponentType<{ blocks: ArticleBlock[] }> } | null = null;
+const _BlockRendererModule: { BlockRenderer: React.ComponentType<{ blocks: ArticleBlock[] }> } | null = null;
 
 interface ArticleSpreadProps {
   article?: Partial<Article> | null;

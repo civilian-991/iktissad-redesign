@@ -1,10 +1,9 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Clock, Loader2, FolderOpen, ChevronDown, ArrowUpLeft } from 'lucide-react';
+import { Clock, Loader2, FolderOpen, ArrowUpLeft } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import { swrFetcher } from '@/lib/api-client';
 import type { ArticleSeries, ApiResponse } from '@/types';

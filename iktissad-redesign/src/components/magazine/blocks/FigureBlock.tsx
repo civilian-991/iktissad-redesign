@@ -28,7 +28,6 @@ export function FigureBlock({ block }: Props) {
   }
   const height = heightBySize[block.size ?? 'normal'] ?? '400px'
 
-  const isFloated = block.size === 'normal' // normal = half-column float for variety?
   // Per spec: full = w-full, normal/wide = full column width
   // We keep all sizes full width but vary height
 

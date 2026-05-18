@@ -9,7 +9,7 @@
  * Optimistic updates with SWR.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -104,7 +104,7 @@ export default function CommentsClient() {
     { revalidateOnFocus: false }
   );
 
-  const comments = data?.data ?? [];
+  const comments = useMemo(() => data?.data ?? [], [data]);
 
   // Fetch pending count for badge
   const { data: pendingData } = useSWR<ApiResponse<Comment[]>>(

@@ -32,7 +32,6 @@ import {
   ChevronUp,
   ChevronsUpDown,
   ExternalLink,
-  Loader2,
   UserX,
   RefreshCw,
 } from 'lucide-react';
@@ -147,7 +146,7 @@ export default function SubscribersClient() {
     swrFetcher,
     { revalidateOnFocus: false }
   );
-  const plans = plansData?.data ?? [];
+  const plans = useMemo(() => plansData?.data ?? [], [plansData]);
 
   // ─── Client-side filtering ────────────────────────────────
   const filtered = useMemo(() => {
@@ -374,7 +373,7 @@ export default function SubscribersClient() {
     link.click();
     URL.revokeObjectURL(url);
     toast.success(t('admin.subscribers.exportCsvSuccess'));
-  }, [selectedRows, filtered, plans]);
+  }, [selectedRows, filtered, plans, t]);
 
   // ─── Excel Export ─────────────────────────────────────────
   const handleExportExcel = useCallback(() => {
@@ -384,7 +383,7 @@ export default function SubscribersClient() {
     link.download = 'subscribers.xlsx';
     link.click();
     toast.success(t('admin.subscribers.exportExcelSuccess'));
-  }, []);
+  }, [t]);
 
   // ─── Bulk Suspend ─────────────────────────────────────────
   const handleBulkSuspend = useCallback(async () => {
@@ -398,7 +397,7 @@ export default function SubscribersClient() {
     } catch {
       toast.error(t('admin.subscribers.bulkSuspendError'));
     }
-  }, [selectedIds, mutate]);
+  }, [selectedIds, mutate, t]);
 
   // ─── Sort icon ────────────────────────────────────────────
   function SortIcon({ column }: { column: { getIsSorted: () => false | 'asc' | 'desc' } }) {

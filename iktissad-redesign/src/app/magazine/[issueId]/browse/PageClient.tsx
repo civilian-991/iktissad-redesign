@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut,
@@ -95,7 +95,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   const uiTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const flipBookRef = useRef<any>(null);
 
-  const pages = issue.pagesImages ?? [];
+  const pages = useMemo(() => issue.pagesImages ?? [], [issue.pagesImages]);
   const total = pages.length;
 
   // Lazy-import react-pageflip (not SSR-safe)

@@ -25,7 +25,6 @@ import {
   ScrollText,
   TrendingUp,
   AlertCircle,
-  Loader2,
   ArrowUpDown,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -36,8 +35,6 @@ import type { ReadingAnalytics } from '@/app/api/admin/reading-analytics/route';
 // ─── Color Palette ──────────────────────────────────────────────
 const GOLD = '#DDA853';
 const NAVY = '#27548A';
-const OBSIDIAN = '#183B4E';
-
 // ─── Date Range Filter ──────────────────────────────────────────
 type DateRange = '7' | '30' | '90' | 'custom';
 

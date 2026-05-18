@@ -58,7 +58,6 @@ import {
   Table as TableIcon,
   Minus,
   MessageSquareQuote,
-  Type,
   Languages,
 } from 'lucide-react';
 import { iconSizes } from '@/lib/design-tokens';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Pause, Play, X, Gauge } from 'lucide-react';
+import { Volume2, Pause, Play, X, Gauge } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 interface ListenButtonProps {

@@ -48,7 +48,7 @@ import {
   ChevronDown,
   FileText,
   Quote,
-  Image,
+  Image as ImageIcon,
   Minus,
   MousePointerClick,
   GripVertical,
@@ -117,7 +117,7 @@ const BLOCK_LIBRARY: BlockConfig[] = [
     type: 'image',
     label: 'صورة',
     description: 'صورة مع تعليق اختياري',
-    icon: <Image size={iconSizes.md} />,
+    icon: <ImageIcon size={iconSizes.md} />,
     defaultData: { src: '', alt: '', caption: '' },
   },
   {
@@ -207,7 +207,7 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
         </div>
       ) : (
         <div className="w-full h-16 bg-white/10 rounded-lg flex items-center justify-center">
-          <Image size={20} className="text-white/30" />
+          <ImageIcon size={20} className="text-white/30" />
         </div>
       );
     case 'divider':

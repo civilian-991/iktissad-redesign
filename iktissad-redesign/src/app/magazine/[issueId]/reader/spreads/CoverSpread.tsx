@@ -12,19 +12,13 @@ interface CoverSpreadProps {
   issue: MagazineIssue;
 }
 
-export default function CoverSpread({ spread, issue }: CoverSpreadProps) {
+export default function CoverSpread({ spread: _spread, issue }: CoverSpreadProps) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLButtonElement>(null);
-
-  // Metadata from spread or issue
-  const meta = spread.metadata as {
-    logoUrl?: string;
-    decorativeText?: string;
-  };
 
   const publishDate = issue.publishDate
     ? new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', {

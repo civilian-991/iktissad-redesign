@@ -27,8 +27,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Download,
-  Upload,
   Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -44,7 +42,6 @@ import {
 } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
-import { ArticleType } from '@/lib/ai/arabic-editorial';
 import ArticlePresenceBadge from '@/components/admin/ArticlePresenceBadge';
 import type { MeData } from '@/app/api/auth/me/route';
 
@@ -75,7 +72,7 @@ type ArticleStatus = 'published' | 'draft' | 'review' | 'scheduled';
 export default function ArticlesPage() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSection, setSelectedSection] = useState('all');
+  const [selectedSection] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState<StatusKey>('all');
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -120,8 +117,6 @@ export default function ArticlesPage() {
   const presenceCurrentUser = meRes?.data
     ? { userId: meRes.data.id, name: meRes.data.name, avatarUrl: meRes.data.avatarUrl }
     : null;
-
-  const publishedCount = articles.filter(a => a.status === 'published').length;
 
   // Get status label from translations
   const getStatusLabel = (status: StatusKey): string => {
