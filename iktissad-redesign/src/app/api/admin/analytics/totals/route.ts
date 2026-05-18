@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { requireRole, unauthorizedResponse, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -45,8 +45,10 @@ function parseWindow(raw: string | null): { key: string; days: number | null } {
 // ─── GET ────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(request, ["super_admin", "editor", "writer", "finance"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const params = request.nextUrl.searchParams;
   const { days } = parseWindow(params.get("window"));
