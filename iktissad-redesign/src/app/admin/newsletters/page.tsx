@@ -52,6 +52,14 @@ const STATUS_CONFIG: Record<
     label: 'ملغي',
     className: 'bg-red-700/20 text-red-300 border border-red-600/30',
   },
+  partial: {
+    label: 'إرسال جزئي',
+    className: 'bg-amber-700/20 text-amber-300 border border-amber-600/30',
+  },
+  failed: {
+    label: 'فشل الإرسال',
+    className: 'bg-red-700/30 text-red-200 border border-red-600/40',
+  },
 };
 
 function StatusBadge({ status }: { status: Newsletter['status'] }) {

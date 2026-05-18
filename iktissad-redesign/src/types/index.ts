@@ -640,11 +640,13 @@ export interface Newsletter {
   previewText: string | null
   senderName: string
   segment: 'all' | 'premium' | 'free'
-  status: 'draft' | 'scheduled' | 'sent' | 'cancelled'
+  status: 'draft' | 'scheduled' | 'sent' | 'cancelled' | 'partial' | 'failed'
   blocks: NewsletterBlock[]
   scheduledAt: string | null
   sentAt: string | null
   recipientCount: number | null
+  sentCount: number
+  failedCount: number
   openCount: number
   clickCount: number
   createdBy: string | null

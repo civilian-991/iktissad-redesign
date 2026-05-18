@@ -19,6 +19,8 @@ function mapNewsletterRow(row: any): Newsletter {
     scheduledAt: row.scheduled_at ?? null,
     sentAt: row.sent_at ?? null,
     recipientCount: row.recipient_count ?? null,
+    sentCount: row.sent_count ?? 0,
+    failedCount: row.failed_count ?? 0,
     openCount: row.open_count ?? 0,
     clickCount: row.click_count ?? 0,
     createdBy: row.created_by ?? null,
@@ -125,9 +127,14 @@ function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject
 
 // ─── POST /api/newsletters/[id]/send ─────────────────────────────
 //
-// Marks the newsletter as sent and records sent_at + recipient_count.
-// Actual email delivery via Resend is a future step — this route only
-// updates the DB record so the UI can reflect the "sent" state immediately.
+// Sends a newsletter via SendGrid in batches, then writes the final
+// status to the DB based on per-batch outcomes:
+//   - all batches succeed  → status="sent"
+//   - some succeed         → status="partial"
+//   - none succeed (and we had recipients) → status="failed"
+//
+// The DB row is only marked terminal AFTER SendGrid runs so a SendGrid
+// crash can never leave us showing "sent" with zero recipients.
 
 export async function POST(
   _request: NextRequest,
@@ -168,104 +175,147 @@ export async function POST(
     );
   }
 
-  // Count eligible recipients based on segment:
-  //   "all"     → all active newsletter_subscribers
-  //   "premium" → active paid subscribers (subscribers table, status=active)
-  //   "free"    → active newsletter_subscribers only (no paid subscription)
-  let recipientCount = 0;
+  // Fetch the full row up front so we have blocks/subject/sender_name for SendGrid.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: fullRow, error: fullRowError } = await (admin as any)
+    .from("newsletters")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (fullRowError || !fullRow) {
+    return NextResponse.json(
+      { error: fullRowError?.message ?? "Newsletter not found" } satisfies ApiResponse<never>,
+      { status: 500 }
+    );
+  }
+
+  // Resolve recipient emails based on segment:
+  //   "all" / "free" → active newsletter_subscribers
+  //   "premium"      → active paid subscribers (subscribers table)
+  let emailRows: { email: string }[] = [];
 
   if (existing.segment === "premium") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (admin as any)
+    const { data } = await (admin as any)
       .from("subscribers")
-      .select("id", { count: "exact", head: true })
+      .select("email")
       .eq("status", "active");
-    recipientCount = count ?? 0;
+    emailRows = data ?? [];
   } else {
-    // "all" or "free" → count from newsletter_subscribers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (admin as any)
+    const { data } = await (admin as any)
       .from("newsletter_subscribers")
-      .select("id", { count: "exact", head: true })
+      .select("email")
       .eq("status", "active");
-    recipientCount = count ?? 0;
+    emailRows = data ?? [];
   }
 
-  // Update the newsletter to "sent"
+  const emails: string[] = (emailRows ?? [])
+    .map((s) => s.email)
+    .filter(Boolean);
+  const recipientCount = emails.length;
+
+  // Phase 4.4: SendGrid email delivery
+  const sgApiKey = process.env.SENDGRID_API_KEY;
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL ?? "newsletter@iktissad.com";
+  const fromName = (fullRow.sender_name as string) ?? "إكتساد";
+
+  let sentCount = 0;
+  let failedCount = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lastError: any = null;
+  let sendGridSkipped = false;
+
+  if (!sgApiKey) {
+    console.warn("[newsletter/send] SENDGRID_API_KEY not set — skipping email delivery");
+    sendGridSkipped = true;
+  } else if (recipientCount > 0) {
+    try {
+      const sgMail = (await import("@sendgrid/mail")).default;
+      sgMail.setApiKey(sgApiKey);
+
+      const html = renderBlocksToHtml(fullRow.blocks ?? [], fullRow.subject as string);
+      const BATCH = 1000;
+
+      for (let i = 0; i < emails.length; i += BATCH) {
+        const slice = emails.slice(i, i + BATCH);
+        try {
+          await sgMail.sendMultiple({
+            to: slice,
+            from: { email: fromEmail, name: fromName },
+            subject: fullRow.subject as string,
+            html,
+          });
+          sentCount += slice.length;
+        } catch (batchErr) {
+          failedCount += slice.length;
+          lastError = batchErr;
+          console.error(
+            `[newsletter/send] SendGrid batch ${i / BATCH} failed (${slice.length} recipients):`,
+            batchErr
+          );
+        }
+      }
+    } catch (importErr) {
+      // Failed before any batch could run — treat all recipients as failed.
+      failedCount = recipientCount;
+      lastError = importErr;
+      console.error("[newsletter/send] SendGrid init error:", importErr);
+    }
+  }
+
+  // Determine final status based on per-batch outcomes.
+  // - No SendGrid key configured or no recipients → "sent" (legacy behaviour;
+  //   the route is still considered a successful "send" with 0 recipients).
+  // - At least one batch failed AND at least one batch succeeded → "partial".
+  // - All batches failed (and we had recipients) → "failed".
+  // - All batches succeeded → "sent".
+  let finalStatus: Newsletter["status"];
+  if (sendGridSkipped || recipientCount === 0) {
+    finalStatus = "sent";
+  } else if (sentCount === 0) {
+    finalStatus = "failed";
+  } else if (failedCount > 0) {
+    finalStatus = "partial";
+  } else {
+    finalStatus = "sent";
+  }
+
+  // Persist the result.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error: updateError } = await (admin as any)
     .from("newsletters")
     .update({
-      status: "sent",
+      status: finalStatus,
       sent_at: new Date().toISOString(),
-      recipient_count: recipientCount ?? 0,
+      recipient_count: recipientCount,
+      sent_count: sentCount,
+      failed_count: failedCount,
     })
     .eq("id", id)
     .select("*")
     .single();
 
-  if (updateError) {
+  if (updateError || !row) {
     return NextResponse.json(
-      { error: updateError.message } satisfies ApiResponse<never>,
+      { error: updateError?.message ?? "Failed to persist newsletter status" } satisfies ApiResponse<never>,
       { status: 500 }
     );
   }
 
-  // Phase 4.4: SendGrid email delivery
-  const sgApiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL ?? "newsletter@iktissad.com";
-  const fromName = (row.sender_name as string) ?? "إكتساد";
-
-  if (sgApiKey) {
-    try {
-      const sgMail = (await import("@sendgrid/mail")).default;
-      sgMail.setApiKey(sgApiKey);
-
-      // Fetch confirmed subscriber emails based on segment
-       
-      let emailRows: { email: string }[] = [];
-
-      if (existing.segment === "premium") {
-        // Active paid subscribers
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data } = await (admin as any)
-          .from("subscribers")
-          .select("email")
-          .eq("status", "active");
-        emailRows = data ?? [];
-      } else {
-        // "all" or "free" → newsletter_subscribers
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data } = await (admin as any)
-          .from("newsletter_subscribers")
-          .select("email")
-          .eq("status", "active");
-        emailRows = data ?? [];
-      }
-
-      const subscribers = emailRows;
-      const emails: string[] = (subscribers ?? [])
-        .map((s: { email: string }) => s.email)
-        .filter(Boolean);
-
-      if (emails.length > 0) {
-        const html = renderBlocksToHtml(row.blocks ?? [], row.subject as string);
-        const BATCH = 1000;
-        for (let i = 0; i < emails.length; i += BATCH) {
-          await sgMail.sendMultiple({
-            to: emails.slice(i, i + BATCH),
-            from: { email: fromEmail, name: fromName },
-            subject: row.subject as string,
-            html,
-          });
-        }
-      }
-    } catch (emailErr) {
-      // Log but don't fail — DB is already updated to "sent"
-      console.error("[newsletter/send] SendGrid error:", emailErr);
-    }
-  } else {
-    console.warn("[newsletter/send] SENDGRID_API_KEY not set — skipping email delivery");
+  // If the whole send failed, surface a 500 with the SendGrid error — but the
+  // DB row is now consistent (status=failed, sent_count=0, failed_count=N).
+  if (finalStatus === "failed") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const code = (lastError && (lastError.code ?? lastError.statusCode)) ?? "SENDGRID_ERROR";
+    return NextResponse.json(
+      {
+        error: `Newsletter send failed: ${code}`,
+        data: mapNewsletterRow(row),
+      } as ApiResponse<Newsletter> & { error: string },
+      { status: 500 }
+    );
   }
 
   const response: ApiResponse<Newsletter> = { data: mapNewsletterRow(row) };
