@@ -7,6 +7,7 @@ import { Radio, Plus, Square, Send, Clock, User, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { swrFetcher } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
+import { sanitizeLiveBlogHtml } from '@/lib/sanitize';
 import type { ApiResponse } from '@/types';
 
 interface LiveBlogItem {
@@ -273,7 +274,7 @@ export default function LiveBlogsClient() {
                     </div>
                     <div
                       className="text-[13px] font-[family-name:var(--font-display)] text-white/80 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: update.content }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeLiveBlogHtml(update.content) }}
                     />
                   </div>
                 ))}
