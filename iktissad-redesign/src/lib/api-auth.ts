@@ -223,3 +223,54 @@ export function unauthorizedResponse() {
     { status: 401 }
   );
 }
+
+/** Return a 403 response for callers who lack the required admin role. */
+export function forbiddenResponse(message: string = "Forbidden"): NextResponse {
+  return NextResponse.json({ error: message }, { status: 403 });
+}
+
+export type AdminRole =
+  | "super_admin"
+  | "editor"
+  | "writer"
+  | "finance"
+  | "advertiser_manager";
+
+/**
+ * Require the caller to be authenticated AND to have one of the listed
+ * admin roles (looked up from the `admin_roles` table).
+ *
+ * Returns either `{ ok: true, userId, role }` or an in-flight NextResponse
+ * (401/403) that the route handler can return directly:
+ *
+ * ```ts
+ * const auth = await requireRole(request, ['super_admin', 'finance']);
+ * if (!('ok' in auth)) return auth;
+ * // auth.userId, auth.role available here
+ * ```
+ */
+export async function requireRole(
+  request: Request | undefined,
+  allowed: AdminRole[]
+): Promise<
+  | { ok: true; userId: string; role: AdminRole }
+  | NextResponse
+> {
+  const auth = await requireAuth(request);
+  if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+
+  const admin = createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (admin.from("admin_roles") as any)
+    .select("role")
+    .eq("user_id", auth.userId)
+    .single();
+
+  const role = (data as { role: AdminRole } | null)?.role ?? null;
+  if (!role || !allowed.includes(role)) {
+    return forbiddenResponse("غير مصرح — ليس لديك صلاحية للوصول إلى هذه الصفحة");
+  }
+
+  return { ok: true, userId: auth.userId, role };
+}

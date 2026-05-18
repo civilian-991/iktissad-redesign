@@ -385,11 +385,19 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.text();
 
   // ── 2. Verify MPGS webhook secret ──────────────────────────────
-  const receivedSecret = request.headers.get("x-notification-secret") ?? "";
+  // When MPGS_WEBHOOK_HMAC=true, we expect an HMAC-SHA256 digest in
+  // `x-notification-signature` computed over the raw body. Otherwise we fall
+  // back to the legacy plain-secret value in `x-notification-secret`.
+  const useHmac = process.env.MPGS_WEBHOOK_HMAC === "true";
+  const headerValue = useHmac
+    ? request.headers.get("x-notification-signature") ?? ""
+    : request.headers.get("x-notification-secret") ?? "";
   const { webhookSecret } = getMpgsCredentials();
 
-  if (!verifyMpgsWebhook(rawBody, webhookSecret, receivedSecret)) {
-    console.warn("[webhook] Invalid x-notification-secret — rejecting request");
+  if (!verifyMpgsWebhook(rawBody, webhookSecret, headerValue)) {
+    console.warn(
+      `[webhook] Invalid ${useHmac ? "x-notification-signature" : "x-notification-secret"} — rejecting request`
+    );
     return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
   }
 
