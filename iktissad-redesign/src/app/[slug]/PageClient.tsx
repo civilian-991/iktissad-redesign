@@ -39,6 +39,7 @@ import Poll from '@/components/Poll';
 import LiveBlog from '@/components/LiveBlog';
 import type { JSONContent } from '@tiptap/core';
 import { addBidiIsolation } from '@/lib/i18n/format';
+import { sanitizeArticleHtml } from '@/lib/sanitize';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
@@ -666,7 +667,7 @@ export default function ArticlePageClient({
                     <div
                       className="article-body-slug"
                       style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
-                      dangerouslySetInnerHTML={{ __html: addBidiIsolation(truncatedHtml ?? '') }}
+                      dangerouslySetInnerHTML={{ __html: addBidiIsolation(sanitizeArticleHtml(truncatedHtml ?? '')) }}
                     />
                   )}
 
@@ -720,7 +721,7 @@ export default function ArticlePageClient({
                   <div
                     className="article-body-slug"
                     style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
-                    dangerouslySetInnerHTML={{ __html: addBidiIsolation(rawContent as string) }}
+                    dangerouslySetInnerHTML={{ __html: addBidiIsolation(sanitizeArticleHtml(rawContent as string)) }}
                   />
                 )
               )}

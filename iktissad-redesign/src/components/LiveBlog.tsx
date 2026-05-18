@@ -6,6 +6,7 @@ import { useTranslation, useFormatters } from '@/lib/i18n';
 import { createClient } from '@/lib/supabase/client';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
+import { sanitizeLiveBlogHtml } from '@/lib/sanitize';
 import type { ApiResponse } from '@/types';
 
 interface LiveBlogUpdate {
@@ -139,7 +140,7 @@ export default function LiveBlog({ articleId }: LiveBlogProps) {
             </div>
             <div
               className="text-[14px] font-[family-name:var(--font-display)] text-obsidian leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: update.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeLiveBlogHtml(update.content) }}
             />
           </div>
         ))}
