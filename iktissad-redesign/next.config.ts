@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
     // Enable View Transitions API integration for smooth article-to-article navigation
     viewTransition: true,
   },
+  // Mark exceljs (and its transitive unzipper) as external for server bundles.
+  // unzipper@0.12 lazily requires '@aws-sdk/client-s3' only when reading from S3,
+  // but Turbopack's static analysis still tries to resolve it. Externalizing
+  // exceljs ensures Node.js's runtime require() is used (which only loads s3
+  // when actually called).
+  serverExternalPackages: ["exceljs", "unzipper"],
   images: {
     remotePatterns: [
       {
