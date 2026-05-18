@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Clock, TrendingUp, Users, DollarSign, ChevronLeft, ChevronRight, Grid3X3, List, Loader2 } from 'lucide-react';
+import { Clock, TrendingUp, Users, DollarSign, Grid3X3, List, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -17,7 +17,6 @@ export default function CountryPageClient() {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, error, isLoading } = useSWR<ApiResponse<CountryWithArticles>>(
     slug ? `/api/countries/${slug}` : null,

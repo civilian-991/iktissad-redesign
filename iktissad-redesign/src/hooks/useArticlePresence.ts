@@ -11,7 +11,7 @@
  * No DB writes — entirely ephemeral Realtime Presence.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export interface PresenceUser {

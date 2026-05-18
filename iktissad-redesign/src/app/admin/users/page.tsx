@@ -31,11 +31,10 @@ import {
   X,
   Key,
   Ban,
-  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { Button, Badge, RoleBadge } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { swrFetcher, usersKey, deleteUser } from '@/lib/api-client';
 import type { AdminUser as AdminUserType, ApiResponse } from '@/types';
 
@@ -49,7 +48,6 @@ const statusKeys = ['all', 'active', 'inactive', 'suspended'] as const;
 type RoleKey = typeof roleKeys[number];
 type StatusKey = typeof statusKeys[number];
 type UserRole = 'admin' | 'editor' | 'author' | 'contributor';
-type UserStatus = 'active' | 'inactive' | 'suspended';
 
 // Stats configuration
 interface StatConfig {
@@ -82,7 +80,7 @@ export default function UsersPage() {
     status: selectedStatus !== 'all' ? selectedStatus : undefined,
   });
 
-  const { data, isLoading, mutate } = useSWR<ApiResponse<AdminUserType[]>>(
+  const { data, mutate } = useSWR<ApiResponse<AdminUserType[]>>(
     swrKey,
     swrFetcher,
     { revalidateOnFocus: false, keepPreviousData: true }

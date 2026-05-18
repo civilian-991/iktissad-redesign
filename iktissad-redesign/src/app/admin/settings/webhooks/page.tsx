@@ -61,7 +61,7 @@ export default function WebhooksPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { loadWebhooks(); }, [loadWebhooks]);
 

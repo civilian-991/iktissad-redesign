@@ -26,7 +26,14 @@ jobs:
           cache-dependency-path: iktissad-redesign/package-lock.json
       - run: npm ci
         working-directory: iktissad-redesign
-      - run: npm run lint
+      # Lint budget (May 2026 baseline): 326 warnings remaining after the
+      # post-launch lint cleanup pass. Breakdown:
+      #   239 @typescript-eslint/no-explicit-any  — postgrest-js v2.95.3 type-inference workaround (see CLAUDE.md)
+      #    68 @next/next/no-img-element           — admin previews + email-renderer <img> usage (not user-facing perf)
+      #    16 react-hooks/set-state-in-effect     — React Compiler advisories on client-only mount patterns
+      #     2 react-hooks/preserve-manual-memoization, 1 react-hooks/incompatible-library — compiler advisories
+      # New warnings must be fixed before merge or the budget bumped intentionally.
+      - run: npm run lint -- --max-warnings 326
         working-directory: iktissad-redesign
 
   type-check:

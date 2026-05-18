@@ -118,7 +118,7 @@ function TemplateSvgPreview({ templateId }: { templateId: string }) {
 
 export default function SpreadThumbnail({
   spread,
-  index,
+  index: _index,
   isSelected,
   onClick,
   onDelete,

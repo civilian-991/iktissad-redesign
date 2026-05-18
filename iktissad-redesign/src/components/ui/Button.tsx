@@ -15,7 +15,6 @@
 import React, { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
 import { motion, HTMLMotionProps } from 'motion/react';
 import { Loader2 } from 'lucide-react';
-import { colors, animations, spacing, typography } from '@/lib/design-tokens';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES

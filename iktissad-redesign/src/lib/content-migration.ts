@@ -28,10 +28,6 @@ export function htmlToArticleBlocks(html: string): ArticleBlock[] {
 
   // Simple tag-based parser using regex (no DOM dependency — works server-side)
   // Split on block-level tags while preserving the tags themselves
-  const blockTagPattern =
-    /<(h[1-6]|p|blockquote|hr|ul|ol|figure|div|img)([^>]*)>([\s\S]*?)<\/\1>|<(img|hr)([^>]*)\/?>|<(ul|ol)([^>]*)>([\s\S]*?)<\/\6>/gi
-
-  let lastIndex = 0
   let match: RegExpExecArray | null
 
   const re =
@@ -39,7 +35,6 @@ export function htmlToArticleBlocks(html: string): ArticleBlock[] {
 
   while ((match = re.exec(html)) !== null) {
     const [, tagName, , innerHtml, imgTag, imgAttrs, hrTag] = match
-    lastIndex = re.lastIndex
 
     if (imgTag === 'img') {
       // Image → FigureBlock

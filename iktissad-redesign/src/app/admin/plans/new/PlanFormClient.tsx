@@ -35,7 +35,7 @@ export default function PlanFormClient({ plan }: Props) {
     isActive:     plan?.isActive ?? true,
   });
   const [featuresAr, setFeaturesAr] = useState<string[]>(plan?.featuresAr ?? ['']);
-  const [features, setFeatures] = useState<string[]>(plan?.features ?? ['']);
+  const [features, _setFeatures] = useState<string[]>(plan?.features ?? ['']);
   const [saving, setSaving] = useState(false);
 
   const handleFeatureChange = (

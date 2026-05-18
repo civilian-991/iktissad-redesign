@@ -12,14 +12,6 @@ const statsIcons = [Users, Eye, TrendingUp, Target];
 
 const adFormatIcons = [Monitor, Newspaper, Mail, Smartphone];
 
-// Features that are technical terms / kept as-is data (mixed Arabic/English per original)
-const adFormatsFeatures = [
-  ['Header Banner', 'Sidebar Ads', 'In-Article Ads', 'Footer Banner'],
-  null, // from i18n
-  null, // from i18n
-  ['Interstitial', 'Native Ads', 'Push Notifications', 'In-App Ads'],
-];
-
 interface AdvertisePageClientProps {
   advertiseStats?: AdvertiseStats | null;
 }

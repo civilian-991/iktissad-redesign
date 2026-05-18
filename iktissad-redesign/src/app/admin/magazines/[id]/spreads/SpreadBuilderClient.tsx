@@ -28,7 +28,7 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, MagazineIssue, MagazineSpread, MediaItem } from '@/types';
-import { SPREAD_TEMPLATES, SPREAD_TEMPLATE_MAP } from '@/lib/spread-templates';
+import { SPREAD_TEMPLATE_MAP } from '@/lib/spread-templates';
 import { useSpreadPresence } from '@/hooks/useSpreadPresence';
 import SpreadCanvas from '@/components/admin/spread-editor/SpreadCanvas';
 import SpreadThumbnail from '@/components/admin/spread-editor/SpreadThumbnail';
@@ -191,7 +191,7 @@ export default function SpreadBuilderClient({ issueId }: Props) {
     { revalidateOnFocus: false }
   );
 
-  const { data: spreadsData, isLoading } = useSWR<ApiResponse<MagazineSpread[]>>(
+  const { isLoading } = useSWR<ApiResponse<MagazineSpread[]>>(
     `/api/magazines/${issueId}/spreads`,
     swrFetcher,
     {

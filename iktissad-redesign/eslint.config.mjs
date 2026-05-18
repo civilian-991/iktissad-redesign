@@ -30,6 +30,14 @@ const eslintConfig = defineConfig([
       // warnings instead of failing CI on them.
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/preserve-manual-memoization": "warn",
+      // Allow `_`-prefixed identifiers to opt out of no-unused-vars. Used for
+      // intentionally-unused function parameters, destructure ignores, etc.
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      }],
     },
   },
 ]);

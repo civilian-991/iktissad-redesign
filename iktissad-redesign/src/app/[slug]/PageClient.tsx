@@ -187,7 +187,7 @@ export default function ArticlePageClient({
   freeArticleLimit = FREE_ARTICLE_LIMIT_DEFAULT,
   hasPurchasedArticle = false,
   giftValid = false,
-  giftToken,
+  giftToken: _giftToken,
   paywallSettings,
   dbUserId,
 }: ArticlePageClientProps) {

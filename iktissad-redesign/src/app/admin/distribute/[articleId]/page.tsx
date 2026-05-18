@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { use } from 'react'
 import Link from 'next/link'
 import useSWR from 'swr'
@@ -30,8 +30,6 @@ import {
   Zap,
 } from 'lucide-react'
 import { swrFetcher } from '@/lib/api-client'
-import { Button } from '@/components/ui'
-import { iconSizes } from '@/lib/design-tokens'
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary'
 import type { Article, ApiResponse } from '@/types'
 import type { SocialAccountsStatus } from '@/app/api/admin/social-accounts/route'

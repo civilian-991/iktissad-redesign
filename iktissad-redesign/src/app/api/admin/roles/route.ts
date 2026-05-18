@@ -60,7 +60,7 @@ async function getCallerRole(userId: string): Promise<string | null> {
 
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const auth = await requireAuth();
   if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
 

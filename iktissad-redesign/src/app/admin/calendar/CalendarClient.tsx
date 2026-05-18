@@ -60,11 +60,6 @@ function toDateKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function parseDateKey(key: string): Date {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
 function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
@@ -542,7 +537,6 @@ function DayCell({
 
 export default function CalendarClient() {
   const today = useMemo(() => new Date(), []);
-  const router = useRouter();
 
   // View state
   const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -691,8 +685,6 @@ export default function CalendarClient() {
   const gridDays = viewMode === 'month'
     ? buildMonthGrid(currentYear, currentMonth)
     : buildWeekGrid(weekAnchor);
-
-  const todayKey = toDateKey(today);
 
   // Section filter options (unique sections from loaded articles)
   const sectionOptions = useMemo(() => {

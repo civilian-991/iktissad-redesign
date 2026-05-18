@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { toast } from 'sonner';
@@ -260,7 +260,7 @@ export function SectionsClient({ issueId }: { issueId: string }) {
   );
 
   const [sections, setSections] = useState<MagazineSection[] | null>(null);
-  const displaySections = sections ?? data?.data ?? [];
+  const displaySections = useMemo(() => sections ?? data?.data ?? [], [sections, data]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })

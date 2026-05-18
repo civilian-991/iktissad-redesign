@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bookmark, Trash2, Clock, Loader2, BookmarkX, ArrowRight } from 'lucide-react';
+import { Bookmark, Trash2, Loader2, BookmarkX, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
-import type { ApiResponse } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

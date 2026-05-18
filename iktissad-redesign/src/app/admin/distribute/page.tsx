@@ -27,9 +27,6 @@ import { iconSizes } from '@/lib/design-tokens'
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary'
 import type { Article, ApiResponse } from '@/types'
 
-// Only show articles eligible for distribution
-const DISTRIBUTABLE_STATUSES = ['published', 'scheduled'] as const
-
 export default function DistributePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)

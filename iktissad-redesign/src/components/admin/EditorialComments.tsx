@@ -235,7 +235,7 @@ interface ThreadProps {
   onReplySubmit: (parentId: string, body: string) => Promise<void>;
 }
 
-function Thread({ note, currentUserId, onResolutionToggle, onReplySubmit }: ThreadProps) {
+function Thread({ note, currentUserId: _currentUserId, onResolutionToggle, onReplySubmit }: ThreadProps) {
   const [showReplies, setShowReplies] = useState(false);
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyBody, setReplyBody] = useState('');

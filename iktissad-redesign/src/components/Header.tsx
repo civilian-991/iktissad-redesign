@@ -150,8 +150,9 @@ export default function Header() {
   // Fetch trending articles when search modal opens
   useEffect(() => {
     if (!isSearchOpen) {
-      setSearchQuery('');
-      setSearchResults([]);
+      // Only clear when transitioning from open → closed (guard avoids cascading renders)
+      setSearchQuery((prev) => (prev === '' ? prev : ''));
+      setSearchResults((prev) => (prev.length === 0 ? prev : []));
       return;
     }
     fetch('/api/search/trending?limit=5')

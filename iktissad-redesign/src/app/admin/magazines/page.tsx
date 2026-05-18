@@ -9,21 +9,14 @@ import {
   BookOpen,
   Plus,
   Search,
-  Filter,
   Eye,
   Download,
   Edit3,
   Trash2,
   Star,
-  StarOff,
-  Calendar,
   FileText,
-  MoreVertical,
   Grid,
   List,
-  ChevronLeft,
-  ChevronRight,
-  Upload,
   Check,
   X,
   Loader2,
@@ -44,9 +37,7 @@ export default function MagazinesPage() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedMagazines, setSelectedMagazines] = useState<string[]>([]);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [magazineToDelete, setMagazineToDelete] = useState<string | null>(null);
 

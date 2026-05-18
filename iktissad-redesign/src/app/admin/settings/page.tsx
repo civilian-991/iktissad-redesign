@@ -16,7 +16,6 @@ import {
   Sun,
   Moon,
   Check,
-  ChevronDown,
   Lock,
   Eye,
   EyeOff,
@@ -176,6 +175,7 @@ export default function SettingsPage() {
     }
 
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; t() is stable enough for error toasts
   }, []);
 
   // Build the value object for the current active tab
@@ -237,7 +237,7 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [activeTab, getTabValue]);
+  }, [activeTab, getTabValue, t]);
 
   const handleChangePassword = useCallback(async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -272,7 +272,7 @@ export default function SettingsPage() {
     } finally {
       setIsChangingPassword(false);
     }
-  }, [currentPassword, newPassword, confirmPassword]);
+  }, [currentPassword, newPassword, confirmPassword, t]);
 
   const renderTabContent = () => {
     if (isLoading) {

@@ -5,7 +5,6 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
   Zap,
-  ChevronDown,
   ChevronUp,
   Loader2,
   Settings2,

@@ -87,6 +87,7 @@ export default async function PrintPage({
         {/* Arabic fonts via Google Fonts CDN — Puppeteer loads external resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font -- print-only PDF route loaded by Puppeteer, not by Next.js navigation */}
         <link
           href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
           rel="stylesheet"

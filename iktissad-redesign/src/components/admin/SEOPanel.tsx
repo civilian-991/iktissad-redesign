@@ -321,7 +321,7 @@ export default function SEOPanel({
   }
 
   // Helper: get chip status for word count
-  function wordCountStatus(wc: number): ChipStatus {
+  function wordCountStatus(_wc: number): ChipStatus {
     if (!result) return "neutral";
     const hasError = result.issues.some(
       (i) => i.severity === "error" && i.message.includes("عدد الكلمات")
