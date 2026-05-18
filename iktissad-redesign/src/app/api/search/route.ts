@@ -18,7 +18,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { mapArticleRow } from "@/lib/supabase/mappers";
-import { hybridSearch } from "@/lib/ai/embeddings";
+import { hybridSearch } from "@/lib/ai/keyword-search";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
