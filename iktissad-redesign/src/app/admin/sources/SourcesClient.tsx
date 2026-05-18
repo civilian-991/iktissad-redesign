@@ -28,7 +28,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { iconSizes } from '@/lib/design-tokens';
-import { swrFetcher } from '@/lib/api-client';
+import { swrFetcher, deleteSource } from '@/lib/api-client';
 import type { ApiResponse, Source } from '@/types';
 import SourceFormModal from '@/components/admin/SourceFormModal';
 
@@ -254,8 +254,7 @@ export default function SourcesClient() {
   const handleDelete = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا المصدر؟')) return;
     try {
-      const res = await fetch(`/api/sources/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('فشل الحذف');
+      await deleteSource(id);
       toast.success('تم حذف المصدر');
       mutate();
     } catch {

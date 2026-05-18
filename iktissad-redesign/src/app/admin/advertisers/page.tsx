@@ -23,16 +23,14 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { iconSizes } from '@/lib/design-tokens';
+import {
+  swrFetcher,
+  createAdvertiser,
+  updateAdvertiser,
+  deleteAdvertiser,
+} from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type { Advertiser } from '@/app/api/advertisers/route';
-
-// ─── Fetcher ──────────────────────────────────────────────────────────────────
-
-const fetcher = (url: string) =>
-  fetch(url).then((res) => {
-    if (!res.ok) throw new Error('فشل تحميل البيانات');
-    return res.json();
-  });
 
 // ─── Form initial state ───────────────────────────────────────────────────────
 
@@ -260,7 +258,7 @@ export default function AdvertisersPage() {
 
   // ─── Data ─────────────────────────────────────────────────────────────────
   const apiUrl = `/api/advertisers?page=${page}&pageSize=${pageSize}${debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : ''}`;
-  const { data, isLoading, mutate } = useSWR<ApiResponse<Advertiser[]>>(apiUrl, fetcher, {
+  const { data, isLoading, mutate } = useSWR<ApiResponse<Advertiser[]>>(apiUrl, swrFetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
@@ -312,24 +310,10 @@ export default function AdvertisersPage() {
         notes: form.notes.trim() || undefined,
       };
 
-      let res: Response;
       if (editTarget) {
-        res = await fetch(`/api/advertisers/${editTarget.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+        await updateAdvertiser(editTarget.id, payload);
       } else {
-        res = await fetch('/api/advertisers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json.error || 'فشلت العملية');
+        await createAdvertiser(payload);
       }
 
       toast.success(editTarget ? 'تم تحديث المعلن بنجاح' : 'تمت إضافة المعلن بنجاح');
@@ -349,11 +333,7 @@ export default function AdvertisersPage() {
 
     setDeletingId(adv.id);
     try {
-      const res = await fetch(`/api/advertisers/${adv.id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json.error || 'فشل الحذف');
-      }
+      await deleteAdvertiser(adv.id);
       toast.success(`تم حذف "${adv.name}" بنجاح`);
       mutate();
     } catch (err) {

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useFormatters } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { swrFetcher } from '@/lib/api-client';
+import { swrFetcher, deleteContactSubmission } from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type { ContactSubmission } from '@/app/api/admin/contact-submissions/route';
 
@@ -49,8 +49,7 @@ export default function ContactSubmissionsClient() {
   const handleDelete = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
     try {
-      const res = await fetch(`/api/admin/contact-submissions/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await deleteContactSubmission(id);
       toast.success('تم الحذف');
       if (selected?.id === id) setSelected(null);
       mutate();

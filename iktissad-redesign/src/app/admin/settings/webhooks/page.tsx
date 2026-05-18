@@ -19,6 +19,14 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import type { Webhook as WebhookType, WebhookDelivery, WebhookEventType } from '@/types';
+import {
+  getWebhooks,
+  getWebhookDeliveries,
+  createWebhook,
+  updateWebhook,
+  deleteWebhook,
+  testWebhook,
+} from '@/lib/api-client';
 
 export default function WebhooksPage() {
   const { t } = useTranslation();
@@ -53,15 +61,14 @@ export default function WebhooksPage() {
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/webhooks');
-      const json = await res.json();
+      const json = await getWebhooks();
       setWebhooks(json.data ?? []);
     } catch {
       toast.error(t('admin.common.error'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { loadWebhooks(); }, [loadWebhooks]);
 
@@ -69,8 +76,7 @@ export default function WebhooksPage() {
     if (deliveries[webhookId]) return;
     setLoadingDeliveries(webhookId);
     try {
-      const res = await fetch(`/api/admin/webhooks/${webhookId}/deliveries`);
-      const json = await res.json();
+      const json = await getWebhookDeliveries(webhookId);
       setDeliveries((prev) => ({ ...prev, [webhookId]: json.data ?? [] }));
     } catch {
       toast.error(t('admin.common.error'));
@@ -95,13 +101,8 @@ export default function WebhooksPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/webhooks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, url, secret, events: selectedEvents }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? t('admin.common.error'));
+      const json = await createWebhook({ name, url, secret, events: selectedEvents });
+      if (!json.data) throw new Error(json.error ?? t('admin.common.error'));
       toast.success(t('admin.webhooks.actions.created'));
       setShowForm(false);
       setName(''); setUrl(''); setSecret(''); setSelectedEvents([]);
@@ -115,12 +116,7 @@ export default function WebhooksPage() {
 
   const handleToggleEnabled = async (wh: WebhookType) => {
     try {
-      const res = await fetch(`/api/admin/webhooks/${wh.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !wh.enabled }),
-      });
-      if (!res.ok) throw new Error('Failed');
+      await updateWebhook(wh.id, { enabled: !wh.enabled });
       setWebhooks((prev) => prev.map((w) => w.id === wh.id ? { ...w, enabled: !w.enabled } : w));
     } catch {
       toast.error(t('admin.common.error'));
@@ -130,8 +126,7 @@ export default function WebhooksPage() {
   const handleTest = async (id: string) => {
     setTestingId(id);
     try {
-      const res = await fetch(`/api/admin/webhooks/${id}/test`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed');
+      await testWebhook(id);
       toast.success(t('admin.webhooks.actions.testSent'));
       // Clear cached deliveries to reload
       setDeliveries((prev) => { const next = { ...prev }; delete next[id]; return next; });
@@ -146,8 +141,7 @@ export default function WebhooksPage() {
     if (!confirm(t('admin.webhooks.validation.confirmDelete'))) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/webhooks/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
+      await deleteWebhook(id);
       toast.success(t('admin.webhooks.actions.deleted'));
       setWebhooks((prev) => prev.filter((w) => w.id !== id));
     } catch {

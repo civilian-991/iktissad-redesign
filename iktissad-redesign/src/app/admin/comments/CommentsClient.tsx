@@ -27,7 +27,11 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { formatRelativeTime } from '@/lib/i18n/format';
 import { iconSizes } from '@/lib/design-tokens';
-import { swrFetcher } from '@/lib/api-client';
+import {
+  swrFetcher,
+  updateComment as updateCommentApi,
+  deleteComment as deleteCommentApi,
+} from '@/lib/api-client';
 import { createClient } from '@/lib/supabase/client';
 import type { ApiResponse } from '@/types';
 
@@ -164,12 +168,7 @@ export default function CommentsClient() {
       );
 
       try {
-        const res = await fetch(`/api/comments/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status }),
-        });
-        if (!res.ok) throw new Error(await res.text());
+        await updateCommentApi(id, { status });
         toast.success(t(`admin.comments.actions.${status}Success`));
         mutate();
       } catch {
@@ -190,8 +189,7 @@ export default function CommentsClient() {
   const deleteComment = useCallback(
     async (id: string) => {
       try {
-        const res = await fetch(`/api/comments/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error(await res.text());
+        await deleteCommentApi(id);
         toast.success(t('admin.comments.actions.deleteSuccess'));
         mutate();
       } catch {
@@ -204,13 +202,7 @@ export default function CommentsClient() {
   const bulkModerate = useCallback(
     async (status: 'approved' | 'spam') => {
       try {
-        await Promise.all(selected.map((id) =>
-          fetch(`/api/comments/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status }),
-          })
-        ));
+        await Promise.all(selected.map((id) => updateCommentApi(id, { status })));
         toast.success(
           status === 'approved'
             ? t('admin.comments.bulkApproveSuccess')

@@ -21,7 +21,11 @@ import {
 } from 'lucide-react';
 import { useFormatters } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import { swrFetcher } from '@/lib/api-client';
+import {
+  swrFetcher,
+  updateNewsletterSubscriber,
+  deleteNewsletterSubscriber,
+} from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type { NewsletterSubscriber } from '@/app/api/admin/newsletter-subscribers/route';
 
@@ -54,12 +58,7 @@ export default function NewsletterSubscribersClient() {
   const handleToggle = async (id: string, current: 'active' | 'unsubscribed') => {
     const next = current === 'active' ? 'unsubscribed' : 'active';
     try {
-      const res = await fetch(`/api/admin/newsletter-subscribers/${id}`, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ status: next }),
-      });
-      if (!res.ok) throw new Error();
+      await updateNewsletterSubscriber(id, { status: next });
       toast.success(next === 'active' ? 'تم التفعيل' : 'تم إلغاء الاشتراك');
       mutate();
     } catch {
@@ -70,8 +69,7 @@ export default function NewsletterSubscribersClient() {
   const handleDelete = async (id: string) => {
     if (!confirm('حذف نهائي للمشترك (لا يمكن التراجع)؟')) return;
     try {
-      const res = await fetch(`/api/admin/newsletter-subscribers/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await deleteNewsletterSubscriber(id);
       toast.success('تم الحذف');
       mutate();
     } catch {
