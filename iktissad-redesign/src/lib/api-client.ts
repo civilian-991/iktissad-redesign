@@ -533,6 +533,46 @@ export async function deleteUser(
   });
 }
 
+// ─── Bulk actions ───────────────────────────────────────────────
+
+export type ArticleBulkAction = "delete" | "publish" | "unpublish" | "archive";
+export type UserBulkAction = "delete" | "disable" | "enable";
+
+export interface BulkActionResult {
+  success: number;
+  failed: number;
+  errors: Array<{ id: string; error: string }>;
+}
+
+/**
+ * Bulk-mutate a set of articles. `ids` must be ≤ 100 UUIDs.
+ * Caller must hold super_admin or editor role.
+ */
+export async function bulkArticles(
+  ids: string[],
+  action: ArticleBulkAction
+): Promise<ApiResponse<BulkActionResult>> {
+  return api<BulkActionResult>("/api/admin/articles/bulk", {
+    method: "POST",
+    body: JSON.stringify({ ids, action }),
+  });
+}
+
+/**
+ * Bulk-mutate a set of users. `ids` must be ≤ 100 UUIDs.
+ * Caller must hold super_admin role. For `delete`, also cascades
+ * through admin_roles server-side.
+ */
+export async function bulkUsers(
+  ids: string[],
+  action: UserBulkAction
+): Promise<ApiResponse<BulkActionResult>> {
+  return api<BulkActionResult>("/api/admin/users/bulk", {
+    method: "POST",
+    body: JSON.stringify({ ids, action }),
+  });
+}
+
 // ─── Media ──────────────────────────────────────────────────────
 
 export interface MediaListParams {

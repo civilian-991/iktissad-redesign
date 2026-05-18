@@ -36,7 +36,14 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import { Button, Badge, RoleBadge } from '@/components/ui';
-import { swrFetcher, usersKey, deleteUser } from '@/lib/api-client';
+import { ConfirmModal } from '@/components/ui/Modal';
+import {
+  swrFetcher,
+  usersKey,
+  deleteUser,
+  bulkUsers,
+  type UserBulkAction,
+} from '@/lib/api-client';
 import type { AdminUser as AdminUserType, ApiResponse } from '@/types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -107,39 +114,58 @@ export default function UsersPage() {
     }
   }, [mutate, t]);
 
-  const handleBulkActivate = useCallback(async () => {
-    let failed = 0;
-    for (const id of selectedUsers) {
-      try {
-        await fetch(`/api/users/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'active' }),
-        });
-      } catch { failed++; }
-    }
-    if (failed > 0) toast.error(t('admin.common.error'));
-    else toast.success(t('admin.users.bulkActions.activate'));
-    setSelectedUsers([]);
-    mutate();
-  }, [selectedUsers, mutate, t]);
+  // Bulk action state — destructive actions show a confirm modal first
+  const [pendingBulkAction, setPendingBulkAction] = useState<UserBulkAction | null>(null);
+  const [bulkInFlight, setBulkInFlight] = useState(false);
 
-  const handleBulkDeactivate = useCallback(async () => {
-    let failed = 0;
-    for (const id of selectedUsers) {
+  const runBulkAction = useCallback(
+    async (action: UserBulkAction) => {
+      if (selectedUsers.length === 0) return;
+      setBulkInFlight(true);
       try {
-        await fetch(`/api/users/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'inactive' }),
-        });
-      } catch { failed++; }
-    }
-    if (failed > 0) toast.error(t('admin.common.error'));
-    else toast.success(t('admin.users.bulkActions.deactivate'));
-    setSelectedUsers([]);
-    mutate();
-  }, [selectedUsers, mutate, t]);
+        const res = await bulkUsers(selectedUsers, action);
+        const result = res.data;
+        if (result) {
+          if (result.failed > 0) {
+            toast.error(
+              t('admin.users.bulkActions.result', {
+                success: result.success,
+                failed: result.failed,
+              }),
+            );
+          } else {
+            toast.success(
+              t('admin.users.bulkActions.resultAllSuccess', { success: result.success }),
+            );
+          }
+        }
+        setSelectedUsers([]);
+        await mutate();
+      } catch (err: any) {
+        toast.error(err?.message || t('admin.common.error'));
+      } finally {
+        setBulkInFlight(false);
+        setPendingBulkAction(null);
+      }
+    },
+    [selectedUsers, mutate, t],
+  );
+
+  // 'delete' requires confirmation; enable/disable run immediately
+  const onBulkClick = useCallback(
+    (action: UserBulkAction) => {
+      if (action === 'delete') {
+        setPendingBulkAction(action);
+      } else {
+        void runBulkAction(action);
+      }
+    },
+    [runBulkAction],
+  );
+
+  // Aliases (kept for compatibility with the existing bulk-bar markup)
+  const handleBulkActivate = useCallback(() => onBulkClick('enable'), [onBulkClick]);
+  const handleBulkDeactivate = useCallback(() => onBulkClick('disable'), [onBulkClick]);
 
   // Stats data
   const statsConfig: StatConfig[] = [
@@ -337,25 +363,67 @@ export default function UsersPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex items-center justify-between"
+            className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
           >
             <span className="text-gold font-[family-name:var(--font-display)] text-sm">
               {t('admin.users.bulkActions.selected', { count: selectedUsers.length })}
             </span>
-            <div className="flex items-center gap-2">
-              <Button variant="success" size="sm" onClick={handleBulkActivate}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="success"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={handleBulkActivate}
+              >
                 {t('admin.users.bulkActions.activate')}
               </Button>
-              <Button variant="danger" size="sm" onClick={handleBulkDeactivate}>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={handleBulkDeactivate}
+              >
                 {t('admin.users.bulkActions.deactivate')}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedUsers([])}>
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => onBulkClick('delete')}
+              >
+                {t('admin.users.bulkActions.delete')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => setSelectedUsers([])}
+              >
                 {t('admin.users.bulkActions.deselect')}
               </Button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Bulk delete confirmation */}
+      <ConfirmModal
+        open={pendingBulkAction === 'delete'}
+        onClose={() => {
+          if (!bulkInFlight) setPendingBulkAction(null);
+        }}
+        onConfirm={() => {
+          if (pendingBulkAction) void runBulkAction(pendingBulkAction);
+        }}
+        loading={bulkInFlight}
+        variant="danger"
+        title={t('admin.users.bulkActions.confirmDeleteTitle')}
+        message={t('admin.users.bulkActions.confirmDeleteMessage', {
+          count: selectedUsers.length,
+        })}
+        confirmText={t('admin.users.bulkActions.confirm')}
+        cancelText={t('admin.users.bulkActions.cancel')}
+      />
 
       {/* Users Table */}
       <div className="bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden">
