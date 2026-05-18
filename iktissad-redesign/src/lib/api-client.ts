@@ -598,15 +598,16 @@ export interface DashboardStats {
  * Uses three parallel API calls with pageSize=1 to get totals from pagination.
  */
 export async function fetchDashboardStats(): Promise<DashboardStats> {
-  const [articles, users] = await Promise.all([
+  const [articles, users, totals] = await Promise.all([
     api<Article[]>("/api/articles?pageSize=1"),
     api<AdminUser[]>("/api/users?pageSize=1"),
+    api<{ totalViews: number }>("/api/admin/analytics/totals").catch(() => null),
   ]);
 
   return {
     articleCount: articles.pagination?.total ?? 0,
     userCount: users.pagination?.total ?? 0,
-    totalViews: 0, // would require a dedicated endpoint or DB aggregate
+    totalViews: totals?.data?.totalViews ?? 0,
   };
 }
 
