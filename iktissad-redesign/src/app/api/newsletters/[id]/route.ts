@@ -21,6 +21,8 @@ function mapNewsletterRow(row: any): Newsletter {
     scheduledAt: row.scheduled_at ?? null,
     sentAt: row.sent_at ?? null,
     recipientCount: row.recipient_count ?? null,
+    sentCount: row.sent_count ?? 0,
+    failedCount: row.failed_count ?? 0,
     openCount: row.open_count ?? 0,
     clickCount: row.click_count ?? 0,
     createdBy: row.created_by ?? null,
