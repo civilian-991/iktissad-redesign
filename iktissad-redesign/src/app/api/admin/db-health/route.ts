@@ -21,7 +21,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -58,7 +58,7 @@ const TRACKED_TABLES = [
 const SLOW_QUERY_THRESHOLD_MS = 1000;
 
 export async function GET() {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin"]);
   if (!auth.authenticated) {
     return unauthorizedResponse();
   }

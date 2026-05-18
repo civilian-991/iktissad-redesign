@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -105,8 +105,10 @@ function computeSeoScore(article: any): { score: number; checks: SeoCheck[] } {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor", "writer"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const admin = createAdminClient();
   const params = request.nextUrl.searchParams;

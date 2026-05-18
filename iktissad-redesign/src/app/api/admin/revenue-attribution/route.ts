@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import type { ApiResponse } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,8 +67,10 @@ interface ReadRow {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor", "finance"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const { searchParams } = new URL(request.url);
   const articleId = searchParams.get("articleId") ?? undefined;

@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -25,7 +25,7 @@ export interface CalendarArticle {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
   if (!auth.authenticated) {
     return unauthorizedResponse();
   }

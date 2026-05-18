@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse } from '@/types';
 
@@ -40,8 +40,10 @@ function mapRow(row: Record<string, unknown>): SocialAccount {
 }
 
 export async function GET() {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const admin = createAdminClient();
   const { data, error } = await (admin as any)
@@ -70,8 +72,10 @@ const createSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   let body: unknown;
   try { body = await request.json(); }

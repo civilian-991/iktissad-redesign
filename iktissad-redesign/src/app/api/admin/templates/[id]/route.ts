@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   authWriteLimit,
@@ -17,8 +17,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const ip = getClientIp(request);
   const rl = authWriteLimit(`admin-templates:delete:${ip}`);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/slugify";
 import type { ApiResponse } from "@/types";
@@ -75,8 +75,10 @@ function looksDirty(title: string, slug: string, body: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") === "1";

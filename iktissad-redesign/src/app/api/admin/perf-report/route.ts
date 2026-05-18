@@ -12,7 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthFromRequest, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 
 interface PerfReportPayload {
   component: string;
@@ -34,8 +34,10 @@ function isValidReport(body: unknown): body is PerfReportPayload {
 
 export async function POST(request: NextRequest) {
   // Verify admin session
-  const auth = await requireAuthFromRequest(request);
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(request, ["super_admin", "editor", "writer"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   let body: unknown;
   try {

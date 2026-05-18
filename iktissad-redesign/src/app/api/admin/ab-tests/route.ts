@@ -16,7 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAuth, unauthorizedResponse } from '@/lib/api-auth'
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { mapABTestRow, publicStatusToDb } from '@/lib/supabase/mappers'
 
@@ -59,9 +59,10 @@ const updateTestSchema = z.object({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth()
+  const auth = await requireRole(undefined, ["super_admin", "editor"])
   if (!auth.authenticated) return unauthorizedResponse()
-
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
   const searchParams = request.nextUrl.searchParams
   const articleId = searchParams.get('articleId')
 
@@ -113,9 +114,10 @@ export async function GET(request: NextRequest) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth()
+  const auth = await requireRole(undefined, ["super_admin", "editor"])
   if (!auth.authenticated) return unauthorizedResponse()
-
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
   let body: unknown
   try {
     body = await request.json()
@@ -195,9 +197,10 @@ export async function POST(request: NextRequest) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireAuth()
+  const auth = await requireRole(undefined, ["super_admin", "editor"])
   if (!auth.authenticated) return unauthorizedResponse()
-
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
   let body: unknown
   try {
     body = await request.json()

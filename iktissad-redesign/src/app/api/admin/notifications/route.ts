@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthFromRequest, unauthorizedResponse } from '@/lib/api-auth';
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from '@/lib/api-auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse } from '@/types';
 
 // ─── GET /api/admin/notifications ───────────────────────────────
 export async function GET(request: NextRequest) {
-  const auth = await requireAuthFromRequest(request);
+  const auth = await requireRole(request, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const admin = createAdminClient();
 
@@ -28,8 +30,10 @@ export async function GET(request: NextRequest) {
 
 // ─── PUT /api/admin/notifications (bulk mark-read) ───────────────
 export async function PUT(request: NextRequest) {
-  const auth = await requireAuthFromRequest(request);
+  const auth = await requireRole(request, ["super_admin", "editor"]);
   if (!auth.authenticated) return unauthorizedResponse();
+  if (auth.csrfFailed) return csrfForbiddenResponse();
+  if (auth.forbidden) return forbiddenResponse();
 
   const admin = createAdminClient();
 

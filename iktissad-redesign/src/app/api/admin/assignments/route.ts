@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -22,8 +22,10 @@ export interface ArticleAssignment {
 // ─── GET /api/admin/assignments ──────────────────────────────────────────────
 
 export async function GET() {
-  const auth = await requireAuth();
-  if (!auth.authenticated) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin", "editor"]);
+  if (!auth.authenticated) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const admin = createAdminClient();
 

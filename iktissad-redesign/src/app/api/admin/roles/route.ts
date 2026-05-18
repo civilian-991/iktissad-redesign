@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
+import { unauthorizedResponse, requireRole, forbiddenResponse, csrfForbiddenResponse } from "@/lib/api-auth"
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
@@ -61,8 +61,10 @@ async function getCallerRole(userId: string): Promise<string | null> {
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth();
-  if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated || !auth.userId) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const callerRole = await getCallerRole(auth.userId);
   if (callerRole !== "super_admin") {
@@ -111,8 +113,10 @@ const assignRoleSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
-  if (!auth.authenticated || !auth.userId) return unauthorizedResponse();
+  const auth = await requireRole(undefined, ["super_admin"]);
+  if (!auth.authenticated || !auth.userId) return unauthorizedResponse()
+  if (auth.csrfFailed) return csrfForbiddenResponse()
+  if (auth.forbidden) return forbiddenResponse()
 
   const callerRole = await getCallerRole(auth.userId);
   if (callerRole !== "super_admin") {
