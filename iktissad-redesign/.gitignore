@@ -49,3 +49,5 @@ scripts/drupal-export.json
 public/sw.js
 public/workbox-*.js
 public/sw.js.map
+iktissad-redesign/test-results/
+iktissad-redesign/playwright-report/
