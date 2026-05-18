@@ -3,12 +3,21 @@
  * GET /api/admin/db-health
  *
  * Returns a snapshot of database health metrics:
- *   - connectionCount     : active server-side connections (from pg_stat_activity)
- *   - slowQueryCount      : queries > 1 s in the last hour via pg_stat_statements
- *                           (stubbed to 0 when the extension is not enabled)
- *   - tableRowCounts      : estimated live row counts for all core tables
+ *   - connectionCount         : active server-side connections (from pg_stat_activity)
+ *   - slowQueryCount          : count of queries above the 1s threshold (pg_stat_statements)
+ *   - slowQueries             : top 5 slow queries (query/mean_ms/calls) for admin UI
+ *   - pgStatStatementsEnabled : whether pg_stat_statements RPC is callable
+ *   - tableRowCounts          : estimated live row counts for all core tables
  *
  * Requires admin authentication (Supabase Auth session).
+ *
+ * Backing RPCs (see supabase/migrations/20260518_039_db_health_rpc.sql):
+ *   - get_connection_count() -> int
+ *   - get_slow_queries(threshold_ms int) -> table(query text, mean_ms double precision, calls bigint)
+ *
+ * If pg_stat_statements is not enabled in the Supabase project, the
+ * slow-query RPC will throw; we catch and return null for the slow-query
+ * fields rather than failing the whole endpoint.
  */
 
 import { NextResponse } from "next/server";
@@ -16,9 +25,17 @@ import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse } from "@/types";
 
+export interface SlowQuery {
+  query: string;
+  meanMs: number;
+  calls: number;
+}
+
 export interface DbHealthPayload {
-  connectionCount: number;
-  slowQueryCount: number;
+  connectionCount: number | null;
+  slowQueryCount: number | null;
+  slowQueries: SlowQuery[] | null;
+  pgStatStatementsEnabled: boolean;
   tableRowCounts: Record<string, number>;
 }
 
@@ -38,6 +55,8 @@ const TRACKED_TABLES = [
   "magazine_spread_reads",
 ] as const;
 
+const SLOW_QUERY_THRESHOLD_MS = 1000;
+
 export async function GET() {
   const auth = await requireAuth();
   if (!auth.authenticated) {
@@ -47,40 +66,52 @@ export async function GET() {
   const admin = createAdminClient();
 
   // ── Connection count ────────────────────────────────────────────────────────
-  // pg_stat_activity is accessible via Supabase's pg_meta / rpc. We use a raw
-  // RPC call that wraps a simple SQL query. If the RPC function does not exist
-  // yet we fall back gracefully.
-  let connectionCount = 0;
+  // Calls the get_connection_count() RPC which wraps pg_stat_activity.
+  let connectionCount: number | null = null;
   try {
-    const { data: connData, error: connErr } = await admin.rpc(
+    const { data, error } = (await admin.rpc(
       "get_connection_count" as never
-    ) as { data: number | null; error: unknown };
+    )) as { data: number | null; error: unknown };
 
-    if (!connErr && typeof connData === "number") {
-      connectionCount = connData;
-    } else {
-      // Fallback: count via pg_stat_activity through a SQL query routed as RPC
-      // If the RPC isn't defined this will silently stay 0, which is acceptable.
-      connectionCount = 0;
+    if (!error && typeof data === "number") {
+      connectionCount = data;
     }
   } catch {
-    // Extension not available or RPC not defined — non-fatal
-    connectionCount = 0;
+    // RPC missing or DB unreachable — leave as null
+    connectionCount = null;
   }
 
-  // ── Slow query count ─────────────────────────────────────────────────────────
-  // Requires pg_stat_statements extension. Stubbed to 0 until it is enabled.
-  // To enable: run `CREATE EXTENSION IF NOT EXISTS pg_stat_statements;` in the
-  // Supabase SQL editor, then replace this stub with:
-  //
-  //   const { data } = await admin.rpc("get_slow_query_count_last_hour");
-  //
-  // where the RPC wraps:
-  //   SELECT count(*) FROM pg_stat_statements
-  //   WHERE mean_exec_time > 1000 AND ...
-  //
-  // See: https://supabase.com/docs/guides/platform/performance#query-performance
-  const slowQueryCount = 0;
+  // ── Slow queries (pg_stat_statements) ───────────────────────────────────────
+  // The get_slow_queries() RPC requires pg_stat_statements. If the extension
+  // is not enabled the RPC will error — we degrade gracefully.
+  let slowQueryCount: number | null = null;
+  let slowQueries: SlowQuery[] | null = null;
+  let pgStatStatementsEnabled = false;
+
+  try {
+    const { data, error } = (await admin.rpc(
+      "get_slow_queries" as never,
+      { threshold_ms: SLOW_QUERY_THRESHOLD_MS } as never
+    )) as {
+      data: Array<{ query: string; mean_ms: number; calls: number }> | null;
+      error: unknown;
+    };
+
+    if (!error && Array.isArray(data)) {
+      pgStatStatementsEnabled = true;
+      slowQueryCount = data.length;
+      slowQueries = data.slice(0, 5).map((row) => ({
+        query: row.query,
+        meanMs: row.mean_ms,
+        calls: row.calls,
+      }));
+    }
+  } catch {
+    // pg_stat_statements not enabled or RPC missing — keep nulls
+    pgStatStatementsEnabled = false;
+    slowQueryCount = null;
+    slowQueries = null;
+  }
 
   // ── Table row counts ─────────────────────────────────────────────────────────
   // pg_stat_user_tables.n_live_tup gives cheap estimated counts without a
@@ -109,6 +140,8 @@ export async function GET() {
   const payload: DbHealthPayload = {
     connectionCount,
     slowQueryCount,
+    slowQueries,
+    pgStatStatementsEnabled,
     tableRowCounts,
   };
 
