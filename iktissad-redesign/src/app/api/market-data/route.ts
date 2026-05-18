@@ -4,15 +4,23 @@
  * Returns GCC stock market data.
  *
  * Provider is controlled by the MARKET_DATA_PROVIDER env var:
- *   - "mock"           (default) — returns static mock data; no API key needed
- *   - "alpha_vantage"  — fetches real quotes from Alpha Vantage (free tier: 25 req/day)
+ *   - "alphavantage"   — fetches real quotes from Alpha Vantage (free tier: 25 req/day).
+ *                        REQUIRED in production. ALPHA_VANTAGE_API_KEY must be set.
+ *   - "mock"           — returns static mock data. Allowed in development only.
+ *                        In production, "mock" is rejected and the widget returns an
+ *                        "unavailable" response instead of fake numbers.
+ *
+ * Default behaviour:
+ *   - production (NODE_ENV === "production")  → defaults to "alphavantage"
+ *   - development                              → defaults to "mock"
  *
  * Required env vars for Alpha Vantage:
- *   MARKET_DATA_PROVIDER=alpha_vantage
+ *   MARKET_DATA_PROVIDER=alphavantage
  *   ALPHA_VANTAGE_API_KEY=your_key_here   # Free at alphavantage.co
  *
- * Response shape is stable regardless of provider, so the frontend MarketWidget
- * works identically with or without an API key.
+ * Unavailable response shape (when prod has no key, or prod tries to use mock):
+ *   { data: [], provider: "unavailable", reason: "missing-api-key" | "mock-disabled-in-prod" }
+ *   — status 200, so the frontend can render a graceful "data unavailable" state.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -45,8 +53,16 @@ export interface MarketDataResponse {
   history: MarketDataPoint[]
 }
 
+/** Graceful "data unavailable" envelope — returned when prod cannot serve real data. */
+export interface MarketDataUnavailableResponse {
+  data: []
+  provider: 'unavailable'
+  reason: 'missing-api-key' | 'mock-disabled-in-prod'
+}
+
 // ─────────────────────────────────────────────────────────────────
 // Mock dataset — 10 GCC stocks with realistic price history
+// DEV ONLY. Never served in production.
 // ─────────────────────────────────────────────────────────────────
 
 function generateHistory(basePrice: number, days = 30): MarketDataPoint[] {
@@ -292,11 +308,11 @@ async function fetchAlphaVantage(
   symbol: string,
   market: string,
   mockFallback: Omit<MarketDataResponse, 'isStale'> | undefined
-): Promise<{ data: Omit<MarketDataResponse, 'isStale'>; isStale: boolean }> {
+): Promise<{ data: Omit<MarketDataResponse, 'isStale'>; isStale: boolean } | null> {
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY
   if (!apiKey) {
-    // No key configured — fall back to mock
-    return { data: mockFallback ?? buildPlaceholder(symbol, market), isStale: false }
+    // No key — caller must handle (return unavailable in prod, fallback to mock in dev)
+    return null
   }
 
   const cacheKey = `${symbol}.${market}`
@@ -326,11 +342,13 @@ async function fetchAlphaVantage(
 
     // Alpha Vantage returns a "Note" key when the rate limit is hit
     if (json.Note) {
-      console.warn('[market-data] Alpha Vantage rate limit hit, returning stale/mock')
-      return {
-        data: cached?.data ?? mockFallback ?? buildPlaceholder(symbol, market),
-        isStale: true,
+      console.warn('[market-data] Alpha Vantage rate limit hit, returning stale cached data if any')
+      if (cached) return { data: cached.data, isStale: true }
+      // No cache to fall back to — let the caller decide (dev: mock, prod: unavailable)
+      if (mockFallback && process.env.NODE_ENV !== 'production') {
+        return { data: mockFallback, isStale: true }
       }
+      return null
     }
 
     const quote = json['Global Quote']
@@ -356,11 +374,18 @@ async function fetchAlphaVantage(
     return { data: mapped, isStale: false }
   } catch (err) {
     console.error('[market-data] Alpha Vantage fetch error:', err)
-    // Fall back to cached or mock on any error
-    return {
-      data: cached?.data ?? mockFallback ?? buildPlaceholder(symbol, market),
-      isStale: cached ? now - cached.fetchedAt > AV_STALE_TTL_MS : false,
+    // Fall back to cached if we have it
+    if (cached) {
+      return {
+        data: cached.data,
+        isStale: now - cached.fetchedAt > AV_STALE_TTL_MS,
+      }
     }
+    // In dev, use mock as a last resort so local dev still shows something
+    if (mockFallback && process.env.NODE_ENV !== 'production') {
+      return { data: mockFallback, isStale: false }
+    }
+    return null
   }
 }
 
@@ -388,6 +413,46 @@ function buildPlaceholder(symbol: string, market: string): Omit<MarketDataRespon
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Provider resolution + one-time warning state
+// ─────────────────────────────────────────────────────────────────
+
+const ALPHA_VANTAGE_ALIASES = new Set(['alphavantage', 'alpha_vantage', 'alpha-vantage'])
+
+/**
+ * Resolves the active provider name based on env + NODE_ENV.
+ * Defaults to "alphavantage" in production, "mock" in dev/test.
+ */
+function resolveProvider(): 'alphavantage' | 'mock' | 'unknown' {
+  const raw = (process.env.MARKET_DATA_PROVIDER ?? '').trim().toLowerCase()
+  if (!raw) {
+    return process.env.NODE_ENV === 'production' ? 'alphavantage' : 'mock'
+  }
+  if (ALPHA_VANTAGE_ALIASES.has(raw)) return 'alphavantage'
+  if (raw === 'mock') return 'mock'
+  return 'unknown'
+}
+
+// Track which warnings have been emitted to avoid log spam in long-lived instances
+const warnedOnce = new Set<string>()
+function warnOnce(key: string, message: string) {
+  if (warnedOnce.has(key)) return
+  warnedOnce.add(key)
+  console.warn(message)
+}
+
+function unavailableResponse(reason: MarketDataUnavailableResponse['reason']) {
+  const body: MarketDataUnavailableResponse = {
+    data: [],
+    provider: 'unavailable',
+    reason,
+  }
+  return NextResponse.json(body, {
+    status: 200,
+    headers: { 'Cache-Control': 'no-store' },
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Route handler
 // ─────────────────────────────────────────────────────────────────
 
@@ -403,7 +468,36 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  // Resolve mock data (used as fallback for all providers and for the 'mock' provider)
+  const isProd = process.env.NODE_ENV === 'production'
+  const provider = resolveProvider()
+
+  // ── PROD GUARD #1: mock is never allowed in production ──
+  if (isProd && provider === 'mock') {
+    warnOnce(
+      'mock-in-prod',
+      '[market-data] MARKET_DATA_PROVIDER=mock is not allowed in production. Returning unavailable. Set MARKET_DATA_PROVIDER=alphavantage and ALPHA_VANTAGE_API_KEY.'
+    )
+    return unavailableResponse('mock-disabled-in-prod')
+  }
+
+  // ── PROD GUARD #2: alphavantage requires an API key in production ──
+  if (isProd && provider === 'alphavantage' && !process.env.ALPHA_VANTAGE_API_KEY) {
+    warnOnce(
+      'missing-av-key',
+      '[market-data] ALPHA_VANTAGE_API_KEY is missing in production. Returning unavailable instead of mock data. Get a free key at https://www.alphavantage.co'
+    )
+    return unavailableResponse('missing-api-key')
+  }
+
+  if (provider === 'unknown') {
+    warnOnce(
+      'unknown-provider',
+      `[market-data] Unknown MARKET_DATA_PROVIDER="${process.env.MARKET_DATA_PROVIDER}". Expected "alphavantage" or "mock".`
+    )
+    if (isProd) return unavailableResponse('missing-api-key')
+  }
+
+  // Resolve mock data (used as fallback in dev only, and for AlphaVantage meta lookup)
   const key = market ? `${symbol}.${market}` : symbol
   let mockData: Omit<MarketDataResponse, 'isStale'> | undefined = MOCK_DB[key] ?? MOCK_DB[symbol]
 
@@ -414,21 +508,38 @@ export async function GET(request: NextRequest) {
     mockData = found
   }
 
-  const provider = process.env.MARKET_DATA_PROVIDER ?? 'mock'
-
   let responseData: Omit<MarketDataResponse, 'isStale'>
   let isStale = false
-
   let isMock = false
 
-  if (provider === 'alpha_vantage') {
+  if (provider === 'alphavantage') {
     const result = await fetchAlphaVantage(symbol, market, mockData)
-    responseData = result.data
-    isStale = result.isStale
-    // If alpha_vantage fell back to mock (no API key), mark as mock
-    isMock = !process.env.ALPHA_VANTAGE_API_KEY
+    if (result) {
+      responseData = result.data
+      isStale = result.isStale
+      isMock = false
+    } else {
+      // fetchAlphaVantage returned null:
+      //   - in prod with no key, we already returned above
+      //   - in dev with no key, fall back to mock so local dev still works
+      if (isProd) {
+        // Safety net — should already be handled by the prod guard above
+        return unavailableResponse('missing-api-key')
+      }
+      // Dev fallback to mock
+      if (!mockData) {
+        const placeholder = buildPlaceholder(symbol, market)
+        const response: MarketDataResponse = { ...placeholder, isStale: false, isMock: true }
+        return NextResponse.json(response, {
+          status: 200,
+          headers: { 'Cache-Control': 'no-store' },
+        })
+      }
+      responseData = { ...mockData, lastUpdated: new Date().toISOString() }
+      isMock = true
+    }
   } else {
-    // Default: mock provider
+    // provider === 'mock' (dev only — prod blocked above)
     isMock = true
     if (!mockData) {
       const placeholder = buildPlaceholder(symbol, market)

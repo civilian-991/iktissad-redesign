@@ -24,7 +24,13 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts'
-import type { MarketDataResponse } from '@/app/api/market-data/route'
+import type { MarketDataResponse, MarketDataUnavailableResponse } from '@/app/api/market-data/route'
+
+type MarketDataApiResponse = MarketDataResponse | MarketDataUnavailableResponse
+
+function isUnavailable(json: MarketDataApiResponse): json is MarketDataUnavailableResponse {
+  return (json as MarketDataUnavailableResponse).provider === 'unavailable'
+}
 
 // ─────────────────────────────────────────────────────────────────
 // Types
@@ -401,6 +407,30 @@ function WidgetSkeleton({ height }: { height: number }) {
 // Error state
 // ─────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────
+// Unavailable state — shown when the server cannot serve real data
+// (e.g. ALPHA_VANTAGE_API_KEY missing in production). Never shows
+// fake numbers — just a calm "data unavailable" notice.
+// ─────────────────────────────────────────────────────────────────
+
+function WidgetUnavailable({ arabic = true }: { arabic?: boolean }) {
+  return (
+    <div
+      dir={arabic ? 'rtl' : 'ltr'}
+      className="rounded-xl border px-5 py-4 flex items-center gap-3"
+      style={{
+        background: 'rgba(24,59,78,0.5)',
+        borderColor: 'rgba(245,238,220,0.12)',
+      }}
+    >
+      <BarChart3 size={18} style={{ color: 'rgba(245,238,220,0.45)', flexShrink: 0 }} />
+      <p className="text-sm text-white/55">
+        {arabic ? 'بيانات السوق غير متاحة' : 'Market data unavailable'}
+      </p>
+    </div>
+  )
+}
+
 function WidgetError({ symbol, onRetry }: { symbol: string; onRetry: () => void }) {
   return (
     <div
@@ -440,6 +470,7 @@ export default function MarketWidget({
   className = '',
 }: MarketWidgetProps) {
   const [data, setData] = useState<MarketDataResponse | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [fetchKey, setFetchKey] = useState(0)
@@ -450,19 +481,25 @@ export default function MarketWidget({
     let cancelled = false
     setLoading(true)
     setError(false)
+    setUnavailable(false)
 
     const params = new URLSearchParams({ symbol, market })
 
     fetch(`/api/market-data?${params.toString()}`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json() as Promise<MarketDataResponse>
+        return res.json() as Promise<MarketDataApiResponse>
       })
       .then((json) => {
-        if (!cancelled) {
+        if (cancelled) return
+        if (isUnavailable(json)) {
+          setUnavailable(true)
+          setData(null)
+        } else {
           setData(json)
-          setLoading(false)
+          setUnavailable(false)
         }
+        setLoading(false)
       })
       .catch(() => {
         if (!cancelled) {
@@ -482,6 +519,14 @@ export default function MarketWidget({
     return (
       <div className={className}>
         <WidgetSkeleton height={type === 'price' ? 56 : height} />
+      </div>
+    )
+  }
+
+  if (unavailable) {
+    return (
+      <div className={className}>
+        <WidgetUnavailable arabic={arabicNumerals} />
       </div>
     )
   }
