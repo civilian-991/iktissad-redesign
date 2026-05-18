@@ -71,7 +71,7 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 
-// Auth mock — set `authedUser` to control whether requireAuth() succeeds.
+// Auth mock — set `authedUser` to control whether requireRole() succeeds.
 let authedUser: { id: string } | null = { id: "test-admin-id" };
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -84,6 +84,17 @@ vi.mock("@/lib/supabase/server", () => ({
     },
   }),
 }));
+
+vi.mock("@/lib/api-auth", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/api-auth")>("@/lib/api-auth");
+  return {
+    ...actual,
+    requireRole: async () =>
+      authedUser
+        ? { authenticated: true, userId: authedUser.id, role: "super_admin" }
+        : { authenticated: false },
+  };
+});
 
 // ── Helpers ────────────────────────────────────────────────────────
 
