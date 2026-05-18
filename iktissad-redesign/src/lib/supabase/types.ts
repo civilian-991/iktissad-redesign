@@ -1753,6 +1753,103 @@ export type Database = {
         };
         Relationships: [];
       };
+      // ── Phase 12: A/B Tests (persistent storage) ─────────────────────────
+      ab_tests: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          variants: Json;
+          status: "draft" | "running" | "paused" | "completed";
+          target_metric: string | null;
+          started_at: string | null;
+          ended_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          variants: Json;
+          status?: "draft" | "running" | "paused" | "completed";
+          target_metric?: string | null;
+          started_at?: string | null;
+          ended_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          variants?: Json;
+          status?: "draft" | "running" | "paused" | "completed";
+          target_metric?: string | null;
+          started_at?: string | null;
+          ended_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      ab_test_assignments: {
+        Row: {
+          id: number;
+          test_id: string;
+          subject_id: string;
+          variant_key: string;
+          assigned_at: string;
+        };
+        Insert: {
+          id?: number;
+          test_id: string;
+          subject_id: string;
+          variant_key: string;
+          assigned_at?: string;
+        };
+        Update: {
+          id?: number;
+          test_id?: string;
+          subject_id?: string;
+          variant_key?: string;
+          assigned_at?: string;
+        };
+        Relationships: [];
+      };
+      ab_test_events: {
+        Row: {
+          id: number;
+          test_id: string | null;
+          subject_id: string | null;
+          variant_key: string | null;
+          event: string | null;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          test_id?: string | null;
+          subject_id?: string | null;
+          variant_key?: string | null;
+          event?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          test_id?: string | null;
+          subject_id?: string | null;
+          variant_key?: string | null;
+          event?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       // ── Phase 10: Social accounts (Twitter / LinkedIn / Telegram tokens) ─
       social_accounts: {
         Row: {
@@ -1971,3 +2068,17 @@ export type ContactSubmissionUpdate = Tables["contact_submissions"]["Update"];
 export type SocialAccountRow    = Tables["social_accounts"]["Row"];
 export type SocialAccountInsert = Tables["social_accounts"]["Insert"];
 export type SocialAccountUpdate = Tables["social_accounts"]["Update"];
+
+// ── Phase 12: A/B Tests ──────────────────────────────────────────────────────
+
+export type ABTestRow    = Tables["ab_tests"]["Row"];
+export type ABTestInsert = Tables["ab_tests"]["Insert"];
+export type ABTestUpdate = Tables["ab_tests"]["Update"];
+
+export type ABTestAssignmentRow    = Tables["ab_test_assignments"]["Row"];
+export type ABTestAssignmentInsert = Tables["ab_test_assignments"]["Insert"];
+export type ABTestAssignmentUpdate = Tables["ab_test_assignments"]["Update"];
+
+export type ABTestEventRow    = Tables["ab_test_events"]["Row"];
+export type ABTestEventInsert = Tables["ab_test_events"]["Insert"];
+export type ABTestEventUpdate = Tables["ab_test_events"]["Update"];
