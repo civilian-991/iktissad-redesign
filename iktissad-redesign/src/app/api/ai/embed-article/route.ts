@@ -1,12 +1,13 @@
 /**
  * POST /api/ai/embed-article
  *
- * Triggers a search-vector refresh for a published article.
+ * Triggers a tsvector search-vector refresh for a published article.
  * Called automatically at publish time (e.g. from the article save flow
  * or an automation rule) to ensure full-text search is immediately current.
  *
- * When a real embedding model is available, this route will also write to
- * the `embedding` vector(1536) column.
+ * The route name is historical; semantic search is implemented via Postgres
+ * tsvector (`articles.search_vector`), not vector embeddings. See
+ * `src/lib/ai/keyword-search.ts` for the design rationale.
  *
  * Request body: { articleId: string }
  * Response:     { success: true } | { error: string }
@@ -16,7 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuthFromRequest, unauthorizedResponse } from "@/lib/api-auth";
-import { updateArticleSearchVector } from "@/lib/ai/embeddings";
+import { updateArticleSearchVector } from "@/lib/ai/keyword-search";
 import type { ApiResponse } from "@/types";
 
 export async function POST(request: NextRequest) {

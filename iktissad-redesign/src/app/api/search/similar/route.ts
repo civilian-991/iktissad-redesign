@@ -16,7 +16,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { findSimilarArticles, type SimilarArticle } from "@/lib/ai/embeddings";
+import { findSimilarArticles, type SimilarArticle } from "@/lib/ai/keyword-search";
 import type { ApiResponse } from "@/types";
 
 export async function GET(request: NextRequest) {

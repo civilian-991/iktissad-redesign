@@ -85,8 +85,8 @@
 - Covered by F1.4 analytics POST; sessionStorage flag prevents double-counting
 
 ### F2.5 — Semantic "More Like This" ✅
-- Sidebar calls `/api/search/similar?articleId=X` (pgvector) first
-- Falls back to same-section if no embeddings; `Sparkles` icon when AI results active
+- Sidebar calls `/api/search/similar?articleId=X` (Postgres tsvector + section/sector overlap)
+- Falls back to same-section query if the RPC is unavailable; `Sparkles` icon when AI results active
 
 ---
 

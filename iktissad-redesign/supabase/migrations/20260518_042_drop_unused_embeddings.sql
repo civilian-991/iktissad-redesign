@@ -1,0 +1,21 @@
+-- =============================================================================
+-- Drop unused vector embeddings index
+-- =============================================================================
+--
+-- Phase 9.4 reserved an `articles.embedding vector(1536)` column with an
+-- IVFFlat cosine-similarity index for a future embedding pipeline. No
+-- embedding model is wired up, so the column is 100% NULL and the index is
+-- pure overhead (storage + maintenance cost on every INSERT/UPDATE).
+--
+-- This migration drops the unused IVFFlat index. The `embedding` column is
+-- retained so a future embedding pipeline can backfill it without another
+-- schema change. The `vector` extension is also retained — it has near-zero
+-- cost when no indexes use it, and re-creating it requires superuser perms
+-- on hosted Supabase.
+--
+-- Semantic search at launch uses Postgres tsvector (`articles.search_vector`)
+-- exclusively, via `search_articles_hybrid()` and `find_similar_articles()`
+-- RPCs from migration 20260401_020_semantic_search.sql.
+-- =============================================================================
+
+DROP INDEX IF EXISTS articles_embedding_idx;

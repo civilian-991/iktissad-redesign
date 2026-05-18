@@ -1,13 +1,22 @@
 /**
- * Embeddings & Semantic Search Helpers — Phase 9.4
+ * Keyword Search Helpers
  *
- * We do not have an embedding model provider installed, so we rely on
- * Supabase's weighted tsvector (`search_vector`) for "semantic" similarity.
- * The column is auto-maintained by a DB trigger (migration 020).
+ * Semantic search at launch is implemented as Postgres full-text search over a
+ * weighted `tsvector` column (`articles.search_vector`), maintained by a DB
+ * trigger (migration `20260401_020_semantic_search.sql`).
  *
- * When a real embedding model (e.g. @ai-sdk/openai text-embedding-3-small)
- * is added, swap `updateArticleSearchVector` to call `embed()` and persist
- * the vector to the `embedding` column instead.
+ * No vector-embedding model is wired up — this module talks to tsvector RPCs
+ * directly and falls back to ILIKE when the RPCs are unavailable. The
+ * `articles.embedding vector(1536)` column exists in the schema but is unused;
+ * its index was dropped in migration `20260518_042_drop_unused_embeddings.sql`
+ * to avoid carrying ivfflat storage cost for an empty column. The column is
+ * retained so a future embedding pipeline can be slotted in without another
+ * schema change.
+ *
+ * Public surface:
+ *   - updateArticleSearchVector(articleId)
+ *   - findSimilarArticles(articleId, limit)
+ *   - hybridSearch(query, limit, offset)
  */
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,11 +47,6 @@ export interface SimilarArticle {
  * `updated_at` is sufficient to fire it. This is called at publish time
  * (via /api/ai/embed-article) to guarantee the vector reflects the latest
  * title/excerpt before the article goes live.
- *
- * If a real embedding model is integrated later, extend this function to:
- *   1. Build the embedding text from title + excerpt
- *   2. Call `embed()` to obtain a float[] vector
- *   3. Update the `embedding` column alongside `updated_at`
  */
 export async function updateArticleSearchVector(articleId: string): Promise<void> {
   const supabase = createAdminClient();
@@ -84,7 +88,7 @@ export async function findSimilarArticles(
   );
 
   if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-     
+
     return rpcData.map((row: {
       id: string;
       title: string;
@@ -179,7 +183,7 @@ export async function hybridSearch(
   );
 
   if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-     
+
     const results: HybridSearchResult[] = rpcData.map((row: {
       id: string;
       title: string;
