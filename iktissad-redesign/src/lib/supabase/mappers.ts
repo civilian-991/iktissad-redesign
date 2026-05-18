@@ -478,6 +478,76 @@ export function mapArticleSeriesRow(
   };
 }
 
+// ──────────────────────────────────────────────────────────────
+// A/B Tests (headline experiments)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Public ABTest shape consumed by /api/admin/ab-tests and HeadlineABLab.
+ * (Defined here to avoid a circular import with the route file.)
+ */
+export interface ABTestPublic {
+  id: string;
+  articleId: string;
+  variantA: string;
+  variantB: string;
+  durationHours: number;
+  trafficSplit: number;
+  status: "active" | "stopped" | "completed";
+  startedAt: string;
+  endsAt: string;
+  createdBy?: string;
+}
+
+interface ABTestVariantsPayload {
+  articleId: string;
+  variantA: string;
+  variantB: string;
+  trafficSplit: number;
+  durationHours: number;
+}
+
+function dbStatusToPublic(
+  status: "draft" | "running" | "paused" | "completed",
+): "active" | "stopped" | "completed" {
+  if (status === "running") return "active";
+  if (status === "completed") return "completed";
+  return "stopped"; // draft + paused → stopped
+}
+
+export function publicStatusToDb(
+  status: "active" | "stopped" | "completed",
+): "running" | "paused" | "completed" {
+  if (status === "active") return "running";
+  if (status === "completed") return "completed";
+  return "paused";
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapABTestRow(row: any): ABTestPublic {
+  const variants = (row.variants ?? {}) as Partial<ABTestVariantsPayload>;
+  const durationHours = Number(variants.durationHours ?? 24);
+  const trafficSplit = Number(variants.trafficSplit ?? 50);
+  const startedAt: string = row.started_at ?? row.created_at;
+  const endedAt: string | null = row.ended_at ?? null;
+  const endsAt =
+    endedAt ??
+    new Date(new Date(startedAt).getTime() + durationHours * 60 * 60 * 1000).toISOString();
+
+  return {
+    id: row.id,
+    articleId: String(variants.articleId ?? row.name ?? ""),
+    variantA: String(variants.variantA ?? ""),
+    variantB: String(variants.variantB ?? ""),
+    durationHours,
+    trafficSplit,
+    status: dbStatusToPublic(row.status),
+    startedAt,
+    endsAt,
+    createdBy: row.created_by ?? undefined,
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapNewsletterRow(row: any): Newsletter {
   return {
