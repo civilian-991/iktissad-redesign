@@ -34,7 +34,14 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 import { Button, Badge, StatusBadge } from '@/components/ui';
-import { swrFetcher, articlesKey, deleteArticle } from '@/lib/api-client';
+import { ConfirmModal } from '@/components/ui/Modal';
+import {
+  swrFetcher,
+  articlesKey,
+  deleteArticle,
+  bulkArticles,
+  type ArticleBulkAction,
+} from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
@@ -163,17 +170,54 @@ export default function ArticlesPage() {
     }
   }, [mutate, t]);
 
-  // Bulk delete
-  const handleBulkDelete = useCallback(async () => {
-    try {
-      await Promise.all(selectedArticles.map((id) => deleteArticle(id)));
-      toast.success(t('admin.articles.bulkActions.deleteSuccess'));
-      setSelectedArticles([]);
-      mutate();
-    } catch (err: any) {
-      toast.error(err.message || t('admin.common.error'));
-    }
-  }, [selectedArticles, mutate, t]);
+  // Bulk action state — destructive actions show a confirm modal first
+  const [pendingBulkAction, setPendingBulkAction] = useState<ArticleBulkAction | null>(null);
+  const [bulkInFlight, setBulkInFlight] = useState(false);
+
+  const runBulkAction = useCallback(
+    async (action: ArticleBulkAction) => {
+      if (selectedArticles.length === 0) return;
+      setBulkInFlight(true);
+      try {
+        const res = await bulkArticles(selectedArticles, action);
+        const result = res.data;
+        if (result) {
+          if (result.failed > 0) {
+            toast.error(
+              t('admin.articles.bulkActions.result', {
+                success: result.success,
+                failed: result.failed,
+              }),
+            );
+          } else {
+            toast.success(
+              t('admin.articles.bulkActions.resultAllSuccess', { success: result.success }),
+            );
+          }
+        }
+        setSelectedArticles([]);
+        await mutate();
+      } catch (err: any) {
+        toast.error(err?.message || t('admin.common.error'));
+      } finally {
+        setBulkInFlight(false);
+        setPendingBulkAction(null);
+      }
+    },
+    [selectedArticles, mutate, t],
+  );
+
+  // Non-destructive actions run immediately; delete + archive require confirmation
+  const onBulkClick = useCallback(
+    (action: ArticleBulkAction) => {
+      if (action === 'delete' || action === 'archive') {
+        setPendingBulkAction(action);
+      } else {
+        void runBulkAction(action);
+      }
+    },
+    [runBulkAction],
+  );
 
   return (
     <div className="space-y-6">
@@ -299,22 +343,85 @@ export default function ArticlesPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex items-center justify-between"
+            className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
           >
             <span className="text-gold font-[family-name:var(--font-display)] text-sm">
               {t('admin.articles.bulkActions.selected', { count: selectedArticles.length })}
             </span>
-            <div className="flex items-center gap-2">
-              <Button variant="danger" size="sm" onClick={handleBulkDelete}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="success"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => onBulkClick('publish')}
+              >
+                {t('admin.articles.bulkActions.publish')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => onBulkClick('unpublish')}
+              >
+                {t('admin.articles.bulkActions.unpublish')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => onBulkClick('archive')}
+              >
+                {t('admin.articles.bulkActions.archive')}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => onBulkClick('delete')}
+              >
                 {t('admin.articles.bulkActions.delete')}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedArticles([])}>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={bulkInFlight}
+                onClick={() => setSelectedArticles([])}
+              >
                 {t('admin.articles.bulkActions.deselect')}
               </Button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Bulk action confirmation modal (delete + archive) */}
+      <ConfirmModal
+        open={pendingBulkAction === 'delete' || pendingBulkAction === 'archive'}
+        onClose={() => {
+          if (!bulkInFlight) setPendingBulkAction(null);
+        }}
+        onConfirm={() => {
+          if (pendingBulkAction) void runBulkAction(pendingBulkAction);
+        }}
+        loading={bulkInFlight}
+        variant={pendingBulkAction === 'delete' ? 'danger' : 'warning'}
+        title={
+          pendingBulkAction === 'delete'
+            ? t('admin.articles.bulkActions.confirmDeleteTitle')
+            : t('admin.articles.bulkActions.confirmArchiveTitle')
+        }
+        message={
+          pendingBulkAction === 'delete'
+            ? t('admin.articles.bulkActions.confirmDeleteMessage', {
+                count: selectedArticles.length,
+              })
+            : t('admin.articles.bulkActions.confirmArchiveMessage', {
+                count: selectedArticles.length,
+              })
+        }
+        confirmText={t('admin.articles.bulkActions.confirm')}
+        cancelText={t('admin.articles.bulkActions.cancel')}
+      />
 
       {/* Articles Table */}
       <SectionErrorBoundary section="articles-table">

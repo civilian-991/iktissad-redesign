@@ -223,3 +223,60 @@ export function unauthorizedResponse() {
     { status: 401 }
   );
 }
+
+/**
+ * Admin role gate — requires the caller to be authenticated AND hold one of
+ * the specified roles in the `admin_roles` table.
+ *
+ * Wraps `requireAuth(request)` (which also handles CSRF when `request` is
+ * provided) and then looks up the caller's `admin_roles.role`.
+ *
+ * Returns:
+ * - { ok: true, userId, role } on success
+ * - { ok: false, response } with a ready-made NextResponse on failure
+ *   (401 unauthenticated, 403 csrf, 403 forbidden role)
+ *
+ * The caller's `userId` is also returned for downstream audit logging.
+ */
+export type AdminRole =
+  | "super_admin"
+  | "editor"
+  | "writer"
+  | "finance"
+  | "advertiser_manager";
+
+export async function requireRole(
+  request: Request,
+  allowed: ReadonlyArray<AdminRole>
+): Promise<
+  | { ok: true; userId: string; role: AdminRole }
+  | { ok: false; response: NextResponse }
+> {
+  const auth = await requireAuth(request);
+  if (!auth.authenticated || !auth.userId) {
+    return { ok: false, response: unauthorizedResponse() };
+  }
+  if (auth.csrfFailed) {
+    return { ok: false, response: csrfForbiddenResponse() };
+  }
+
+  const admin = createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: row } = await (admin.from("admin_roles") as any)
+    .select("role")
+    .eq("user_id", auth.userId)
+    .single();
+
+  const role = (row as { role: AdminRole } | null)?.role ?? null;
+  if (!role || !allowed.includes(role)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Forbidden — insufficient role" },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { ok: true, userId: auth.userId, role };
+}
