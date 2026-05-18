@@ -26,7 +26,19 @@ jobs:
           cache-dependency-path: iktissad-redesign/package-lock.json
       - run: npm ci
         working-directory: iktissad-redesign
-      - run: npm run lint
+      # --max-warnings caps the warning count at the current baseline so the
+      # number can only ever shrink. The baseline below is a conservative
+      # ceiling derived from: ~614 `any` usages (each potentially triggers
+      # `@typescript-eslint/no-explicit-any` — surfaced as a warning per
+      # eslint.config.mjs because postgrest-js v2.95.3 requires `as any`
+      # casts), plus the React Compiler advisories
+      # (`react-hooks/set-state-in-effect`, `react-hooks/preserve-manual-memoization`)
+      # also demoted to warnings. The local dev box (Node 25) currently can't
+      # run ESLint 9.39 due to an ajv/eslintrc incompatibility, so this number
+      # MUST be tightened to the exact count produced by the first green CI
+      # run on Node 24. Tracking comment owner: whoever lands the next
+      # warning-reducing PR — please drop this cap to the real number.
+      - run: npm run lint -- --max-warnings 800
         working-directory: iktissad-redesign
 
   type-check:
@@ -44,10 +56,44 @@ jobs:
       - run: npm run type-check
         working-directory: iktissad-redesign
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint, type-check]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: iktissad-redesign/package-lock.json
+      - run: npm ci
+        working-directory: iktissad-redesign
+      - run: npm test
+        working-directory: iktissad-redesign
+
+  audit:
+    name: Audit (prod deps)
+    runs-on: ubuntu-latest
+    # Non-blocking: high/critical advisories surface in CI but don't fail the
+    # pipeline. Promote to required if/when the dep tree is fully patched.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: iktissad-redesign/package-lock.json
+      - run: npm ci
+        working-directory: iktissad-redesign
+      - run: npm run audit-prod
+        working-directory: iktissad-redesign
+
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint, type-check]
+    needs: [lint, type-check, test]
     env:
       # Sentry source map upload requires auth token in CI
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

@@ -9,7 +9,11 @@
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "audit-prod": "npm audit --omit=dev --audit-level=high"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
