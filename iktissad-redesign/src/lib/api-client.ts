@@ -644,6 +644,30 @@ export async function aiGenerateExcerpt(
   });
 }
 
+// ─── Admin: Refunds ──────────────────────────────────────────────
+
+export interface RefundResult {
+  purchaseId: string;
+  refundId: string;
+  status: string;
+}
+
+/**
+ * Issue a refund against a single-article purchase.
+ *
+ * Requires the caller to have the `super_admin` or `finance` admin role.
+ * Pass `amount` to issue a partial refund (defaults to full).
+ */
+export async function refundPurchase(
+  purchaseId: string,
+  options: { amount?: number; reason?: string } = {}
+): Promise<ApiResponse<RefundResult>> {
+  return api<RefundResult>("/api/admin/refunds", {
+    method: "POST",
+    body: JSON.stringify({ purchaseId, ...options }),
+  });
+}
+
 // ─── Subscriptions ───────────────────────────────────────────────
 
 export interface SubscriberListParams {
