@@ -260,6 +260,8 @@ export function mapSectorRow(
     nameEn: row.name_en,
     description: row.description,
     descriptionEn: row.description_en,
+    icon: row.icon ?? undefined,
+    color: row.color ?? undefined,
     articleCount,
   };
 }
