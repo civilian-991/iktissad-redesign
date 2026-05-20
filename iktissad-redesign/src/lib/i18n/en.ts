@@ -2547,6 +2547,25 @@ export const en = {
   profile: {
     articles_by: 'Articles by',
   },
+  authors: {
+    detail: {
+      tagline: 'Author on Iktissad & Business',
+      articleCount: '{count} articles',
+      articlesHeading: 'Articles by this author',
+      empty: 'No published articles yet.',
+      roles: {
+        admin: 'Admin',
+        editor: 'Editor',
+        author: 'Author',
+        contributor: 'Contributor',
+      },
+      notFound: {
+        title: 'This author does not exist',
+        description: 'We couldn’t find this author. The link may be incorrect or the account is no longer available.',
+        backHome: 'Back to home',
+      },
+    },
+  },
   // ═══════════════════════════════════════════════════════════════
   // PHASE 6 — ENGAGEMENT
   // ═══════════════════════════════════════════════════════════════

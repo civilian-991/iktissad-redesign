@@ -1,5 +1,12 @@
 'use client';
 
+// TODO: replace mock
+// This page currently renders hardcoded mock data for a single profile (Yasir
+// al-Rumayyan). The /profiles route is intended for "Profiles" content
+// (notable economic personalities, articles tagged `profile`) — NOT for
+// authors/users. The author/user page now lives at /authors/[id]. Replace the
+// `profile` constant below with a real fetch against a `profiles` content
+// source when that content type is wired up.
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
