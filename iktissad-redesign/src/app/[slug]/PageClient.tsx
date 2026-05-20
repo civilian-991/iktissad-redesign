@@ -576,7 +576,7 @@ export default function ArticlePageClient({
               <div className="flex items-center gap-3 mb-8 pb-7 border-b border-sand/60">
                 {article.author?.id ? (
                   <Link
-                    href={`/authors/${article.author.id}`}
+                    href={`/authors/${article.author.slug ?? article.author.id}`}
                     className="flex items-center gap-3 group flex-1 min-w-0"
                   >
                     {/* Avatar circle */}

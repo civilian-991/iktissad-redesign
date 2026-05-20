@@ -17,7 +17,7 @@ import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
   *,
-  users:author_id ( name, avatar ),
+  users:author_id ( name, avatar, slug ),
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
   countries:country_id ( slug, name )

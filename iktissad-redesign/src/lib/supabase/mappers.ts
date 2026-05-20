@@ -60,7 +60,7 @@ function stripHtml(str: string): string {
 /** article row + joined author -> frontend Article */
 export function mapArticleRow(
   row: ArticleRow & {
-    users?: { name: string; avatar: string } | null;
+    users?: { name: string; avatar: string; slug?: string | null } | null;
     sections?: { slug: string; name: string } | null;
     sectors?: { slug: string; name: string } | null;
     countries?: { slug: string; name: string } | null;
@@ -84,6 +84,7 @@ export function mapArticleRow(
     countrySlug: row.countries?.slug ?? "",
     author: {
       id: row.author_id ?? undefined,
+      slug: row.users?.slug ?? undefined,
       name: row.users?.name ?? "",
       avatar: row.users?.avatar ?? "",
     },

@@ -6,13 +6,16 @@ import type { ApiResponse } from "@/types";
  * Public author info endpoint.
  *
  * Returns only safe, public-facing fields about a CMS user (author):
- *   { id, name, avatar, role, articleCount }
+ *   { id, slug, name, avatar, role, articleCount }
+ *
+ * Accepts either a UUID or a slug as the `id` route param.
  *
  * Unlike `/api/users/[id]` (admin-only), this endpoint requires no auth and
  * is intended for the public `/authors/[id]` page.
  */
 export interface PublicAuthor {
   id: string;
+  slug: string | null;
   name: string;
   avatar: string;
   role: "admin" | "editor" | "author" | "contributor";
@@ -24,23 +27,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-
-  // Validate UUID shape early to avoid leaking DB error details
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-  if (!isUuid) {
-    return NextResponse.json(
-      { error: "Author not found" } satisfies ApiResponse<never>,
-      { status: 404 }
-    );
-  }
 
   const admin = createAdminClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (admin
     .from("users") as any)
-    .select("id, name, avatar, role, article_count, status")
-    .eq("id", id)
+    .select("id, slug, name, avatar, role, article_count, status")
+    .eq(isUuid ? "id" : "slug", id)
     .single();
 
   if (error || !row) {
@@ -60,6 +55,7 @@ export async function GET(
 
   const author: PublicAuthor = {
     id: row.id,
+    slug: row.slug ?? null,
     name: row.name,
     avatar: row.avatar ?? "",
     role: row.role,

@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images: ogImages,
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
-      authors: article.author?.name ? [`${BASE_URL}/profiles/${article.author.name}`] : [],
+      authors: article.author?.id ? [`${BASE_URL}/authors/${encodeURIComponent(article.author.slug ?? article.author.id)}`] : [],
       section: article.section,
       tags: article.tags ?? [],
     },
@@ -282,7 +282,7 @@ export default async function ArticlePage({
           ? {
               '@type': 'Person',
               name: article.author.name,
-              url: `${BASE_URL}/profiles/${encodeURIComponent(article.author.slug ?? article.author.name)}`,
+              url: `${BASE_URL}/authors/${encodeURIComponent(article.author.slug ?? article.author.id ?? article.author.name)}`,
             }
           : { '@type': 'Organization', name: SITE_NAME, url: BASE_URL },
         publisher: {

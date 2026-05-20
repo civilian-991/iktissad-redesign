@@ -165,6 +165,7 @@ export interface Article {
   countrySlug: string;
   author: {
     id?: string;
+    slug?: string;
     name: string;
     avatar: string;
   };
