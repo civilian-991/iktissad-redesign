@@ -53,6 +53,8 @@ import {
   Braces,
   Inbox,
   AtSign,
+  Tags,
+  Briefcase,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -105,6 +107,11 @@ const navigationConfig: NavItem[] = [
   { key: 'users',       href: '/admin/users',        icon: Users },
   { key: 'media',       href: '/admin/media',        icon: Image },
   { key: 'settings',    href: '/admin/settings',     icon: Settings },
+];
+
+const taxonomyNavConfig: SubNavItem[] = [
+  { key: 'sections', href: '/admin/sections', icon: Tags },
+  { key: 'sectors',  href: '/admin/sectors',  icon: Briefcase },
 ];
 
 const subscriptionNavConfig: SubNavItem[] = [
@@ -227,6 +234,8 @@ export default function AdminLayoutClient({
       socialAccounts:   'الحسابات الاجتماعية',
       mcp:              t('admin.common.mcp'),
       graphql:          t('admin.common.graphql'),
+      sections:         t('admin.sections.title'),
+      sectors:          t('admin.sectors.title'),
     };
     return subNavKeys[key] || key;
   };
@@ -361,6 +370,60 @@ export default function AdminLayoutClient({
               </Link>
             );
           })}
+
+          {/* Taxonomy Group */}
+          <div className="pt-4 mt-4 border-t border-gold/10">
+            <AnimatePresence>
+              {sidebarOpen && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`text-xs font-[family-name:var(--font-display)] font-semibold px-4 block mb-2 ${darkMode ? 'text-white/40' : 'text-graphite'}`}
+                >
+                  {t('admin.common.taxonomy')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {taxonomyNavConfig.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 relative ${
+                    isActive
+                      ? darkMode
+                        ? 'bg-gold/10 text-gold'
+                        : 'bg-gold/10 text-gold-muted'
+                      : darkMode
+                        ? 'text-white/60 hover:text-white hover:bg-white/5'
+                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicatorTaxonomy"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gold rounded-l"
+                    />
+                  )}
+                  <item.icon size={iconSizes.lg} className={isActive ? 'text-gold' : ''} />
+                  <AnimatePresence>
+                    {sidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className="font-[family-name:var(--font-display)] font-semibold text-sm whitespace-nowrap overflow-hidden"
+                      >
+                        {getSubNavName(item.key)}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              );
+            })}
+          </div>
 
           {/* Subscriptions Group */}
           <div className="pt-4 mt-4 border-t border-gold/10">

@@ -27,6 +27,8 @@ import type {
   MagazineSpread,
   SpreadRevision,
   Newsletter,
+  Section,
+  Sector,
 } from "@/types";
 
 // ─── Subscription domain types ───────────────────────────────────
@@ -609,7 +611,7 @@ export async function createMedia(input: CreateMediaInput): Promise<ApiResponse<
   });
 }
 
-// ─── Sections / Sectors / Countries (read-only for admin) ──────
+// ─── Sections / Sectors / Countries ─────────────────────────────
 
 export function sectionsKey(): string {
   return "/api/sections";
@@ -621,6 +623,90 @@ export function sectorsKey(): string {
 
 export function countriesKey(): string {
   return "/api/countries";
+}
+
+export interface CreateSectionInput {
+  slug?: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  descriptionEn?: string;
+}
+
+export type UpdateSectionInput = Partial<CreateSectionInput>;
+
+export async function getSections(): Promise<ApiResponse<Section[]>> {
+  return api<Section[]>(sectionsKey());
+}
+
+export async function createSection(
+  input: CreateSectionInput
+): Promise<ApiResponse<Section>> {
+  return api<Section>(sectionsKey(), {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateSection(
+  slug: string,
+  patch: UpdateSectionInput
+): Promise<ApiResponse<Section>> {
+  return api<Section>(`/api/sections/${encodeURIComponent(slug)}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteSection(
+  slug: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/sections/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+  });
+}
+
+export interface CreateSectorInput {
+  slug?: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  descriptionEn?: string;
+  icon?: string;
+  color?: string;
+}
+
+export type UpdateSectorInput = Partial<CreateSectorInput>;
+
+export async function getSectors(): Promise<ApiResponse<Sector[]>> {
+  return api<Sector[]>(sectorsKey());
+}
+
+export async function createSector(
+  input: CreateSectorInput
+): Promise<ApiResponse<Sector>> {
+  return api<Sector>(sectorsKey(), {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateSector(
+  slug: string,
+  patch: UpdateSectorInput
+): Promise<ApiResponse<Sector>> {
+  return api<Sector>(`/api/sectors/${encodeURIComponent(slug)}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteSector(
+  slug: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/sectors/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+  });
 }
 
 // ─── Dashboard aggregates ───────────────────────────────────────

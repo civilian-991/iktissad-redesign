@@ -313,6 +313,8 @@ export interface Sector {
   nameEn: string;
   description: string;
   descriptionEn: string;
+  icon?: string;
+  color?: string;
   articleCount: number;
 }
 
