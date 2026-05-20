@@ -412,7 +412,7 @@ export default function RichTextEditor({
           } else {
             const url = window.prompt('Image URL:');
             if (url) {
-              editor.chain().focus().setImage({ src: url }).run();
+              editor.chain().focus().insertFigure({ src: url, alt: '', caption: '', credit: '' }).run();
             }
           }
           break;
@@ -521,13 +521,13 @@ export default function RichTextEditor({
   }, [editor]);
 
   /**
-   * Insert an image (via TipTap Image extension — simple inline image).
-   * For rich figure with caption/credit, use FigureExtension.insertFigure().
+   * Insert an image as a Figure node so editors get inline alt / caption / credit fields.
+   * Plain TipTap Image is left registered for backwards compat with existing content.
    */
   const insertImage = useCallback(
     (url: string, alt?: string) => {
       if (!editor) return;
-      editor.chain().focus().setImage({ src: url, alt: alt ?? '' }).run();
+      editor.chain().focus().insertFigure({ src: url, alt: alt ?? '', caption: '', credit: '' }).run();
     },
     [editor]
   );
