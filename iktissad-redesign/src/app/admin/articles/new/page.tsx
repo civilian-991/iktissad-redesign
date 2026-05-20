@@ -22,8 +22,6 @@ import TemplateSelector from '@/components/admin/TemplateSelector';
 import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
 import { slugify } from '@/lib/slugify';
 import type { JSONContent } from '@tiptap/core';
-import type { MeData } from '@/app/api/auth/me/route';
-import type { ApiResponse } from '@/types';
 
 // TipTap editor is large (~500KB). Dynamic import keeps it out of the initial bundle.
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
@@ -63,18 +61,12 @@ export default function NewArticlePage() {
   const [section, setSection] = useState('');
   const [selectedSector, setSelectedSector] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedAuthorId, setSelectedAuthorId] = useState('');
-
-  // Auto-fill author with the current logged-in user so drafts aren't
-  // saved against a placeholder migration author. Only fires once on mount
-  // — users can still pick a different author from the dropdown.
-  const { data: meRes } = useSWR<ApiResponse<MeData>>('/api/auth/me', swrFetcher);
-  useEffect(() => {
-    if (meRes?.data?.id && !selectedAuthorId) {
-      setSelectedAuthorId(meRes.data.id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meRes?.data?.id]);
+  // Canonical "house byline" author — the default for every new article
+  // unless the editor explicitly picks a real author from the dropdown.
+  // This is the merged "الإقتصاد والأعمال" record (see migration consolidating
+  // the per-city/per-agency awalan placeholder bylines into one record).
+  const DEFAULT_AUTHOR_ID = 'f77603cc-e466-49ca-afbf-e1c8fa90c1d9';
+  const [selectedAuthorId, setSelectedAuthorId] = useState(DEFAULT_AUTHOR_ID);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTagInput, setCustomTagInput] = useState('');
 
