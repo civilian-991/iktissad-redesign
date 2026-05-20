@@ -22,6 +22,8 @@ import TemplateSelector from '@/components/admin/TemplateSelector';
 import { createArticle, updateArticle, aiTranslate, aiGenerateExcerpt, swrFetcher } from '@/lib/api-client';
 import { slugify } from '@/lib/slugify';
 import type { JSONContent } from '@tiptap/core';
+import type { MeData } from '@/app/api/auth/me/route';
+import type { ApiResponse } from '@/types';
 
 // TipTap editor is large (~500KB). Dynamic import keeps it out of the initial bundle.
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
@@ -62,6 +64,17 @@ export default function NewArticlePage() {
   const [selectedSector, setSelectedSector] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedAuthorId, setSelectedAuthorId] = useState('');
+
+  // Auto-fill author with the current logged-in user so drafts aren't
+  // saved against a placeholder migration author. Only fires once on mount
+  // — users can still pick a different author from the dropdown.
+  const { data: meRes } = useSWR<ApiResponse<MeData>>('/api/auth/me', swrFetcher);
+  useEffect(() => {
+    if (meRes?.data?.id && !selectedAuthorId) {
+      setSelectedAuthorId(meRes.data.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meRes?.data?.id]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTagInput, setCustomTagInput] = useState('');
 
