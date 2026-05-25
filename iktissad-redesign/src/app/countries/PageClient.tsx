@@ -33,7 +33,10 @@ export default function CountriesPageClient() {
     swrFetcher
   );
 
-  const countries = data?.data ?? [];
+  // Only show countries that have published articles (articleCount comes from
+  // /api/countries — published, non-archived). Hides the bulk of the full
+  // ISO-3166 list that has no coverage yet.
+  const countries = (data?.data ?? []).filter((c) => (c.articleCount ?? 0) > 0);
 
   return (
     <>
