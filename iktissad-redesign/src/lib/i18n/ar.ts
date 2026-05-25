@@ -360,6 +360,12 @@ export const ar = {
         edit: 'تعديل',
         preview: 'معاينة',
         delete: 'حذف',
+        deleted: 'تم حذف المقال',
+      },
+      notFound: 'لم يتم العثور على المقال',
+      deleteModal: {
+        title: 'حذف المقال',
+        message: 'هل أنت متأكد من حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.',
       },
       editor: {
         newArticle: 'مقال جديد',
@@ -367,6 +373,9 @@ export const ar = {
         createDesc: 'إنشاء وتحرير مقال جديد',
         preview: 'معاينة',
         saveDraft: 'حفظ مسودة',
+        saveChanges: 'حفظ التغييرات',
+        saveSuccess: 'تم حفظ التغييرات',
+        titleRequired: 'العنوان مطلوب',
         publish: 'نشر المقال',
         titleLabel: 'عنوان المقال',
         titlePlaceholder: 'أدخل عنوان المقال هنا...',

@@ -360,6 +360,12 @@ export const en = {
         edit: 'Edit',
         preview: 'Preview',
         delete: 'Delete',
+        deleted: 'Article deleted',
+      },
+      notFound: 'Article not found',
+      deleteModal: {
+        title: 'Delete Article',
+        message: 'Are you sure you want to delete this article? This action cannot be undone.',
       },
       editor: {
         newArticle: 'New Article',
@@ -367,6 +373,9 @@ export const en = {
         createDesc: 'Create and edit a new article',
         preview: 'Preview',
         saveDraft: 'Save Draft',
+        saveChanges: 'Save Changes',
+        saveSuccess: 'Changes saved',
+        titleRequired: 'Title is required',
         publish: 'Publish Article',
         titleLabel: 'Article Title',
         titlePlaceholder: 'Enter article title here...',
