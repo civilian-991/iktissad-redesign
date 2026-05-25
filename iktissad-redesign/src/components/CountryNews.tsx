@@ -117,8 +117,9 @@ export default function CountryNews() {
     const byRegion: Record<string, ViewCountry[]> = {};
     for (const c of all) {
       // Hide countries with no published articles — /api/countries returns
-      // articleCount (published, non-archived) per country.
-      if (!c.articleCount) continue;
+      // articleCount (published, non-archived) per country. Also skip the
+      // 'world' placeholder row (not a real country).
+      if (!c.articleCount || c.slug === 'world') continue;
       const region = c.region || 'world';
       if (!byRegion[region]) byRegion[region] = [];
       byRegion[region].push({

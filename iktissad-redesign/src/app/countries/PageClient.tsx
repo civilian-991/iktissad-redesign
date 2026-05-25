@@ -35,8 +35,10 @@ export default function CountriesPageClient() {
 
   // Only show countries that have published articles (articleCount comes from
   // /api/countries — published, non-archived). Hides the bulk of the full
-  // ISO-3166 list that has no coverage yet.
-  const countries = (data?.data ?? []).filter((c) => (c.articleCount ?? 0) > 0);
+  // ISO-3166 list that has no coverage yet, and the 'world' placeholder row.
+  const countries = (data?.data ?? []).filter(
+    (c) => (c.articleCount ?? 0) > 0 && c.slug !== 'world'
+  );
 
   return (
     <>
