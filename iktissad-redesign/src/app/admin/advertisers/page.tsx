@@ -353,7 +353,7 @@ export default function AdvertisersPage() {
             المعلنون
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {isLoading ? 'جاري التحميل...' : `${total.toLocaleString('ar-SA-u-ca-gregory')} معلن مسجل`}
+            {isLoading ? 'جاري التحميل...' : `${total.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} معلن مسجل`}
           </p>
         </div>
         <button
@@ -374,7 +374,7 @@ export default function AdvertisersPage() {
           <div>
             <p className="text-white/50 text-xs font-[family-name:var(--font-display)] mb-1">إجمالي المعلنين</p>
             <p className="text-white text-2xl font-[family-name:var(--font-display)] font-bold">
-              {isLoading ? '—' : total.toLocaleString('ar-SA-u-ca-gregory')}
+              {isLoading ? '—' : total.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
             </p>
           </div>
         </div>
@@ -533,7 +533,7 @@ export default function AdvertisersPage() {
                 <ChevronRight size={14} />
               </button>
               <span className="text-white/40 text-xs font-[family-name:var(--font-display)]">
-                صفحة {page.toLocaleString('ar-SA-u-ca-gregory')} من {totalPages.toLocaleString('ar-SA-u-ca-gregory')}
+                صفحة {page.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} من {totalPages.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}

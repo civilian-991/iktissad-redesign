@@ -442,7 +442,7 @@ export default function SourceFormModal({ source, onClose, onSave }: Props) {
             />
             {form.embargoUntil && new Date(form.embargoUntil) > new Date() && (
               <p className="mt-1 text-loss text-xs font-[family-name:var(--font-display)]">
-                سيكون هذا المصدر تحت الحظر حتى {new Date(form.embargoUntil).toLocaleString('ar-SA-u-ca-gregory')}
+                سيكون هذا المصدر تحت الحظر حتى {new Date(form.embargoUntil).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
               </p>
             )}
           </div>

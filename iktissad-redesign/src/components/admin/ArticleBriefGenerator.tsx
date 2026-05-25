@@ -338,14 +338,14 @@ function BriefDisplay({ brief }: { brief: ArticleBrief }) {
           <div className="flex items-center justify-center gap-6 py-4">
             <div className="text-center">
               <p className="text-2xl font-[family-name:var(--font-accent)] font-bold text-gold">
-                {brief.targetWordCount.min.toLocaleString('ar-SA')}
+                {brief.targetWordCount.min.toLocaleString('ar-SA-u-nu-latn')}
               </p>
               <p className="text-xs text-white/40 font-[family-name:var(--font-display)] mt-1">الحد الأدنى</p>
             </div>
             <div className="w-px h-10 bg-gold/20" />
             <div className="text-center">
               <p className="text-2xl font-[family-name:var(--font-accent)] font-bold text-white">
-                {brief.targetWordCount.max.toLocaleString('ar-SA')}
+                {brief.targetWordCount.max.toLocaleString('ar-SA-u-nu-latn')}
               </p>
               <p className="text-xs text-white/40 font-[family-name:var(--font-display)] mt-1">الحد الأقصى</p>
             </div>

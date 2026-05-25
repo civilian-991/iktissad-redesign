@@ -155,7 +155,7 @@ export default function SectorsPageClient() {
                           {/* Footer */}
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-slate font-[family-name:var(--font-display)]">
-                              {sector.articleCount.toLocaleString('ar-SA-u-ca-gregory')} مقال
+                              {sector.articleCount.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} مقال
                             </span>
                             <span className="flex items-center gap-1 text-gold text-sm font-[family-name:var(--font-display)] font-semibold group-hover:gap-2 transition-all">
                               استكشف

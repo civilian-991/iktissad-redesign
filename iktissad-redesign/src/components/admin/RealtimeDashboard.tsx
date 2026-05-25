@@ -74,7 +74,7 @@ export default function RealtimeDashboard({ initialActiveSubscribers = 0 }: Real
         </div>
         <Users size={14} className="text-white/50" />
         <span className="text-white font-[family-name:var(--font-display)] text-sm font-semibold">
-          {activeSubscribers.toLocaleString('ar-SA-u-ca-gregory')}
+          {activeSubscribers.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
         </span>
         <span className="text-white/40 text-xs font-[family-name:var(--font-display)] hidden sm:inline">
           مشترك نشط
@@ -88,7 +88,7 @@ export default function RealtimeDashboard({ initialActiveSubscribers = 0 }: Real
       <div className="flex items-center gap-2">
         <BookOpen size={14} className="text-gold" />
         <span className="text-white font-[family-name:var(--font-display)] text-sm font-semibold">
-          {activeReaders.toLocaleString('ar-SA-u-ca-gregory')}
+          {activeReaders.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
         </span>
         <span className="text-white/40 text-xs font-[family-name:var(--font-display)] hidden sm:inline">
           قارئ الآن

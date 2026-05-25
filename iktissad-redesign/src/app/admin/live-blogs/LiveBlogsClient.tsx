@@ -179,7 +179,7 @@ export default function LiveBlogsClient() {
                     </span>
                   )}
                   <span className="text-[10px] text-white/30">
-                    {new Date(blog.started_at).toLocaleDateString('ar-SA')}
+                    {new Date(blog.started_at).toLocaleDateString('ar-SA-u-nu-latn')}
                   </span>
                 </div>
                 <p className="text-[13px] font-[family-name:var(--font-display)] font-semibold text-white/80 line-clamp-2">
@@ -238,7 +238,7 @@ export default function LiveBlogsClient() {
                     <div className="flex items-center gap-2 mb-1.5">
                       <Clock size={10} className="text-white/30" />
                       <span className="text-[10px] text-white/40 font-[family-name:var(--font-display)]">
-                        {new Date(update.created_at).toLocaleTimeString('ar-SA', {
+                        {new Date(update.created_at).toLocaleTimeString('ar-SA-u-nu-latn', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}

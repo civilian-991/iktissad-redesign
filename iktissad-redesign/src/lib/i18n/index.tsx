@@ -298,8 +298,8 @@ export function useFormatters() {
     fmtShortDate: (d: Date | string) => _fmtShort(d, locale),
     fmtTime: (d: Date | string) => _fmtTime(d, locale),
     fmtRelative: (d: Date | string) => _fmtRelative(d, locale),
-    /** Locale string for direct Intl use: 'ar-SA' or 'en-US' */
-    dateLocale: locale === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US',
-    numberLocale: locale === 'ar' ? 'ar-SA' : 'en-US',
+    /** Locale string for direct Intl use (Western digits via -u-nu-latn). */
+    dateLocale: locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-US',
+    numberLocale: locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US',
   }), [locale]);
 }

@@ -84,7 +84,7 @@ export default function ShareAnalyticsClient() {
                   : 'bg-white/5 text-white/50 border border-white/10 hover:text-white'
               }`}
             >
-              {p === '7' ? '٧ أيام' : p === '30' ? '٣٠ يوم' : '٩٠ يوم'}
+              {p === '7' ? '7 أيام' : p === '30' ? '30 يوم' : '90 يوم'}
             </button>
           ))}
         </div>
@@ -116,7 +116,7 @@ export default function ShareAnalyticsClient() {
                   {t('admin.shareAnalytics.totalShares')}
                 </p>
                 <p className="text-5xl font-[family-name:var(--font-display)] font-bold text-gold">
-                  {analytics.totalShares.toLocaleString('ar')}
+                  {analytics.totalShares.toLocaleString('ar-u-nu-latn')}
                 </p>
               </motion.div>
             </WidgetErrorBoundary>
@@ -210,7 +210,7 @@ export default function ShareAnalyticsClient() {
                         className="border-b border-gold/5 hover:bg-white/5 transition-colors"
                       >
                         <td className="py-3 text-gold/40 font-[family-name:var(--font-display)] text-sm font-bold w-8">
-                          {(i + 1).toLocaleString('ar')}
+                          {(i + 1).toLocaleString('ar-u-nu-latn')}
                         </td>
                         <td className="py-3">
                           <Link
@@ -222,7 +222,7 @@ export default function ShareAnalyticsClient() {
                           </Link>
                         </td>
                         <td className="py-3 text-gold font-[family-name:var(--font-display)] text-sm font-semibold">
-                          {article.shares.toLocaleString('ar')}
+                          {article.shares.toLocaleString('ar-u-nu-latn')}
                         </td>
                         <td className="py-3">
                           <div className="flex items-center gap-1.5">

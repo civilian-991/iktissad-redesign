@@ -112,7 +112,7 @@ function ArticleCard({
             }`}
           >
             <Calendar size={10} />
-            {new Date(article.dueDate).toLocaleDateString('ar-SA-u-ca-gregory', {
+            {new Date(article.dueDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
               month: 'short',
               day: 'numeric',
             })}

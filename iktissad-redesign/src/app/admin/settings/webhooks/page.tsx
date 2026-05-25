@@ -406,7 +406,7 @@ export default function WebhooksPage() {
                                 {d.responseStatus ?? 'ERR'}
                               </span>
                               <span className="text-white/30 text-xs mr-auto">
-                                {new Date(d.deliveredAt).toLocaleString('ar-SA')}
+                                {new Date(d.deliveredAt).toLocaleString('ar-SA-u-nu-latn')}
                               </span>
                             </div>
                           ))}

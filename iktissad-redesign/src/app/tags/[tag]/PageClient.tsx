@@ -143,7 +143,7 @@ export default function TagPageClient({ params }: { params: Promise<{ tag: strin
                           {article.publishedAt && (
                             <span className="flex items-center gap-1">
                               <Calendar size={12} />
-                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                             </span>
                           )}
                         </div>

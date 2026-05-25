@@ -121,7 +121,7 @@ export default function RevenueAttributionWidget({ articleId }: { articleId: str
                 </div>
                 <div>
                   <p className="text-white font-[family-name:var(--font-display)] font-bold text-3xl leading-none">
-                    {stat.conversionCount.toLocaleString('ar')}
+                    {stat.conversionCount.toLocaleString('ar-u-nu-latn')}
                   </p>
                   <p className="text-white/50 text-sm font-[family-name:var(--font-display)] mt-1">
                     اشتراك جديد
@@ -135,7 +135,7 @@ export default function RevenueAttributionWidget({ articleId }: { articleId: str
                   إيرادات منسوبة تقريبية
                 </span>
                 <span className="text-profit font-[family-name:var(--font-display)] font-semibold text-base">
-                  ~{stat.estimatedRevenue.toLocaleString('ar')} ر.س
+                  ~{stat.estimatedRevenue.toLocaleString('ar-u-nu-latn')} ر.س
                 </span>
               </div>
 

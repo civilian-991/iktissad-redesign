@@ -303,7 +303,7 @@ export default function ArticleSpread({ article, spread }: ArticleSpreadProps) {
                     margin: 0,
                   }}
                 >
-                  {new Date(articleData.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+                  {new Date(articleData.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',

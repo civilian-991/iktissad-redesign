@@ -78,7 +78,7 @@ function computeSuggestions(params: {
       titleAr: "استخدم هذا المقال في حملات الاشتراك",
       descriptionAr:
         "الزيارات المرتفعة تجعله مثالاً مثالياً للمحتوى المميز — روّج له في النشرة البريدية وصفحة الاشتراك.",
-      dataPoint: `المشاهدات: ${views.toLocaleString("ar-SA")}`,
+      dataPoint: `المشاهدات: ${views.toLocaleString("ar-SA-u-nu-latn")}`,
     });
   }
 

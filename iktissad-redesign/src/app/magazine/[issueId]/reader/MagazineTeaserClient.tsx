@@ -73,7 +73,7 @@ export default function MagazineTeaserClient({
               <div className="text-center lg:text-right flex-1">
                 <span className="inline-block text-gold font-[family-name:var(--font-display)] font-semibold mb-3 text-sm">
                   {issue.subtitle ||
-                    new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', {
+                    new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
                       year: 'numeric',
                       month: 'long',
                     })}

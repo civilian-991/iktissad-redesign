@@ -122,7 +122,7 @@ export default function ArticleAnalyticsPanel({ articleId }: { articleId: string
                 <StatCard
                   icon={Eye}
                   label="إجمالي القراءات"
-                  value={detail.totalReads.toLocaleString('ar')}
+                  value={detail.totalReads.toLocaleString('ar-u-nu-latn')}
                   color="text-gold"
                 />
                 <StatCard
@@ -213,7 +213,7 @@ export default function ArticleAnalyticsPanel({ articleId }: { articleId: string
                     <div>
                       <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">مشتركون</p>
                       <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                        {detail.subscriberReads.toLocaleString('ar')}
+                        {detail.subscriberReads.toLocaleString('ar-u-nu-latn')}
                       </p>
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export default function ArticleAnalyticsPanel({ articleId }: { articleId: string
                     <div>
                       <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">زوار</p>
                       <p className="text-white font-[family-name:var(--font-display)] font-semibold">
-                        {detail.anonymousReads.toLocaleString('ar')}
+                        {detail.anonymousReads.toLocaleString('ar-u-nu-latn')}
                       </p>
                     </div>
                   </div>

@@ -651,7 +651,7 @@ export default function RichTextEditor({
       {/* ── Character Count ──────────────────────────────────── */}
       <div className="flex justify-end px-6 pb-3">
         <span className="text-xs text-white/30 font-[family-name:var(--font-display)] tabular-nums">
-          {charCount.toLocaleString('ar')} حرف
+          {charCount.toLocaleString('ar-u-nu-latn')} حرف
         </span>
       </div>
 

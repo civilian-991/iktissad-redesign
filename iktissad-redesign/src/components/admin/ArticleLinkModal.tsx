@@ -172,7 +172,7 @@ export default function ArticleLinkModal({ sourceId, onClose, onSave }: Props) {
                         </p>
                         {article.publishedAt && (
                           <p className="text-white/40 text-xs font-[family-name:var(--font-display)] mt-0.5">
-                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                           </p>
                         )}
                       </div>

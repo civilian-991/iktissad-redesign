@@ -27,7 +27,7 @@ function makeGetKey(featuredOnly: boolean) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

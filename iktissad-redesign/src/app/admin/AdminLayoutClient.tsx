@@ -255,7 +255,7 @@ export default function AdminLayoutClient({
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(
-        new Date().toLocaleTimeString('ar-SA-u-ca-gregory', {
+        new Date().toLocaleTimeString('ar-SA-u-ca-gregory-nu-latn', {
           hour: '2-digit',
           minute: '2-digit',
         })

@@ -333,7 +333,7 @@ function ABTestPanel({ test, onStop, isStopping }: ABTestPanelProps) {
         <span>توزيع الزيارات: {test.trafficSplit}/{100 - test.trafficSplit}</span>
         <span>
           بدأ:{' '}
-          {new Date(test.startedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+          {new Date(test.startedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
             day: 'numeric',
             month: 'short',
             hour: '2-digit',

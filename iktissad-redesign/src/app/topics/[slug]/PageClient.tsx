@@ -127,7 +127,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                       {featuredArticle.publishedAt && (
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
-                          {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                          {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                         </span>
                       )}
                     </div>
@@ -175,7 +175,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                           {article.publishedAt && (
                             <span className="flex items-center gap-1">
                               <Calendar size={12} />
-                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                              {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                             </span>
                           )}
                         </div>

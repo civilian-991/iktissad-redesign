@@ -65,9 +65,9 @@ export default function PromoCodesPage() {
 
   const formatDiscount = (promo: PromoCode) => {
     if (promo.discountType === 'percent') {
-      return `${promo.discountValue.toLocaleString('ar-SA-u-ca-gregory')}%`;
+      return `${promo.discountValue.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}%`;
     }
-    return `${promo.discountValue.toLocaleString('ar-SA-u-ca-gregory')} ر.س`;
+    return `${promo.discountValue.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} ر.س`;
   };
 
   return (
@@ -79,7 +79,7 @@ export default function PromoCodesPage() {
             {t('admin.promoCodes.title')}
           </h1>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {promoCodes.length.toLocaleString('ar-SA-u-ca-gregory')} كوبون
+            {promoCodes.length.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} كوبون
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -170,8 +170,8 @@ export default function PromoCodesPage() {
                       <td className="p-4">
                         <div className="flex flex-col gap-1.5">
                           <span className="text-white/70 text-sm font-[family-name:var(--font-display)]">
-                            {promo.usesCount.toLocaleString('ar-SA-u-ca-gregory')}
-                            {usesMax ? ` / ${usesMax.toLocaleString('ar-SA-u-ca-gregory')}` : ''}
+                            {promo.usesCount.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
+                            {usesMax ? ` / ${usesMax.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}` : ''}
                           </span>
                           {usesPct !== null && (
                             <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -188,7 +188,7 @@ export default function PromoCodesPage() {
                       <td className="p-4">
                         <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
                           {promo.validUntil
-                            ? new Date(promo.validUntil).toLocaleDateString('ar-SA-u-ca-gregory')
+                            ? new Date(promo.validUntil).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
                             : 'غير محدد'}
                         </span>
                       </td>

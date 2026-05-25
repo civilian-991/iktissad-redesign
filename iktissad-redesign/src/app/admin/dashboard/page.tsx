@@ -111,11 +111,11 @@ export default function DashboardPage() {
   // Build stats values from real data
   const statsValues: Record<string, { value: string; change: string; trend: 'up' | 'down' }> = {
     visitsToday: { value: '-', change: '-', trend: 'up' },
-    publishedArticles: { value: totalArticles.toLocaleString('ar'), change: '-', trend: 'up' },
-    activeUsers: { value: totalUsers.toLocaleString('ar'), change: '-', trend: 'up' },
+    publishedArticles: { value: totalArticles.toLocaleString('ar-u-nu-latn'), change: '-', trend: 'up' },
+    activeUsers: { value: totalUsers.toLocaleString('ar-u-nu-latn'), change: '-', trend: 'up' },
     newComments: { value: '-', change: '-', trend: 'up' },
-    totalMagazines: { value: totalMagazines.toLocaleString('ar'), change: '-', trend: 'up' },
-    activeSubscribers: { value: activeSubscribers.toLocaleString('ar'), change: '-', trend: 'up' },
+    totalMagazines: { value: totalMagazines.toLocaleString('ar-u-nu-latn'), change: '-', trend: 'up' },
+    activeSubscribers: { value: activeSubscribers.toLocaleString('ar-u-nu-latn'), change: '-', trend: 'up' },
   };
 
   return (
@@ -319,7 +319,7 @@ export default function DashboardPage() {
                         <StatusBadge status={article.status} />
                       </td>
                       <td className="py-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                        {article.views.toLocaleString('ar')}
+                        {article.views.toLocaleString('ar-u-nu-latn')}
                       </td>
                     </tr>
                   ))}

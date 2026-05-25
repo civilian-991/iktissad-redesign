@@ -161,7 +161,7 @@ function GeoCoverageTab({ countries }: { countries: CountryCoverage[] }) {
         const flag = COUNTRY_FLAGS[c.country] ?? '🌍';
         const pct = Math.round((c.articleCount / maxCount) * 100);
         const dateLabel = c.lastArticleDate
-          ? new Date(c.lastArticleDate).toLocaleDateString('ar-SA', {
+          ? new Date(c.lastArticleDate).toLocaleDateString('ar-SA-u-nu-latn', {
               day: 'numeric',
               month: 'short',
             })
@@ -181,7 +181,7 @@ function GeoCoverageTab({ countries }: { countries: CountryCoverage[] }) {
               </div>
               <div className="text-end">
                 <span className="text-white font-[family-name:var(--font-display)] font-semibold text-sm">
-                  {c.articleCount.toLocaleString('ar')}
+                  {c.articleCount.toLocaleString('ar-u-nu-latn')}
                 </span>
                 <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">
                   {dateLabel}

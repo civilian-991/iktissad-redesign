@@ -18,9 +18,9 @@ function getNumberFormatter(locale: Locale, options?: Intl.NumberFormatOptions):
   const key = `${locale}-${JSON.stringify(options ?? {})}`;
   let fmt = numberFormatters.get(key);
   if (!fmt) {
-    // ar-SA uses Arabic-Indic numerals; ar-EG uses Western numerals
-    // We use ar-SA for authentic Arabic numeral display
-    const intlLocale = locale === 'ar' ? 'ar-SA' : 'en-US';
+    // Force Western (Latin) digits in Arabic via the -u-nu-latn extension —
+    // the site uses Western Arabic numerals (0-9), not Arabic-Indic (٠-٩).
+    const intlLocale = locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
     fmt = new Intl.NumberFormat(intlLocale, options);
     numberFormatters.set(key, fmt);
   }
@@ -85,7 +85,8 @@ function getDateFormatter(locale: Locale, options: Intl.DateTimeFormatOptions): 
   const key = `${locale}-${JSON.stringify(options)}`;
   let fmt = dateFormatters.get(key);
   if (!fmt) {
-    const intlLocale = locale === 'ar' ? 'ar-SA' : 'en-US';
+    // -u-nu-latn forces Western digits in Arabic dates (keeps Arabic month names).
+    const intlLocale = locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
     fmt = new Intl.DateTimeFormat(intlLocale, options);
     dateFormatters.set(key, fmt);
   }
@@ -142,7 +143,8 @@ const relativeFormatters = new Map<string, Intl.RelativeTimeFormat>();
 function getRelativeFormatter(locale: Locale): Intl.RelativeTimeFormat {
   let fmt = relativeFormatters.get(locale);
   if (!fmt) {
-    const intlLocale = locale === 'ar' ? 'ar' : 'en';
+    // -u-nu-latn forces Western digits in Arabic relative times (e.g. "قبل 5 دقائق").
+    const intlLocale = locale === 'ar' ? 'ar-u-nu-latn' : 'en';
     fmt = new Intl.RelativeTimeFormat(intlLocale, { numeric: 'auto' });
     relativeFormatters.set(locale, fmt);
   }

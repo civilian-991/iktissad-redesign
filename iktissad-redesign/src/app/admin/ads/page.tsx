@@ -65,7 +65,7 @@ function formatUSD(cents: number | null) {
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—';
   try {
-    return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory', {
+    return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
       year: 'numeric', month: 'short', day: 'numeric',
     });
   } catch {
@@ -74,7 +74,7 @@ function formatDate(dateStr: string | null) {
 }
 
 function formatNum(n: number) {
-  return n.toLocaleString('ar-SA-u-ca-gregory');
+  return n.toLocaleString('ar-SA-u-ca-gregory-nu-latn');
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────

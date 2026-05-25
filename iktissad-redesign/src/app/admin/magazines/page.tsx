@@ -484,7 +484,7 @@ export default function MagazinesPage() {
               </div>
 
               <div className="col-span-2 text-white/60 text-sm">
-                {new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory')}
+                {new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
               </div>
 
               <div className="col-span-2 flex items-center gap-4 text-white/50 text-sm">

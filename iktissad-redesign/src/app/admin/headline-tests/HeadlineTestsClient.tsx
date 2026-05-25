@@ -195,7 +195,7 @@ export default function HeadlineTestsClient() {
                         {test.winnerIndex !== null && (
                           <span className="flex items-center gap-1 text-xs text-profit font-[family-name:var(--font-display)]">
                             <Trophy size={12} />
-                            {t('admin.headlineTests.winner')}: {t('admin.headlineTests.variant')} {(test.winnerIndex + 1).toLocaleString('ar')}
+                            {t('admin.headlineTests.winner')}: {t('admin.headlineTests.variant')} {(test.winnerIndex + 1).toLocaleString('ar-u-nu-latn')}
                           </span>
                         )}
                       </div>
@@ -251,7 +251,7 @@ export default function HeadlineTestsClient() {
                             {isWinner ? (
                               <Trophy size={14} className="text-profit mx-auto" />
                             ) : (
-                              (vi + 1).toLocaleString('ar')
+                              (vi + 1).toLocaleString('ar-u-nu-latn')
                             )}
                           </span>
                           <div className="flex-1 min-w-0">
@@ -264,11 +264,11 @@ export default function HeadlineTestsClient() {
                           <div className="flex items-center gap-4 text-xs text-white/50 font-[family-name:var(--font-display)]">
                             <span className="flex items-center gap-1" title={t('admin.headlineTests.impressions')}>
                               <Eye size={12} />
-                              {variant.impressions.toLocaleString('ar')}
+                              {variant.impressions.toLocaleString('ar-u-nu-latn')}
                             </span>
                             <span className="flex items-center gap-1" title={t('admin.headlineTests.clicks')}>
                               <MousePointer size={12} />
-                              {variant.clicks.toLocaleString('ar')}
+                              {variant.clicks.toLocaleString('ar-u-nu-latn')}
                             </span>
                             <span className="flex items-center gap-1 font-semibold text-gold" title={t('admin.headlineTests.ctr')}>
                               <TrendingUp size={12} />
@@ -283,7 +283,7 @@ export default function HeadlineTestsClient() {
 
                   {/* Footer: Min sample note */}
                   <p className="text-white/20 text-xs font-[family-name:var(--font-display)] mt-3">
-                    {t('admin.headlineTests.minSample')}: {test.minSample.toLocaleString('ar')} — {t('admin.headlineTests.statisticalNote')}
+                    {t('admin.headlineTests.minSample')}: {test.minSample.toLocaleString('ar-u-nu-latn')} — {t('admin.headlineTests.statisticalNote')}
                   </p>
                 </motion.div>
               </WidgetErrorBoundary>

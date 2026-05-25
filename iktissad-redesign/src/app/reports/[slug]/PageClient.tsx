@@ -10,7 +10,7 @@ import { swrFetcher } from '@/lib/api-client';
 import type { ArticleSeries, ApiResponse } from '@/types';
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 }

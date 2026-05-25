@@ -80,7 +80,7 @@ function SegmentStat({ group, color, t }: { group: SegmentGroup; color: string; 
       <div className="flex items-center gap-4 text-xs text-white/50 font-[family-name:var(--font-display)]">
         <span className="flex items-center gap-1">
           <Users size={12} />
-          {group.readers.toLocaleString('ar')}
+          {group.readers.toLocaleString('ar-u-nu-latn')}
         </span>
         <span className="flex items-center gap-1" title={t('admin.segments.avgTimeOnPage')}>
           <Clock size={12} />
@@ -193,7 +193,7 @@ export default function SegmentsClient() {
           animate={{ opacity: 1, y: 0 }}
           className="text-white/30 text-sm font-[family-name:var(--font-display)]"
         >
-          {analytics.totalReaders.toLocaleString('ar')} {t('admin.segments.readers')}
+          {analytics.totalReaders.toLocaleString('ar-u-nu-latn')} {t('admin.segments.readers')}
         </motion.div>
       )}
 

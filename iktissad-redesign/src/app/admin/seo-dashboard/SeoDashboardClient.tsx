@@ -212,7 +212,7 @@ export default function SeoDashboardClient() {
             <ChevronRight size={iconSizes.md} />
           </button>
           <span className="text-white/50 text-sm font-[family-name:var(--font-display)]">
-            {page.toLocaleString('ar')} / {totalPages.toLocaleString('ar')}
+            {page.toLocaleString('ar-u-nu-latn')} / {totalPages.toLocaleString('ar-u-nu-latn')}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}

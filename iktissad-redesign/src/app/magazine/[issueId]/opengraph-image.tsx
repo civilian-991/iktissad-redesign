@@ -41,7 +41,7 @@ export default async function OGImage({
   let publishDateStr = ''
   if (issue?.publish_date) {
     try {
-      publishDateStr = new Date(issue.publish_date as string).toLocaleDateString('ar-SA-u-ca-gregory', {
+      publishDateStr = new Date(issue.publish_date as string).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
         year: 'numeric',
         month: 'long',
       })

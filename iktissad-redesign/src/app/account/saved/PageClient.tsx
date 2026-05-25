@@ -42,7 +42,7 @@ interface BookmarksResponse {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

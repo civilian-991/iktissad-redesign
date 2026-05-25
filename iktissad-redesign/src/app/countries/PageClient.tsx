@@ -96,7 +96,7 @@ export default function CountriesPageClient() {
                         {/* Article Count */}
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
                           <span className="text-white/60 text-sm font-[family-name:var(--font-display)]">
-                            {(country.articleCount ?? 0).toLocaleString('ar-SA-u-ca-gregory')} مقال
+                            {(country.articleCount ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')} مقال
                           </span>
                           <span className="flex items-center gap-1 text-gold text-sm font-[family-name:var(--font-display)] font-semibold">
                             استكشف

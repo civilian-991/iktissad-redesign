@@ -51,7 +51,7 @@ function getInitials(name: string | null | undefined): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
+    return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

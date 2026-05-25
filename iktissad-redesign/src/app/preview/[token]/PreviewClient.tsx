@@ -48,7 +48,7 @@ export default function PreviewClient({ article, isDraft, expiresAt }: PreviewCl
     : (article.content || null)
 
   const expiresDate = new Date(expiresAt)
-  const expiresLabel = expiresDate.toLocaleString('ar-SA', {
+  const expiresLabel = expiresDate.toLocaleString('ar-SA-u-nu-latn', {
     day: 'numeric',
     month: 'long',
     hour: '2-digit',

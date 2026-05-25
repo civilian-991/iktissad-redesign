@@ -77,7 +77,7 @@ function SortableArticleRow({ item, index, onRemove }: SortableArticleRowProps) 
   };
 
   const publishedAt = item.article?.publishedAt
-    ? new Date(item.article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+    ? new Date(item.article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',

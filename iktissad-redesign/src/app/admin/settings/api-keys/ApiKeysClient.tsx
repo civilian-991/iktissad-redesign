@@ -205,7 +205,7 @@ function UsagePanel({ keyId, keyName }: UsagePanelProps) {
           <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
             <Icon size={14} className="text-gold mx-auto mb-1" />
             <p className="text-white font-bold text-xl font-[family-name:var(--font-accent)]">
-              {value.toLocaleString('ar-SA')}
+              {value.toLocaleString('ar-SA-u-nu-latn')}
             </p>
             <p className="text-white/40 text-xs font-[family-name:var(--font-display)]">{label}</p>
           </div>
@@ -566,7 +566,7 @@ export default function ApiKeysClient() {
                   <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">آخر استخدام</p>
                   <p className="text-white/50 text-xs font-[family-name:var(--font-display)]">
                     {key.lastUsedAt
-                      ? new Date(key.lastUsedAt).toLocaleDateString('ar-SA')
+                      ? new Date(key.lastUsedAt).toLocaleDateString('ar-SA-u-nu-latn')
                       : 'لم يُستخدم'}
                   </p>
                 </div>

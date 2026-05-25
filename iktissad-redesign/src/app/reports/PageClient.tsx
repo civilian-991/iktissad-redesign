@@ -12,7 +12,7 @@ import { useCallback } from 'react';
 const PAGE_SIZE = 12;
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 }

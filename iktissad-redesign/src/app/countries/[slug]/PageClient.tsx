@@ -170,7 +170,7 @@ export default function CountryPageClient() {
                     {featuredArticle.publishedAt && (
                       <span className="text-white/60 text-sm flex items-center gap-2">
                         <Clock size={16} />
-                        {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                        {new Date(featuredArticle.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                       </span>
                     )}
                   </div>
@@ -233,7 +233,7 @@ export default function CountryPageClient() {
                         {article.publishedAt && (
                           <span className="text-slate text-sm flex items-center gap-1">
                             <Clock size={14} />
-                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                           </span>
                         )}
                       </div>
@@ -261,7 +261,7 @@ export default function CountryPageClient() {
                         {article.publishedAt && (
                           <span className="text-slate text-sm flex items-center gap-1">
                             <Clock size={14} />
-                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                            {new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                           </span>
                         )}
                       </div>

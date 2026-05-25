@@ -44,7 +44,7 @@ export interface SemanticSearchInputProps {
 function formatDate(iso: string | undefined): string {
   if (!iso) return '';
   try {
-    return new Intl.DateTimeFormat('ar-SA', {
+    return new Intl.DateTimeFormat('ar-SA-u-nu-latn', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

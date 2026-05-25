@@ -556,8 +556,8 @@ export default function ArticlesPage() {
                       <span className="text-white/50 text-xs font-[family-name:var(--font-display)] flex items-center gap-1">
                         <Calendar size={12} />
                         {article.publishedAt
-                          ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')
-                          : new Date(article.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                          ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
+                          : new Date(article.createdAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                       </span>
                     </td>
                     <td className="p-4">

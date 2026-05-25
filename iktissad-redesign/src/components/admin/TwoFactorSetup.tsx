@@ -407,7 +407,7 @@ export default function TwoFactorSetup() {
         {/* Step 1: QR Code */}
         <div className="space-y-3">
           <p className="text-white/70 text-sm font-[family-name:var(--font-display)] font-semibold">
-            الخطوة ١: امسح رمز QR
+            الخطوة 1: امسح رمز QR
           </p>
           <div className="flex justify-center">
             <div className="bg-white p-4 rounded-xl inline-block">
@@ -427,7 +427,7 @@ export default function TwoFactorSetup() {
         {/* Step 2: Manual secret */}
         <div className="space-y-3">
           <p className="text-white/70 text-sm font-[family-name:var(--font-display)] font-semibold">
-            الخطوة ٢: أو أدخل المفتاح يدوياً
+            الخطوة 2: أو أدخل المفتاح يدوياً
           </p>
           <div className="flex items-center gap-2">
             <code
@@ -458,7 +458,7 @@ export default function TwoFactorSetup() {
         {/* Step 3: CTA */}
         <div className="space-y-3">
           <p className="text-white/70 text-sm font-[family-name:var(--font-display)] font-semibold">
-            الخطوة ٣: تحقق من التطبيق
+            الخطوة 3: تحقق من التطبيق
           </p>
           <p className="text-white/50 text-sm font-[family-name:var(--font-display)]">
             بعد مسح الرمز، أدخل الرمز المكوّن من 6 أرقام الذي يظهر في التطبيق للتأكيد.

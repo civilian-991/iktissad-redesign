@@ -377,7 +377,7 @@ export default function ArticlePageClient({
   }
 
   const publishedDate = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', {
+    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
         year: 'numeric', month: 'long', day: 'numeric',
       })
     : '';
@@ -430,7 +430,7 @@ export default function ArticlePageClient({
                   <strong>الإقتصاد والأعمال</strong> — iktissad.com
                 </div>
                 <div style={{ fontSize: '10pt', color: '#666', marginBottom: '8px' }}>
-                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA')} · URL: {typeof window !== 'undefined' ? window.location.href : ''}
+                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA-u-nu-latn')} · URL: {typeof window !== 'undefined' ? window.location.href : ''}
                 </div>
               </div>
 
@@ -849,7 +849,7 @@ export default function ArticlePageClient({
                             {related.publishedAt && (
                               <span className="flex items-center gap-1 text-[9px] text-charcoal/30 mt-1.5">
                                 <Clock size={8} />
-                                {new Date(related.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })}
+                                {new Date(related.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { month: 'short', day: 'numeric' })}
                               </span>
                             )}
                           </div>

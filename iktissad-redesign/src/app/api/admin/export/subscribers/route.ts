@@ -90,10 +90,10 @@ export async function GET() {
         plan:        sub.subscription_plans?.name_ar ?? 'مجاني',
         status:      STATUS_LABELS[sub.status] ?? sub.status,
         periodStart: sub.current_period_start
-          ? new Date(sub.current_period_start).toLocaleDateString('ar-SA-u-ca-gregory')
+          ? new Date(sub.current_period_start).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
           : '',
         periodEnd: sub.current_period_end
-          ? new Date(sub.current_period_end).toLocaleDateString('ar-SA-u-ca-gregory')
+          ? new Date(sub.current_period_end).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
           : '',
         phone: sub.phone ?? '',
       });

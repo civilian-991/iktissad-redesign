@@ -21,7 +21,7 @@ export default function CoverSpread({ spread: _spread, issue }: CoverSpreadProps
   const ctaRef = useRef<HTMLButtonElement>(null);
 
   const publishDate = issue.publishDate
-    ? new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', {
+    ? new Date(issue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
         year: 'numeric',
         month: 'long',
       })

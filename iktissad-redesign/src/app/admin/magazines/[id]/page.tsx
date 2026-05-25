@@ -232,7 +232,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
             </h1>
             <p className="text-white/50 text-sm">
               {magazine?.updatedAt
-                ? `${t('admin.magazines.edit.lastUpdate')} ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}`
+                ? `${t('admin.magazines.edit.lastUpdate')} ${new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}`
                 : ''}
             </p>
           </div>
@@ -788,7 +788,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <div>
                     <p className="text-white/80">{t('admin.magazines.edit.issueUpdated')}</p>
                     <p className="text-white/40 text-xs">
-                      {new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                      {new Date(magazine.updatedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                     </p>
                   </div>
                 </div>
@@ -799,7 +799,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                   <div>
                     <p className="text-white/80">{t('admin.magazines.edit.issueCreated')}</p>
                     <p className="text-white/40 text-xs">
-                      {new Date(magazine.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                      {new Date(magazine.createdAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                     </p>
                   </div>
                 </div>

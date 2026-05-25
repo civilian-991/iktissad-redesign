@@ -131,7 +131,7 @@ export default function RealtimeDashboardClient() {
                 {isLoading ? (
                   <Loader2 size={32} className="animate-spin text-white/30" />
                 ) : (
-                  (analytics?.activeReaders ?? 0).toLocaleString('ar')
+                  (analytics?.activeReaders ?? 0).toLocaleString('ar-u-nu-latn')
                 )}
               </p>
               <p className="text-white/30 text-xs font-[family-name:var(--font-display)] mt-1">
@@ -181,7 +181,7 @@ export default function RealtimeDashboardClient() {
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
                   >
                     <span className="text-2xl font-[family-name:var(--font-display)] font-bold text-gold/40 w-8 text-center">
-                      {(i + 1).toLocaleString('ar')}
+                      {(i + 1).toLocaleString('ar-u-nu-latn')}
                     </span>
                     <div className="flex-1 min-w-0">
                       <Link
@@ -207,7 +207,7 @@ export default function RealtimeDashboardClient() {
                     <div className="flex items-center gap-1 text-white/50">
                       <Eye size={iconSizes.sm} />
                       <span className="text-sm font-[family-name:var(--font-display)] font-semibold">
-                        {article.reads.toLocaleString('ar')}
+                        {article.reads.toLocaleString('ar-u-nu-latn')}
                       </span>
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export default function RealtimeDashboardClient() {
                           {section.name}
                         </span>
                         <span className="text-gold text-sm font-[family-name:var(--font-display)] font-semibold">
-                          {section.reads.toLocaleString('ar')}
+                          {section.reads.toLocaleString('ar-u-nu-latn')}
                         </span>
                       </div>
                       <div className="h-2 bg-white/5 rounded-full overflow-hidden">
@@ -317,7 +317,7 @@ export default function RealtimeDashboardClient() {
                     <div className="flex items-center gap-1 text-white/50">
                       <Eye size={12} />
                       <span className="text-xs font-[family-name:var(--font-display)]">
-                        {article.reads.toLocaleString('ar')}
+                        {article.reads.toLocaleString('ar-u-nu-latn')}
                       </span>
                     </div>
                   </div>

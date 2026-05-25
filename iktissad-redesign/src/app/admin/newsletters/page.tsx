@@ -284,10 +284,10 @@ export default function NewslettersPage() {
                       <span className="text-white/50 text-xs font-[family-name:var(--font-display)] flex items-center gap-1">
                         <Calendar size={12} />
                         {nl.sentAt
-                          ? new Date(nl.sentAt).toLocaleDateString('ar-SA-u-ca-gregory')
+                          ? new Date(nl.sentAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
                           : nl.scheduledAt
-                          ? new Date(nl.scheduledAt).toLocaleDateString('ar-SA-u-ca-gregory')
-                          : new Date(nl.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')}
+                          ? new Date(nl.scheduledAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
+                          : new Date(nl.createdAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')}
                       </span>
                     </td>
 

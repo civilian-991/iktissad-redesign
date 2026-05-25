@@ -196,7 +196,7 @@ function QuickCreateModal({ date, sections, onClose, onCreated }: QuickCreateMod
 
   if (!date) return null;
 
-  const dateLabel = date.toLocaleDateString('ar-SA-u-ca-gregory', {
+  const dateLabel = date.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
@@ -356,7 +356,7 @@ function PublishingHeatmap({ articles, today }: HeatmapProps) {
             return (
               <div
                 key={key}
-                title={`${day.toLocaleDateString('ar-SA-u-ca-gregory')} — ${count} مقال`}
+                title={`${day.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')} — ${count} مقال`}
                 className={`w-3 h-3 rounded-sm transition-colors ${
                   isFuture ? 'bg-white/[0.03]' : heatColor(count)
                 }`}
@@ -710,7 +710,7 @@ export default function CalendarClient() {
     : (() => {
         const ws = weekStart(weekAnchor);
         const we = addDays(ws, 6);
-        return `${ws.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric' })} – ${we.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        return `${ws.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { month: 'short', day: 'numeric' })} – ${we.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { month: 'short', day: 'numeric', year: 'numeric' })}`;
       })();
 
   return (

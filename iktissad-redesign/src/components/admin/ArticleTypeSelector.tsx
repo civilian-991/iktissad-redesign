@@ -114,10 +114,10 @@ export default function ArticleTypeSelector({
         <p className="text-xs text-white/40 font-[family-name:var(--font-display)]">
           عدد الكلمات المقترح:{' '}
           <span className="text-white/60">
-            {wordCounts.min.toLocaleString('ar')}–{wordCounts.max.toLocaleString('ar')}
+            {wordCounts.min.toLocaleString('ar-u-nu-latn')}–{wordCounts.max.toLocaleString('ar-u-nu-latn')}
           </span>
           {' '}(مثالي:{' '}
-          <span className="text-gold/70">{wordCounts.ideal.toLocaleString('ar')}</span>
+          <span className="text-gold/70">{wordCounts.ideal.toLocaleString('ar-u-nu-latn')}</span>
           )
         </p>
       )}

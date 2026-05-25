@@ -98,7 +98,7 @@ function isOverdue(dueDate: string | null): boolean {
 
 function formatDate(iso: string | null): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(iso).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     day: 'numeric',
     month: 'short',
   });

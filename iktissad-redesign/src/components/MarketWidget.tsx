@@ -53,7 +53,7 @@ export interface MarketWidgetProps {
 // ─────────────────────────────────────────────────────────────────
 
 function formatPrice(value: number, currency: string, arabic = false): string {
-  const locale = arabic ? 'ar-SA' : 'en-US'
+  const locale = arabic ? 'ar-SA-u-nu-latn' : 'en-US'
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 3,
@@ -61,7 +61,7 @@ function formatPrice(value: number, currency: string, arabic = false): string {
 }
 
 function formatVolume(value: number, arabic = false): string {
-  const locale = arabic ? 'ar-SA' : 'en-US'
+  const locale = arabic ? 'ar-SA-u-nu-latn' : 'en-US'
   if (value >= 1_000_000_000) {
     return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value / 1_000_000_000) + (arabic ? ' م' : 'B')
   }
@@ -72,12 +72,12 @@ function formatVolume(value: number, arabic = false): string {
 }
 
 function formatMarketCap(value: number, currency: string, arabic = false): string {
-  const locale = arabic ? 'ar-SA' : 'en-US'
+  const locale = arabic ? 'ar-SA-u-nu-latn' : 'en-US'
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value) + ' ' + (arabic ? 'مليار ' : 'B ') + currency
 }
 
 function formatDate(dateStr: string, arabic = false): string {
-  return new Date(dateStr).toLocaleDateString(arabic ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(arabic ? 'ar-SA-u-nu-latn' : 'en-US', { month: 'short', day: 'numeric' })
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ interface ChangeIndicatorProps {
 
 function ChangeIndicator({ change, changePercent, arabic = false }: ChangeIndicatorProps) {
   const isPositive = change >= 0
-  const locale = arabic ? 'ar-SA' : 'en-US'
+  const locale = arabic ? 'ar-SA-u-nu-latn' : 'en-US'
   const sign = isPositive ? '+' : ''
   const pct = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(changePercent))
   const abs = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(Math.abs(change))
@@ -202,7 +202,7 @@ function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
             <RefreshCw size={10} />
             <span>
               {arabic ? 'آخر تحديث: ' : 'Updated: '}
-              {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+              {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
           {data.isStale && (
@@ -276,7 +276,7 @@ function ChartWidget({ data, height, arabic = false }: ChartWidgetProps) {
           )}
           <span className="text-xs text-white/25">
             {arabic ? 'آخر تحديث: ' : 'Updated: '}
-            {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
       </div>
@@ -359,7 +359,7 @@ function FullWidget({ data, arabic = false }: FullWidgetProps) {
       >
         <span className="text-xs text-white/25">
           {arabic ? 'آخر تحديث: ' : 'Updated: '}
-          {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(data.lastUpdated).toLocaleTimeString(arabic ? 'ar-SA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
         </span>
         {data.isStale && (
           <span className="text-xs text-white/30 italic">

@@ -82,7 +82,7 @@ function SuggestionRow({ suggestion }: SuggestionRowProps) {
 
       {/* Views count */}
       <span className="shrink-0 text-xs text-zinc-500 tabular-nums">
-        {suggestion.views.toLocaleString("ar-SA")}
+        {suggestion.views.toLocaleString("ar-SA-u-nu-latn")}
       </span>
 
       {/* Copy button */}

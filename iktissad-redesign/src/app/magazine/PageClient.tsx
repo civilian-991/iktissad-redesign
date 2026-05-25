@@ -138,7 +138,7 @@ export default function MagazinePageClient() {
                     {/* Stats row */}
                     <div className="flex items-center gap-6 mb-8" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       <span className="text-xs font-[family-name:var(--font-display)]">
-                        {new Date(featuredIssue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
+                        {new Date(featuredIssue.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { year: 'numeric', month: 'long' })}
                       </span>
                       {featuredIssue.pages > 0 && (
                         <>
@@ -426,7 +426,7 @@ export default function MagazinePageClient() {
                           className="text-[11px] font-[family-name:var(--font-display)] font-semibold leading-none"
                           style={{ color: '#DDA853' }}
                         >
-                          {new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'short' })}
+                          {new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { year: 'numeric', month: 'short' })}
                         </span>
                         {magazine.pages > 0 && (
                           <span className="text-white/40 text-[10px] font-[family-name:var(--font-display)]">
@@ -452,7 +452,7 @@ export default function MagazinePageClient() {
                           {magazine.title}
                         </h3>
                         <p className="text-[#DDA853] text-[11px] font-[family-name:var(--font-display)] mb-4">
-                          {magazine.subtitle || new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long' })}
+                          {magazine.subtitle || new Date(magazine.publishDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { year: 'numeric', month: 'long' })}
                         </p>
                         <div
                           className="flex items-center gap-1.5 text-[11px] font-[family-name:var(--font-display)] font-bold"

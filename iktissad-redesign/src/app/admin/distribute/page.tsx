@@ -158,8 +158,8 @@ export default function DistributePage() {
 function ArticleCard({ article, index }: { article: Article; index: number }) {
   const isScheduled = article.status === 'scheduled'
   const dateLabel = article.publishedAt
-    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory')
-    : new Date(article.createdAt).toLocaleDateString('ar-SA-u-ca-gregory')
+    ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
+    : new Date(article.createdAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')
 
   return (
     <motion.div

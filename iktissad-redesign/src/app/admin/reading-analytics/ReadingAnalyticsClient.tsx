@@ -41,8 +41,8 @@ type DateRange = '7' | '30' | '90' | 'custom';
 // ─── Time Formatter ─────────────────────────────────────────────
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
-  if (mins === 0) return `${seconds.toLocaleString('ar-SA-u-ca-gregory')} ث`;
-  return `${mins.toLocaleString('ar-SA-u-ca-gregory')} د`;
+  if (mins === 0) return `${seconds.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} ث`;
+  return `${mins.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} د`;
 }
 
 // ─── Custom Tooltip ─────────────────────────────────────────────
@@ -55,7 +55,7 @@ interface TooltipProps {
 
 function ArabicTooltip({ active, payload, label, formatValue }: TooltipProps) {
   if (!active || !payload?.length) return null;
-  const fmt = formatValue ?? ((v: number) => v.toLocaleString('ar-SA-u-ca-gregory'));
+  const fmt = formatValue ?? ((v: number) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn'));
   return (
     <div className="bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-display)]">
       {label && <p className="text-white/60 mb-1">{label}</p>}
@@ -87,7 +87,7 @@ function ScrollDepthBar({ value }: { value: number }) {
           }}
         />
       </div>
-      <span className="text-white/60 text-xs w-8 text-end">{value.toLocaleString('ar-SA-u-ca-gregory')}%</span>
+      <span className="text-white/60 text-xs w-8 text-end">{value.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}%</span>
     </div>
   );
 }
@@ -97,7 +97,7 @@ function ReadThroughBadge({ value }: { value: number }) {
   const color = value >= 50 ? 'bg-emerald-500/20 text-emerald-400' : value >= 25 ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-white/40';
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-[family-name:var(--font-display)] ${color}`}>
-      {value.toLocaleString('ar-SA-u-ca-gregory')}%
+      {value.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}%
     </span>
   );
 }
@@ -229,7 +229,7 @@ export default function ReadingAnalyticsClient() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-navy/20 border border-navy/30 rounded-lg p-4 text-center">
                 <p className="text-3xl font-[family-name:var(--font-display)] font-bold text-white">
-                  {(d?.subscriberVsAnon.subscriber ?? 0).toLocaleString('ar-SA-u-ca-gregory')}
+                  {(d?.subscriberVsAnon.subscriber ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                 </p>
                 <p className="text-white/50 text-sm mt-1 font-[family-name:var(--font-display)]">
                   {t('admin.readingAnalytics.subscribers')}
@@ -237,7 +237,7 @@ export default function ReadingAnalyticsClient() {
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
                 <p className="text-3xl font-[family-name:var(--font-display)] font-bold text-white">
-                  {(d?.subscriberVsAnon.anonymous ?? 0).toLocaleString('ar-SA-u-ca-gregory')}
+                  {(d?.subscriberVsAnon.anonymous ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                 </p>
                 <p className="text-white/50 text-sm mt-1 font-[family-name:var(--font-display)]">
                   {t('admin.readingAnalytics.anonymous')}
@@ -336,7 +336,7 @@ export default function ReadingAnalyticsClient() {
                   <tr key={article.articleId} className="border-b border-gold/5 hover:bg-white/5 transition-colors">
                     <td className="py-3 ps-2 pe-4">
                       <span className="text-white/40 text-sm font-[family-name:var(--font-display)]">
-                        {(idx + 1).toLocaleString('ar-SA-u-ca-gregory')}
+                        {(idx + 1).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                       </span>
                     </td>
                     <td className="py-3 pe-4 max-w-xs">
@@ -349,7 +349,7 @@ export default function ReadingAnalyticsClient() {
                     </td>
                     <td className="py-3 pe-4">
                       <span className="text-white font-[family-name:var(--font-display)] text-sm">
-                        {article.reads.toLocaleString('ar-SA-u-ca-gregory')}
+                        {article.reads.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                       </span>
                     </td>
                     <td className="py-3 pe-4">
@@ -402,7 +402,7 @@ export default function ReadingAnalyticsClient() {
                     tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: 'var(--font-display)' }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
+                    tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                   />
                   <YAxis
                     type="category"
@@ -448,7 +448,7 @@ export default function ReadingAnalyticsClient() {
                 <BarChart
                   data={(d?.spreadDwell ?? []).map((s) => ({
                     ...s,
-                    label: s.spreadNumber.toLocaleString('ar-SA-u-ca-gregory'),
+                    label: s.spreadNumber.toLocaleString('ar-SA-u-ca-gregory-nu-latn'),
                   }))}
                   layout="vertical"
                   margin={{ top: 5, right: 20, left: 10, bottom: 5 }}

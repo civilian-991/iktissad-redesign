@@ -38,7 +38,7 @@ const CHART_COLORS = ['#DDA853', '#183B4E', '#27548A', '#C49240', '#F5EEDC']
 export function DataChartBlock({ block }: Props) {
   const chartData = block.data.map(d => ({ name: d.label, value: d.value }))
 
-  const arabicFormatter = (value: number) => value.toLocaleString('ar-SA-u-ca-gregory')
+  const arabicFormatter = (value: number) => value.toLocaleString('ar-SA-u-ca-gregory-nu-latn')
 
   const tooltipStyle = {
     fontFamily: 'Tajawal, sans-serif',

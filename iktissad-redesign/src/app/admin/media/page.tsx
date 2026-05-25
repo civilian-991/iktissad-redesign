@@ -589,7 +589,7 @@ export default function MediaLibraryPage() {
                     {item.folder || '-'}
                   </td>
                   <td className="p-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
-                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString('ar-SA-u-ca-gregory') : '-'}
+                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn') : '-'}
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">

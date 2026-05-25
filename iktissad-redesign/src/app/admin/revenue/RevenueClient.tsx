@@ -52,7 +52,7 @@ function formatUSD(value: number) {
 
 function formatMonth(month: string) {
   try {
-    return new Date(month + '-01').toLocaleDateString('ar-SA-u-ca-gregory', {
+    return new Date(month + '-01').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
       month: 'short',
       year: 'numeric',
     });
@@ -72,7 +72,7 @@ interface TooltipProps {
 
 function ArabicTooltip({ active, payload, label, valueFormatter, labelPrefix }: TooltipProps) {
   if (!active || !payload?.length) return null;
-  const fmt = valueFormatter ?? ((v: number) => v.toLocaleString('ar-SA-u-ca-gregory'));
+  const fmt = valueFormatter ?? ((v: number) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn'));
   return (
     <div className="bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm font-[family-name:var(--font-display)]">
       <p className="text-white/60 mb-1">{labelPrefix ?? ''}{label ? formatMonth(label) : ''}</p>
@@ -214,32 +214,32 @@ export default function RevenueClient() {
             />
             <KpiCard
               label={t('admin.revenue.churnRate')}
-              value={(d?.churnRate ?? 0).toLocaleString('ar-SA-u-ca-gregory', { maximumFractionDigits: 1 }) + '%'}
+              value={(d?.churnRate ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn', { maximumFractionDigits: 1 }) + '%'}
               icon={TrendingDown}
               iconColor={(d?.churnRate ?? 0) > 5 ? 'bg-gradient-to-br from-rose-500 to-red-700' : 'bg-gradient-to-br from-emerald-500 to-teal-700'}
               trend={(d?.churnRate ?? 0) > 5 ? 'down' : 'up'}
             />
             <KpiCard
               label={t('admin.revenue.activeSubscribers')}
-              value={(d?.activeSubscribers ?? 0).toLocaleString('ar-SA-u-ca-gregory')}
+              value={(d?.activeSubscribers ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
               icon={Users}
               iconColor="bg-gradient-to-br from-purple-500 to-indigo-700"
               trend="neutral"
             />
             <KpiCard
               label={t('admin.revenue.trials')}
-              value={(d?.trialSubscribers ?? 0).toLocaleString('ar-SA-u-ca-gregory')}
+              value={(d?.trialSubscribers ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
               icon={Users}
               iconColor="bg-gradient-to-br from-emerald-500 to-teal-700"
               trend="neutral"
             />
             <KpiCard
               label={t('admin.revenue.newThisMonth')}
-              value={(d?.newThisMonth ?? 0).toLocaleString('ar-SA-u-ca-gregory')}
+              value={(d?.newThisMonth ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
               icon={UserPlus}
               iconColor="bg-gradient-to-br from-gold to-bronze"
               trend="up"
-              subLabel={`${(d?.canceledThisMonth ?? 0).toLocaleString('ar-SA-u-ca-gregory')} ملغى`}
+              subLabel={`${(d?.canceledThisMonth ?? 0).toLocaleString('ar-SA-u-ca-gregory-nu-latn')} ملغى`}
             />
           </>
         )}
@@ -276,7 +276,7 @@ export default function RevenueClient() {
                   tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: 'var(--font-display)' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
+                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                 />
                 <Tooltip
                   content={<ArabicTooltip valueFormatter={formatUSD} />}
@@ -333,7 +333,7 @@ export default function RevenueClient() {
                   </Pie>
                   <Tooltip
                     formatter={(value) => [
-                      Number(value).toLocaleString('ar-SA-u-ca-gregory'),
+                      Number(value).toLocaleString('ar-SA-u-ca-gregory-nu-latn'),
                     ]}
                     contentStyle={{
                       background: OBSIDIAN,
@@ -395,7 +395,7 @@ export default function RevenueClient() {
                   tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: 'var(--font-display)' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
+                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                 />
                 <Tooltip content={<ArabicTooltip valueFormatter={formatUSD} />} />
                 <Area
@@ -445,7 +445,7 @@ export default function RevenueClient() {
                   tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: 'var(--font-display)' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory')}
+                  tickFormatter={(v) => v.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
                 />
                 <Tooltip content={<ArabicTooltip valueFormatter={formatUSD} />} />
                 <Bar dataKey="revenue" fill={NAVY} radius={[4, 4, 0, 0]} />

@@ -45,7 +45,7 @@ interface HistoryResponse {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -53,7 +53,7 @@ function formatDate(dateStr: string | null) {
 }
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('ar-SA-u-ca-gregory', {
+  return new Date(dateStr).toLocaleTimeString('ar-SA-u-ca-gregory-nu-latn', {
     hour: '2-digit',
     minute: '2-digit',
   });

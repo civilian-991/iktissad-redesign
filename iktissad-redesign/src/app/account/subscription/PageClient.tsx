@@ -59,7 +59,7 @@ interface Props {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory', {
+  return new Date(dateStr).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -392,7 +392,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
                           {payment.description ?? 'اشتراك'}
                         </td>
                         <td className="px-6 py-4 font-semibold text-obsidian">
-                          {payment.amount.toLocaleString('ar-SA-u-ca-gregory')} {payment.currency}
+                          {payment.amount.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} {payment.currency}
                         </td>
                         <td className="px-6 py-4">
                           <PaymentStatusBadge status={payment.status} />

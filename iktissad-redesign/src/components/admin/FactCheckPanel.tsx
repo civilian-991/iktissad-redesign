@@ -81,7 +81,7 @@ export default function FactCheckPanel({ articleId: _articleId, content, title }
         </div>
         {claims !== null && (
           <span className="text-xs text-white/30 font-[family-name:var(--font-display)]">
-            {new Date(checkedAt!).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(checkedAt!).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
       </div>
