@@ -88,6 +88,14 @@ export async function GET(request: NextRequest) {
     query = query.eq("archived", false);
   }
 
+  // Exclude empty drafts (rows created by /admin/articles/new that the editor
+  // hasn't given a title yet). Opt-in via ?includeEmpty=true if a caller ever
+  // needs them — no current caller does.
+  const includeEmpty = searchParams.get("includeEmpty") === "true";
+  if (!includeEmpty) {
+    query = query.neq("title", "");
+  }
+
   if (featured !== null) {
     query = query.eq("featured", featured === "true");
   }
