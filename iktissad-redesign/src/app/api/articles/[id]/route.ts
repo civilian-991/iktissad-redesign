@@ -167,6 +167,23 @@ export async function PUT(
     }
   }
 
+  // Auto-stamp published_at the first time an article becomes published.
+  // The editor only sends publishedAt for scheduled posts, so without this a
+  // published article keeps published_at = null and sorts last in every list
+  // ordered by published_at (homepage Hero, latest news, sections, RSS…).
+  // Guard on the current value so routine re-saves/autosaves of an
+  // already-published article don't keep resetting the publish date.
+  if (data.status === "published" && data.publishedAt === undefined) {
+    const { data: current } = await admin
+      .from("articles")
+      .select("published_at")
+      .eq("id", id)
+      .single() as { data: { published_at: string | null } | null };
+    if (current && !current.published_at) {
+      updateData.published_at = new Date().toISOString();
+    }
+  }
+
   if (data.sectionSlug !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sec } = await admin.from("sections").select("id").eq("slug", data.sectionSlug).single() as { data: any };

@@ -282,7 +282,9 @@ export async function POST(request: NextRequest) {
     author_id: data.authorId ?? null,
     tags: data.tags,
     status: data.status,
-    published_at: data.publishedAt ?? null,
+    // Stamp the publish time when creating an already-published article so it
+    // sorts correctly in published lists (which order by published_at desc).
+    published_at: data.publishedAt ?? (data.status === "published" ? new Date().toISOString() : null),
   };
   if (data.deck !== undefined) insertData.deck = data.deck;
   if (data.deckEn !== undefined) insertData.deck_en = data.deckEn;
