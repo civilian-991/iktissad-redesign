@@ -16,7 +16,7 @@ export default function Hero() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const { data: featuredData } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&featured=true&pageSize=5',
+    '/api/articles?status=published&featured=true&pageSize=4',
     swrFetcher
   );
 
