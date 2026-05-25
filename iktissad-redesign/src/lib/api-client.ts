@@ -29,6 +29,7 @@ import type {
   Newsletter,
   Section,
   Sector,
+  Country,
 } from "@/types";
 
 // ─── Subscription domain types ───────────────────────────────────
@@ -705,6 +706,50 @@ export async function deleteSector(
   slug: string
 ): Promise<ApiResponse<{ deleted: boolean }>> {
   return api<{ deleted: boolean }>(`/api/sectors/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+  });
+}
+
+export interface CreateCountryInput {
+  slug?: string;
+  name: string;
+  nameEn?: string;
+  flag?: string;
+  region?: "gulf" | "mashreq" | "northafrica" | "world";
+  economicOverview?: string;
+  economicOverviewEn?: string;
+  keyIndicators?: Record<string, string | number>;
+}
+
+export type UpdateCountryInput = Partial<CreateCountryInput>;
+
+export async function getCountries(): Promise<ApiResponse<Country[]>> {
+  return api<Country[]>(countriesKey());
+}
+
+export async function createCountry(
+  input: CreateCountryInput
+): Promise<ApiResponse<Country>> {
+  return api<Country>(countriesKey(), {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateCountry(
+  slug: string,
+  patch: UpdateCountryInput
+): Promise<ApiResponse<Country>> {
+  return api<Country>(`/api/countries/${encodeURIComponent(slug)}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteCountry(
+  slug: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/countries/${encodeURIComponent(slug)}`, {
     method: "DELETE",
   });
 }

@@ -55,6 +55,7 @@ import {
   AtSign,
   Tags,
   Briefcase,
+  Globe,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -110,8 +111,9 @@ const navigationConfig: NavItem[] = [
 ];
 
 const taxonomyNavConfig: SubNavItem[] = [
-  { key: 'sections', href: '/admin/sections', icon: Tags },
-  { key: 'sectors',  href: '/admin/sectors',  icon: Briefcase },
+  { key: 'sections',  href: '/admin/sections',  icon: Tags },
+  { key: 'sectors',   href: '/admin/sectors',   icon: Briefcase },
+  { key: 'countries', href: '/admin/countries', icon: Globe },
 ];
 
 const subscriptionNavConfig: SubNavItem[] = [
@@ -236,6 +238,7 @@ export default function AdminLayoutClient({
       graphql:          t('admin.common.graphql'),
       sections:         t('admin.sections.title'),
       sectors:          t('admin.sectors.title'),
+      countries:        t('admin.countries.title'),
     };
     return subNavKeys[key] || key;
   };
