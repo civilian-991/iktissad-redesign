@@ -9,22 +9,6 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, Country } from '@/types';
 
-// Static visual supplement — images/gdp/capital not stored in DB
-const countryMeta: Record<string, { image: string; gdp: string; capital: string }> = {
-  'saudi-arabia':  { image: 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=800&h=600&fit=crop', gdp: '1.1 تريليون دولار', capital: 'الرياض' },
-  'uae':           { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=600&fit=crop', gdp: '507 مليار دولار',   capital: 'أبوظبي' },
-  'egypt':         { image: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&h=600&fit=crop', gdp: '476 مليار دولار',   capital: 'القاهرة' },
-  'lebanon':       { image: 'https://images.unsplash.com/photo-1579606032821-4e6161c81571?w=800&h=600&fit=crop', gdp: '23 مليار دولار',    capital: 'بيروت' },
-  'qatar':         { image: 'https://images.unsplash.com/photo-1548972150-3c1d2e6f5176?w=800&h=600&fit=crop', gdp: '221 مليار دولار',   capital: 'الدوحة' },
-  'kuwait':        { image: 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?w=800&h=600&fit=crop', gdp: '175 مليار دولار',   capital: 'الكويت' },
-  'bahrain':       { image: 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=800&h=600&fit=crop', gdp: '44 مليار دولار',    capital: 'المنامة' },
-  'oman':          { image: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&h=600&fit=crop', gdp: '108 مليار دولار',   capital: 'مسقط' },
-  'jordan':        { image: 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=800&h=600&fit=crop', gdp: '47 مليار دولار',    capital: 'عمّان' },
-  'morocco':       { image: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=800&h=600&fit=crop', gdp: '143 مليار دولار',   capital: 'الرباط' },
-};
-
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop';
-
 export default function CountriesPageClient() {
   const { t } = useTranslation();
 
@@ -83,9 +67,7 @@ export default function CountriesPageClient() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {countries.map((country, index) => {
-                  const meta = countryMeta[country.slug];
-                  return (
+                {countries.map((country, index) => (
                     <motion.a
                       key={country.slug}
                       href={`/countries/${country.slug}`}
@@ -93,22 +75,12 @@ export default function CountriesPageClient() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       whileHover={{ y: -8 }}
-                      className="group relative rounded-2xl overflow-hidden h-80"
+                      className="group relative rounded-2xl overflow-hidden h-80 bg-gradient-to-br from-navy via-navy-light to-navy"
                     >
-                      {/* Background Image */}
-                      <img
-                        src={meta?.image ?? FALLBACK_IMAGE}
-                        alt={country.name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/60 to-transparent" />
-
-                      {/* Flag Badge */}
-                      <div className="absolute top-4 right-4 text-4xl">
-                        {country.flag}
-                      </div>
+                      {/* Decorative pattern + bottom gradient for text contrast */}
+                      <div className="absolute inset-0 star-pattern opacity-20" />
+                      <div className="absolute -top-10 -right-10 w-48 h-48 bg-gold/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-125" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/50 to-transparent" />
 
                       {/* Content */}
                       <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -119,16 +91,6 @@ export default function CountriesPageClient() {
                           <p className="text-white/70 text-sm mb-4 line-clamp-2">
                             {country.economicOverview}
                           </p>
-                        )}
-
-                        {/* Stats */}
-                        {meta && (
-                          <div className="flex items-center justify-between text-xs text-white/60">
-                            <div className="flex items-center gap-4">
-                              <span>الناتج: {meta.gdp}</span>
-                              <span>العاصمة: {meta.capital}</span>
-                            </div>
-                          </div>
                         )}
 
                         {/* Article Count */}
@@ -143,8 +105,7 @@ export default function CountriesPageClient() {
                         </div>
                       </div>
                     </motion.a>
-                  );
-                })}
+                ))}
               </div>
             )}
           </div>
@@ -177,11 +138,10 @@ export default function CountriesPageClient() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ scale: 1.05 }}
-                  className="bg-white rounded-xl p-4 shadow-sm hover:shadow-lg transition-all text-center"
+                  className="bg-white rounded-xl p-5 shadow-sm hover:shadow-lg transition-all text-center"
                 >
-                  <span className="text-3xl mb-2 block">{country.flag}</span>
                   <span className="font-[family-name:var(--font-display)] font-semibold text-navy text-sm">
-                    {country.name.split(' ').slice(-1)[0]}
+                    {country.name}
                   </span>
                 </motion.a>
               ))}
