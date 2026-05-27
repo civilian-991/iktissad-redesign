@@ -208,9 +208,17 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
     }
 
     case 'table':
+      // Scroll wide tables horizontally inside the article column instead of
+      // overflowing the page on mobile. Inline styles (not Tailwind utilities)
+      // because the class scanner doesn't reliably emit them for this route, and
+      // `max-width:100%` needs a width-constrained ancestor — see the `min-w-0`
+      // on the article column in [slug]/PageClient.tsx.
       return (
-        <div key={keyPrefix} className="overflow-x-auto my-4">
-          <table className="w-full border-collapse">{children}</table>
+        <div
+          key={keyPrefix}
+          style={{ overflowX: 'auto', maxWidth: '100%', marginTop: '1rem', marginBottom: '1rem' }}
+        >
+          <table className="border-collapse" style={{ minWidth: '100%' }}>{children}</table>
         </div>
       )
 

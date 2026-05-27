@@ -463,7 +463,13 @@ export default function ArticlePageClient({
           <div className="grid lg:grid-cols-[1fr_300px] gap-10 pt-8 pb-20">
 
             {/* ── Main article column ── */}
+            {/* min-width:0 lets this grid/flex item shrink below its content's
+                intrinsic width, so wide children (tables, code) scroll inside the
+                column instead of blowing out the page on mobile. Inline style so
+                it applies regardless of Tailwind class emission. */}
             <motion.article
+              className="min-w-0"
+              style={{ minWidth: 0 }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
