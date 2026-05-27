@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 
 export const revalidate = 300; // 5 minutes — homepage shows latest news
+
+// Self-referencing canonical (resolved against metadataBase in layout.tsx).
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 import LatestNews from '@/components/LatestNews';
 import CompaniesSection from '@/components/CompaniesSection';
 import SectorNews from '@/components/SectorNews';
@@ -19,6 +25,11 @@ export default function Home() {
     <>
       <Header />
       <main>
+        {/* Single page H1 for SEO/accessibility — visually hidden, the visible
+            hero headlines remain the design focus. */}
+        <h1 className="sr-only">
+          الإقتصاد والأعمال — أخبار الاقتصاد والأعمال والأسواق المالية في العالم العربي
+        </h1>
         <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
         {/* 1. Featured */}
         <Hero />

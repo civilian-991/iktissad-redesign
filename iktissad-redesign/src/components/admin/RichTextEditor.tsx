@@ -348,6 +348,18 @@ export default function RichTextEditor({
         dir,
         style: `min-height: ${minHeight}px`,
       },
+      // Keyboard shortcut for inserting an image: Cmd/Ctrl + Shift + M.
+      // (Shift+I is avoided — it's the browser devtools shortcut on Win/Linux.)
+      // Opens the media picker when wired; otherwise the toolbar button handles
+      // the URL-prompt fallback.
+      handleKeyDown: (_view, event) => {
+        if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.code === 'KeyM' && onImageInsert) {
+          event.preventDefault();
+          onImageInsert();
+          return true;
+        }
+        return false;
+      },
     },
     onCreate: ({ editor: ed }) => {
       onEditorReady();
@@ -574,7 +586,7 @@ export default function RichTextEditor({
           <ToolbarButton icon={Link2}     onClick={() => handleAction('link')}       active={isActive('link')}       title="رابط" />
           <ToolbarButton icon={Quote}     onClick={() => handleAction('blockquote')} active={isActive('blockquote')} title="اقتباس" />
           <ToolbarButton icon={Code}      onClick={() => handleAction('codeBlock')}  active={isActive('codeBlock')}  title="كتلة كود" />
-          <ToolbarButton icon={ImageIcon} onClick={() => handleAction('image')}      title="إدراج صورة" />
+          <ToolbarButton icon={ImageIcon} onClick={() => handleAction('image')}      title="إدراج صورة (Ctrl/⌘ + Shift + M)" />
 
           <div className="w-px h-6 bg-gold/10 mx-1" />
 

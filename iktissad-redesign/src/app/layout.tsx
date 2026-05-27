@@ -23,7 +23,11 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+const SITE_URL = "https://www.iktissadonline.com";
+
 export const metadata: Metadata = {
+  // Resolves relative canonical/OG URLs set per-page (e.g. canonical: "/").
+  metadataBase: new URL(SITE_URL),
   title: "الإقتصاد والأعمال | Al-Iktissad Wal-Aamal",
   description: "المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي. تغطية شاملة لأسواق المال والأعمال والتجارة في الشرق الأوسط.",
   keywords: ["اقتصاد", "أعمال", "مال", "أخبار اقتصادية", "السعودية", "الإمارات", "مصر", "لبنان", "قطر", "الكويت"],
@@ -46,14 +50,11 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.json",
-  alternates: {
-    canonical: "https://www.iktissadonline.com",
-    languages: {
-      "ar": "https://www.iktissadonline.com",
-      "en": "https://www.iktissadonline.com",
-      "x-default": "https://www.iktissadonline.com",
-    },
-  },
+  // NOTE: no site-wide `alternates.canonical` here. A hardcoded canonical in the
+  // root layout was inherited by every route, telling Google that /articles,
+  // /topics/*, etc. were duplicates of the homepage. Each page now sets its own
+  // canonical (homepage below, article pages in [slug]/page.tsx); pages without
+  // an explicit canonical self-canonicalize to their actual URL.
   // Google Search Console ownership verification
   // Set NEXT_PUBLIC_GSC_VERIFICATION in your environment variables
   ...(process.env.NEXT_PUBLIC_GSC_VERIFICATION && {

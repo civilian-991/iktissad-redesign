@@ -145,6 +145,10 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [title, setTitle] = useState('');
   const [titleEn, setTitleEn] = useState('');
   const [slug, setSlug] = useState('');
+  // While false, the slug auto-follows the title (standard CMS behavior). Set
+  // true once the article has a real (non-placeholder) slug or the user edits
+  // the slug field manually, so we never clobber an intentional slug.
+  const [slugTouched, setSlugTouched] = useState(false);
   const [deck, setDeck] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [excerptEn, setExcerptEn] = useState('');
@@ -296,7 +300,12 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     if (article && !initialized) {
       setTitle(article.title);
       setTitleEn(article.titleEn || '');
-      setSlug(article.slug || '');
+      // A `draft-<uuid>` placeholder slug (assigned at creation) is not a real
+      // slug — derive one from the title and let it keep following the title
+      // until the user edits it. A real slug is kept as-is and locked.
+      const hasRealSlug = !!article.slug && !article.slug.startsWith('draft-');
+      setSlug(hasRealSlug ? article.slug : slugify(article.title || ''));
+      setSlugTouched(hasRealSlug);
       setDeck(article.deck || '');
       setExcerpt(article.excerpt);
       setExcerptEn(article.excerptEn || '');
@@ -754,7 +763,12 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setTitle(v);
+                // Slug follows the title until the user takes over the slug field.
+                if (!slugTouched) setSlug(slugify(v));
+              }}
               placeholder={t('admin.articles.editor.titlePlaceholder')}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-4 px-5 text-white text-xl font-[family-name:var(--font-display)] font-bold placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
             />
@@ -795,7 +809,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 <input
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(slugify(e.target.value))}
+                  onChange={(e) => { setSlug(slugify(e.target.value)); setSlugTouched(true); }}
                   placeholder="article-slug"
                   dir="ltr"
                   className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-mono placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"

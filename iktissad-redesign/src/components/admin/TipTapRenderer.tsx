@@ -63,6 +63,14 @@ function applyMarks(text: string, marks: Mark[], keyPrefix: string): React.React
 // Recursive node renderer
 // ---------------------------------------------------------------------------
 
+// TipTap's TextAlign extension stores alignment as a `textAlign` node attribute
+// ('left' | 'center' | 'right' | 'justify'). The editor renders it; the published
+// view must too, or centered/aligned text silently reverts to the default.
+function alignStyle(node: JSONContent): React.CSSProperties | undefined {
+  const a = node.attrs?.textAlign as string | undefined
+  return a && a !== 'start' ? { textAlign: a as React.CSSProperties['textAlign'] } : undefined
+}
+
 function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
   if (!node) return null
 
@@ -84,30 +92,31 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
 
     case 'paragraph':
       return (
-        <p key={keyPrefix} dir="rtl" className="mb-4 text-zinc-200 leading-relaxed text-base">
+        <p key={keyPrefix} dir="rtl" style={alignStyle(node)} className="mb-4 text-zinc-200 leading-relaxed text-base">
           {children.length > 0 ? children : <br />}
         </p>
       )
 
     case 'heading': {
       const level = (node.attrs?.level as number) ?? 2
+      const style = alignStyle(node)
       if (level === 1) {
         return (
-          <h1 key={keyPrefix} dir="rtl" className="text-3xl font-bold text-white mb-4 mt-8 font-serif">
+          <h1 key={keyPrefix} dir="rtl" style={style} className="text-3xl font-bold text-white mb-4 mt-8 font-serif">
             {children}
           </h1>
         )
       }
       if (level === 2) {
         return (
-          <h2 key={keyPrefix} dir="rtl" className="text-2xl font-bold text-white mb-3 mt-6 border-b border-zinc-700 pb-2">
+          <h2 key={keyPrefix} dir="rtl" style={style} className="text-2xl font-bold text-white mb-3 mt-6 border-b border-zinc-700 pb-2">
             {children}
           </h2>
         )
       }
       // level 3+
       return (
-        <h3 key={keyPrefix} dir="rtl" className="text-xl font-semibold text-white mb-2 mt-4">
+        <h3 key={keyPrefix} dir="rtl" style={style} className="text-xl font-semibold text-white mb-2 mt-4">
           {children}
         </h3>
       )
@@ -162,6 +171,12 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
       const src = (node.attrs?.src as string) ?? ''
       const alt = (node.attrs?.alt as string) ?? ''
       const title = (node.attrs?.title as string) ?? undefined
+      // The editor renders images block-centered (mx-auto); match that here so
+      // they don't snap to the start edge after publishing. Honor an explicit
+      // alignment if one was set.
+      const align = node.attrs?.textAlign as string | undefined
+      const alignClass =
+        align === 'left' ? 'mr-auto' : align === 'right' ? 'ml-auto' : 'mx-auto'
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -169,7 +184,7 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
           src={src}
           alt={alt}
           title={title}
-          className="max-w-full rounded-lg my-4"
+          className={`block max-w-full rounded-lg my-4 ${alignClass}`}
         />
       )
     }

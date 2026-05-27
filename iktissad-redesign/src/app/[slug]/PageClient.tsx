@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import NextImage from 'next/image';
 import {
@@ -169,31 +169,34 @@ interface PaywallSettings {
   highEngagementThreshold: number;
 }
 
+/** Shape returned by GET /api/articles/[slug]/access (resolved client-side). */
+interface ArticleAccess {
+  subscriptionTier: 'free' | 'premium' | 'digital';
+  freeArticlesReadThisMonth: number;
+  freeArticleLimit: number;
+  hasPurchasedArticle: boolean;
+  giftValid: boolean;
+  paywallSettings: PaywallSettings;
+  dbUserId: string | null;
+}
+
 interface ArticlePageClientProps {
-  params: Promise<{ slug: string }>;
-  subscriptionTier?: 'free' | 'premium' | 'digital';
-  freeArticlesReadThisMonth?: number;
-  freeArticleLimit?: number;
-  hasPurchasedArticle?: boolean;
-  giftValid?: boolean;
-  giftToken?: string;
-  paywallSettings?: PaywallSettings;
-  dbUserId?: string | null;
+  /** Article slug (or id) — passed directly from the static server page. */
+  slug: string;
+  /**
+   * Article fetched server-side (page.tsx). Seeds SWR's fallbackData so the
+   * headline (H1) and body render in the static HTML — crawlers and Google News
+   * see full content instead of a loading spinner. SWR still revalidates on the
+   * client (fresh data + view-count increment).
+   */
+  initialArticle?: Article | null;
 }
 
 export default function ArticlePageClient({
-  params,
-  subscriptionTier = 'free',
-  freeArticlesReadThisMonth = 0,
-  freeArticleLimit = FREE_ARTICLE_LIMIT_DEFAULT,
-  hasPurchasedArticle = false,
-  giftValid = false,
-  giftToken: _giftToken,
-  paywallSettings,
-  dbUserId,
+  slug,
+  initialArticle,
 }: ArticlePageClientProps) {
   const { t } = useTranslation();
-  const { slug } = use(params);
   const [copied, setCopied] = useState(false);
   const [readTime, setReadTime] = useState(0);
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -214,12 +217,41 @@ export default function ArticlePageClient({
     });
   };
 
-  const { data, error, isLoading } = useSWR<ApiResponse<Article>>(
+  const { data, isLoading } = useSWR<ApiResponse<Article>>(
     slug ? `/api/articles/${slug}` : null,
-    swrFetcher
+    swrFetcher,
+    // Seed with the server-fetched article so the first render (SSR + hydration)
+    // already has the full article — no spinner, content present in the HTML.
+    initialArticle ? { fallbackData: { data: initialArticle } } : undefined
   );
 
-  const article = data?.data;
+  // Prefer SWR data, but fall back to the server-fetched article so the first
+  // render (SSR + hydration) always has content — never a spinner — when the
+  // server already resolved the article.
+  const article = data?.data ?? initialArticle ?? undefined;
+
+  // ── Per-user paywall/subscription access (resolved client-side) ─────────────
+  // The page itself renders statically (ISR) for SEO; this cookie-based access
+  // info is fetched after mount so it doesn't force the page to render dynamically.
+  // Gift token comes from the ?gift= URL param.
+  const [giftToken, setGiftToken] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const g = new URLSearchParams(window.location.search).get('gift');
+    if (g) setGiftToken(g);
+  }, []);
+
+  const { data: accessData } = useSWR<ApiResponse<ArticleAccess>>(
+    slug ? `/api/articles/${slug}/access${giftToken ? `?gift=${encodeURIComponent(giftToken)}` : ''}` : null,
+    swrFetcher
+  );
+  const access = accessData?.data;
+  const subscriptionTier = access?.subscriptionTier ?? 'free';
+  const freeArticlesReadThisMonth = access?.freeArticlesReadThisMonth ?? 0;
+  const freeArticleLimit = access?.freeArticleLimit ?? FREE_ARTICLE_LIMIT_DEFAULT;
+  const hasPurchasedArticle = access?.hasPurchasedArticle ?? false;
+  const giftValid = access?.giftValid ?? false;
+  const paywallSettings = access?.paywallSettings;
+  const dbUserId = access?.dbUserId ?? null;
 
   // F2.5 — Semantic "More Like This": try pgvector similar endpoint first,
   // fall back to same-section articles if the semantic result is empty/errors.
@@ -275,14 +307,23 @@ export default function ArticlePageClient({
   }, [article?.id]);
 
   // ── Paywall gate logic ─────────────────────────────────────────────────────
-  // Bypass conditions: paid subscriber, purchased article, or valid gift link
+  // Bypass conditions: paid subscriber, purchased article, or valid gift link.
   const effectiveReadCount = dbUserId ? freeArticlesReadThisMonth : anonReadCount;
+  // Whether we've resolved the viewer's entitlement yet (client-side fetch).
+  const accessResolved = accessData !== undefined;
   const isPaywalled =
     article?.paywalled === true &&
-    !hasPurchasedArticle &&
-    !giftValid &&
-    subscriptionTier === 'free' &&
-    effectiveReadCount >= freeArticleLimit;
+    // Flexible sampling: until entitlement is resolved on the client, a paywalled
+    // article shows only its preview. This keeps the full body of paywalled
+    // articles out of the static/server HTML (crawlers + page source see the
+    // sample, not the locked content); entitled viewers get the full body once
+    // the access check returns. Non-paywalled articles are never gated, so they
+    // render in full server-side for SEO.
+    (!accessResolved ||
+      (!hasPurchasedArticle &&
+        !giftValid &&
+        subscriptionTier === 'free' &&
+        effectiveReadCount >= freeArticleLimit));
 
   // Determine content format: TipTap JSON or legacy HTML string
   const _baseContent = article?.content ?? '';
@@ -351,7 +392,10 @@ export default function ArticlePageClient({
     window.open(shareUrls[platform], '_blank', 'width=600,height=400');
   };
 
-  if (isLoading) {
+  // Only show the spinner when we truly have nothing to render yet. If the
+  // server passed initialArticle, `article` is already populated and we render
+  // full content server-side (no spinner in the SSR HTML).
+  if (!article && isLoading) {
     return (
       <>
         <Header />
@@ -363,7 +407,7 @@ export default function ArticlePageClient({
     );
   }
 
-  if (error || !article) {
+  if (!article) {
     return (
       <>
         <Header />

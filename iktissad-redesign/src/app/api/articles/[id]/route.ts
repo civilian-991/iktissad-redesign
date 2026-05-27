@@ -5,6 +5,7 @@ import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import { slugify } from "@/lib/slugify";
 import { notifyIndexNow } from "@/lib/indexnow";
 import { autoPostOnPublish } from "@/lib/social-posting";
 import type { ApiResponse, Article } from "@/types";
@@ -167,20 +168,41 @@ export async function PUT(
     }
   }
 
-  // Auto-stamp published_at the first time an article becomes published.
-  // The editor only sends publishedAt for scheduled posts, so without this a
-  // published article keeps published_at = null and sorts last in every list
-  // ordered by published_at (homepage Hero, latest news, sections, RSS…).
-  // Guard on the current value so routine re-saves/autosaves of an
-  // already-published article don't keep resetting the publish date.
-  if (data.status === "published" && data.publishedAt === undefined) {
+  // Publish-time fixups: stamp published_at and ensure a real slug.
+  if (data.status === "published") {
     const { data: current } = await admin
       .from("articles")
-      .select("published_at")
+      .select("published_at, title, slug")
       .eq("id", id)
-      .single() as { data: { published_at: string | null } | null };
-    if (current && !current.published_at) {
+      .single() as { data: { published_at: string | null; title: string | null; slug: string | null } | null };
+
+    // Auto-stamp published_at the first time an article becomes published.
+    // The editor only sends publishedAt for scheduled posts, so without this a
+    // published article keeps published_at = null and sorts last in every list
+    // ordered by published_at (homepage Hero, latest news, sections, RSS…).
+    // Guard on the current value so routine re-saves/autosaves of an
+    // already-published article don't keep resetting the publish date.
+    if (data.publishedAt === undefined && current && !current.published_at) {
       updateData.published_at = new Date().toISOString();
+    }
+
+    // Safety net: never publish with the `draft-<uuid>` placeholder slug that new
+    // articles are created with. The editor normally derives a slug from the
+    // title; this guards every other path (direct API calls, older clients).
+    const effectiveSlug = (updateData.slug as string | undefined) ?? current?.slug ?? "";
+    const effectiveTitle = (updateData.title as string | undefined) ?? current?.title ?? "";
+    if ((!effectiveSlug || effectiveSlug.startsWith("draft-")) && effectiveTitle.trim()) {
+      const base = slugify(effectiveTitle);
+      if (base) {
+        // Ensure uniqueness against the slug column (slug is UNIQUE NOT NULL).
+        const { data: clash } = await admin
+          .from("articles")
+          .select("id")
+          .eq("slug", base)
+          .neq("id", id)
+          .maybeSingle() as { data: { id: string } | null };
+        updateData.slug = clash ? `${base}-${id.slice(0, 8)}` : base;
+      }
     }
   }
 
