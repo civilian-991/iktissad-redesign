@@ -171,12 +171,20 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
       const src = (node.attrs?.src as string) ?? ''
       const alt = (node.attrs?.alt as string) ?? ''
       const title = (node.attrs?.title as string) ?? undefined
-      // The editor renders images block-centered (mx-auto); match that here so
-      // they don't snap to the start edge after publishing. Honor an explicit
-      // alignment if one was set.
+      // Center block images (match the editor). Use INLINE styles, not Tailwind
+      // utilities: the centering class is built dynamically here, so Tailwind's
+      // content scanner doesn't emit a `.mx-auto` rule and class-based centering
+      // silently no-ops in production. Honor an explicit alignment if set.
       const align = node.attrs?.textAlign as string | undefined
-      const alignClass =
-        align === 'left' ? 'mr-auto' : align === 'right' ? 'ml-auto' : 'mx-auto'
+      const imgStyle: React.CSSProperties = {
+        display: 'block',
+        maxWidth: '100%',
+        height: 'auto',
+        marginTop: '1rem',
+        marginBottom: '1rem',
+        marginLeft: align === 'left' ? 0 : 'auto',
+        marginRight: align === 'right' ? 0 : 'auto',
+      }
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -184,7 +192,8 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
           src={src}
           alt={alt}
           title={title}
-          className={`block max-w-full rounded-lg my-4 ${alignClass}`}
+          style={imgStyle}
+          className="rounded-lg"
         />
       )
     }
