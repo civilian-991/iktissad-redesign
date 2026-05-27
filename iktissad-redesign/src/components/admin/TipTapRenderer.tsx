@@ -34,7 +34,7 @@ function applyMarks(text: string, marks: Mark[], keyPrefix: string): React.React
         return <s key={key}>{children}</s>
       case 'code':
         return (
-          <code key={key} className="bg-zinc-800 text-amber-400 px-1 rounded text-sm">
+          <code key={key} className="px-1.5 py-0.5 rounded text-sm" style={{ backgroundColor: CODE_FILL, fontFamily: 'monospace' }}>
             {children}
           </code>
         )
@@ -47,7 +47,8 @@ function applyMarks(text: string, marks: Mark[], keyPrefix: string): React.React
             href={href}
             target={target}
             rel="noopener noreferrer"
-            className="text-amber-400 underline hover:text-amber-300 transition-colors"
+            className="underline transition-opacity hover:opacity-80"
+            style={{ color: 'var(--color-gold)' }}
           >
             {children}
           </a>
@@ -70,6 +71,14 @@ function alignStyle(node: JSONContent): React.CSSProperties | undefined {
   const a = node.attrs?.textAlign as string | undefined
   return a && a !== 'start' ? { textAlign: a as React.CSSProperties['textAlign'] } : undefined
 }
+
+// Theme-neutral surfaces derived from the inherited text color (currentColor).
+// This makes tables, code blocks and headings render correctly on BOTH the light
+// public article page (ink text) and the dark admin preview (light text), instead
+// of the hardcoded dark zinc/white that only suited the editor.
+const SUBTLE_BORDER = 'color-mix(in srgb, currentColor 22%, transparent)'
+const SUBTLE_FILL = 'color-mix(in srgb, currentColor 7%, transparent)'
+const CODE_FILL = 'color-mix(in srgb, currentColor 10%, transparent)'
 
 function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
   if (!node) return null
@@ -102,21 +111,21 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
       const style = alignStyle(node)
       if (level === 1) {
         return (
-          <h1 key={keyPrefix} dir="rtl" style={style} className="text-3xl font-bold text-white mb-4 mt-8 font-serif">
+          <h1 key={keyPrefix} dir="rtl" style={style} className="text-3xl font-bold mb-4 mt-8 font-serif">
             {children}
           </h1>
         )
       }
       if (level === 2) {
         return (
-          <h2 key={keyPrefix} dir="rtl" style={style} className="text-2xl font-bold text-white mb-3 mt-6 border-b border-zinc-700 pb-2">
+          <h2 key={keyPrefix} dir="rtl" style={{ ...style, borderBottom: `1px solid ${SUBTLE_BORDER}` }} className="text-2xl font-bold mb-3 mt-6 pb-2">
             {children}
           </h2>
         )
       }
       // level 3+
       return (
-        <h3 key={keyPrefix} dir="rtl" style={style} className="text-xl font-semibold text-white mb-2 mt-4">
+        <h3 key={keyPrefix} dir="rtl" style={style} className="text-xl font-semibold mb-2 mt-4">
           {children}
         </h3>
       )
@@ -156,8 +165,8 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
 
     case 'codeBlock':
       return (
-        <pre key={keyPrefix} className="bg-zinc-800 rounded-lg p-4 my-4 overflow-x-auto">
-          <code className="text-sm text-green-400 font-mono">{children}</code>
+        <pre key={keyPrefix} className="rounded-lg p-4 my-4 overflow-x-auto" style={{ backgroundColor: CODE_FILL }}>
+          <code className="text-sm font-mono">{children}</code>
         </pre>
       )
 
@@ -213,14 +222,14 @@ function renderNode(node: JSONContent, keyPrefix = 'n'): React.ReactNode {
 
     case 'tableCell':
       return (
-        <td key={keyPrefix} className="border border-zinc-700 px-4 py-2 text-zinc-200 text-sm">
+        <td key={keyPrefix} className="px-4 py-2 text-sm" style={{ border: `1px solid ${SUBTLE_BORDER}` }}>
           {children}
         </td>
       )
 
     case 'tableHeader':
       return (
-        <th key={keyPrefix} className="border border-zinc-700 px-4 py-2 text-white font-semibold bg-zinc-800 text-sm">
+        <th key={keyPrefix} className="px-4 py-2 font-semibold text-sm" style={{ border: `1px solid ${SUBTLE_BORDER}`, backgroundColor: SUBTLE_FILL }}>
           {children}
         </th>
       )
