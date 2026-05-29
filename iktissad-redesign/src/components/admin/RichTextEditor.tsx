@@ -84,6 +84,18 @@ export interface RichTextEditorProps {
   minHeight?: number;
   /** Whether to show toolbar */
   showToolbar?: boolean;
+  /**
+   * Keep the toolbar pinned to the top of the viewport while scrolling through
+   * long content, so insert actions (image, table, etc.) are always reachable.
+   * Defaults to true.
+   */
+  stickyToolbar?: boolean;
+  /**
+   * Pixel offset from the top of the viewport for the sticky toolbar — set this
+   * to the height of any fixed/sticky page header above the editor so the
+   * toolbar docks just beneath it. Defaults to 0.
+   */
+  stickyTopOffset?: number;
   /** Called when the image button is clicked (opens media picker) */
   onImageInsert?: () => void;
   /** Additional className for the editor wrapper */
@@ -215,6 +227,8 @@ export default function RichTextEditor({
   dir = 'rtl',
   minHeight = 400,
   showToolbar = true,
+  stickyToolbar = true,
+  stickyTopOffset = 0,
   onImageInsert,
   className = '',
   onEditorMount,
@@ -552,10 +566,17 @@ export default function RichTextEditor({
   const charCount = editor.storage.characterCount?.characters?.() ?? 0;
 
   return (
-    <div className={`bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl overflow-hidden ${className}`}>
+    <div className={`bg-midnight/50 backdrop-blur-sm border border-gold/10 rounded-xl ${className}`}>
       {/* ── Toolbar ─────────────────────────────────────────── */}
       {showToolbar && (
-        <div className="relative flex flex-wrap items-center gap-1 p-3 border-b border-gold/10 bg-white/5">
+        <div
+          style={stickyToolbar ? { top: stickyTopOffset } : undefined}
+          className={`flex flex-wrap items-center gap-1 p-3 border-b border-gold/10 rounded-t-xl ${
+            stickyToolbar
+              ? 'sticky z-20 bg-midnight/95 backdrop-blur-md'
+              : 'relative bg-white/5'
+          }`}
+        >
           {/* Formatting */}
           <ToolbarButton icon={Bold}           onClick={() => handleAction('bold')}         active={isActive('bold')}         title="غامق" />
           <ToolbarButton icon={Italic}         onClick={() => handleAction('italic')}       active={isActive('italic')}       title="مائل" />

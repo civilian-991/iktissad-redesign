@@ -890,6 +890,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 placeholder={t('admin.articles.editor.contentPlaceholder')}
                 dir="rtl"
                 minHeight={400}
+                stickyTopOffset={80}
                 onImageInsert={() => setShowMediaPicker(true)}
                 collaborative={
                   currentUser
