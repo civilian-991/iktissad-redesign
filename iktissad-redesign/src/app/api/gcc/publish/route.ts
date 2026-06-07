@@ -21,6 +21,19 @@ const schema = z.object({
   decidedBy: z.string().optional(),
 });
 
+/** Arabic slug from a title (keeps Arabic + Latin + digits, spaces → hyphens). */
+function arabicSlug(title: string): string {
+  const s = (title || 'خبر')
+    .normalize('NFKC')
+    .replace(/[^؀-ۿa-zA-Z0-9\s-]/g, '') // drop punctuation/symbols
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+    .replace(/-+$/g, '');
+  return s || 'خبر';
+}
+
 /** Minimal, safe Markdown → HTML for the article body. */
 function mdToHtml(md: string): string {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -81,14 +94,17 @@ export async function POST(request: NextRequest) {
 
   // 3. Build + insert the article (all CMS fields).
   const d = gen.draft || {};
-  const slug = `${(d.slug || 'gcc-news').slice(0, 80)}-${generatedArticleId.slice(0, 6)}`;
+  // Arabic slug from the title (matches the site convention, e.g.
+  // "الذهب-يعود-إلى-قلب-احتياطيات-العالم"), not the SEO agent's Latin slug.
+  const baseSlug = arabicSlug(d.title);
   const insertRow: Record<string, unknown> = {
-    slug,
+    slug: baseSlug,
     title: d.title || 'خبر',
     deck: d.deck || null,
     content: mdToHtml(d.body_md || ''),
-    excerpt: (d.tldr || d.deck || d.title || '').slice(0, 280),
-    summary: d.tldr || null,
+    // excerpt = short teaser (deck); summary = the "smart summary" (TL;DR) — keep them distinct.
+    excerpt: (d.deck || d.tldr || d.title || '').slice(0, 280),
+    summary: d.tldr || d.deck || null,
     meta_title: d.meta_title || d.title || null,
     meta_description: d.meta_description || d.tldr || null,
     tags: Array.isArray(d.tags) ? d.tags : [],
@@ -100,10 +116,18 @@ export async function POST(request: NextRequest) {
     source_site: 'تداول عبر مباشر',
   };
 
-  const { data: article, error: insErr } = await (admin.from('articles') as any)
+  let { data: article, error: insErr } = await (admin.from('articles') as any)
     .insert(insertRow)
     .select('id, slug')
     .single();
+  // On a slug collision, append a short suffix and retry once.
+  if (insErr && /duplicate|unique|23505/i.test(insErr.message || '')) {
+    insertRow.slug = `${baseSlug}-${generatedArticleId.slice(0, 4)}`;
+    ({ data: article, error: insErr } = await (admin.from('articles') as any)
+      .insert(insertRow)
+      .select('id, slug')
+      .single());
+  }
   if (insErr || !article) {
     return NextResponse.json({ error: `publish failed: ${insErr?.message}` }, { status: 500 });
   }
