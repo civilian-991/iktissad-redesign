@@ -5,6 +5,9 @@
  * risk and no storage needed — the URL itself IS the image. Used as the
  * article's featured_image/og_image and shown on the Telegram review card.
  *
+ * Note: Satori (next/og) does NOT honor `direction: rtl` for flex ordering, so
+ * RTL is done explicitly with row-reverse + right alignment.
+ *
  *   /api/gcc/og?title=...&badge=...&issuer=...
  */
 
@@ -21,11 +24,11 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 const BADGE_LABEL: Record<string, string> = {
-  halt: '⚡ تعليق تداول', legal: '⚖️ قضية', regulatory: '⚖️ تنظيمي',
-  board: '🏛️ مجلس الإدارة', leadership: '🏛️ تغيير قيادي',
-  earnings: '📊 نتائج مالية', dividend: '💰 توزيعات',
-  ownership: '🤝 استحواذ', deal: '🤝 صفقة', capital_change: '🏦 رأس المال', capital: '🏦 رأس المال',
-  ipo_listing: '📈 إدراج', debt_fund: '🏦 تمويل', other: '📰 خبر',
+  halt: 'تعليق تداول', legal: 'قضية', regulatory: 'تنظيمي',
+  board: 'مجلس الإدارة', leadership: 'تغيير قيادي',
+  earnings: 'نتائج مالية', dividend: 'توزيعات أرباح',
+  ownership: 'استحواذ', deal: 'صفقة', capital_change: 'رأس المال', capital: 'رأس المال',
+  ipo_listing: 'إدراج', debt_fund: 'تمويل', other: 'خبر',
 };
 
 async function loadFont(): Promise<ArrayBuffer | null> {
@@ -59,14 +62,22 @@ export async function GET(request: Request): Promise<Response> {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
+          alignItems: 'flex-end', // right-align everything (RTL)
           padding: '64px',
           background: 'linear-gradient(135deg, #0a0e1a 0%, #14213d 100%)',
           fontFamily: 'Tajawal',
-          direction: 'rtl',
         }}
       >
-        {/* top row: brand + category badge */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* top row: badge on the left, brand on the right (RTL via row-reverse) */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           <div style={{ display: 'flex', color: '#e2e8f0', fontSize: 34, fontWeight: 700 }}>
             اقتصاد · الأسواق الخليجية
           </div>
@@ -75,7 +86,7 @@ export async function GET(request: Request): Promise<Response> {
               display: 'flex',
               background: accent,
               color: 'white',
-              padding: '12px 28px',
+              padding: '12px 30px',
               borderRadius: '999px',
               fontSize: 30,
             }}
@@ -84,25 +95,28 @@ export async function GET(request: Request): Promise<Response> {
           </div>
         </div>
 
-        {/* headline */}
+        {/* headline — right aligned, RTL */}
         <div
           style={{
             display: 'flex',
+            width: '100%',
             color: 'white',
-            fontSize: 60,
+            fontSize: 62,
             fontWeight: 700,
-            lineHeight: 1.3,
-            maxHeight: '380px',
+            lineHeight: 1.35,
+            textAlign: 'right',
+            justifyContent: 'flex-end',
+            maxHeight: '360px',
             overflow: 'hidden',
           }}
         >
           {title}
         </div>
 
-        {/* bottom: issuer + accent bar */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', width: '120px', height: '8px', background: accent, marginBottom: '20px' }} />
-          <div style={{ display: 'flex', color: '#94a3b8', fontSize: 30 }}>
+        {/* bottom: accent bar + issuer, right aligned */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', width: '100%' }}>
+          <div style={{ display: 'flex', width: '140px', height: '8px', background: accent, marginBottom: '20px' }} />
+          <div style={{ display: 'flex', color: '#94a3b8', fontSize: 32, textAlign: 'right' }}>
             {issuer || 'تداول السعودية'}
           </div>
         </div>
