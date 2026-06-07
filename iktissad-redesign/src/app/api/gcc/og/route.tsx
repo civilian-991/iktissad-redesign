@@ -50,7 +50,13 @@ export async function GET(request: Request): Promise<Response> {
   const issuer = (searchParams.get('issuer') || '').slice(0, 60);
 
   const accent = BADGE_COLORS[badge] || '#2563eb';
-  const label = BADGE_LABEL[badge] || BADGE_LABEL.other;
+  // Satori lays words out LTR even for Arabic, so reverse word order to get the
+  // correct RTL reading order in the rendered card.
+  const rtl = (s: string) => s.split(/\s+/).filter(Boolean).reverse().join(' ');
+  const label = rtl(BADGE_LABEL[badge] || BADGE_LABEL.other);
+  const brand = rtl('اقتصاد · الأسواق الخليجية');
+  const headline = rtl(title);
+  const issuerRtl = rtl(issuer || 'تداول السعودية');
   const font = await loadFont();
 
   return new ImageResponse(
@@ -79,7 +85,7 @@ export async function GET(request: Request): Promise<Response> {
           }}
         >
           <div style={{ display: 'flex', color: '#e2e8f0', fontSize: 34, fontWeight: 700 }}>
-            اقتصاد · الأسواق الخليجية
+            {brand}
           </div>
           <div
             style={{
@@ -110,14 +116,14 @@ export async function GET(request: Request): Promise<Response> {
             overflow: 'hidden',
           }}
         >
-          {title}
+          {headline}
         </div>
 
         {/* bottom: accent bar + issuer, right aligned */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', width: '100%' }}>
           <div style={{ display: 'flex', width: '140px', height: '8px', background: accent, marginBottom: '20px' }} />
           <div style={{ display: 'flex', color: '#94a3b8', fontSize: 32, textAlign: 'right' }}>
-            {issuer || 'تداول السعودية'}
+            {issuerRtl}
           </div>
         </div>
       </div>
