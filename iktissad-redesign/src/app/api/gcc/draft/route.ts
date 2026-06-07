@@ -14,6 +14,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { runPipeline, type IssuerContext } from '@/lib/gcc/pipeline';
 import { persistDraft } from '@/lib/gcc/pipeline/persist';
 import { getEventMemory, formatMemoryForPrompt, writeEventMemory } from '@/lib/gcc/memory';
+import { generateAndStoreImage } from '@/lib/gcc/pipeline/visuals';
+
+// Pipeline + image generation can take ~60s; allow headroom.
+export const maxDuration = 120;
 import { getFetcher, ruleFactExtractor } from '@/lib/gcc/sourcing';
 import { SupabaseDisclosureRepository } from '@/lib/gcc/sourcing/repository';
 import type { VerifiedFigure, SourceTier, ExchangeCode } from '@/lib/gcc/sourcing/types';
@@ -127,7 +131,11 @@ export async function POST(request: NextRequest) {
     .insert({ disclosure_event_id: disclosureEventId, category: disc.type, action: 'screened_in' })
     .then(() => {}, () => {});
 
-  // 4. Run the pipeline.
+  // 4. Generate the illustration IN PARALLEL with the pipeline (only needs the
+  //    category) so it adds ~no latency.
+  const imagePromise = generateAndStoreImage({ category: disc.type || 'other', key: disclosureEventId });
+
+  // Run the pipeline.
   const result = await runPipeline({
     issuer,
     disclosureText,
@@ -149,12 +157,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: result.error ?? 'pipeline failed' }, { status: 502 });
   }
 
-  // 4b. Deterministic branded card image (the URL renders the image on demand).
+  // 4b. Image: AI illustration if it succeeded, else the branded card fallback.
   const origin = new URL(request.url).origin;
+  const aiImage = await imagePromise;
   result.article.ogImageUrl =
+    aiImage ||
     `${origin}/api/gcc/og?title=${encodeURIComponent(result.article.title)}` +
-    `&badge=${encodeURIComponent(disc.type || 'other')}` +
-    `&issuer=${encodeURIComponent(issuer.nameAr || '')}`;
+      `&badge=${encodeURIComponent(disc.type || 'other')}` +
+      `&issuer=${encodeURIComponent(issuer.nameAr || '')}`;
 
   // 5. Persist trust-layer rows.
   let persisted;
