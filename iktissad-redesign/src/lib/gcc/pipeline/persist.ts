@@ -66,6 +66,7 @@ export async function persistDraft(ctx: PersistContext, result: PipelineResult):
     slug: result.article.slug,
     tags: result.article.tags,
     secondary_keywords: result.article.secondaryKeywords,
+    og_image_url: result.article.ogImageUrl ?? null,
   };
   const { data: gen, error: genErr } = await (admin.from('gcc_generated_articles') as any)
     .insert({

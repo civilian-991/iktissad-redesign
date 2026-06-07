@@ -51,6 +51,7 @@ export interface CompleteArticle {
   slug: string;
   tags: string[];
   secondaryKeywords: string[];
+  ogImageUrl?: string;
 }
 
 export interface PipelineResult {

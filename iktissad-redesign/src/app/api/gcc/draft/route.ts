@@ -149,6 +149,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: result.error ?? 'pipeline failed' }, { status: 502 });
   }
 
+  // 4b. Deterministic branded card image (the URL renders the image on demand).
+  const origin = new URL(request.url).origin;
+  result.article.ogImageUrl =
+    `${origin}/api/gcc/og?title=${encodeURIComponent(result.article.title)}` +
+    `&badge=${encodeURIComponent(disc.type || 'other')}` +
+    `&issuer=${encodeURIComponent(issuer.nameAr || '')}`;
+
   // 5. Persist trust-layer rows.
   let persisted;
   try {

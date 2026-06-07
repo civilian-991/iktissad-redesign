@@ -92,6 +92,8 @@ export async function POST(request: NextRequest) {
     meta_title: d.meta_title || d.title || null,
     meta_description: d.meta_description || d.tldr || null,
     tags: Array.isArray(d.tags) ? d.tags : [],
+    featured_image: d.og_image_url || null,
+    og_image: d.og_image_url || null,
     status: 'published',
     published_at: new Date().toISOString(),
     article_type: 'news',
