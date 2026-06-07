@@ -67,7 +67,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `decision log failed: ${decErr.message}` }, { status: 500 });
   }
 
-  // 2. Advance generated-article + active review-bundle status.
+  // 2a. On 'edited', persist the editor's text into the stored draft and mark it
+  //     human-verified (the human edit IS the verification → passes the gate).
+  if (d.action === 'edited' && d.generatedArticleId) {
+    const after =
+      typeof d.editDiff === 'string'
+        ? d.editDiff
+        : (d.editDiff as { after?: string } | null)?.after;
+    if (after && after.trim()) {
+      const lines = after.split('\n').map((s) => s.trim()).filter(Boolean);
+      const title = lines[0] ?? '';
+      const bodyMd = lines.slice(1).join('\n\n') || after;
+      const { data: gen } = await (admin.from('gcc_generated_articles') as any)
+        .select('draft, fact_check')
+        .eq('id', d.generatedArticleId)
+        .maybeSingle();
+      if (gen) {
+        await (admin.from('gcc_generated_articles') as any)
+          .update({
+            draft: { ...(gen.draft || {}), title, body_md: bodyMd },
+            fact_check: { ...(gen.fact_check || {}), publishable: true, human_edited: true },
+          })
+          .eq('id', d.generatedArticleId);
+      }
+    }
+  }
+
+  // 2b. Advance generated-article + active review-bundle status.
   if (d.generatedArticleId) {
     const newStatus = STATUS_BY_ACTION[d.action];
     if (newStatus) {

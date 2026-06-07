@@ -122,6 +122,11 @@ export async function POST(request: NextRequest) {
   const companyId: string | null = disc.company_id ?? null;
   const priorMemory = formatMemoryForPrompt(await getEventMemory(companyId));
 
+  // 3c. Tapping ✍️ is a screen-in — log it for the feedback corpus (best-effort).
+  void (admin.from('gcc_editorial_decisions') as any)
+    .insert({ disclosure_event_id: disclosureEventId, category: disc.type, action: 'screened_in' })
+    .then(() => {}, () => {});
+
   // 4. Run the pipeline.
   const result = await runPipeline({
     issuer,
