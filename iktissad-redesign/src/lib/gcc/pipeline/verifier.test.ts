@@ -38,13 +38,22 @@ describe('verifyDraft — deterministic number checking (no network)', () => {
     expect(r.blockers.length).toBeGreaterThan(0);
   });
 
-  it('BLOCKS a number with no extracted figures as missing', async () => {
+  it('BLOCKS a fabricated number that is in neither figures nor the source', async () => {
     const r = await verifyDraft({
       claims: [{ text: 'ارتفعت الإيرادات بنسبة 12 بالمئة', type: 'number' }],
       figures: [], disclosureText: 'نص لا يذكر النسبة', sourceTier: 'origin',
     });
-    expect(r.verdicts[0].status).toBe('missing');
+    expect(r.verdicts[0].status).toBe('contradicted');
     expect(r.publishable).toBe(false);
+  });
+
+  it('ACCEPTS a number that appears in the source text even if not an extracted figure', async () => {
+    const r = await verifyDraft({
+      claims: [{ text: 'بلغت الغرامة 10,000 ريال', type: 'number' }],
+      figures: [], disclosureText: 'فرضت الهيئة غرامة قدرها 10,000 ريال على الشركة', sourceTier: 'origin',
+    });
+    expect(r.verdicts[0].status).toBe('supported');
+    expect(r.publishable).toBe(true);
   });
 
   it('grounds a name claim present in the disclosure text', async () => {

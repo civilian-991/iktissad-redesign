@@ -110,8 +110,18 @@ function inferType(claim: DraftClaim): ClaimType {
   return 'semantic';
 }
 
-/** Deterministically verify a numeric claim against the ground-truth figures. */
-function verifyNumber(claim: DraftClaim, figures: VerifiedFigure[], tierW: number): ClaimVerdict {
+/**
+ * Deterministically verify a numeric claim. A number is valid if it matches an
+ * extracted ground-truth figure OR appears verbatim in the source disclosure
+ * (the rule-extractor only knows a few financial labels, so source-text presence
+ * is the broader grounding). Only numbers in NEITHER are flagged as fabricated.
+ */
+function verifyNumber(
+  claim: DraftClaim,
+  figures: VerifiedFigure[],
+  tierW: number,
+  sourceNumbers: number[]
+): ClaimVerdict {
   const nums = extractNumbers(claim.text);
   const supporting: ClaimVerdict['supportingEvidence'] = [];
   const contradicting: ClaimVerdict['contradictingEvidence'] = [];
@@ -120,11 +130,11 @@ function verifyNumber(claim: DraftClaim, figures: VerifiedFigure[], tierW: numbe
   for (const n of nums) {
     const hit = matchFigure(n, figures);
     if (hit) {
-      supporting.push({ span: hit.sourceSpan, figureLabel: hit.label });
-    } else if (figures.length === 0) {
-      missing.push({ note: `لا توجد أرقام مُستخرجة من المصدر للتحقق من «${n}»` });
+      supporting.push({ span: hit.sourceSpan, figureLabel: hit.label }); // matches a verified figure
+    } else if (sourceNumbers.some((s) => approxEqual(s, n))) {
+      supporting.push({ span: 'مذكور في نص الإفصاح' }); // grounded in the disclosure text
     } else {
-      // a number that doesn't match ANY verified figure → contradicted/hallucinated
+      // appears in NEITHER the figures nor the source → fabricated
       contradicting.push({ span: claim.text.slice(0, 160), found: n });
     }
   }
@@ -225,11 +235,13 @@ async function verifySemanticLLM(claim: DraftClaim, disclosureText: string, tier
 export async function verifyDraft(input: VerifyInput): Promise<VerifyResult> {
   const tierW = TIER_WEIGHT[input.sourceTier];
   const verdicts: ClaimVerdict[] = [];
+  // All numbers present in the source disclosure — the broad grounding set.
+  const sourceNumbers = extractNumbers(input.disclosureText);
 
   for (const claim of input.claims) {
     const type = inferType(claim);
     if (type === 'number') {
-      verdicts.push(verifyNumber(claim, input.figures, tierW));
+      verdicts.push(verifyNumber(claim, input.figures, tierW, sourceNumbers));
     } else if (type === 'date') {
       // dates: deterministic grounding in the disclosure text
       verdicts.push(groundInText(claim, input.disclosureText, tierW, 'date'));
