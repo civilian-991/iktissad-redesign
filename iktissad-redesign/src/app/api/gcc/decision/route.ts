@@ -53,11 +53,22 @@ export async function POST(request: NextRequest) {
   const d = parsed.data;
   const admin = createAdminClient();
 
+  // Derive category from the generated article's story budget when not supplied
+  // (reject/edit callbacks don't carry it) — keeps per-category stats accurate.
+  let category = d.category ?? null;
+  if (!category && d.generatedArticleId) {
+    const { data: gen } = await (admin.from('gcc_generated_articles') as any)
+      .select('gcc_story_budget:story_budget_id ( story_type )')
+      .eq('id', d.generatedArticleId)
+      .maybeSingle();
+    category = gen?.gcc_story_budget?.story_type ?? null;
+  }
+
   // 1. Log the decision (the feedback corpus).
   const { error: decErr } = await (admin.from('gcc_editorial_decisions') as any).insert({
     generated_article_id: d.generatedArticleId ?? null,
     disclosure_event_id: d.disclosureEventId ?? null,
-    category: d.category ?? null,
+    category,
     action: d.action,
     edit_diff: d.editDiff ?? null,
     reason: d.reason ?? null,
@@ -117,7 +128,7 @@ export async function POST(request: NextRequest) {
     action: `editorial:${d.action}`,
     object_type: 'gcc_generated_article',
     object_id: d.generatedArticleId ?? d.disclosureEventId ?? null,
-    details: { category: d.category ?? null, reason: d.reason ?? null },
+    details: { category, reason: d.reason ?? null },
     override_flag: false,
   });
 
