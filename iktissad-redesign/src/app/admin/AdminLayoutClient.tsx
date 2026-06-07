@@ -114,6 +114,7 @@ const taxonomyNavConfig: SubNavItem[] = [
   { key: 'sections',  href: '/admin/sections',  icon: Tags },
   { key: 'sectors',   href: '/admin/sectors',   icon: Briefcase },
   { key: 'countries', href: '/admin/countries', icon: Globe },
+  { key: 'tags',      href: '/admin/tags',      icon: Tag },
 ];
 
 const subscriptionNavConfig: SubNavItem[] = [
@@ -239,6 +240,7 @@ export default function AdminLayoutClient({
       sections:         t('admin.sections.title'),
       sectors:          t('admin.sectors.title'),
       countries:        t('admin.countries.title'),
+      tags:             t('admin.tags.title'),
     };
     return subNavKeys[key] || key;
   };

@@ -319,6 +319,15 @@ export interface Sector {
   articleCount: number;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  nameEn: string;
+  slug: string;
+  description: string;
+  articleCount: number;
+}
+
 export interface ApiResponse<T> {
   data?: T;
   error?: string;

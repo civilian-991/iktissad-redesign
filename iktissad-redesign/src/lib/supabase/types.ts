@@ -49,6 +49,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      tags: {
+        Row: {
+          id: string;
+          name: string;
+          name_en: string;
+          slug: string;
+          description: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          name_en?: string;
+          slug?: string;
+          description?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          name_en?: string;
+          slug?: string;
+          description?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       sectors: {
         Row: {
           id: string;
@@ -1963,6 +1993,10 @@ export type SectionUpdate = Tables["sections"]["Update"];
 export type SectorRow    = Tables["sectors"]["Row"];
 export type SectorInsert = Tables["sectors"]["Insert"];
 export type SectorUpdate = Tables["sectors"]["Update"];
+
+export type TagRow    = Tables["tags"]["Row"];
+export type TagInsert = Tables["tags"]["Insert"];
+export type TagUpdate = Tables["tags"]["Update"];
 
 export type CountryRow    = Tables["countries"]["Row"];
 export type CountryInsert = Tables["countries"]["Insert"];

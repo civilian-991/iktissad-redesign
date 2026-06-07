@@ -29,6 +29,7 @@ import type {
   Newsletter,
   Section,
   Sector,
+  Tag,
   Country,
 } from "@/types";
 
@@ -663,6 +664,59 @@ export async function deleteSection(
   slug: string
 ): Promise<ApiResponse<{ deleted: boolean }>> {
   return api<{ deleted: boolean }>(`/api/sections/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+  });
+}
+
+// ─── Tags ───────────────────────────────────────────────────────
+
+export function tagsKey(search = "", limit = 50): string {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (limit) params.set("limit", String(limit));
+  const qs = params.toString();
+  return `/api/tags${qs ? `?${qs}` : ""}`;
+}
+
+export interface CreateTagInput {
+  name: string;
+  nameEn?: string;
+  slug?: string;
+  description?: string;
+}
+
+export type UpdateTagInput = Partial<CreateTagInput>;
+
+export async function getTags(
+  search = "",
+  limit = 50
+): Promise<ApiResponse<Tag[]>> {
+  return api<Tag[]>(tagsKey(search, limit));
+}
+
+export async function createTag(
+  input: CreateTagInput
+): Promise<ApiResponse<Tag>> {
+  return api<Tag>("/api/tags", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateTag(
+  id: string,
+  patch: UpdateTagInput
+): Promise<ApiResponse<Tag>> {
+  return api<Tag>(`/api/tags/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteTag(
+  id: string
+): Promise<ApiResponse<{ deleted: boolean }>> {
+  return api<{ deleted: boolean }>(`/api/tags/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
 }

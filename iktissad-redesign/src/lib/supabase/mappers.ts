@@ -14,6 +14,7 @@ import type {
   CountryRow,
   SectionRow,
   SectorRow,
+  TagRow,
   MagazineSectionRow,
   MagazineSpreadRow,
   SubscriptionPlanRow,
@@ -34,6 +35,7 @@ import type {
   Country,
   Section,
   Sector,
+  Tag,
   MagazineSection,
   MagazineSpread,
   SubscriptionPlan,
@@ -264,6 +266,28 @@ export function mapSectorRow(
     icon: row.icon ?? undefined,
     color: row.color ?? undefined,
     articleCount,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────
+// Tags
+// ──────────────────────────────────────────────────────────────
+
+// Accepts either a plain TagRow or a row from the search_tags() RPC
+// (which carries an extra `article_count`). The explicit `articleCount`
+// argument, when provided, wins over any value on the row.
+export function mapTagRow(
+  row: TagRow & { article_count?: number | string },
+  articleCount?: number
+): Tag {
+  return {
+    id: row.id,
+    name: row.name,
+    nameEn: row.name_en ?? "",
+    slug: row.slug ?? "",
+    description: row.description ?? "",
+    articleCount:
+      articleCount ?? Number(row.article_count ?? 0),
   };
 }
 

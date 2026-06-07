@@ -39,12 +39,12 @@ import {
   Zap,
   User,
   Link as LinkIcon,
-  X,
   Plus,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import dynamic from 'next/dynamic';
 import ImageUploader from '@/components/admin/ImageUploader';
+import TagAutocomplete from '@/components/admin/TagAutocomplete';
 import MediaPicker from '@/components/admin/MediaPicker';
 import AddAuthorModal from '@/components/admin/AddAuthorModal';
 import FocalPointSelector from '@/components/admin/spread-editor/FocalPointSelector';
@@ -126,8 +126,6 @@ function resolveInitialBody(article: Article): JSONContent | string {
   return content;
 }
 
-const tagKeys = ['breaking', 'exclusive', 'analysis', 'report', 'interview', 'opinion', 'data', 'infographic'] as const;
-
 export default function ArticleEditor({ articleId }: { articleId: string }) {
   const id = articleId;
   const { t } = useTranslation();
@@ -159,7 +157,6 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [selectedSector, setSelectedSector] = useState('');
   const [selectedAuthorId, setSelectedAuthorId] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [customTagInput, setCustomTagInput] = useState('');
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [focalX, setFocalX] = useState(0.5);
   const [focalY, setFocalY] = useState(0.5);
@@ -374,20 +371,6 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     }, 1500);
     return () => clearTimeout(timer);
   }, [initialized, editorInstance, currentUser]);
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
-
-  const addCustomTag = () => {
-    const tag = customTagInput.trim();
-    if (tag && !selectedTags.includes(tag)) {
-      setSelectedTags((prev) => [...prev, tag]);
-    }
-    setCustomTagInput('');
-  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -1100,50 +1083,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 {isAutoTagging ? t('admin.articles.editor.ai.suggesting') : t('admin.articles.editor.ai.smartSuggest')}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {tagKeys.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-[family-name:var(--font-display)] transition-all ${
-                    selectedTags.includes(tag)
-                      ? 'bg-gold text-obsidian'
-                      : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-gold/10'
-                  }`}
-                >
-                  {t(`admin.articles.tags.${tag}`)}
-                </button>
-              ))}
-            </div>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {selectedTags.filter(t => !tagKeys.includes(t as any)).length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {selectedTags.filter(t => !tagKeys.includes(t as any)).map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gold/15 text-gold text-xs font-[family-name:var(--font-display)] border border-gold/20">
-                    {tag}
-                    <button onClick={() => toggleTag(tag)} className="hover:text-white transition-colors"><X size={10} /></button>
-                  </span>
-                ))}
-              </div>
-            )}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={customTagInput}
-                onChange={(e) => setCustomTagInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); }}}
-                placeholder={t('admin.articles.editor.customTagPlaceholder')}
-                className="flex-1 bg-white/5 border border-gold/10 rounded-lg py-1.5 px-3 text-white text-sm font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
-              />
-              <button
-                onClick={addCustomTag}
-                disabled={!customTagInput.trim()}
-                className="p-1.5 bg-white/5 border border-gold/10 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
+            <TagAutocomplete value={selectedTags} onChange={setSelectedTags} />
           </motion.div>
 
           {/* Fact-Check Panel */}
