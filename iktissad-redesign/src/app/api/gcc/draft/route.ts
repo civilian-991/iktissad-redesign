@@ -14,12 +14,40 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { runPipeline, type IssuerContext } from '@/lib/gcc/pipeline';
 import { persistDraft } from '@/lib/gcc/pipeline/persist';
 import { getEventMemory, formatMemoryForPrompt, writeEventMemory } from '@/lib/gcc/memory';
-import type { VerifiedFigure, SourceTier } from '@/lib/gcc/sourcing/types';
+import { getFetcher, ruleFactExtractor } from '@/lib/gcc/sourcing';
+import { SupabaseDisclosureRepository } from '@/lib/gcc/sourcing/repository';
+import type { VerifiedFigure, SourceTier, ExchangeCode } from '@/lib/gcc/sourcing/types';
 
-const schema = z.object({
-  disclosureEventId: z.string().uuid(),
-  adversarial: z.boolean().optional(),
-});
+// Accept either a stored disclosure UUID, OR a source native id (e.g. the
+// Mubasher id the Telegram screening callback already carries) which we
+// ingest-on-demand. This lets the n8n Responder call /draft with the id it has.
+const schema = z
+  .object({
+    disclosureEventId: z.string().uuid().optional(),
+    nativeId: z.string().optional(),
+    exchange: z.enum(['TADAWUL', 'ADX', 'DFM', 'QSE', 'BK', 'BHB', 'MSX']).optional(),
+    adversarial: z.boolean().optional(),
+  })
+  .refine((d) => d.disclosureEventId || d.nativeId, {
+    message: 'disclosureEventId or nativeId is required',
+  });
+
+/** Resolve a native id to a stored gcc_disclosure_events id, ingesting if new. */
+async function resolveByNativeId(admin: any, nativeId: string, exchange: ExchangeCode): Promise<string> {
+  // Mubasher dedup_key == nativeId; origin uses "<EXCHANGE>:<nativeId>".
+  const { data: existing } = await admin
+    .from('gcc_disclosure_events')
+    .select('id')
+    .or(`dedup_key.eq.${nativeId},dedup_key.eq.${exchange}:${nativeId}`)
+    .maybeSingle();
+  if (existing?.id) return existing.id;
+
+  const fetcher = getFetcher(exchange);
+  const detail = await fetcher.fetchDetail(nativeId);
+  const figures = ruleFactExtractor.extract(detail);
+  const cached = await new SupabaseDisclosureRepository().save(detail, figures);
+  return cached.disclosureEventId;
+}
 
 export async function POST(request: NextRequest) {
   const denied = checkGccSecret(request);
@@ -40,7 +68,18 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  const { disclosureEventId } = parsed.data;
+
+  // Resolve to a stored disclosure id (ingest-on-demand from a native id).
+  let disclosureEventId: string;
+  try {
+    disclosureEventId = parsed.data.disclosureEventId
+      ?? (await resolveByNativeId(admin, parsed.data.nativeId!, (parsed.data.exchange ?? 'TADAWUL') as ExchangeCode));
+  } catch (e) {
+    return NextResponse.json(
+      { error: `could not resolve disclosure: ${e instanceof Error ? e.message : String(e)}` },
+      { status: 502 }
+    );
+  }
 
   // 1. Load disclosure + exchange + company.
   const { data: disc, error: discErr } = await (admin.from('gcc_disclosure_events') as any)
