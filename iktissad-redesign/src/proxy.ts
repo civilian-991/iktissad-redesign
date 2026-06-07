@@ -10,6 +10,7 @@ const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
  */
 const CSRF_EXEMPT_PATTERNS = [
   /^\/api\/webhooks\//,          // Payment / external webhooks (use HMAC sig instead)
+  /^\/api\/gcc\//,               // GCC newsroom — called by n8n (uses x-gcc-secret header)
   /^\/api\/auth\/csrf$/,         // CSRF token endpoint itself
   /^\/api\/auth\/turnstile$/,    // Bot-check endpoint (no session yet)
   /^\/api\/newsletter$/,         // Public newsletter signup
