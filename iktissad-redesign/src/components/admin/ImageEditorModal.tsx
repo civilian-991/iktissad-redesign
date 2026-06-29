@@ -13,6 +13,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactCrop, {
   centerCrop,
@@ -105,6 +106,9 @@ export default function ImageEditorModal({
   const [lockAspect, setLockAspect] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Portal target — only available on the client after mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Reset all state whenever a new image is opened
   useEffect(() => {
@@ -322,9 +326,9 @@ export default function ImageEditorModal({
     }
   }, [completedCrop, filterString, resize, resizeDirty, filename, bucket, folder, onSave, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -601,7 +605,8 @@ export default function ImageEditorModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
 
