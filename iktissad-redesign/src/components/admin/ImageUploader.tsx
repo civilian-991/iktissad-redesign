@@ -9,8 +9,10 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, CheckCircle, AlertCircle, Loader2, Sparkles, Save } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Loader2, Sparkles, Save, ImageIcon, Crop } from 'lucide-react';
 import { uploadFile, validateFile, type StorageBucket } from '@/lib/supabase/storage';
+import MediaPicker from '@/components/admin/MediaPicker';
+import ImageEditorModal from '@/components/admin/ImageEditorModal';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -49,6 +51,10 @@ export interface ImageUploaderProps {
   onTagsGenerated?: (tags: string[]) => void;
   /** Whether to show the AI alt text panel after upload */
   showAIAltText?: boolean;
+  /** Whether to offer browsing the media library (default true) */
+  enableMediaLibrary?: boolean;
+  /** Whether to offer the built-in image editor (crop/resize) (default true) */
+  enableEditor?: boolean;
 }
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
@@ -83,8 +89,12 @@ export default function ImageUploader({
   onAltTextGenerated,
   onTagsGenerated,
   showAIAltText = false,
+  enableMediaLibrary = true,
+  enableEditor = true,
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -234,8 +244,46 @@ export default function ImageUploader({
     onRemove?.();
   }, [onRemove]);
 
+  // Apply an externally-sourced image (media library pick or editor result)
+  const applySelected = useCallback(
+    (url: string, path = '') => {
+      setPreviewUrl(url);
+      setUploadedUrl(url);
+      setUploadState('success');
+      setErrorMessage('');
+      onUpload?.(url, path);
+      if (showAIAltText) generateAltText(url);
+    },
+    [onUpload, showAIAltText, generateAltText]
+  );
+
   const displayImage = currentImage ?? previewUrl;
   const activeUrl = uploadedUrl ?? currentImage ?? null;
+
+  // Shared modals (media library + image editor) — rendered in every branch
+  const modals = (
+    <>
+      {enableMediaLibrary && (
+        <MediaPicker
+          open={showLibrary}
+          onClose={() => setShowLibrary(false)}
+          onSelect={(url) => applySelected(url)}
+          bucket={bucket}
+          folder={folder}
+        />
+      )}
+      {enableEditor && (
+        <ImageEditorModal
+          open={showEditor}
+          src={displayImage}
+          bucket={bucket}
+          folder={folder}
+          onClose={() => setShowEditor(false)}
+          onSave={(url, path) => applySelected(url, path)}
+        />
+      )}
+    </>
+  );
 
   // ─── Image preview ─────────────────────────────────────────
 
@@ -260,14 +308,27 @@ export default function ImageUploader({
               <CheckCircle size={16} />
             </div>
           )}
-          {/* Remove button */}
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="absolute top-2 left-2 p-1.5 bg-obsidian/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <X size={16} />
-          </button>
+          {/* Action buttons */}
+          <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            {enableEditor && uploadState !== 'uploading' && (
+              <button
+                type="button"
+                onClick={() => setShowEditor(true)}
+                title="تحرير الصورة"
+                className="p-1.5 bg-obsidian/80 text-white hover:text-gold rounded-lg transition-colors"
+              >
+                <Crop size={16} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleRemove}
+              title="إزالة الصورة"
+              className="p-1.5 bg-obsidian/80 text-white hover:text-loss rounded-lg transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* AI Alt Text Panel */}
@@ -356,6 +417,7 @@ export default function ImageUploader({
             )}
           </div>
         )}
+        {modals}
       </div>
     );
   }
@@ -408,6 +470,19 @@ export default function ImageUploader({
           onChange={handleFileInput}
         />
       </label>
+
+      {enableMediaLibrary && uploadState !== 'uploading' && (
+        <button
+          type="button"
+          onClick={() => setShowLibrary(true)}
+          className="mt-2 flex w-full items-center justify-center gap-2 py-2 text-white/50 hover:text-gold text-xs font-[family-name:var(--font-display)] transition-colors"
+        >
+          <ImageIcon size={14} />
+          أو اختر من مكتبة الوسائط
+        </button>
+      )}
+
+      {modals}
     </div>
   );
 }
