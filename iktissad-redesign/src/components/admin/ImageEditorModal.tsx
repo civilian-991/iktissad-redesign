@@ -69,14 +69,8 @@ const BG_SWATCHES: { label: string; value: string }[] = [
   { label: 'شفاف', value: 'transparent' },
 ];
 
-// Ratios to extend the canvas to (image is centered + padded, never cropped)
-const EXTEND_RATIOS: { label: string; value: number }[] = [
-  { label: '1:1', value: 1 },
-  { label: '16:9', value: 16 / 9 },
-  { label: '4:3', value: 4 / 3 },
-  { label: '3:2', value: 3 / 2 },
-  { label: '9:16', value: 9 / 16 },
-];
+// The featured-image aspect used across the site (hero + card previews).
+const FEATURED_RATIO = 16 / 9;
 
 interface AspectPreset {
   label: string;
@@ -611,22 +605,15 @@ export default function ImageEditorModal({
                         </div>
                       </div>
 
-                      {/* Extend to ratio */}
+                      {/* Extend to the featured-image size */}
                       <div>
-                        <label className="block text-white/60 text-xs mb-1.5 font-[family-name:var(--font-display)]">
-                          توسيع إلى نسبة
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {EXTEND_RATIOS.map((r) => (
-                            <button
-                              key={r.label}
-                              onClick={() => extendToRatio(r.value)}
-                              className="py-2 rounded-lg text-xs font-[family-name:var(--font-display)] bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
-                            >
-                              {r.label}
-                            </button>
-                          ))}
-                        </div>
+                        <button
+                          onClick={() => extendToRatio(FEATURED_RATIO)}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-[family-name:var(--font-display)] bg-gold/10 text-gold hover:bg-gold/20 transition-colors"
+                        >
+                          <Frame size={14} />
+                          توسيع إلى مقاس الصورة البارزة (16:9)
+                        </button>
                       </div>
 
                       {/* Uniform padding */}
