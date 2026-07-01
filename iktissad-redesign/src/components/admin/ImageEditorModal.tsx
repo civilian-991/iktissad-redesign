@@ -31,6 +31,7 @@ import {
   FlipVertical,
   SlidersHorizontal,
   Ruler,
+  Frame,
   Loader2,
   Check,
   RefreshCw,
@@ -60,7 +61,22 @@ export interface ImageEditorModalProps {
   filename?: string;
 }
 
-type Tool = 'crop' | 'transform' | 'adjust' | 'resize';
+type Tool = 'crop' | 'transform' | 'frame' | 'adjust' | 'resize';
+
+const BG_SWATCHES: { label: string; value: string }[] = [
+  { label: 'أبيض', value: '#ffffff' },
+  { label: 'أسود', value: '#000000' },
+  { label: 'شفاف', value: 'transparent' },
+];
+
+// Ratios to extend the canvas to (image is centered + padded, never cropped)
+const EXTEND_RATIOS: { label: string; value: number }[] = [
+  { label: '1:1', value: 1 },
+  { label: '16:9', value: 16 / 9 },
+  { label: '4:3', value: 4 / 3 },
+  { label: '3:2', value: 3 / 2 },
+  { label: '9:16', value: 9 / 16 },
+];
 
 interface AspectPreset {
   label: string;
@@ -104,6 +120,11 @@ export default function ImageEditorModal({
   const [resize, setResize] = useState({ width: 0, height: 0 });
   const [resizeDirty, setResizeDirty] = useState(false);
   const [lockAspect, setLockAspect] = useState(true);
+  // Canvas-extend (Photoshop-style "add canvas") state
+  const [bgColor, setBgColor] = useState('#ffffff');
+  const [padPx, setPadPx] = useState(100);
+  // Whether the working image carries transparency → export as PNG, not JPEG
+  const [hasAlpha, setHasAlpha] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   // Portal target — only available on the client after mount
@@ -122,6 +143,9 @@ export default function ImageEditorModal({
       setResize({ width: 0, height: 0 });
       setResizeDirty(false);
       setLockAspect(true);
+      setBgColor('#ffffff');
+      setPadPx(100);
+      setHasAlpha(false);
       setError('');
     }
   }, [open, src]);
@@ -217,6 +241,75 @@ export default function ImageEditorModal({
     [workingSrc]
   );
 
+  // ─── Extend canvas (Photoshop-style: pad the image instead of cropping) ──
+  // `compute` returns the new canvas size + where to place the current image.
+  const bakeExtend = useCallback(
+    (compute: (iw: number, ih: number) => { cw: number; ch: number; dx: number; dy: number }) => {
+      if (!workingSrc) return;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const iw = img.naturalWidth;
+        const ih = img.naturalHeight;
+        const { cw, ch, dx, dy } = compute(iw, ih);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(cw);
+        canvas.height = Math.round(ch);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const transparent = bgColor === 'transparent';
+        if (!transparent) {
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.drawImage(img, Math.round(dx), Math.round(dy));
+        setWorkingSrc(canvas.toDataURL('image/png'));
+        setHasAlpha(transparent);
+        // Dimensions changed → reset crop + resize so they re-derive on load
+        setCrop(undefined);
+        setCompletedCrop(null);
+        setAspect(undefined);
+        setResize({ width: 0, height: 0 });
+        setResizeDirty(false);
+      };
+      img.onerror = () => setError('تعذّر تحميل الصورة للتعديل (قد تكون مشكلة CORS)');
+      img.src = workingSrc;
+    },
+    [workingSrc, bgColor]
+  );
+
+  // Extend to a target aspect ratio: image centered, padding added on the
+  // short axis so the whole image stays visible (never cropped).
+  const extendToRatio = useCallback(
+    (targetRatio: number) => {
+      bakeExtend((iw, ih) => {
+        const current = iw / ih;
+        let cw: number;
+        let ch: number;
+        if (targetRatio > current) {
+          // need to add width
+          ch = ih;
+          cw = ih * targetRatio;
+        } else {
+          // need to add height
+          cw = iw;
+          ch = iw / targetRatio;
+        }
+        return { cw, ch, dx: (cw - iw) / 2, dy: (ch - ih) / 2 };
+      });
+    },
+    [bakeExtend]
+  );
+
+  // Add uniform padding (px) on all four sides.
+  const extendPadding = useCallback(
+    (px: number) => {
+      const p = Math.max(0, px);
+      bakeExtend((iw, ih) => ({ cw: iw + 2 * p, ch: ih + 2 * p, dx: p, dy: p }));
+    },
+    [bakeExtend]
+  );
+
   // ─── Resize inputs (aspect-locked) ─────────────────────────
   const handleResizeWidth = useCallback(
     (value: number) => {
@@ -254,6 +347,7 @@ export default function ImageEditorModal({
     setAdjust(DEFAULT_ADJUST);
     setResize({ width: naturalSize.width, height: naturalSize.height });
     setResizeDirty(false);
+    setHasAlpha(false);
     setError('');
   }, [src, naturalSize]);
 
@@ -302,13 +396,16 @@ export default function ImageEditorModal({
         outputCanvas = resizeCanvas;
       }
 
+      // Preserve transparency (from an extended canvas) by exporting PNG.
+      const outType = hasAlpha ? 'image/png' : 'image/jpeg';
+      const outExt = hasAlpha ? 'png' : 'jpg';
       const blob = await new Promise<Blob | null>((resolve) =>
-        outputCanvas.toBlob((b) => resolve(b), 'image/jpeg', 0.92)
+        outputCanvas.toBlob((b) => resolve(b), outType, hasAlpha ? undefined : 0.92)
       );
       if (!blob) throw new Error('فشل إنشاء الصورة');
 
       const baseName = (filename || 'image').replace(/\.[^.]+$/, '');
-      const file = new File([blob], `${baseName}-edited.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `${baseName}-edited.${outExt}`, { type: outType });
       const result = await uploadFile(bucket, file, folder);
       onSave(result.publicUrl, result.path);
       onClose();
@@ -324,7 +421,7 @@ export default function ImageEditorModal({
     } finally {
       setBusy(false);
     }
-  }, [completedCrop, filterString, resize, resizeDirty, filename, bucket, folder, onSave, onClose]);
+  }, [completedCrop, filterString, resize, resizeDirty, hasAlpha, filename, bucket, folder, onSave, onClose]);
 
   if (!open || !mounted) return null;
 
@@ -392,10 +489,11 @@ export default function ImageEditorModal({
               {/* Controls */}
               <div className="w-full md:w-72 shrink-0 border-t md:border-t-0 md:border-s border-gold/10 flex flex-col">
                 {/* Tool tabs */}
-                <div className="grid grid-cols-4 border-b border-gold/10">
+                <div className="grid grid-cols-5 border-b border-gold/10">
                   {([
                     { id: 'crop', icon: CropIcon, label: 'قص' },
                     { id: 'transform', icon: RotateCw, label: 'تدوير' },
+                    { id: 'frame', icon: Frame, label: 'إطار' },
                     { id: 'adjust', icon: SlidersHorizontal, label: 'تعديل' },
                     { id: 'resize', icon: Ruler, label: 'حجم' },
                   ] as const).map((tab) => (
@@ -469,6 +567,88 @@ export default function ImageEditorModal({
                         >
                           <FlipVertical size={15} /> رأسي
                         </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {tool === 'frame' && (
+                    <div className="space-y-4">
+                      <p className="text-white/50 text-xs font-[family-name:var(--font-display)]">
+                        توسيع مساحة الصورة بإضافة خلفية بدل القص — لا يُقتطع أي جزء.
+                      </p>
+
+                      {/* Background colour */}
+                      <div>
+                        <label className="block text-white/60 text-xs mb-1.5 font-[family-name:var(--font-display)]">
+                          لون الخلفية
+                        </label>
+                        <div className="flex items-center gap-2">
+                          {BG_SWATCHES.map((sw) => (
+                            <button
+                              key={sw.value}
+                              onClick={() => setBgColor(sw.value)}
+                              title={sw.label}
+                              className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                                bgColor === sw.value ? 'border-gold scale-110' : 'border-white/20'
+                              } ${sw.value === 'transparent' ? 'bg-[repeating-conic-gradient(#666_0%_25%,#999_0%_50%)] bg-[length:12px_12px]' : ''}`}
+                              style={sw.value !== 'transparent' ? { backgroundColor: sw.value } : undefined}
+                            />
+                          ))}
+                          <label
+                            className={`w-8 h-8 rounded-lg border-2 overflow-hidden cursor-pointer relative ${
+                              !BG_SWATCHES.some((s) => s.value === bgColor) ? 'border-gold scale-110' : 'border-white/20'
+                            }`}
+                            title="لون مخصّص"
+                            style={{ backgroundColor: bgColor === 'transparent' ? '#888' : bgColor }}
+                          >
+                            <input
+                              type="color"
+                              value={bgColor === 'transparent' ? '#ffffff' : bgColor}
+                              onChange={(e) => setBgColor(e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Extend to ratio */}
+                      <div>
+                        <label className="block text-white/60 text-xs mb-1.5 font-[family-name:var(--font-display)]">
+                          توسيع إلى نسبة
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {EXTEND_RATIOS.map((r) => (
+                            <button
+                              key={r.label}
+                              onClick={() => extendToRatio(r.value)}
+                              className="py-2 rounded-lg text-xs font-[family-name:var(--font-display)] bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
+                            >
+                              {r.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Uniform padding */}
+                      <div>
+                        <label className="block text-white/60 text-xs mb-1.5 font-[family-name:var(--font-display)]">
+                          حشوة موحّدة (بكسل على كل جانب)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            value={padPx}
+                            onChange={(e) => setPadPx(Number(e.target.value))}
+                            className="flex-1 bg-white/5 border border-gold/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/30"
+                          />
+                          <button
+                            onClick={() => extendPadding(padPx)}
+                            className="px-4 py-2 bg-gold/10 text-gold rounded-lg text-xs font-[family-name:var(--font-display)] hover:bg-gold/20 transition-colors"
+                          >
+                            تطبيق
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
