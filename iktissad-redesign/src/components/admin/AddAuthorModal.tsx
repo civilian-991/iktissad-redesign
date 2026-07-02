@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { Loader2, UserPlus, X } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
-import type { AdminUser, ApiResponse } from '@/types';
+import { createContributor } from '@/lib/api-client';
+import type { AdminUser } from '@/types';
 
 interface Props {
   onClose: () => void;
@@ -33,25 +34,22 @@ export default function AddAuthorModal({ onClose, onCreated }: Props) {
     if (!trimmed) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/users/contributors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: trimmed,
-          email: email.trim() || undefined,
-          avatar: avatar.trim() || undefined,
-        }),
+      const json = await createContributor({
+        name: trimmed,
+        email: email.trim() || undefined,
+        avatar: avatar.trim() || undefined,
       });
-      const json: ApiResponse<AdminUser> = await res.json();
-      if (!res.ok || !json.data) {
+      if (!json.data) {
         toast.error(json.error || t('admin.articles.editor.addAuthorModal.error'));
         return;
       }
       toast.success(t('admin.articles.editor.addAuthorModal.success'));
       onCreated(json.data);
       onClose();
-    } catch {
-      toast.error(t('admin.articles.editor.addAuthorModal.error'));
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : t('admin.articles.editor.addAuthorModal.error')
+      );
     } finally {
       setSaving(false);
     }

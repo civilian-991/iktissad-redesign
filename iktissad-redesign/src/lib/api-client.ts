@@ -517,6 +517,15 @@ export async function createUser(
   });
 }
 
+export async function createContributor(
+  data: Record<string, unknown>
+): Promise<ApiResponse<AdminUser>> {
+  return api<AdminUser>("/api/users/contributors", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function updateUser(
   id: string,
   data: Record<string, unknown>
