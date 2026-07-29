@@ -1,6 +1,0 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "cd iktissad-redesign && npm run build",
-  "outputDirectory": "iktissad-redesign/.next",
-  "installCommand": "cd iktissad-redesign && npm install"
-}
