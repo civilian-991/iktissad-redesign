@@ -387,6 +387,7 @@ export const en = {
         imageCaptionPlaceholder: 'Short description shown under the image...',
         imageCredit: 'Image Source',
         imageCreditPlaceholder: 'e.g. Reuters',
+        imageCreditUrl: 'Source link (optional)',
         uploadImage: 'Click to upload image',
         imageFormats: 'PNG, JPG or WebP',
         sectionLabel: 'Section',

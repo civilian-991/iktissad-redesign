@@ -161,6 +161,8 @@ export interface Article {
   featuredImageCaption?: string;
   /** Image source / photographer credit shown under the featured image */
   featuredImageCredit?: string;
+  /** Optional link to the credit source page */
+  featuredImageCreditUrl?: string;
   section: string;
   sectionSlug: string;
   sector: string;

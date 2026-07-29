@@ -624,7 +624,19 @@ export default function ArticlePageClient({
                       {article.featuredImageCaption}
                       {article.featuredImageCredit && (
                         <span className={article.featuredImageCaption ? 'ms-2 text-pewter/70' : 'text-pewter/70'}>
-                          {t('article.imageSource')}: {article.featuredImageCredit}
+                          {t('article.imageSource')}:{' '}
+                          {article.featuredImageCreditUrl ? (
+                            <a
+                              href={article.featuredImageCreditUrl}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              className="underline decoration-pewter/40 underline-offset-2 hover:text-pewter"
+                            >
+                              {article.featuredImageCredit}
+                            </a>
+                          ) : (
+                            article.featuredImageCredit
+                          )}
                         </span>
                       )}
                     </figcaption>

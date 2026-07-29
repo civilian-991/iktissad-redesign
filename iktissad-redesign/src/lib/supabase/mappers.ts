@@ -105,6 +105,7 @@ export function mapArticleRow(
     featuredImageFocalY: (row as any).featured_image_focal_y ?? 0.5,
     featuredImageCaption: (row as any).featured_image_caption || undefined,
     featuredImageCredit: (row as any).featured_image_credit || undefined,
+    featuredImageCreditUrl: (row as any).featured_image_credit_url || undefined,
     body: (row as any).body ?? undefined,
     isBreaking: (row as any).is_breaking ?? false,
     paywalled: (row as any).is_paywalled ?? false,

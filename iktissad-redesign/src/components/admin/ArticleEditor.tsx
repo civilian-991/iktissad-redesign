@@ -162,6 +162,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [focalY, setFocalY] = useState(0.5);
   const [imageCaption, setImageCaption] = useState('');
   const [imageCredit, setImageCredit] = useState('');
+  const [imageCreditUrl, setImageCreditUrl] = useState('');
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
   const [scheduledAt, setScheduledAt] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -258,6 +259,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     featuredImageFocalY: focalY,
     featuredImageCaption: imageCaption,
     featuredImageCredit: imageCredit,
+    featuredImageCreditUrl: imageCreditUrl,
     featured,
     editorChoice,
     isBreaking,
@@ -267,7 +269,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     canonicalUrl: canonicalUrl || undefined,
     noIndex,
     ...(articleType ? { article_type: articleType } : {}),
-  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountry, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
+  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountry, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
 
   const performAutoSave = useCallback(async () => {
     if (!title.trim()) return;
@@ -294,7 +296,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
+  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -333,6 +335,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       if (article.featuredImageFocalY !== undefined) setFocalY(article.featuredImageFocalY);
       setImageCaption(article.featuredImageCaption || '');
       setImageCredit(article.featuredImageCredit || '');
+      setImageCreditUrl(article.featuredImageCreditUrl || '');
       setMetaTitle(article.metaTitle || '');
       setMetaDescription(article.metaDescription || '');
       setOgImage(article.ogImage || '');
@@ -981,6 +984,17 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                   value={imageCredit}
                   onChange={(e) => setImageCredit(e.target.value)}
                   placeholder={t('admin.articles.editor.imageCreditPlaceholder')}
+                  className="w-full bg-white/5 border border-gold/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold/40"
+                />
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mt-3 mb-2">
+                  {t('admin.articles.editor.imageCreditUrl')}
+                </label>
+                <input
+                  type="url"
+                  dir="ltr"
+                  value={imageCreditUrl}
+                  onChange={(e) => setImageCreditUrl(e.target.value)}
+                  placeholder="https://..."
                   className="w-full bg-white/5 border border-gold/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold/40"
                 />
               </div>

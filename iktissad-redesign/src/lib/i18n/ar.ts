@@ -387,6 +387,7 @@ export const ar = {
         imageCaptionPlaceholder: 'وصف موجز يظهر أسفل الصورة...',
         imageCredit: 'مصدر الصورة',
         imageCreditPlaceholder: 'مثال: رويترز',
+        imageCreditUrl: 'رابط المصدر (اختياري)',
         uploadImage: 'اضغط لرفع صورة',
         imageFormats: 'PNG, JPG أو WebP',
         sectionLabel: 'القسم',

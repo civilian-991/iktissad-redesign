@@ -83,6 +83,7 @@ const updateArticleSchema = z.object({
   featuredImageFocalX: z.number().min(0).max(1).optional(),
   featuredImageCaption: z.string().optional(),
   featuredImageCredit: z.string().optional(),
+  featuredImageCreditUrl: z.string().optional(),
   /** Focal point Y (0–1) for smart image cropping */
   featuredImageFocalY: z.number().min(0).max(1).optional(),
   featured: z.boolean().optional(),
@@ -150,6 +151,7 @@ export async function PUT(
   if (data.featuredImageFocalY !== undefined) updateData.featured_image_focal_y = data.featuredImageFocalY;
   if (data.featuredImageCaption !== undefined) updateData.featured_image_caption = data.featuredImageCaption;
   if (data.featuredImageCredit !== undefined) updateData.featured_image_credit = data.featuredImageCredit;
+  if (data.featuredImageCreditUrl !== undefined) updateData.featured_image_credit_url = data.featuredImageCreditUrl;
   if (data.featured !== undefined) updateData.featured = data.featured;
   if (data.editorChoice !== undefined) updateData.editor_choice = data.editorChoice;
   if (data.isBreaking !== undefined) updateData.is_breaking = data.isBreaking;
