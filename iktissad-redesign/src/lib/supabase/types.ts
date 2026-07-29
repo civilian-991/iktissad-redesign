@@ -392,6 +392,8 @@ export type Database = {
           accent_color: string | null;
           featured_image_focal_x: number;
           featured_image_focal_y: number;
+          featured_image_caption: string;
+          featured_image_credit: string;
           article_type: string | null;
           is_breaking: boolean;
           is_paywalled: boolean;
@@ -434,6 +436,8 @@ export type Database = {
           accent_color?: string | null;
           featured_image_focal_x?: number;
           featured_image_focal_y?: number;
+          featured_image_caption?: string;
+          featured_image_credit?: string;
           article_type?: string | null;
           is_breaking?: boolean;
           is_paywalled?: boolean;
@@ -476,6 +480,8 @@ export type Database = {
           accent_color?: string | null;
           featured_image_focal_x?: number;
           featured_image_focal_y?: number;
+          featured_image_caption?: string;
+          featured_image_credit?: string;
           article_type?: string | null;
           is_breaking?: boolean;
           is_paywalled?: boolean;

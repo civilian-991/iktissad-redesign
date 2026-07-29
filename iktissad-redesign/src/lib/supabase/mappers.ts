@@ -103,6 +103,8 @@ export function mapArticleRow(
     accentColor: (row as any).accent_color ?? undefined,
     featuredImageFocalX: (row as any).featured_image_focal_x ?? 0.5,
     featuredImageFocalY: (row as any).featured_image_focal_y ?? 0.5,
+    featuredImageCaption: (row as any).featured_image_caption || undefined,
+    featuredImageCredit: (row as any).featured_image_credit || undefined,
     body: (row as any).body ?? undefined,
     isBreaking: (row as any).is_breaking ?? false,
     paywalled: (row as any).is_paywalled ?? false,

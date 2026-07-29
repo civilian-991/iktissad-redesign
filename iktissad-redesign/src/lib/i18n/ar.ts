@@ -383,6 +383,10 @@ export const ar = {
         excerptPlaceholder: 'ملخص قصير للمقال يظهر في القوائم...',
         contentPlaceholder: 'ابدأ بكتابة محتوى المقال هنا...',
         featuredImage: 'الصورة الرئيسية',
+        imageCaption: 'شرح الصورة',
+        imageCaptionPlaceholder: 'وصف موجز يظهر أسفل الصورة...',
+        imageCredit: 'مصدر الصورة',
+        imageCreditPlaceholder: 'مثال: رويترز',
         uploadImage: 'اضغط لرفع صورة',
         imageFormats: 'PNG, JPG أو WebP',
         sectionLabel: 'القسم',
@@ -2594,6 +2598,7 @@ export const ar = {
     paywalled_teaser: 'اقرأ المقال كاملاً مع اشتراك اقتصاد بريميوم',
     related_ai: 'مقالات ذات صلة',
     print: 'طباعة المقال',
+    imageSource: 'المصدر',
   },
   magazine: {
     teaser_heading: 'اقرأ هذا العدد كاملاً',

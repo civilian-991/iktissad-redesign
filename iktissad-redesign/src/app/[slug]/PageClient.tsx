@@ -619,6 +619,16 @@ export default function ArticlePageClient({
                       />
                     </div>
                   )}
+                  {!heroVideoUrl && (article.featuredImageCaption || article.featuredImageCredit) && (
+                    <figcaption className="mt-2 text-[0.78rem] leading-relaxed text-pewter font-[family-name:var(--font-display)]">
+                      {article.featuredImageCaption}
+                      {article.featuredImageCredit && (
+                        <span className={article.featuredImageCaption ? 'ms-2 text-pewter/70' : 'text-pewter/70'}>
+                          {t('article.imageSource')}: {article.featuredImageCredit}
+                        </span>
+                      )}
+                    </figcaption>
+                  )}
                 </motion.figure>
               )}
 

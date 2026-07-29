@@ -157,6 +157,10 @@ export interface Article {
   featuredImage: string;
   featuredImageFocalX?: number;
   featuredImageFocalY?: number;
+  /** Caption shown under the featured image */
+  featuredImageCaption?: string;
+  /** Image source / photographer credit shown under the featured image */
+  featuredImageCredit?: string;
   section: string;
   sectionSlug: string;
   sector: string;

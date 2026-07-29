@@ -198,6 +198,8 @@ const createArticleSchema = z.object({
   featuredImage: z.string().optional().default(""),
   featuredImageFocalX: z.number().min(0).max(1).optional(),
   featuredImageFocalY: z.number().min(0).max(1).optional(),
+  featuredImageCaption: z.string().optional(),
+  featuredImageCredit: z.string().optional(),
   sectionSlug: z.string().optional(),
   sectorSlug: z.string().optional(),
   countrySlug: z.string().optional(),
@@ -294,6 +296,8 @@ export async function POST(request: NextRequest) {
   }
   if (data.featuredImageFocalX !== undefined) insertData.featured_image_focal_x = data.featuredImageFocalX;
   if (data.featuredImageFocalY !== undefined) insertData.featured_image_focal_y = data.featuredImageFocalY;
+  if (data.featuredImageCaption !== undefined) insertData.featured_image_caption = data.featuredImageCaption;
+  if (data.featuredImageCredit !== undefined) insertData.featured_image_credit = data.featuredImageCredit;
   if (data.featured !== undefined) insertData.featured = data.featured;
   if (data.editorChoice !== undefined) insertData.editor_choice = data.editorChoice;
   if (data.isBreaking !== undefined) insertData.is_breaking = data.isBreaking;

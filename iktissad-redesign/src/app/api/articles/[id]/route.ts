@@ -81,6 +81,8 @@ const updateArticleSchema = z.object({
   article_type: z.enum(["news", "report", "analysis", "interview", "opinion"]).optional(),
   /** Focal point X (0–1) for smart image cropping */
   featuredImageFocalX: z.number().min(0).max(1).optional(),
+  featuredImageCaption: z.string().optional(),
+  featuredImageCredit: z.string().optional(),
   /** Focal point Y (0–1) for smart image cropping */
   featuredImageFocalY: z.number().min(0).max(1).optional(),
   featured: z.boolean().optional(),
@@ -146,6 +148,8 @@ export async function PUT(
   if (data.article_type !== undefined) updateData.article_type = data.article_type;
   if (data.featuredImageFocalX !== undefined) updateData.featured_image_focal_x = data.featuredImageFocalX;
   if (data.featuredImageFocalY !== undefined) updateData.featured_image_focal_y = data.featuredImageFocalY;
+  if (data.featuredImageCaption !== undefined) updateData.featured_image_caption = data.featuredImageCaption;
+  if (data.featuredImageCredit !== undefined) updateData.featured_image_credit = data.featuredImageCredit;
   if (data.featured !== undefined) updateData.featured = data.featured;
   if (data.editorChoice !== undefined) updateData.editor_choice = data.editorChoice;
   if (data.isBreaking !== undefined) updateData.is_breaking = data.isBreaking;

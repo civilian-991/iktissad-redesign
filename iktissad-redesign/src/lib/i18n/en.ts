@@ -383,6 +383,10 @@ export const en = {
         excerptPlaceholder: 'Short summary for article listings...',
         contentPlaceholder: 'Start writing your article here...',
         featuredImage: 'Featured Image',
+        imageCaption: 'Image Caption',
+        imageCaptionPlaceholder: 'Short description shown under the image...',
+        imageCredit: 'Image Source',
+        imageCreditPlaceholder: 'e.g. Reuters',
         uploadImage: 'Click to upload image',
         imageFormats: 'PNG, JPG or WebP',
         sectionLabel: 'Section',
@@ -2594,6 +2598,7 @@ export const en = {
     paywalled_teaser: 'Read the full article with Iktissad Premium',
     related_ai: 'Related Articles',
     print: 'Print article',
+    imageSource: 'Source',
   },
   magazine: {
     teaser_heading: 'Read This Issue in Full',
