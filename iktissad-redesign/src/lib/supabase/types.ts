@@ -16,6 +16,170 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      // ── GCC Markets Newsroom (migration 044) ──────────────────────────────
+      gcc_exchanges: {
+        Row: {
+          id: string; code: string; name: string; name_en: string; country: string;
+          currency: string; timezone: string; close_time_local: string | null;
+          data_tier: string; source_config: Json; created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; code: string; name: string; name_en?: string; country: string;
+          currency: string; timezone: string; close_time_local?: string | null;
+          data_tier?: string; source_config?: Json; created_at?: string; updated_at?: string;
+        };
+        Update: {
+          id?: string; code?: string; name?: string; name_en?: string; country?: string;
+          currency?: string; timezone?: string; close_time_local?: string | null;
+          data_tier?: string; source_config?: Json; created_at?: string; updated_at?: string;
+        };
+        Relationships: [];
+      };
+      gcc_trading_calendars: {
+        Row: { exchange_id: string; date: string; is_trading_day: boolean; holiday_name: string | null };
+        Insert: { exchange_id: string; date: string; is_trading_day?: boolean; holiday_name?: string | null };
+        Update: { exchange_id?: string; date?: string; is_trading_day?: boolean; holiday_name?: string | null };
+        Relationships: [];
+      };
+      gcc_sectors: {
+        Row: { id: string; exchange_id: string; name: string; name_en: string; canonical_sector: string | null; created_at: string };
+        Insert: { id?: string; exchange_id: string; name: string; name_en?: string; canonical_sector?: string | null; created_at?: string };
+        Update: { id?: string; exchange_id?: string; name?: string; name_en?: string; canonical_sector?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      gcc_companies: {
+        Row: {
+          id: string; exchange_id: string; ticker: string; isin: string | null; name: string;
+          name_en: string; sector_id: string | null; is_active: boolean; created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; exchange_id: string; ticker: string; isin?: string | null; name: string;
+          name_en?: string; sector_id?: string | null; is_active?: boolean; created_at?: string; updated_at?: string;
+        };
+        Update: {
+          id?: string; exchange_id?: string; ticker?: string; isin?: string | null; name?: string;
+          name_en?: string; sector_id?: string | null; is_active?: boolean; created_at?: string; updated_at?: string;
+        };
+        Relationships: [];
+      };
+      gcc_company_aliases: {
+        Row: { id: string; company_id: string; exchange_id: string; alias_normalized: string; lang: string | null; source: string | null; created_at: string };
+        Insert: { id?: string; company_id: string; exchange_id: string; alias_normalized: string; lang?: string | null; source?: string | null; created_at?: string };
+        Update: { id?: string; company_id?: string; exchange_id?: string; alias_normalized?: string; lang?: string | null; source?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      gcc_themes: {
+        Row: { id: string; slug: string; name: string; name_en: string; created_at: string };
+        Insert: { id?: string; slug: string; name: string; name_en?: string; created_at?: string };
+        Update: { id?: string; slug?: string; name?: string; name_en?: string; created_at?: string };
+        Relationships: [];
+      };
+      gcc_market_summaries: {
+        Row: {
+          id: string; exchange_id: string; trading_date: string; index_name: string;
+          index_close: number | null; change_points: number | null; change_percent: number | null;
+          volume: number | null; value: number | null; num_trades: number | null; market_cap: number | null;
+          market_cap_unit: string | null; advancers: number | null; decliners: number | null; unchanged: number | null;
+          currency: string | null; source_url: string | null; extraction_ts: string; raw: Json;
+          confidence: number | null; notes: string | null; created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; exchange_id: string; trading_date: string; index_name: string;
+          index_close?: number | null; change_points?: number | null; change_percent?: number | null;
+          volume?: number | null; value?: number | null; num_trades?: number | null; market_cap?: number | null;
+          market_cap_unit?: string | null; advancers?: number | null; decliners?: number | null; unchanged?: number | null;
+          currency?: string | null; source_url?: string | null; extraction_ts?: string; raw?: Json;
+          confidence?: number | null; notes?: string | null; created_at?: string; updated_at?: string;
+        };
+        Update: {
+          id?: string; exchange_id?: string; trading_date?: string; index_name?: string;
+          index_close?: number | null; change_points?: number | null; change_percent?: number | null;
+          volume?: number | null; value?: number | null; num_trades?: number | null; market_cap?: number | null;
+          market_cap_unit?: string | null; advancers?: number | null; decliners?: number | null; unchanged?: number | null;
+          currency?: string | null; source_url?: string | null; extraction_ts?: string; raw?: Json;
+          confidence?: number | null; notes?: string | null; created_at?: string; updated_at?: string;
+        };
+        Relationships: [];
+      };
+      gcc_sector_indices: {
+        Row: { id: string; market_summary_id: string; sector_id: string | null; sector_name: string | null; close: number | null; change_points: number | null; change_percent: number | null; created_at: string };
+        Insert: { id?: string; market_summary_id: string; sector_id?: string | null; sector_name?: string | null; close?: number | null; change_points?: number | null; change_percent?: number | null; created_at?: string };
+        Update: { id?: string; market_summary_id?: string; sector_id?: string | null; sector_name?: string | null; close?: number | null; change_points?: number | null; change_percent?: number | null; created_at?: string };
+        Relationships: [];
+      };
+      gcc_disclosure_events: {
+        Row: {
+          id: string; exchange_id: string; company_id: string | null; type: string;
+          title: string | null; title_en: string | null; body: string | null; body_en: string | null;
+          filed_at: string | null; source_url: string | null; native_id: string | null; pdf_url: string | null;
+          pdf_text: string | null; structured: Json; extraction_schema_version: number; theme_ids: string[];
+          newsworthiness: number | null; dedup_key: string; raw: Json; confidence: number | null;
+          created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; exchange_id: string; company_id?: string | null; type?: string;
+          title?: string | null; title_en?: string | null; body?: string | null; body_en?: string | null;
+          filed_at?: string | null; source_url?: string | null; native_id?: string | null; pdf_url?: string | null;
+          pdf_text?: string | null; structured?: Json; extraction_schema_version?: number; theme_ids?: string[];
+          newsworthiness?: number | null; dedup_key: string; raw?: Json; confidence?: number | null;
+          created_at?: string; updated_at?: string;
+        };
+        Update: {
+          id?: string; exchange_id?: string; company_id?: string | null; type?: string;
+          title?: string | null; title_en?: string | null; body?: string | null; body_en?: string | null;
+          filed_at?: string | null; source_url?: string | null; native_id?: string | null; pdf_url?: string | null;
+          pdf_text?: string | null; structured?: Json; extraction_schema_version?: number; theme_ids?: string[];
+          newsworthiness?: number | null; dedup_key?: string; raw?: Json; confidence?: number | null;
+          created_at?: string; updated_at?: string;
+        };
+        Relationships: [];
+      };
+      gcc_macro_signals: {
+        Row: { id: string; ts: string; kind: string; value: number | null; unit: string | null; source_url: string | null; payload: Json; created_at: string };
+        Insert: { id?: string; ts: string; kind: string; value?: number | null; unit?: string | null; source_url?: string | null; payload?: Json; created_at?: string };
+        Update: { id?: string; ts?: string; kind?: string; value?: number | null; unit?: string | null; source_url?: string | null; payload?: Json; created_at?: string };
+        Relationships: [];
+      };
+      gcc_story_budget: {
+        Row: { id: string; run_id: string; assignment: Json; story_type: string | null; newsworthiness: number | null; status: string; created_at: string; updated_at: string };
+        Insert: { id?: string; run_id: string; assignment?: Json; story_type?: string | null; newsworthiness?: number | null; status?: string; created_at?: string; updated_at?: string };
+        Update: { id?: string; run_id?: string; assignment?: Json; story_type?: string | null; newsworthiness?: number | null; status?: string; created_at?: string; updated_at?: string };
+        Relationships: [];
+      };
+      gcc_generated_articles: {
+        Row: {
+          id: string; story_budget_id: string; edition: string; draft: Json; confidence: number | null;
+          fact_check: Json; provenance: Json; compliance: Json; edit_distance: number | null; review_log: Json;
+          parent_article_id: string | null; supersedes_id: string | null; surfaces: Json; correction_history: Json;
+          status: string; article_id: string | null; created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; story_budget_id: string; edition: string; draft?: Json; confidence?: number | null;
+          fact_check?: Json; provenance?: Json; compliance?: Json; edit_distance?: number | null; review_log?: Json;
+          parent_article_id?: string | null; supersedes_id?: string | null; surfaces?: Json; correction_history?: Json;
+          status?: string; article_id?: string | null; created_at?: string; updated_at?: string;
+        };
+        Update: {
+          id?: string; story_budget_id?: string; edition?: string; draft?: Json; confidence?: number | null;
+          fact_check?: Json; provenance?: Json; compliance?: Json; edit_distance?: number | null; review_log?: Json;
+          parent_article_id?: string | null; supersedes_id?: string | null; surfaces?: Json; correction_history?: Json;
+          status?: string; article_id?: string | null; created_at?: string; updated_at?: string;
+        };
+        Relationships: [];
+      };
+      gcc_scrape_runs: {
+        Row: { id: string; exchange_id: string | null; started_at: string; finished_at: string | null; status: string; items: number; source: string | null; http_status: number | null; error: string | null; snapshot_url: string | null };
+        Insert: { id?: string; exchange_id?: string | null; started_at?: string; finished_at?: string | null; status?: string; items?: number; source?: string | null; http_status?: number | null; error?: string | null; snapshot_url?: string | null };
+        Update: { id?: string; exchange_id?: string | null; started_at?: string; finished_at?: string | null; status?: string; items?: number; source?: string | null; http_status?: number | null; error?: string | null; snapshot_url?: string | null };
+        Relationships: [];
+      };
+      gcc_agent_runs: {
+        Row: { id: string; run_id: string | null; agent: string; model: string | null; input_hash: string | null; tokens_in: number | null; tokens_out: number | null; cost: number | null; duration_ms: number | null; status: string | null; created_at: string };
+        Insert: { id?: string; run_id?: string | null; agent: string; model?: string | null; input_hash?: string | null; tokens_in?: number | null; tokens_out?: number | null; cost?: number | null; duration_ms?: number | null; status?: string | null; created_at?: string };
+        Update: { id?: string; run_id?: string | null; agent?: string; model?: string | null; input_hash?: string | null; tokens_in?: number | null; tokens_out?: number | null; cost?: number | null; duration_ms?: number | null; status?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      // ── end GCC Markets Newsroom ──────────────────────────────────────────
       sections: {
         Row: {
           id: string;
@@ -2153,3 +2317,54 @@ export type ABTestAssignmentUpdate = Tables["ab_test_assignments"]["Update"];
 export type ABTestEventRow    = Tables["ab_test_events"]["Row"];
 export type ABTestEventInsert = Tables["ab_test_events"]["Insert"];
 export type ABTestEventUpdate = Tables["ab_test_events"]["Update"];
+
+// ── GCC Markets Newsroom (migration 044) ─────────────────────────────────────
+
+export type GccExchangeRow    = Tables["gcc_exchanges"]["Row"];
+export type GccExchangeInsert = Tables["gcc_exchanges"]["Insert"];
+export type GccExchangeUpdate = Tables["gcc_exchanges"]["Update"];
+
+export type GccTradingCalendarRow    = Tables["gcc_trading_calendars"]["Row"];
+export type GccTradingCalendarInsert = Tables["gcc_trading_calendars"]["Insert"];
+
+export type GccSectorRow    = Tables["gcc_sectors"]["Row"];
+export type GccSectorInsert = Tables["gcc_sectors"]["Insert"];
+
+export type GccCompanyRow    = Tables["gcc_companies"]["Row"];
+export type GccCompanyInsert = Tables["gcc_companies"]["Insert"];
+export type GccCompanyUpdate = Tables["gcc_companies"]["Update"];
+
+export type GccCompanyAliasRow    = Tables["gcc_company_aliases"]["Row"];
+export type GccCompanyAliasInsert = Tables["gcc_company_aliases"]["Insert"];
+
+export type GccThemeRow    = Tables["gcc_themes"]["Row"];
+export type GccThemeInsert = Tables["gcc_themes"]["Insert"];
+
+export type GccMarketSummaryRow    = Tables["gcc_market_summaries"]["Row"];
+export type GccMarketSummaryInsert = Tables["gcc_market_summaries"]["Insert"];
+export type GccMarketSummaryUpdate = Tables["gcc_market_summaries"]["Update"];
+
+export type GccSectorIndexRow    = Tables["gcc_sector_indices"]["Row"];
+export type GccSectorIndexInsert = Tables["gcc_sector_indices"]["Insert"];
+
+export type GccDisclosureEventRow    = Tables["gcc_disclosure_events"]["Row"];
+export type GccDisclosureEventInsert = Tables["gcc_disclosure_events"]["Insert"];
+export type GccDisclosureEventUpdate = Tables["gcc_disclosure_events"]["Update"];
+
+export type GccMacroSignalRow    = Tables["gcc_macro_signals"]["Row"];
+export type GccMacroSignalInsert = Tables["gcc_macro_signals"]["Insert"];
+
+export type GccStoryBudgetRow    = Tables["gcc_story_budget"]["Row"];
+export type GccStoryBudgetInsert = Tables["gcc_story_budget"]["Insert"];
+export type GccStoryBudgetUpdate = Tables["gcc_story_budget"]["Update"];
+
+export type GccGeneratedArticleRow    = Tables["gcc_generated_articles"]["Row"];
+export type GccGeneratedArticleInsert = Tables["gcc_generated_articles"]["Insert"];
+export type GccGeneratedArticleUpdate = Tables["gcc_generated_articles"]["Update"];
+
+export type GccScrapeRunRow    = Tables["gcc_scrape_runs"]["Row"];
+export type GccScrapeRunInsert = Tables["gcc_scrape_runs"]["Insert"];
+export type GccScrapeRunUpdate = Tables["gcc_scrape_runs"]["Update"];
+
+export type GccAgentRunRow    = Tables["gcc_agent_runs"]["Row"];
+export type GccAgentRunInsert = Tables["gcc_agent_runs"]["Insert"];
