@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/site-config';
 /**
  * Apple News Format Export
  * GET /api/articles/[id]/apple-news
@@ -10,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { ApiResponse } from '@/types';
 
-const BASE_URL = 'https://www.iktissadonline.com';
+const BASE_URL = SITE_URL;
 
 interface AppleNewsDocument {
   version: string;

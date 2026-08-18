@@ -55,21 +55,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Legacy URLs are resolved by LOOKUP, not by pattern — see src/lib/redirects.ts
+  // and the /news/[...path] + /Article/[...rest] routes.
+  //
+  // The rules that used to live here stripped the date prefix and passed the rest
+  // through as our slug. That assumed the Drupal alias and our slug were the same
+  // string; they are not, because Drupal slugified the article's <br> tags into a
+  // literal "-br-". Measured against production, 6,681 of 8,490 legacy article
+  // URLs (78.7%) 404'd as a result.
   async redirects() {
-    return [
-      // Drupal date-prefixed URLs: /news/YYYY/MM/DD/slug → /slug
-      {
-        source: '/news/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug',
-        destination: '/:slug',
-        permanent: true,
-      },
-      // Drupal simple news URLs: /news/slug → /slug
-      {
-        source: '/news/:slug',
-        destination: '/:slug',
-        permanent: true,
-      },
-    ];
+    return [];
   },
   async rewrites() {
     return [

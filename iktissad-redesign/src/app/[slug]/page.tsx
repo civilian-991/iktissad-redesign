@@ -1,5 +1,7 @@
+import { SITE_URL } from '@/lib/site-config';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { lookupRedirect, encodePath } from '@/lib/redirects';
 import { getArticleForRender } from '@/lib/articles/get-article';
 import ArticlePageClient from './PageClient';
 
@@ -15,7 +17,7 @@ import ArticlePageClient from './PageClient';
 // getArticleForRender → unstable_cache) so the DB isn't hit on every request.
 export const revalidate = 3600; // 1 hour (governs the cached article data)
 
-const BASE_URL = 'https://www.iktissadonline.com';
+const BASE_URL = SITE_URL;
 const SITE_NAME = 'الإقتصاد والأعمال';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -83,8 +85,15 @@ export default async function ArticlePage({
   const { slug } = await params;
   const article = await getArticleForRender(slug);
 
-  // Missing/unpublished article → real 404 (static not-found, proper status).
-  if (!article) notFound();
+  // Before returning a 404, check whether this path is a retired URL we know the
+  // destination for. The rebuild renames ~16,000 slugs and retires the duplicate
+  // ones, and awalan's own slugs are served at the root too — all of those live
+  // in article_redirects. Only a path with no mapping is a genuine 404.
+  if (!article) {
+    const to = await lookupRedirect('/' + slug);
+    if (to) permanentRedirect(encodePath(to));
+    notFound();
+  }
 
   const newsArticleJsonLd = {
     '@context': 'https://schema.org',

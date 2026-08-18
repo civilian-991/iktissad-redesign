@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/site-config';
 import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
@@ -23,7 +24,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const SITE_URL = "https://www.iktissadonline.com";
+
 
 export const metadata: Metadata = {
   // Resolves relative canonical/OG URLs set per-page (e.g. canonical: "/").
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "الإقتصاد والأعمال | Al-Iktissad Wal-Aamal",
     description: "المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي",
-    url: "https://www.iktissadonline.com",
+    url: SITE_URL,
     siteName: "الإقتصاد والأعمال",
     locale: "ar_SA",
     type: "website",

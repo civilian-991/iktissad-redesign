@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/site-config';
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
@@ -33,8 +34,8 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "Applebot-Extended", disallow: "/" },
     ],
     sitemap: [
-      "https://www.iktissadonline.com/sitemap.xml",
-      "https://www.iktissadonline.com/news-sitemap.xml",
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/news-sitemap.xml`,
     ],
   };
 }

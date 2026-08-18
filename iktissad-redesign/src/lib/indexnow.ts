@@ -1,10 +1,11 @@
+import { SITE_URL } from '@/lib/site-config';
 // Required env var: INDEXNOW_KEY
 // The key value must match the string served by GET /api/indexnow/key.
 // Obtain or generate a key at https://www.indexnow.org/documentation
 // and set it in your .env.local and production environment variables.
 
 const INDEXNOW_API = 'https://api.indexnow.org/indexnow';
-const BASE_URL = 'https://www.iktissadonline.com';
+const BASE_URL = SITE_URL;
 
 export async function notifyIndexNow(slugs: string[]): Promise<void> {
   const key = process.env.INDEXNOW_KEY;

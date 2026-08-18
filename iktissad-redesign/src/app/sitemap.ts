@@ -1,7 +1,8 @@
+import { SITE_URL } from '@/lib/site-config';
 import { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
 
-const BASE_URL = "https://www.iktissadonline.com";
+const BASE_URL = SITE_URL;
 
 const sectionSlugs = [
   "economy",

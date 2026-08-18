@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/site-config';
 /**
  * Social Media Auto-Posting Utility
  *
@@ -7,7 +8,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 
-const BASE_URL = 'https://www.iktissadonline.com';
+const BASE_URL = SITE_URL;
 
 export interface PostResult {
   platform: string;
