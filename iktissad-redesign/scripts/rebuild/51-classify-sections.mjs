@@ -27,7 +27,6 @@ import { stripMarkup } from './slug.mjs';
 import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
 import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -95,7 +94,10 @@ async function classify(a) {
 
   try {
     const { object } = await generateObject({
-      model: openai('gpt-5-mini'),
+      // Routed through the Vercel AI Gateway (AI_GATEWAY_API_KEY): a plain
+      // "provider/model" string is resolved by the gateway, so there is no
+      // direct provider account or per-provider rate limit to manage.
+      model: 'openai/gpt-5-mini',
       schema,
       system:
 `You assign an Arabic business-news article to exactly one section of a financial news site.
