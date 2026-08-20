@@ -287,24 +287,25 @@ export default function Header() {
             </motion.button>
 
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 ms-auto lg:ms-0">
-              {/* Not أبواب, but they still need a way in */}
-              <div className="hidden lg:flex items-center gap-4 me-2">
-                <Link
-                  href="/magazine"
-                  className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
-                >
-                  {t('nav.main.magazine')}
-                </Link>
-                <Link
-                  href="/about"
-                  className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
-                >
-                  {t('nav.main.group')}
-                </Link>
-              </div>
+            {/* Not أبواب, but they still need a way in. Anchored to the start
+                edge so the row is not a single cluster with a dead half. */}
+            <div className="hidden lg:flex items-center gap-5">
+              <Link
+                href="/magazine"
+                className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
+              >
+                {t('nav.main.magazine')}
+              </Link>
+              <Link
+                href="/about"
+                className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
+              >
+                {t('nav.main.group')}
+              </Link>
+            </div>
 
+            {/* Actions — end edge */}
+            <div className="flex items-center gap-3 ms-auto">
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -351,7 +352,7 @@ export default function Header() {
               >
                 <Link
                   href={item.href}
-                  className="flex items-center gap-1 px-2.5 py-2 font-[family-name:var(--font-display)] font-semibold text-[13px] whitespace-nowrap text-ink hover:text-gold transition-colors duration-300 relative group"
+                  className="flex items-center gap-1 px-1.5 2xl:px-2.5 py-2 font-[family-name:var(--font-display)] font-semibold text-[12px] 2xl:text-[13px] whitespace-nowrap text-ink hover:text-gold transition-colors duration-300 relative group"
                 >
                   <span>{getNavName(item.key)}</span>
                   {item.submenu && (
@@ -362,7 +363,7 @@ export default function Header() {
                       }`}
                     />
                   )}
-                  <span className="absolute bottom-1 start-2.5 end-2.5 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
+                  <span className="absolute bottom-1 start-1.5 end-1.5 2xl:start-2.5 2xl:end-2.5 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
                 </Link>
 
                 {/* Dropdown Menu */}

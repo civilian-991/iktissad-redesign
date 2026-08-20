@@ -45,7 +45,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
 const LIMIT = (() => { const i = args.indexOf('--limit'); return i !== -1 ? parseInt(args[i + 1], 10) : null; })();
-const CONCURRENCY = 8;
+const CONCURRENCY = 20;
 const CACHE_FILE = resolve(DATA_DIR, 'section-classifications-15.json');
 
 // ── allowed values come from the DATABASE, never from a literal ─────────────
@@ -230,18 +230,21 @@ if (!APPLY) {
   process.exit(0);
 }
 
-// ── snapshot before writing, so the pass can be undone ──────────────────────
-log('\nsnapshotting current sections to article_section_backup_050…');
-const { error: snapErr } = await supabase.rpc('exec_sql', {
-  sql: `create table if not exists article_section_backup_050 as
-        select id, section_id, now() as snapshot_at from articles;`,
-}).catch(() => ({ error: { message: 'exec_sql rpc unavailable' } }));
+// ── refuse to write without a snapshot to revert to ─────────────────────────
+// The snapshot is DDL, which PostgREST will not run, so it is created out of
+// band. Verifying it here rather than creating it means --apply can never
+// proceed on an unprotected table.
+const { count: snapCount, error: snapErr } = await supabase
+  .from('article_section_backup_050')
+  .select('id', { count: 'exact', head: true });
 if (snapErr) {
-  warn(`snapshot skipped: ${snapErr.message}`);
-  warn('run this in the SQL editor first, then re-run with --apply:');
-  warn('  create table article_section_backup_050 as select id, section_id from articles;');
+  warn(`no snapshot table: ${snapErr.message}`);
+  warn('create it in the SQL editor first, then re-run with --apply:');
+  warn('  create table article_section_backup_050 as');
+  warn('    select id, section_id, now() as snapshot_at from articles;');
   process.exit(1);
 }
+log(`\nsnapshot present: ${snapCount} rows in article_section_backup_050`);
 
 let updated = 0, rejected = 0;
 for (let i = 0; i < moves.length; i += 200) {
