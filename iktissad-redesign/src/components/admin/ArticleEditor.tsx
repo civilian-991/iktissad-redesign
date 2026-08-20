@@ -63,7 +63,7 @@ import ArticleVersionPanel from '@/components/admin/ArticleVersionPanel';
 import SharePreviewModal from '@/components/admin/SharePreviewModal';
 import FactCheckPanel from '@/components/admin/FactCheckPanel';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion, aiAutoTag, aiSummarize, aiGenerateSocialCards } from '@/lib/api-client';
-import { asTipTapDoc } from '@/lib/tiptap-body';
+import { resolveArticleBody } from '@/lib/tiptap-body';
 import { slugify } from '@/lib/slugify';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
@@ -103,35 +103,12 @@ function extractText(node: JSONContent | null | undefined): string {
 
 /**
  * Resolve the editor's initial TipTap document from an article.
- *
- * The editor stores its document two ways at save time:
- *   - `body` (jsonb)           — the TipTap JSON object
- *   - `content` (text/string)  — JSON.stringify of the same object (legacy)
- *
- * When loading, prefer `body`. If absent or empty, attempt to parse `content`
- * as JSON (older drafts may still have only this). Fall back to the raw string
- * so pre-TipTap HTML content still renders.
+ * See resolveArticleBody in @/lib/tiptap-body for the body/content rules.
  */
 function resolveInitialBody(article: Article): JSONContent | string {
   // body is set by the mapper from row.body (jsonb)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const body = (article as any).body as JSONContent | string | null | undefined;
-  const doc = asTipTapDoc(body);
-  if (doc) return doc;
-  if (typeof body === 'string' && body.trim()) {
-    try {
-      const parsed = asTipTapDoc(JSON.parse(body));
-      if (parsed) return parsed;
-    } catch { /* fall through */ }
-  }
-  const content = article.content ?? '';
-  if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
-    try {
-      const parsed = asTipTapDoc(JSON.parse(content));
-      if (parsed) return parsed;
-    } catch { /* fall through */ }
-  }
-  return content;
+  return resolveArticleBody((article as any).body, article.content);
 }
 
 export default function ArticleEditor({ articleId }: { articleId: string }) {

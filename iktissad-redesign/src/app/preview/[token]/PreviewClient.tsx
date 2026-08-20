@@ -11,7 +11,7 @@ import Image from 'next/image'
 import { Clock, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import TipTapRenderer from '@/components/admin/TipTapRenderer'
-import { asTipTapDoc } from '@/lib/tiptap-body'
+import { resolveArticleBody } from '@/lib/tiptap-body'
 
 interface ArticleRow {
   id: string
@@ -44,7 +44,7 @@ export default function PreviewClient({ article, isDraft, expiresAt }: PreviewCl
 
   // Prefer block-based body over HTML content string. An empty jsonb body
   // ([] on every migrated row) is not a document — fall through to content.
-  const bodyContent = asTipTapDoc(article.body) ?? (article.content || null)
+  const bodyContent = resolveArticleBody(article.body, article.content) || null
 
   const expiresDate = new Date(expiresAt)
   const expiresLabel = expiresDate.toLocaleString('ar-SA-u-nu-latn', {
