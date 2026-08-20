@@ -112,7 +112,18 @@ const todo = [];
   }
 }
 log(`published articles: ${todo.length}`);
-const work = LIMIT ? todo.slice(0, LIMIT) : todo;
+
+// فيديو and ملفات are format أبواب, not subject أبواب: a video about a CEO is
+// still a video, and a special file stays a file whatever it covers. A subject
+// classifier will always find a "better" subject باب for them and empty the
+// two out — it pulled 45 videos and 15 files before this guard existed. They
+// are neither reclassified nor available as a destination.
+const FORMAT_ABWAB = new Set(['videos', 'files']);
+const parked = todo.filter(a => FORMAT_ABWAB.has(sectionSlugById.get(a.section_id)));
+const classifiable = todo.filter(a => !FORMAT_ABWAB.has(sectionSlugById.get(a.section_id)));
+if (parked.length) log(`left alone (format أبواب): ${parked.length}`);
+
+const work = LIMIT ? classifiable.slice(0, LIMIT) : classifiable;
 
 const hashOf = (a) => createHash('sha1')
   .update(VOCAB + '|' + stripMarkup(a.title) + '|' + stripMarkup(a.excerpt || '').slice(0, 200))
@@ -198,7 +209,8 @@ writeFileSync(CACHE_FILE, JSON.stringify(cache));
 
 // A move is a high-confidence decision that names a different section.
 const moves = decisions.filter(d =>
-  d.section !== 'keep' && d.section !== d.from && d.confidence === 'high');
+  d.section !== 'keep' && d.section !== d.from && d.confidence === 'high'
+  && !FORMAT_ABWAB.has(d.section));
 const softMoves = decisions.filter(d =>
   d.section !== 'keep' && d.section !== d.from && d.confidence !== 'high');
 
