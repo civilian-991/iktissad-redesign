@@ -338,11 +338,13 @@ export default function Header() {
           </div>
         </div>
 
-        {/* الأبواب strip */}
+        {/* الأبواب strip. justify-between only from xl up, where the 15
+            items fit on one line and can sit flush with the row above; below
+            that they wrap, and a spread-out last row reads as broken. */}
         <div className="hidden lg:block border-t border-sand/60 bg-paper">
           <div className="container-editorial">
           {/* الأبواب — the 15 top-level sections, on their own strip */}
-          <nav className="hidden lg:flex flex-wrap items-center justify-center gap-x-0.5">
+          <nav className="hidden lg:flex flex-wrap items-center justify-center xl:justify-between gap-x-0.5">
             {navigationConfig.map((item) => (
               <div
                 key={item.key}
