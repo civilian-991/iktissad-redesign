@@ -275,7 +275,7 @@ export default function PlanFormClient({ plan }: Props) {
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-bold hover:bg-gold/90 disabled:opacity-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-bold hover:bg-gold/90 disabled:opacity-50 transition-colors"
         >
           {saving ? (
             <Loader2 size={iconSizes.md} className="animate-spin" />

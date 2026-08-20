@@ -139,7 +139,7 @@ export default function SeriesPageClient({ params }: { params: Promise<{ slug: s
                 {/* Section heading */}
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-1 h-8 bg-gold" />
-                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy">
+                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink">
                     {t('series.episodes')}
                   </h2>
                 </div>
@@ -162,7 +162,7 @@ export default function SeriesPageClient({ params }: { params: Promise<{ slug: s
                           <div className="flex items-start gap-4 p-5 bg-white/60 rounded-xl border border-sand/60 opacity-70 cursor-not-allowed">
                             <PartBadge index={index} t={t} />
                             <div className="flex-1 min-w-0">
-                              <p className="font-[family-name:var(--font-display)] font-bold text-navy text-base line-clamp-2">
+                              <p className="font-[family-name:var(--font-display)] font-bold text-ink text-base line-clamp-2">
                                 {article?.title ?? `${t('series.part')} ${index + 1}`}
                               </p>
                             </div>
@@ -176,7 +176,7 @@ export default function SeriesPageClient({ params }: { params: Promise<{ slug: s
                           >
                             <PartBadge index={index} t={t} />
                             <div className="flex-1 min-w-0">
-                              <p className="font-[family-name:var(--font-display)] font-bold text-navy text-base line-clamp-2 group-hover:text-gold transition-colors">
+                              <p className="font-[family-name:var(--font-display)] font-bold text-ink text-base line-clamp-2 group-hover:text-gold transition-colors">
                                 {article!.title}
                               </p>
                               {article!.publishedAt && (

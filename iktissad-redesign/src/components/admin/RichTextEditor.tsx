@@ -159,7 +159,7 @@ function LinkInput({
       />
       <button
         onClick={() => { if (url) onSubmit(url); }}
-        className="px-3 py-1.5 bg-gold text-obsidian rounded-lg text-sm font-semibold hover:bg-gold/90 transition-colors"
+        className="px-3 py-1.5 bg-gold text-ink rounded-lg text-sm font-semibold hover:bg-gold/90 transition-colors"
       >
         OK
       </button>

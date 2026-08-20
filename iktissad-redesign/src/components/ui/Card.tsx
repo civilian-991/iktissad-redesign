@@ -210,12 +210,12 @@ export function CardHeader({
         <>
           <div>
             {title && (
-              <h3 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
+              <h3 className="text-lg font-bold text-ink font-[family-name:var(--font-display)]">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm text-pewter mt-0.5">{subtitle}</p>
             )}
           </div>
           {action && <div className="flex-shrink-0">{action}</div>}
@@ -376,7 +376,7 @@ export function ArticleCard({
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
           {category && (
-            <span className="absolute top-3 right-3 px-2 py-1 bg-accent text-brand-900 text-xs font-bold uppercase tracking-wide">
+            <span className="absolute top-3 right-3 px-2 py-1 bg-accent text-ink text-xs font-bold uppercase tracking-wide">
               {category}
             </span>
           )}
@@ -386,7 +386,7 @@ export function ArticleCard({
       <div className={`flex flex-col ${isHorizontal ? 'flex-1 p-4' : 'p-4'}`}>
         <h3
           className={`
-            font-bold text-slate-900 line-clamp-2 font-[family-name:var(--font-display)]
+            font-bold text-ink line-clamp-2 font-[family-name:var(--font-display)]
             ${size === 'lg' ? 'text-xl' : size === 'md' ? 'text-lg' : 'text-base'}
           `}
         >
@@ -394,11 +394,11 @@ export function ArticleCard({
         </h3>
 
         {excerpt && (
-          <p className="text-slate-600 text-sm mt-2 line-clamp-2">{excerpt}</p>
+          <p className="text-graphite text-sm mt-2 line-clamp-2">{excerpt}</p>
         )}
 
         {(author || date || readTime) && (
-          <div className="flex items-center gap-3 mt-auto pt-3 text-xs text-slate-500">
+          <div className="flex items-center gap-3 mt-auto pt-3 text-xs text-pewter">
             {author && <span className="font-medium">{author}</span>}
             {date && <span>{date}</span>}
             {readTime && <span>{readTime}</span>}
@@ -442,8 +442,8 @@ export function StatCard({
     <Card variant="elevated" size="md" className={className}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500 font-medium">{label}</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1 font-[family-name:var(--font-display)]">
+          <p className="text-sm text-pewter font-medium">{label}</p>
+          <p className="text-2xl font-bold text-ink mt-1 font-[family-name:var(--font-display)]">
             {value}
           </p>
           {change && (

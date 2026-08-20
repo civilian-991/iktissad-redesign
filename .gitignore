@@ -36,3 +36,4 @@ next-env.d.ts
 iktissad-redesign/scripts/migration/progress-*.json
 iktissad-redesign/scripts/progress-*.json
 iktissad-redesign/scripts/drupal-export.json
+.gstack/

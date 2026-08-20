@@ -91,7 +91,7 @@ function QuickLinkCard({
         {icon}
       </div>
       <div>
-        <p className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm group-hover:text-gold transition-colors">
+        <p className="font-[family-name:var(--font-display)] font-bold text-ink text-sm group-hover:text-gold transition-colors">
           {label}
         </p>
         <p className="text-pewter text-xs mt-0.5">{description}</p>
@@ -136,7 +136,7 @@ function MiniArticleCard({
             {sector}
           </span>
         )}
-        <p className="font-[family-name:var(--font-display)] font-semibold text-obsidian text-xs leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+        <p className="font-[family-name:var(--font-display)] font-semibold text-ink text-xs leading-snug line-clamp-2 group-hover:text-gold transition-colors">
           {title}
         </p>
         {date && (
@@ -173,7 +173,7 @@ function SubscriptionStatusCard({ subscriber }: { subscriber: SubscriptionData |
           </div>
           <div>
             <p className="text-xs text-pewter mb-0.5">{t('pages.account.subscription.title')}</p>
-            <p className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm">
+            <p className="font-[family-name:var(--font-display)] font-bold text-ink text-sm">
               {t('pages.account.subscription.noSubscription')}
             </p>
           </div>
@@ -198,7 +198,7 @@ function SubscriptionStatusCard({ subscriber }: { subscriber: SubscriptionData |
         </div>
         <div>
           <p className="text-xs text-pewter mb-0.5">{t('pages.account.subscription.currentPlan')}</p>
-          <p className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm">
+          <p className="font-[family-name:var(--font-display)] font-bold text-ink text-sm">
             {subscriber.subscription_plans?.name_ar ?? 'اشتراك نشط'}
           </p>
         </div>
@@ -290,7 +290,7 @@ export default function AccountDashboardClient({ userId: _userId, userEmail }: P
               className="bg-white rounded-2xl shadow-sm border border-ivory overflow-hidden"
             >
               <div className="flex items-center justify-between p-5 border-b border-ivory">
-                <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm flex items-center gap-2">
+                <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm flex items-center gap-2">
                   <Bookmark className="text-gold" size={16} />
                   {t('pages.account.dashboard.recentSaved')}
                 </h2>
@@ -337,7 +337,7 @@ export default function AccountDashboardClient({ userId: _userId, userEmail }: P
               className="bg-white rounded-2xl shadow-sm border border-ivory overflow-hidden"
             >
               <div className="flex items-center justify-between p-5 border-b border-ivory">
-                <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm flex items-center gap-2">
+                <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm flex items-center gap-2">
                   <BookOpen className="text-gold" size={16} />
                   {t('pages.account.dashboard.recentHistory')}
                 </h2>
@@ -383,7 +383,7 @@ export default function AccountDashboardClient({ userId: _userId, userEmail }: P
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm mb-4 flex items-center gap-2">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm mb-4 flex items-center gap-2">
               <div className="w-1 h-4 bg-gold rounded-full" />
               {t('pages.account.dashboard.quickLinks')}
             </h2>

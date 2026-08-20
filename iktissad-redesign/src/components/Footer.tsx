@@ -17,7 +17,6 @@ import { swrFetcher } from '@/lib/api-client';
 import type { Section, Sector, ApiResponse } from '@/types';
 import {
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
   Youtube,
@@ -27,6 +26,7 @@ import {
   ChevronUp,
   ExternalLink
 } from 'lucide-react';
+import { XIcon } from '@/components/icons/SocialIcons';
 import { useTranslation } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
 
@@ -50,7 +50,7 @@ const aboutLinks: FooterLink[] = [
 
 const socialLinks = [
   { icon: Facebook, href: 'https://facebook.com/iktissad', label: 'Facebook' },
-  { icon: Twitter, href: 'https://twitter.com/iktissad', label: 'Twitter' },
+  { icon: XIcon, href: 'https://x.com/iktissad', label: 'X' },
   { icon: Instagram, href: 'https://instagram.com/iktissad', label: 'Instagram' },
   { icon: Linkedin, href: 'https://linkedin.com/company/iktissad', label: 'LinkedIn' },
   { icon: Youtube, href: 'https://youtube.com/iktissad', label: 'YouTube' },

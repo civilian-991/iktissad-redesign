@@ -116,7 +116,7 @@ function SectorCard({ sector }: { sector: Sector }) {
               {index + 1}
             </span>
             <div className="flex-1 min-w-0">
-              <h5 className="font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian leading-relaxed line-clamp-2 group-hover/item:text-gold transition-colors duration-300">
+              <h5 className="font-[family-name:var(--font-display)] font-semibold text-sm text-ink leading-relaxed line-clamp-2 group-hover/item:text-gold transition-colors duration-300">
                 {article.title}
               </h5>
               {article.publishedAt && (
@@ -158,7 +158,7 @@ export default function SectorNews() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('components.sectorNews.title')}
             </h2>
           </div>

@@ -114,7 +114,7 @@ export default function HeadlineTestsClient() {
         </div>
         <Link
           href="/admin/headlines"
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-midnight rounded-lg hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)] text-sm font-semibold"
+          className="flex items-center gap-2 px-4 py-2 bg-gold text-ink rounded-lg hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)] text-sm font-semibold"
         >
           <Plus size={iconSizes.sm} />
           {t('admin.headlineTests.newTest')}

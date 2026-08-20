@@ -381,7 +381,7 @@ export default function SpreadBuilderClient({ issueId }: Props) {
           <button
             onClick={handleManualSave}
             disabled={state.isSaving || !selectedSpread}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-gold/80 text-obsidian font-[family-name:var(--font-display)] font-bold text-sm rounded-xl hover:shadow-lg transition-all disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-gold/80 text-ink font-[family-name:var(--font-display)] font-bold text-sm rounded-xl hover:shadow-lg transition-all disabled:opacity-60"
           >
             {state.isSaving ? (
               <Loader2 size={15} className="animate-spin" />

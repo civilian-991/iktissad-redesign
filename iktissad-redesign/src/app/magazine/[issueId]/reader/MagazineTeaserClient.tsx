@@ -119,7 +119,7 @@ export default function MagazineTeaserClient({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h2 className="text-xl font-[family-name:var(--font-display)] font-black text-navy mb-6 flex items-center gap-2">
+                <h2 className="text-xl font-[family-name:var(--font-display)] font-black text-ink mb-6 flex items-center gap-2">
                   <span className="w-1 h-5 bg-gold flex-shrink-0 inline-block" />
                   {t('magazine.teaser_toc_heading')}
                 </h2>

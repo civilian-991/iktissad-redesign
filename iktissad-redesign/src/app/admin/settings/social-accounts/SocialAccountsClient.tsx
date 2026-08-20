@@ -132,7 +132,7 @@ export default function SocialAccountsClient() {
         </div>
         <button
           onClick={() => { setForm(EMPTY_FORM); setModalOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 transition-colors"
         >
           <Plus size={iconSizes.md} />
           ربط حساب جديد
@@ -348,7 +348,7 @@ export default function SocialAccountsClient() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2 bg-gold text-obsidian rounded-lg font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-5 py-2 bg-gold text-ink rounded-lg font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
                 {saving ? 'جارٍ الحفظ...' : 'حفظ'}

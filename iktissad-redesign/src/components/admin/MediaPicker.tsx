@@ -285,7 +285,7 @@ export default function MediaPicker({
                           {/* Selection indicator */}
                           {selectedFile?.path === file.path && (
                             <div className="absolute top-2 start-2 w-6 h-6 bg-gold rounded-full flex items-center justify-center">
-                              <Check size={14} className="text-obsidian" />
+                              <Check size={14} className="text-ink" />
                             </div>
                           )}
                           {/* Name on hover */}
@@ -359,7 +359,7 @@ export default function MediaPicker({
                   <button
                     onClick={handleConfirm}
                     disabled={!selectedFile}
-                    className="px-5 py-2 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-5 py-2 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     إدراج
                   </button>

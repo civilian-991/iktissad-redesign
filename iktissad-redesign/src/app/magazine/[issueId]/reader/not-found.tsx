@@ -29,7 +29,7 @@ export default function ReaderNotFound() {
 
       <Link
         href="/magazine"
-        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold/90"
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold/90"
       >
         العودة إلى الأعداد
       </Link>

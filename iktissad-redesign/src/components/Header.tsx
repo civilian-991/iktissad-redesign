@@ -21,11 +21,11 @@ import {
   Search,
   ChevronDown,
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
   Youtube
 } from 'lucide-react';
+import { XIcon } from '@/components/icons/SocialIcons';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
 import PushNotificationToggle from '@/components/PushNotificationToggle';
@@ -49,7 +49,7 @@ interface NavItem {
 
 const socialLinks = [
   { icon: Facebook, href: 'https://facebook.com/iktissad', label: 'Facebook' },
-  { icon: Twitter, href: 'https://twitter.com/iktissad', label: 'Twitter' },
+  { icon: XIcon, href: 'https://x.com/iktissad', label: 'X' },
   { icon: Instagram, href: 'https://instagram.com/iktissad', label: 'Instagram' },
   { icon: Linkedin, href: 'https://linkedin.com/company/iktissad', label: 'LinkedIn' },
   { icon: Youtube, href: 'https://youtube.com/iktissad', label: 'YouTube' },
@@ -281,7 +281,7 @@ export default function Header() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center gap-1.5 px-4 py-2 font-[family-name:var(--font-display)] font-semibold text-sm text-obsidian hover:text-gold transition-colors duration-300 relative group"
+                    className="flex items-center gap-1.5 px-4 py-2 font-[family-name:var(--font-display)] font-semibold text-sm text-ink hover:text-gold transition-colors duration-300 relative group"
                   >
                     <span>{getNavName(item.key)}</span>
                     {item.submenu && (
@@ -385,14 +385,14 @@ export default function Header() {
                     <Link
                       href={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-6 py-3.5 font-[family-name:var(--font-display)] font-semibold text-obsidian hover:bg-cream hover:text-gold transition-colors"
+                      className="flex items-center justify-between px-6 py-3.5 font-[family-name:var(--font-display)] font-semibold text-ink hover:bg-cream hover:text-gold transition-colors"
                     >
                       <span>{getNavName(item.key)}</span>
                       {item.submenu && <ChevronDown size={iconSizes.sm} className="text-gold/50" />}
                     </Link>
                     {item.submenu && (
                       <div className="bg-cream/50 ms-4">
-                        {item.submenu.slice(0, 6).map((subItem) => (
+                        {item.submenu.map((subItem) => (
                           <Link
                             key={subItem.key}
                             href={subItem.href}
@@ -402,15 +402,6 @@ export default function Header() {
                             {getSubmenuName(subItem)}
                           </Link>
                         ))}
-                        {item.submenu.length > 6 && (
-                          <Link
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block px-8 py-2.5 text-sm text-gold font-semibold"
-                          >
-                            {t('common.actions.viewAll')} ({item.submenu.length})
-                          </Link>
-                        )}
                       </div>
                     )}
                   </motion.div>

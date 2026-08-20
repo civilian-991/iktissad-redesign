@@ -50,7 +50,7 @@ export default function PlansPage() {
         </div>
         <Link
           href="/admin/plans/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-bold hover:bg-gold/90 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] text-sm font-bold hover:bg-gold/90 transition-colors"
         >
           <Plus size={iconSizes.md} />
           {t('admin.plans.add')}

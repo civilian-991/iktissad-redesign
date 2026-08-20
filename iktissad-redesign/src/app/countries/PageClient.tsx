@@ -120,7 +120,7 @@ export default function CountriesPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 تغطيتنا الجغرافية
               </h2>
               <p className="text-slate max-w-2xl mx-auto">
@@ -140,7 +140,7 @@ export default function CountriesPageClient() {
                   whileHover={{ scale: 1.05 }}
                   className="bg-white rounded-xl p-5 shadow-sm hover:shadow-lg transition-all text-center"
                 >
-                  <span className="font-[family-name:var(--font-display)] font-semibold text-navy text-sm">
+                  <span className="font-[family-name:var(--font-display)] font-semibold text-ink text-sm">
                     {country.name}
                   </span>
                 </motion.a>

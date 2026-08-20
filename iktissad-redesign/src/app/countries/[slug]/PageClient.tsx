@@ -227,7 +227,7 @@ export default function CountryPageClient() {
                         </div>
                       )}
                       <div className="p-5">
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors mb-3">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink leading-snug line-clamp-2 group-hover:text-gold transition-colors mb-3">
                           {article.title}
                         </h3>
                         {article.publishedAt && (
@@ -255,7 +255,7 @@ export default function CountryPageClient() {
                             {article.sector}
                           </span>
                         )}
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy group-hover:text-gold transition-colors mb-2">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink group-hover:text-gold transition-colors mb-2">
                           {article.title}
                         </h3>
                         {article.publishedAt && (

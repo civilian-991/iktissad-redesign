@@ -520,7 +520,7 @@ export default function ImageEditorModal({
                             onClick={() => applyAspect(preset.value)}
                             className={`py-2 rounded-lg text-xs font-[family-name:var(--font-display)] transition-colors ${
                               aspect === preset.value
-                                ? 'bg-gold text-obsidian'
+                                ? 'bg-gold text-ink'
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                             }`}
                           >
@@ -762,7 +762,7 @@ export default function ImageEditorModal({
                 <button
                   onClick={handleSave}
                   disabled={busy || !workingSrc}
-                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {busy ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                   {busy ? 'جاري الحفظ...' : 'حفظ الصورة'}

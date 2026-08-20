@@ -136,7 +136,7 @@ export default function GroupPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.group.publications')}
               </h2>
               <p className="text-slate max-w-2xl mx-auto">
@@ -173,7 +173,7 @@ export default function GroupPageClient() {
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       {Object.entries(pub.stats).map(([key, value]) => (
                         <div key={key} className="text-center">
-                          <div className="text-xl font-[family-name:var(--font-display)] font-bold text-navy">
+                          <div className="text-xl font-[family-name:var(--font-display)] font-bold text-ink">
                             {value}
                           </div>
                           <div className="text-xs text-slate">
@@ -204,7 +204,7 @@ export default function GroupPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.group.servicesTitle')}
               </h2>
             </motion.div>
@@ -222,7 +222,7 @@ export default function GroupPageClient() {
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center mx-auto mb-4">
                     <service.icon className="text-white" size={24} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy mb-2">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                     {service.title}
                   </h3>
                   <p className="text-slate text-sm">{service.description}</p>

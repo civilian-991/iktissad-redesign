@@ -169,7 +169,7 @@ export default function NewMagazinePage() {
           <button
             onClick={() => handleSave()}
             disabled={isBusy}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-70"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-70"
           >
             {isBusy ? (
               <Loader2 size={18} className="animate-spin" />
@@ -544,7 +544,7 @@ export default function NewMagazinePage() {
                   </div>
                 )}
                 {featured && (
-                  <div className="absolute top-2 right-2 px-2 py-1 bg-gold text-obsidian text-xs font-bold rounded">
+                  <div className="absolute top-2 right-2 px-2 py-1 bg-gold text-ink text-xs font-bold rounded">
                     {t('admin.magazines.create.featured')}
                   </div>
                 )}

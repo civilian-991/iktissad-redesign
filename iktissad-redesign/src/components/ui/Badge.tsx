@@ -67,7 +67,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const variantStyles: Record<BadgeVariant, string> = {
   default: `
     bg-slate-100
-    text-slate-700
+    text-graphite
     border border-slate-200
   `,
   primary: `
@@ -112,12 +112,12 @@ const variantStyles: Record<BadgeVariant, string> = {
   `,
   trending: `
     bg-gradient-to-r from-accent to-accent-600
-    text-brand-900
+    text-ink
     border border-accent
   `,
   outline: `
     bg-transparent
-    text-slate-600
+    text-graphite
     border border-slate-300
     hover:bg-slate-50
   `,

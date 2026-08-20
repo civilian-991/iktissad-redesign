@@ -235,7 +235,7 @@ export default function ContactSubmissionsClient() {
               <div className="flex justify-between pt-2 border-t border-gold/10">
                 <a
                   href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject)}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-obsidian rounded-lg font-semibold text-sm hover:bg-gold/90 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-ink rounded-lg font-semibold text-sm hover:bg-gold/90 transition-colors"
                 >
                   <Mail size={14} />
                   الرد عبر البريد

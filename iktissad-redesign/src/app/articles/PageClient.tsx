@@ -68,7 +68,7 @@ function FeaturedCard({ article }: { article: Article }) {
               {article.sector}
             </span>
           )}
-          <h2 className="font-[family-name:var(--font-display)] font-black text-obsidian text-2xl lg:text-3xl leading-snug group-hover:text-navy transition-colors duration-200 mb-4">
+          <h2 className="font-[family-name:var(--font-display)] font-black text-ink text-2xl lg:text-3xl leading-snug group-hover:text-ink transition-colors duration-200 mb-4">
             {article.title}
           </h2>
           {article.excerpt && (
@@ -118,7 +118,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-navy/5 to-navy/15 flex items-center justify-center">
-            <span className="text-navy/20 font-[family-name:var(--font-display)] font-black text-4xl select-none">
+            <span className="text-ink/20 font-[family-name:var(--font-display)] font-black text-4xl select-none">
               اقتصاد
             </span>
           </div>
@@ -133,7 +133,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
 
       {/* Body */}
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base leading-snug line-clamp-2 group-hover:text-navy transition-colors duration-200 mb-2">
+        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-base leading-snug line-clamp-2 group-hover:text-ink transition-colors duration-200 mb-2">
           {article.title}
         </h3>
         {article.excerpt && (

@@ -138,7 +138,7 @@ export default function SuccessPageClient() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian text-center mb-8"
+              className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink text-center mb-8"
             >
               {t('pages.subscribe.success.benefits.title')}
             </motion.h2>
@@ -172,7 +172,7 @@ export default function SuccessPageClient() {
               viewport={{ once: true }}
               className="bg-white rounded-2xl p-8 shadow-lg"
             >
-              <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian mb-2">
+              <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                 {t('pages.subscribe.success.onboarding.title')}
               </h2>
               <p className="text-pewter text-sm mb-6">
@@ -188,7 +188,7 @@ export default function SuccessPageClient() {
                       onClick={() => toggleSector(key)}
                       className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-[family-name:var(--font-display)] font-semibold transition-all duration-200 ${
                         active
-                          ? 'border-gold bg-gold/10 text-obsidian shadow-sm'
+                          ? 'border-gold bg-gold/10 text-ink shadow-sm'
                           : 'border-sand bg-ivory text-pewter hover:border-gold/40'
                       }`}
                     >

@@ -281,7 +281,7 @@ export default function TwoFactorSetup() {
           </button>
           <button
             onClick={() => setStep('success')}
-            className="flex-1 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all"
+            className="flex-1 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all"
           >
             تم الحفظ
           </button>
@@ -367,7 +367,7 @@ export default function TwoFactorSetup() {
             <button
               type="submit"
               disabled={actionLoading || code.length !== 6}
-              className="flex-1 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {actionLoading && <Loader2 size={14} className="animate-spin" />}
               تحقق وتفعيل
@@ -476,7 +476,7 @@ export default function TwoFactorSetup() {
           <button
             onClick={handleStartVerification}
             disabled={actionLoading}
-            className="flex-1 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:shadow-gold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {actionLoading && <Loader2 size={14} className="animate-spin" />}
             التالي: إدخال الرمز

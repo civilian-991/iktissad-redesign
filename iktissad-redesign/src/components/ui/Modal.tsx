@@ -218,7 +218,7 @@ export function Modal({
                       {title && (
                         <h2
                           id="modal-title"
-                          className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]"
+                          className="text-lg font-bold text-ink font-[family-name:var(--font-display)]"
                         >
                           {title}
                         </h2>
@@ -226,7 +226,7 @@ export function Modal({
                       {description && (
                         <p
                           id="modal-description"
-                          className="text-sm text-slate-500 mt-1"
+                          className="text-sm text-pewter mt-1"
                         >
                           {description}
                         </p>
@@ -361,10 +361,10 @@ export function ConfirmModal({
         >
           {config.icon}
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2 font-[family-name:var(--font-display)]">
+        <h3 className="text-lg font-bold text-ink mb-2 font-[family-name:var(--font-display)]">
           {title}
         </h3>
-        <p className="text-slate-600">{message}</p>
+        <p className="text-graphite">{message}</p>
       </div>
     </Modal>
   );
@@ -494,7 +494,7 @@ export function Sheet({
             {(title || showCloseButton) && (
               <div className="flex items-center justify-between p-5 border-b border-slate-200">
                 {title && (
-                  <h2 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
+                  <h2 className="text-lg font-bold text-ink font-[family-name:var(--font-display)]">
                     {title}
                   </h2>
                 )}

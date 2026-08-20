@@ -128,7 +128,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                   <div className="w-14 h-14 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
                     <info.icon className="text-gold" size={24} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy mb-1">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink mb-1">
                     {info.title}
                   </h3>
                   <p className="text-charcoal font-semibold">{info.value}</p>
@@ -151,7 +151,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                 <div className="bg-white rounded-2xl p-8 shadow-lg">
                   <div className="flex items-center gap-3 mb-6">
                     <MessageSquare className="text-gold" size={28} />
-                    <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy">
+                    <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink">
                       {t('pages.contact.form.send')}
                     </h2>
                   </div>
@@ -159,7 +159,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-[family-name:var(--font-display)] text-navy mb-2">
+                        <label className="block text-sm font-[family-name:var(--font-display)] text-ink mb-2">
                           {t('pages.contact.form.name')}
                         </label>
                         <input
@@ -171,7 +171,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-[family-name:var(--font-display)] text-navy mb-2">
+                        <label className="block text-sm font-[family-name:var(--font-display)] text-ink mb-2">
                           {t('pages.contact.form.email')}
                         </label>
                         <input
@@ -185,7 +185,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                     </div>
 
                     <div>
-                      <label className="block text-sm font-[family-name:var(--font-display)] text-navy mb-2">
+                      <label className="block text-sm font-[family-name:var(--font-display)] text-ink mb-2">
                         {t('pages.contact.form.subject')}
                       </label>
                       <select
@@ -204,7 +204,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                     </div>
 
                     <div>
-                      <label className="block text-sm font-[family-name:var(--font-display)] text-navy mb-2">
+                      <label className="block text-sm font-[family-name:var(--font-display)] text-ink mb-2">
                         {t('pages.contact.form.message')}
                       </label>
                       <textarea
@@ -274,7 +274,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
               >
                 <div className="flex items-center gap-3 mb-6">
                   <Building2 className="text-gold" size={28} />
-                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy">
+                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink">
                     {t('pages.group.offices')}
                   </h2>
                 </div>
@@ -290,7 +290,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
+                          <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg">
                             {office.headquarters
                               ? (locale === 'ar' ? 'المقر الرئيسي' : 'Headquarters')
                               : office.city}

@@ -6,7 +6,6 @@ import NextImage from 'next/image';
 import {
   Clock,
   Facebook,
-  Twitter,
   Linkedin,
   Link2,
   Tag,
@@ -26,15 +25,13 @@ import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, ApiResponse } from '@/types';
-import BookmarkButton from '@/components/BookmarkButton';
 import { trackShareEvent } from '@/lib/api-client';
+import { XIcon, WhatsAppIcon, TelegramIcon } from '@/components/icons/SocialIcons';
 import PaywallModal from '@/components/magazine/PaywallModal';
 import TipTapRenderer from '@/components/admin/TipTapRenderer';
-import ArticleComments from '@/components/ArticleComments';
 import GiftArticleButton from '@/components/GiftArticleButton';
 import ArticleTldr from '@/components/ArticleTldr';
 import RelatedArticles from '@/components/RelatedArticles';
-import ListenButton from '@/components/ListenButton';
 import Poll from '@/components/Poll';
 import LiveBlog from '@/components/LiveBlog';
 import type { JSONContent } from '@tiptap/core';
@@ -386,10 +383,14 @@ export default function ArticlePageClient({
     }
     const shareUrls: Record<string, string> = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+      twitter: `https://x.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
       linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
     };
-    window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+    const target = shareUrls[platform];
+    if (!target) return;
+    window.open(target, '_blank', 'width=600,height=400');
   };
 
   // Only show the spinner when we truly have nothing to render yet. If the
@@ -412,7 +413,7 @@ export default function ArticlePageClient({
       <>
         <Header />
         <main className="min-h-screen bg-paper flex flex-col items-center justify-center gap-4">
-          <h1 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian">المقال غير موجود</h1>
+          <h1 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink">المقال غير موجود</h1>
           <Link href="/" className="text-sm text-gold hover:underline font-[family-name:var(--font-display)]">العودة إلى الرئيسية</Link>
         </main>
         <Footer />
@@ -489,7 +490,7 @@ export default function ArticlePageClient({
                 {article.sector && (
                   <a
                     href={`/industries/${article.sector}`}
-                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
+                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-ink transition-all"
                   >
                     {article.sector}
                   </a>
@@ -497,7 +498,7 @@ export default function ArticlePageClient({
                 {!article.sector && article.section && (
                   <a
                     href={`/topics/${article.section}`}
-                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-obsidian transition-all"
+                    className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-ink transition-all"
                   >
                     {article.section}
                   </a>
@@ -506,7 +507,7 @@ export default function ArticlePageClient({
 
               {/* Title */}
               <h1
-                className="font-[family-name:var(--font-display)] font-black text-obsidian mb-5 leading-snug"
+                className="font-[family-name:var(--font-display)] font-black text-ink mb-5 leading-snug"
                 style={{ fontSize: 'clamp(1.6rem, 2.8vw, 2.3rem)', lineHeight: 1.3 }}
               >
                 {article.title}
@@ -519,15 +520,19 @@ export default function ArticlePageClient({
                 </span>
                 <div className="flex items-center gap-2 flex-1">
                   {[
-                    { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2' },
-                    { p: 'twitter', icon: <Twitter size={12} />, bg: '#0f1419' },
-                    { p: 'linkedin', icon: <Linkedin size={12} />, bg: '#0a66c2' },
-                  ].map(({ p, icon, bg }) => (
+                    { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2', label: 'Facebook' },
+                    { p: 'twitter', icon: <XIcon size={12} />, bg: '#0f1419', label: 'X' },
+                    { p: 'whatsapp', icon: <WhatsAppIcon size={13} />, bg: '#25d366', label: 'WhatsApp' },
+                    { p: 'telegram', icon: <TelegramIcon size={13} />, bg: '#229ed9', label: 'Telegram' },
+                    { p: 'linkedin', icon: <Linkedin size={12} />, bg: '#0a66c2', label: 'LinkedIn' },
+                  ].map(({ p, icon, bg, label }) => (
                     <button
                       key={p}
                       onClick={() => handleShare(p)}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-opacity hover:opacity-80"
                       style={{ backgroundColor: bg }}
+                      title={label}
+                      aria-label={label}
                     >
                       {icon}
                     </button>
@@ -537,14 +542,14 @@ export default function ArticlePageClient({
                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
                       copied
                         ? 'border-emerald-400 text-emerald-600 bg-emerald-50'
-                        : 'border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-obsidian'
+                        : 'border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-ink'
                     }`}
                   >
                     {copied ? <Check size={12} /> : <Link2 size={12} />}
                   </button>
                   <button
                     onClick={() => window.print()}
-                    className="no-print w-8 h-8 rounded-full border border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-obsidian flex items-center justify-center transition-all"
+                    className="no-print w-8 h-8 rounded-full border border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-ink flex items-center justify-center transition-all"
                     title={t('article.print')}
                     aria-label={t('article.print')}
                   >
@@ -556,7 +561,7 @@ export default function ArticlePageClient({
                     <button
                       onClick={() => changeFontSize(-1)}
                       disabled={fontSizeIdx === 0}
-                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-obsidian hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
+                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
                       aria-label="تصغير الخط"
                     >
                       أ-
@@ -564,21 +569,13 @@ export default function ArticlePageClient({
                     <button
                       onClick={() => changeFontSize(1)}
                       disabled={fontSizeIdx === 2}
-                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-obsidian hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
+                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
                       aria-label="تكبير الخط"
                     >
                       أ+
                     </button>
                   </div>
                 </div>
-                {/* Bookmark button */}
-                <BookmarkButton articleId={article.id} />
-                {/* Phase 6.5 — Text-to-Speech */}
-                <ListenButton
-                  text={typeof rawContent === 'string' ? rawContent.replace(/<[^>]+>/g, '') : article.excerpt || article.title}
-                  lang="ar"
-                  articleId={article.id}
-                />
                 {readTime > 0 && (
                   <span className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
                     <BookOpen size={11} className="text-gold/60" />
@@ -663,7 +660,7 @@ export default function ArticlePageClient({
                     </div>
                     <div className="flex-1 min-w-0">
                       {article.author?.name && (
-                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-tight group-hover:text-gold transition-colors">
+                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink leading-tight group-hover:text-gold transition-colors">
                           {article.author.name}
                         </p>
                       )}
@@ -691,7 +688,7 @@ export default function ArticlePageClient({
                     </div>
                     <div className="flex-1 min-w-0">
                       {article.author?.name && (
-                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-tight">
+                        <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink leading-tight">
                           {article.author.name}
                         </p>
                       )}
@@ -711,7 +708,7 @@ export default function ArticlePageClient({
               {/* Excerpt */}
               {article.excerpt && (
                 <p
-                  className="font-[family-name:var(--font-display)] font-semibold text-navy/80 mb-8 leading-loose"
+                  className="font-[family-name:var(--font-display)] font-semibold text-ink/80 mb-8 leading-loose"
                   style={{ fontSize: '1.15rem', lineHeight: 1.95, letterSpacing: '0.005em' }}
                 >
                   {article.excerpt}
@@ -759,7 +756,7 @@ export default function ArticlePageClient({
                   {/* Trigger paywall modal */}
                   <button
                     onClick={() => setPaywallOpen(true)}
-                    className="block mx-auto mt-4 px-8 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-black text-obsidian bg-gold hover:bg-gold-bright transition-colors rounded-sm tracking-wide"
+                    className="block mx-auto mt-4 px-8 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-black text-ink bg-gold hover:bg-gold-bright transition-colors rounded-sm tracking-wide"
                   >
                     اشترك الآن
                   </button>
@@ -827,15 +824,19 @@ export default function ArticlePageClient({
                 <span className="text-[13px] font-[family-name:var(--font-display)] text-charcoal/30">مشاركة المقال</span>
                 <div className="flex items-center gap-2">
                   {[
-                    { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2' },
-                    { p: 'twitter', icon: <Twitter size={12} />, bg: '#0f1419' },
-                    { p: 'linkedin', icon: <Linkedin size={12} />, bg: '#0a66c2' },
-                  ].map(({ p, icon, bg }) => (
+                    { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2', label: 'Facebook' },
+                    { p: 'twitter', icon: <XIcon size={12} />, bg: '#0f1419', label: 'X' },
+                    { p: 'whatsapp', icon: <WhatsAppIcon size={13} />, bg: '#25d366', label: 'WhatsApp' },
+                    { p: 'telegram', icon: <TelegramIcon size={13} />, bg: '#229ed9', label: 'Telegram' },
+                    { p: 'linkedin', icon: <Linkedin size={12} />, bg: '#0a66c2', label: 'LinkedIn' },
+                  ].map(({ p, icon, bg, label }) => (
                     <button
                       key={p}
                       onClick={() => handleShare(p)}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: bg }}
+                      title={label}
+                      aria-label={label}
                     >
                       {icon}
                     </button>
@@ -843,7 +844,7 @@ export default function ArticlePageClient({
                   <button
                     onClick={() => handleShare('copy')}
                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
-                      copied ? 'border-emerald-400 text-emerald-600 bg-emerald-50' : 'border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-obsidian'
+                      copied ? 'border-emerald-400 text-emerald-600 bg-emerald-50' : 'border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-ink'
                     }`}
                   >
                     {copied ? <Check size={12} /> : <Link2 size={12} />}
@@ -862,9 +863,6 @@ export default function ArticlePageClient({
                 sectionSlug={article.section}
                 limit={4}
               />
-
-              {/* F2.2 — Comments section */}
-              <ArticleComments articleId={article.id} />
             </motion.article>
 
             {/* ── Sidebar ── */}
@@ -880,7 +878,7 @@ export default function ArticlePageClient({
                   <div>
                     <div className="flex items-center gap-2.5 mb-4">
                       <div className="w-[3px] h-5 bg-gold flex-shrink-0" />
-                      <h3 className="text-[13px] font-[family-name:var(--font-display)] font-black text-obsidian tracking-wide">
+                      <h3 className="text-[13px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
                         {t('article.related_ai')}
                       </h3>
                       {relatedIsAi && (
@@ -915,7 +913,7 @@ export default function ArticlePageClient({
                                 {related.sector}
                               </span>
                             )}
-                            <h4 className="text-[12px] font-[family-name:var(--font-display)] font-semibold text-obsidian/90 leading-snug line-clamp-3 group-hover:text-gold transition-colors">
+                            <h4 className="text-[12px] font-[family-name:var(--font-display)] font-semibold text-ink/90 leading-snug line-clamp-3 group-hover:text-gold transition-colors">
                               {related.title}
                             </h4>
                             {related.publishedAt && (
@@ -961,7 +959,7 @@ export default function ArticlePageClient({
                       dir="ltr"
                       className="w-full bg-white/[0.06] border border-white/10 text-paper placeholder:text-paper/20 px-3 py-2 text-[12px] font-[family-name:var(--font-display)] mb-2.5 focus:outline-none focus:border-gold/40 transition-colors"
                     />
-                    <button className="w-full bg-gold text-obsidian py-2 text-[13px] font-[family-name:var(--font-display)] font-black tracking-wide hover:bg-gold-bright transition-colors">
+                    <button className="w-full bg-gold text-ink py-2 text-[13px] font-[family-name:var(--font-display)] font-black tracking-wide hover:bg-gold-bright transition-colors">
                       اشتراك
                     </button>
                   </div>
@@ -981,18 +979,18 @@ export default function ArticlePageClient({
           font-family: var(--font-body), system-ui, sans-serif;
           font-size: var(--article-font-size, 1.05rem);
           line-height: 2.05;
-          color: #1E4A60;
+          color: #1A1A1A;
         }
         /* Override TipTapRenderer dark-mode defaults for article reading context */
         .article-body-slug .article-body-slug-tiptap,
         .article-body-slug .article-body-slug-tiptap p,
         .article-body-slug .article-body-slug-tiptap li {
-          color: #1E4A60;
+          color: #1A1A1A;
         }
         .article-body-slug .article-body-slug-tiptap h1,
         .article-body-slug .article-body-slug-tiptap h2,
         .article-body-slug .article-body-slug-tiptap h3 {
-          color: #0C1E2A;
+          color: #000000;
           font-family: var(--font-display), system-ui, sans-serif;
         }
         .article-body-slug .article-body-slug-tiptap a {
@@ -1007,7 +1005,7 @@ export default function ArticlePageClient({
           border-bottom: 1px solid rgba(221,168,83,0.15);
           border-inline-end: none;
           background: rgba(221,168,83,0.03);
-          color: #183B4E;
+          color: #1A1A1A;
         }
         .article-body-slug .article-body-slug-tiptap img {
           border: 1px solid #E8E0D0;
@@ -1017,7 +1015,7 @@ export default function ArticlePageClient({
           font-family: var(--font-display), system-ui, sans-serif;
           font-size: 1.45rem;
           font-weight: 900;
-          color: #0C1E2A;
+          color: #000000;
           margin-top: 3rem;
           margin-bottom: 1.1rem;
           line-height: 1.38;
@@ -1026,7 +1024,7 @@ export default function ArticlePageClient({
           font-family: var(--font-display), system-ui, sans-serif;
           font-size: 1.15rem;
           font-weight: 700;
-          color: #183B4E;
+          color: #000000;
           margin-top: 2.25rem;
           margin-bottom: 0.875rem;
         }
@@ -1041,7 +1039,7 @@ export default function ArticlePageClient({
         .article-body-slug blockquote p {
           font-size: 1.05rem;
           font-weight: 600;
-          color: #183B4E;
+          color: #1A1A1A;
           margin-bottom: 0;
           font-family: var(--font-display), system-ui, sans-serif;
           line-height: 1.85;
@@ -1052,16 +1050,16 @@ export default function ArticlePageClient({
         .article-body-slug ul li::marker { color: #DDA853; }
         .article-body-slug a { color: #C49240; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(196,146,64,0.3); }
         .article-body-slug a:hover { color: #DDA853; }
-        .article-body-slug strong { font-weight: 700; color: #0C1E2A; }
-        .article-body-slug em { color: #275A73; }
+        .article-body-slug strong { font-weight: 700; color: #000000; }
+        .article-body-slug em { color: #3D3D3D; }
         .article-body-slug img { max-width: 100%; height: auto; margin: 2rem 0; border: 1px solid #E8E0D0; display: block; }
         .article-body-slug .video-embed-wrapper { position: relative; width: 100%; margin: 2rem 0; }
         .article-body-slug .video-embed-wrapper iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
         .article-body-slug figure { margin: 2rem 0; }
-        .article-body-slug figcaption { font-size: 0.78rem; color: #548490; font-family: var(--font-display), system-ui, sans-serif; margin-top: 0.5rem; text-align: center; }
+        .article-body-slug figcaption { font-size: 0.78rem; color: #5C5C5C; font-family: var(--font-display), system-ui, sans-serif; margin-top: 0.5rem; text-align: center; }
         .article-body-slug table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; }
         .article-body-slug th { background: #183B4E; color: #F5EEDC; padding: 0.65rem 1rem; font-family: var(--font-display), system-ui, sans-serif; font-weight: 700; text-align: right; }
-        .article-body-slug td { padding: 0.6rem 1rem; border-bottom: 1px solid #E8E0D0; color: #2A5A6E; }
+        .article-body-slug td { padding: 0.6rem 1rem; border-bottom: 1px solid #E8E0D0; color: #1A1A1A; }
         .article-body-slug tr:nth-child(even) td { background: rgba(245,238,220,0.5); }
       `}</style>
     </>

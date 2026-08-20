@@ -192,7 +192,7 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
     case 'cta':
       return (
         <div className="flex justify-center">
-          <span className="inline-block px-5 py-2 bg-gold text-obsidian text-sm font-bold rounded-lg font-[family-name:var(--font-display)]">
+          <span className="inline-block px-5 py-2 bg-gold text-ink text-sm font-bold rounded-lg font-[family-name:var(--font-display)]">
             {(d.label as string) || 'اضغط هنا'}
           </span>
         </div>
@@ -221,7 +221,7 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
           <p className="text-white/50 text-xs truncate">
             {(d.body as string) || 'اشترك في النسخة المميزة'}
           </p>
-          <span className="inline-block mt-1 px-3 py-1 bg-gold/80 text-obsidian text-xs font-bold rounded-sm">
+          <span className="inline-block mt-1 px-3 py-1 bg-gold/80 text-ink text-xs font-bold rounded-sm">
             {(d.buttonLabel as string) || 'اشترك الآن'}
           </span>
         </div>
@@ -705,7 +705,7 @@ function SettingsPanel({
               onClick={() => onChange({ segment: opt.value as SettingsValues['segment'] })}
               className={`py-2.5 rounded-xl text-sm font-[family-name:var(--font-display)] transition-all ${
                 values.segment === opt.value
-                  ? 'bg-gold text-obsidian font-bold'
+                  ? 'bg-gold text-ink font-bold'
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -732,7 +732,7 @@ function SettingsPanel({
               onClick={() => onChange({ sendMode: opt.value as SettingsValues['sendMode'] })}
               className={`py-2.5 rounded-xl text-sm font-[family-name:var(--font-display)] transition-all ${
                 values.sendMode === opt.value
-                  ? 'bg-gold text-obsidian font-bold'
+                  ? 'bg-gold text-ink font-bold'
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -775,7 +775,7 @@ function SettingsPanel({
         <button
           onClick={onSend}
           disabled={isSending || status === 'sent' || status === 'cancelled'}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-gold to-gold/80 text-obsidian rounded-xl transition-all hover:shadow-lg hover:shadow-gold/20 font-[family-name:var(--font-display)] font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-gold to-gold/80 text-ink rounded-xl transition-all hover:shadow-lg hover:shadow-gold/20 font-[family-name:var(--font-display)] font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isSending ? <Loader2 size={iconSizes.sm} className="animate-spin" /> : <Send size={iconSizes.sm} />}
           {status === 'sent' ? 'تم الإرسال' : 'إرسال'}
@@ -1148,7 +1148,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
           <button
             onClick={handleSend}
             disabled={isSending || currentStatus === 'sent' || currentStatus === 'cancelled'}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-obsidian rounded-xl font-[family-name:var(--font-display)] font-bold text-sm hover:shadow-gold transition-all disabled:opacity-40"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-ink rounded-xl font-[family-name:var(--font-display)] font-bold text-sm hover:shadow-gold transition-all disabled:opacity-40"
           >
             {isSending ? <Loader2 size={iconSizes.sm} className="animate-spin" /> : <Send size={iconSizes.sm} />}
             {currentStatus === 'sent' ? 'تم الإرسال' : 'إرسال'}
@@ -1168,7 +1168,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
             onClick={() => setActiveTab(tab.key as typeof activeTab)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-[family-name:var(--font-display)] font-semibold transition-all ${
               activeTab === tab.key
-                ? 'bg-gold text-obsidian'
+                ? 'bg-gold text-ink'
                 : 'text-white/50 hover:text-white'
             }`}
           >

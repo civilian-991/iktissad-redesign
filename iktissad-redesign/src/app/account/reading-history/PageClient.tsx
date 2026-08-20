@@ -109,7 +109,7 @@ function HistoryCard({ item }: { item: HistoryItem }) {
             </span>
           )}
           <Link href={`/${article.slug}`}>
-            <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug hover:text-gold transition-colors line-clamp-2 mb-2">
+            <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm leading-snug hover:text-gold transition-colors line-clamp-2 mb-2">
               {article.title}
             </h3>
           </Link>
@@ -204,7 +204,7 @@ export default function ReadingHistoryClient() {
           ) : history.length === 0 ? (
             <div className="text-center py-20">
               <BookOpen className="text-pewter/40 mx-auto mb-4" size={48} />
-              <p className="font-[family-name:var(--font-display)] font-bold text-obsidian mb-2">
+              <p className="font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                 {t('pages.account.dashboard.noHistory')}
               </p>
               <p className="text-pewter text-sm mb-6">

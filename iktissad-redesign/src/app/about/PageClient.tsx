@@ -150,7 +150,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
                       </div>
                       <div>
                         <p className="text-gold text-sm font-semibold tracking-wide">{section.tagline}</p>
-                        <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-navy">
+                        <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-ink">
                           {section.title}
                         </h2>
                       </div>
@@ -160,7 +160,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
                     <div className="h-px bg-gradient-to-l from-transparent via-gold/40 to-transparent mb-8" />
 
                     {/* Intro */}
-                    <p className="text-navy font-semibold text-xl mb-4 leading-relaxed">
+                    <p className="text-ink font-semibold text-xl mb-4 leading-relaxed">
                       {section.intro}
                     </p>
 
@@ -196,7 +196,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
 
                     {/* Optional question */}
                     {'question' in section && (
-                      <p className="text-navy font-semibold text-lg mb-4 leading-relaxed">
+                      <p className="text-ink font-semibold text-lg mb-4 leading-relaxed">
                         {section.question}
                       </p>
                     )}
@@ -223,7 +223,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
             >
               <div className="mb-10">
                 <p className="text-gold text-sm font-semibold tracking-wide mb-1">إصداراتنا</p>
-                <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-navy">
+                <h2 className="text-3xl font-[family-name:var(--font-display)] font-black text-ink">
                   منشورات المجموعة
                 </h2>
               </div>
@@ -249,7 +249,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg mb-1">
                       مجلة الاقتصاد والأعمال
                     </h3>
                     <p className="text-slate text-sm mb-4 leading-relaxed">
@@ -286,7 +286,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg mb-1">
                       مجلة الدفاعية
                     </h3>
                     <p className="text-slate text-sm mb-4 leading-relaxed">
@@ -323,7 +323,7 @@ export default function AboutPageClient({ aboutStats }: AboutPageClientProps) {
                     </div>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-1">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg mb-1">
                       مجلة الحسناء
                     </h3>
                     <p className="text-slate text-sm mb-4 leading-relaxed">

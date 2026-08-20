@@ -152,14 +152,14 @@ export default function SearchPageClient() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t('pages.search.placeholder')}
-                  className="w-full px-6 py-5 ps-14 text-lg bg-white rounded-xl font-[family-name:var(--font-display)] text-navy placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-gold/30 shadow-xl"
+                  className="w-full px-6 py-5 ps-14 text-lg bg-white rounded-xl font-[family-name:var(--font-display)] text-ink placeholder:text-slate focus:outline-none focus:ring-4 focus:ring-gold/30 shadow-xl"
                   autoFocus
                 />
                 <Search className="absolute start-5 top-1/2 -translate-y-1/2 text-gold" size={24} />
                 {query && (
                   <button
                     onClick={clearQuery}
-                    className="absolute end-5 top-1/2 -translate-y-1/2 text-slate hover:text-navy"
+                    className="absolute end-5 top-1/2 -translate-y-1/2 text-slate hover:text-ink"
                     aria-label="مسح البحث"
                   >
                     <X size={20} />
@@ -187,7 +187,7 @@ export default function SearchPageClient() {
                     ) : (
                       <span className="text-slate">
                         {totalCount} نتيجة
-                        <span className="text-navy font-semibold"> لـ &quot;{debouncedQuery}&quot;</span>
+                        <span className="text-ink font-semibold"> لـ &quot;{debouncedQuery}&quot;</span>
                       </span>
                     )}
                   </div>
@@ -223,7 +223,7 @@ export default function SearchPageClient() {
                       <SlidersHorizontal size={14} />
                       {t('pages.search.filters.title')}
                       {hasActiveFilters && (
-                        <span className="bg-gold text-navy text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                        <span className="bg-gold text-ink text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
                           {(sectionSlug ? 1 : 0) + (dateRange !== 'all' ? 1 : 0)}
                         </span>
                       )}
@@ -247,7 +247,7 @@ export default function SearchPageClient() {
                       <select
                         value={sectionSlug}
                         onChange={(e) => setSectionSlug(e.target.value)}
-                        className="px-3 py-2 bg-cream border border-slate/20 rounded-lg text-sm text-navy font-[family-name:var(--font-display)] focus:outline-none focus:ring-2 focus:ring-navy/20"
+                        className="px-3 py-2 bg-cream border border-slate/20 rounded-lg text-sm text-ink font-[family-name:var(--font-display)] focus:outline-none focus:ring-2 focus:ring-navy/20"
                       >
                         <option value="">{t('pages.search.filters.sectionAll')}</option>
                         {sections.map((s) => (
@@ -284,7 +284,7 @@ export default function SearchPageClient() {
                     {hasActiveFilters && (
                       <button
                         onClick={clearFilters}
-                        className="flex items-center gap-1 text-xs text-slate hover:text-navy transition-colors mt-auto"
+                        className="flex items-center gap-1 text-xs text-slate hover:text-ink transition-colors mt-auto"
                       >
                         <X size={12} />
                         مسح الفلاتر
@@ -303,7 +303,7 @@ export default function SearchPageClient() {
                 className="text-center py-20"
               >
                 <Search className="mx-auto text-slate mb-4" size={48} />
-                <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-2">
+                <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                   ابدأ بكتابة كلمة للبحث
                 </h3>
               </motion.div>
@@ -317,7 +317,7 @@ export default function SearchPageClient() {
                 className="text-center py-20"
               >
                 <Search className="mx-auto text-slate mb-4" size={48} />
-                <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-2">
+                <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                   {t('pages.search.no_results')} &ldquo;{debouncedQuery}&rdquo;
                 </h3>
                 <p className="text-slate mb-6">
@@ -333,7 +333,7 @@ export default function SearchPageClient() {
                       <button
                         key={term}
                         onClick={() => { setQuery(term); setDebouncedQuery(term); }}
-                        className="px-4 py-2 bg-white border border-navy/10 text-navy font-[family-name:var(--font-display)] text-sm rounded-full hover:bg-navy hover:text-white hover:border-navy transition-all shadow-sm"
+                        className="px-4 py-2 bg-white border border-navy/10 text-ink font-[family-name:var(--font-display)] text-sm rounded-full hover:bg-navy hover:text-white hover:border-navy transition-all shadow-sm"
                       >
                         {term}
                       </button>
@@ -378,7 +378,7 @@ export default function SearchPageClient() {
                           </span>
                         )}
                       </div>
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg leading-snug group-hover:text-gold transition-colors mb-2">
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg leading-snug group-hover:text-gold transition-colors mb-2">
                         {result.title}
                       </h3>
                       {result.excerpt && (

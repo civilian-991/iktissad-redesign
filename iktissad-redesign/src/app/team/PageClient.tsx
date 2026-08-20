@@ -109,7 +109,7 @@ export default function TeamPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.team.leadership')}
               </h2>
             </motion.div>
@@ -149,12 +149,12 @@ export default function TeamPageClient() {
                             sizes="128px"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-navy/40 text-4xl font-bold">
+                          <div className="w-full h-full flex items-center justify-center text-ink/40 text-4xl font-bold">
                             {member.name.charAt(0)}
                           </div>
                         )}
                       </div>
-                      <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-2xl mb-1">
+                      <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-2xl mb-1">
                         {member.name}
                       </h3>
                       <p className="text-gold font-[family-name:var(--font-display)] font-semibold mb-4">
@@ -164,7 +164,7 @@ export default function TeamPageClient() {
                       {member.email && (
                         <a
                           href={`mailto:${member.email}`}
-                          className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center text-navy hover:bg-gold hover:text-white transition-colors"
+                          className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center text-ink hover:bg-gold hover:text-white transition-colors"
                           aria-label={`Email ${member.name}`}
                         >
                           <Mail size={18} />
@@ -187,7 +187,7 @@ export default function TeamPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.team.departments')}
               </h2>
             </motion.div>
@@ -225,12 +225,12 @@ export default function TeamPageClient() {
                           sizes="80px"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-navy/40 text-2xl font-bold">
+                        <div className="w-full h-full flex items-center justify-center text-ink/40 text-2xl font-bold">
                           {editor.name.charAt(0)}
                         </div>
                       )}
                     </div>
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg">
                       {editor.name}
                     </h3>
                     <p className="text-slate text-sm">{editor.department || editor.role}</p>
@@ -250,7 +250,7 @@ export default function TeamPageClient() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 المراسلون
               </h2>
               <p className="text-slate">
@@ -278,7 +278,7 @@ export default function TeamPageClient() {
                     transition={{ delay: index * 0.05 }}
                     className="bg-white rounded-lg p-5 shadow-sm border border-sand"
                   >
-                    <h3 className="font-[family-name:var(--font-display)] font-bold text-navy">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink">
                       {correspondent.name}
                     </h3>
                     {correspondent.department && (

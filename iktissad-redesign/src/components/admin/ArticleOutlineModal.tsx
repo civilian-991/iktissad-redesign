@@ -119,7 +119,7 @@ export default function ArticleOutlineModal({
           <button
             type="button"
             onClick={handleInsert}
-            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all flex items-center justify-center gap-2"
           >
             <LayoutTemplate size={15} />
             إدراج في المحرر

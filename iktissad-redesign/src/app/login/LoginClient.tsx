@@ -320,7 +320,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
         onClick={() => switchMode('password')}
         className={`flex-1 py-2 px-3 rounded-lg text-xs font-[family-name:var(--font-display)] transition-all ${
           mode === 'password'
-            ? 'bg-gold text-obsidian font-bold'
+            ? 'bg-gold text-ink font-bold'
             : 'text-white/50 hover:text-white/80'
         }`}
       >
@@ -331,7 +331,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
         onClick={() => switchMode('magic_link')}
         className={`flex-1 py-2 px-3 rounded-lg text-xs font-[family-name:var(--font-display)] transition-all ${
           mode === 'magic_link'
-            ? 'bg-gold text-obsidian font-bold'
+            ? 'bg-gold text-ink font-bold'
             : 'text-white/50 hover:text-white/80'
         }`}
       >
@@ -350,7 +350,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gold via-gold-muted to-bronze mb-4">
-            <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-2xl">
+            <span className="text-ink font-[family-name:var(--font-display)] font-black text-2xl">
               إ
             </span>
           </div>
@@ -401,7 +401,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                   </div>
                 )}
                 <button type="submit" disabled={loading || mfaCode.length !== 6}
-                  className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  className="w-full py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /><span>جاري التحقق...</span></> : 'تأكيد'}
                 </button>
               </form>
@@ -425,7 +425,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                   </div>
                 )}
                 <button type="submit" disabled={loading || !recoveryCode.trim()}
-                  className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  className="w-full py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /><span>جاري التحقق...</span></> : 'استخدام رمز الاسترداد'}
                 </button>
               </form>
@@ -535,7 +535,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -596,7 +596,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? (
                         <>
@@ -669,7 +669,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3 rounded-xl bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all hover:bg-gold-muted disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? (
                         <>

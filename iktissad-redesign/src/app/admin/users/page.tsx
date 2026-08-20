@@ -212,7 +212,7 @@ export default function UsersPage() {
       case 'editor':
         return <ShieldCheck size={iconSizes.sm} className="text-gold" />;
       case 'author':
-        return <Shield size={iconSizes.sm} className="text-teal" />;
+        return <Shield size={iconSizes.sm} className="text-ink" />;
       default:
         return <User size={iconSizes.sm} className="text-white/50" />;
     }
@@ -506,7 +506,7 @@ export default function UsersPage() {
                         : user.role === 'editor'
                           ? 'bg-gold/10 text-gold'
                           : user.role === 'author'
-                            ? 'bg-teal/10 text-teal'
+                            ? 'bg-teal/10 text-ink'
                             : 'bg-white/10 text-white/60'
                     }`}>
                       {getRoleIcon(user.role)}

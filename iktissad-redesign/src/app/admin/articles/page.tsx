@@ -147,7 +147,7 @@ export default function ArticlesPage() {
       case 'review':
         return <AlertCircle size={iconSizes.sm} className="text-gold" />;
       case 'scheduled':
-        return <Clock size={iconSizes.sm} className="text-teal" />;
+        return <Clock size={iconSizes.sm} className="text-ink" />;
       default:
         return null;
     }
@@ -537,7 +537,7 @@ export default function ArticlesPage() {
                           : article.status === 'draft'
                             ? 'bg-white/10 text-white/60'
                             : article.status === 'scheduled'
-                              ? 'bg-teal/10 text-teal'
+                              ? 'bg-teal/10 text-ink'
                               : 'bg-gold/10 text-gold'
                       }`}>
                         {getStatusIcon(article.status)}

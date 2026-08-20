@@ -204,7 +204,7 @@ function SeriesFormModal({ onClose, onCreated }: SeriesFormModalProps) {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               {saving ? 'جارٍ الإنشاء...' : 'إنشاء الملف'}
@@ -327,7 +327,7 @@ export default function SeriesClient() {
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all"
         >
           <Plus size={18} />
           ملف جديد
@@ -364,7 +364,7 @@ export default function SeriesClient() {
             {!search && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:bg-gold-muted transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:bg-gold-muted transition-colors"
               >
                 <Plus size={18} />
                 إنشاء ملف جديد

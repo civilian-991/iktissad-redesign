@@ -143,7 +143,7 @@ function PollCard({ poll }: { poll: PollData }) {
 
       {/* Question */}
       <div className="px-5 pt-4 pb-2">
-        <p className="text-[15px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-relaxed">
+        <p className="text-[15px] font-[family-name:var(--font-display)] font-bold text-ink leading-relaxed">
           {poll.question}
         </p>
       </div>
@@ -167,7 +167,7 @@ function PollCard({ poll }: { poll: PollData }) {
                 showResults
                   ? 'cursor-default border border-sand/60'
                   : isSelected
-                    ? 'border-2 border-gold bg-gold/5 font-semibold text-obsidian'
+                    ? 'border-2 border-gold bg-gold/5 font-semibold text-ink'
                     : 'border border-sand/60 hover:border-gold/40 text-charcoal/70'
               }`}
             >
@@ -199,7 +199,7 @@ function PollCard({ poll }: { poll: PollData }) {
           <button
             onClick={submitVote}
             disabled={selectedOption === null || loading}
-            className="w-full mt-2 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-black bg-gold text-obsidian hover:bg-gold-bright disabled:opacity-40 disabled:cursor-not-allowed transition-all rounded-sm"
+            className="w-full mt-2 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-black bg-gold text-ink hover:bg-gold-bright disabled:opacity-40 disabled:cursor-not-allowed transition-all rounded-sm"
           >
             {loading ? '...' : t('engagement.polls.vote')}
           </button>

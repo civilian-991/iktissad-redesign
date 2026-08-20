@@ -307,7 +307,7 @@ export default function AdminLayoutClient({
             className="flex items-center gap-3"
           >
             <div className="w-10 h-10 bg-gradient-to-br from-gold via-gold-muted to-bronze flex items-center justify-center">
-              <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-lg">إ</span>
+              <span className="text-ink font-[family-name:var(--font-display)] font-black text-lg">إ</span>
             </div>
             <AnimatePresence>
               {sidebarOpen && (
@@ -317,7 +317,7 @@ export default function AdminLayoutClient({
                   exit={{ opacity: 0, width: 0 }}
                   className="overflow-hidden"
                 >
-                  <span className={`font-[family-name:var(--font-display)] font-bold text-sm whitespace-nowrap ${darkMode ? 'text-white' : 'text-obsidian'}`}>
+                  <span className={`font-[family-name:var(--font-display)] font-bold text-sm whitespace-nowrap ${darkMode ? 'text-white' : 'text-ink'}`}>
                     {t('admin.common.controlPanel')}
                   </span>
                 </motion.div>
@@ -341,7 +341,7 @@ export default function AdminLayoutClient({
                       : 'bg-gold/10 text-gold-muted'
                     : darkMode
                       ? 'text-white/60 hover:text-white hover:bg-white/5'
-                      : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                      : 'text-graphite hover:text-ink hover:bg-sand/50'
                 }`}
               >
                 {isActive && (
@@ -403,7 +403,7 @@ export default function AdminLayoutClient({
                         : 'bg-gold/10 text-gold-muted'
                       : darkMode
                         ? 'text-white/60 hover:text-white hover:bg-white/5'
-                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                        : 'text-graphite hover:text-ink hover:bg-sand/50'
                   }`}
                 >
                   {isActive && (
@@ -457,7 +457,7 @@ export default function AdminLayoutClient({
                         : 'bg-gold/10 text-gold-muted'
                       : darkMode
                         ? 'text-white/60 hover:text-white hover:bg-white/5'
-                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                        : 'text-graphite hover:text-ink hover:bg-sand/50'
                   }`}
                 >
                   {isActive && (
@@ -511,7 +511,7 @@ export default function AdminLayoutClient({
                         : 'bg-gold/10 text-gold-muted'
                       : darkMode
                         ? 'text-white/60 hover:text-white hover:bg-white/5'
-                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                        : 'text-graphite hover:text-ink hover:bg-sand/50'
                   }`}
                 >
                   {isActive && (
@@ -565,7 +565,7 @@ export default function AdminLayoutClient({
                         : 'bg-gold/10 text-gold-muted'
                       : darkMode
                         ? 'text-white/60 hover:text-white hover:bg-white/5'
-                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                        : 'text-graphite hover:text-ink hover:bg-sand/50'
                   }`}
                 >
                   {isActive && (
@@ -619,7 +619,7 @@ export default function AdminLayoutClient({
                         : 'bg-gold/10 text-gold-muted'
                       : darkMode
                         ? 'text-white/60 hover:text-white hover:bg-white/5'
-                        : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                        : 'text-graphite hover:text-ink hover:bg-sand/50'
                   }`}
                 >
                   {isActive && (
@@ -688,7 +688,7 @@ export default function AdminLayoutClient({
             className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
               darkMode
                 ? 'text-white/60 hover:text-white hover:bg-white/5'
-                : 'text-graphite hover:text-obsidian hover:bg-sand'
+                : 'text-graphite hover:text-ink hover:bg-sand'
             }`}
           >
             <motion.div animate={{ rotate: sidebarOpen ? 0 : 180 }}>
@@ -721,7 +721,7 @@ export default function AdminLayoutClient({
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className={`lg:hidden p-2 rounded-lg ${darkMode ? 'text-white' : 'text-obsidian'}`}
+            className={`lg:hidden p-2 rounded-lg ${darkMode ? 'text-white' : 'text-ink'}`}
           >
             <Menu size={iconSizes.lg} />
           </button>
@@ -737,7 +737,7 @@ export default function AdminLayoutClient({
                 className={`w-full py-2.5 pr-12 pl-4 rounded-xl font-[family-name:var(--font-display)] text-sm transition-all ${
                   darkMode
                     ? 'bg-white/5 border border-gold/10 text-white placeholder:text-white/40 focus:border-gold/30'
-                    : 'bg-sand/50 border border-sand text-obsidian placeholder:text-graphite focus:border-gold'
+                    : 'bg-sand/50 border border-sand text-ink placeholder:text-graphite focus:border-gold'
                 } focus:outline-none`}
               />
               <Search className={`absolute right-4 top-1/2 -translate-y-1/2 ${darkMode ? 'text-white/40' : 'text-graphite'}`} size={iconSizes.md} />
@@ -763,7 +763,7 @@ export default function AdminLayoutClient({
               className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-[family-name:var(--font-display)] ${
                 darkMode
                   ? 'bg-white/5 border-gold/10 text-white/50 hover:text-white hover:bg-white/10'
-                  : 'bg-sand border-sand text-graphite hover:text-obsidian hover:bg-sand/70'
+                  : 'bg-sand border-sand text-graphite hover:text-ink hover:bg-sand/70'
               }`}
             >
               <span>⌘K</span>
@@ -775,7 +775,7 @@ export default function AdminLayoutClient({
               className={`p-2.5 rounded-xl transition-all ${
                 darkMode
                   ? 'bg-white/5 text-gold hover:bg-white/10'
-                  : 'bg-sand text-obsidian hover:bg-sand/70'
+                  : 'bg-sand text-ink hover:bg-sand/70'
               }`}
             >
               {darkMode ? <Sun size={iconSizes.md} /> : <Moon size={iconSizes.md} />}
@@ -795,10 +795,10 @@ export default function AdminLayoutClient({
                 }`}
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-bronze flex items-center justify-center">
-                  <span className="text-obsidian font-bold text-sm">{displayName.charAt(0)}</span>
+                  <span className="text-ink font-bold text-sm">{displayName.charAt(0)}</span>
                 </div>
                 <div className="hidden md:block text-right">
-                  <p className={`text-sm font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
+                  <p className={`text-sm font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-ink'}`}>
                     {displayName}
                   </p>
                   <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
@@ -819,7 +819,7 @@ export default function AdminLayoutClient({
                     }`}
                   >
                     <div className={`p-4 border-b ${darkMode ? 'border-gold/10' : 'border-sand'}`}>
-                      <p className={`font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
+                      <p className={`font-[family-name:var(--font-display)] font-semibold ${darkMode ? 'text-white' : 'text-ink'}`}>
                         {displayName}
                       </p>
                       <p className={`text-sm ${darkMode ? 'text-white/50' : 'text-graphite'}`}>
@@ -833,7 +833,7 @@ export default function AdminLayoutClient({
                         className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
                           darkMode
                             ? 'text-white/70 hover:text-white hover:bg-white/5'
-                            : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                            : 'text-graphite hover:text-ink hover:bg-sand/50'
                         }`}
                       >
                         <Settings size={iconSizes.sm} />
@@ -919,12 +919,12 @@ export default function AdminLayoutClient({
               style={{ width: config.mobileMenu.width }}
             >
               <div className={`h-20 flex items-center justify-between px-6 border-b ${darkMode ? 'border-gold/10' : 'border-sand'}`}>
-                <span className={`font-[family-name:var(--font-display)] font-bold ${darkMode ? 'text-white' : 'text-obsidian'}`}>
+                <span className={`font-[family-name:var(--font-display)] font-bold ${darkMode ? 'text-white' : 'text-ink'}`}>
                   {t('header.menu.label')}
                 </span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`p-2 rounded-lg ${darkMode ? 'text-white/70 hover:text-white' : 'text-graphite hover:text-obsidian'}`}
+                  className={`p-2 rounded-lg ${darkMode ? 'text-white/70 hover:text-white' : 'text-graphite hover:text-ink'}`}
                 >
                   <X size={iconSizes.lg} />
                 </button>
@@ -942,7 +942,7 @@ export default function AdminLayoutClient({
                           ? 'bg-gold/10 text-gold'
                           : darkMode
                             ? 'text-white/60 hover:text-white hover:bg-white/5'
-                            : 'text-graphite hover:text-obsidian hover:bg-sand/50'
+                            : 'text-graphite hover:text-ink hover:bg-sand/50'
                       }`}
                     >
                       <item.icon size={iconSizes.lg} />

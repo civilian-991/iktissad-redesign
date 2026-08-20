@@ -53,7 +53,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 const variantStyles: Record<ButtonVariant, string> = {
   primary: `
     bg-gradient-to-br from-accent to-accent-600
-    text-brand-900
+    text-ink
     hover:shadow-gold
     hover:from-accent-400 hover:to-accent
     active:from-accent-600 active:to-accent-700
@@ -77,7 +77,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   `,
   ghost: `
     bg-transparent
-    text-slate-700
+    text-graphite
     hover:bg-slate-100
     hover:text-brand
     active:bg-slate-200

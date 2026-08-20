@@ -33,7 +33,7 @@ function getInitials(name: string): string {
 /** Deterministic colour offset so the same user always gets the same hue. */
 const AVATAR_COLORS = [
   'bg-gold/30 text-gold',
-  'bg-teal/30 text-teal',
+  'bg-teal/30 text-ink',
   'bg-purple-500/30 text-purple-300',
   'bg-profit/30 text-profit',
   'bg-loss/30 text-loss',

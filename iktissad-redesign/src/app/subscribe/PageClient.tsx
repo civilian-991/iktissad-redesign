@@ -35,7 +35,7 @@ const staticTiers = [
     priceAnnual: 0,
     icon: Star,
     color: 'from-slate-400 to-slate-500',
-    badgeClass: 'bg-slate-100 text-slate-700',
+    badgeClass: 'bg-slate-100 text-graphite',
     popular: false,
     featuresAr: [
       '5 مقالات شهرياً',
@@ -59,7 +59,7 @@ const staticTiers = [
     priceAnnual: 399,
     icon: Zap,
     color: 'from-brand to-brand-600',
-    badgeClass: 'bg-brand-50 text-brand-800',
+    badgeClass: 'bg-brand-50 text-ink',
     popular: false,
     featuresAr: [
       '5 مقالات شهرياً',
@@ -83,7 +83,7 @@ const staticTiers = [
     priceAnnual: 799,
     icon: Crown,
     color: 'from-gold to-gold-dark',
-    badgeClass: 'bg-gold-pale text-obsidian',
+    badgeClass: 'bg-gold-pale text-ink',
     popular: true,
     featuresAr: [
       '5 مقالات شهرياً',
@@ -280,7 +280,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
               className={`px-5 py-2 rounded-full font-[family-name:var(--font-display)] font-semibold transition-all ${
                 billing === 'monthly'
                   ? 'bg-obsidian text-white shadow-md'
-                  : 'text-charcoal hover:text-navy'
+                  : 'text-charcoal hover:text-ink'
               }`}
             >
               {t('pages.subscribe.monthly')}
@@ -304,7 +304,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
               className={`px-5 py-2 rounded-full font-[family-name:var(--font-display)] font-semibold transition-all ${
                 billing === 'annual'
                   ? 'bg-obsidian text-white shadow-md'
-                  : 'text-charcoal hover:text-navy'
+                  : 'text-charcoal hover:text-ink'
               }`}
             >
               {t('pages.subscribe.annual')}
@@ -404,7 +404,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
                       <tier.icon className="text-white" size={26} />
                     </div>
 
-                    <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian mb-1">
+                    <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-1">
                       {tier.nameAr}
                     </h3>
                     <p className="text-pewter text-sm mb-4">
@@ -414,13 +414,13 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
                     {/* Price */}
                     <div className="mb-6">
                       {tier.priceMonthly === 0 ? (
-                        <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
+                        <span className="text-4xl font-[family-name:var(--font-display)] font-black text-ink">
                           مجاني
                         </span>
                       ) : (
                         <>
                           <span className="text-pewter text-sm ms-1">$</span>
-                          <span className="text-4xl font-[family-name:var(--font-display)] font-black text-obsidian">
+                          <span className="text-4xl font-[family-name:var(--font-display)] font-black text-ink">
                             {price.toLocaleString('en-US')}
                           </span>
                           <span className="text-pewter text-xs">
@@ -460,7 +460,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
                       disabled={loadingTier !== null}
                       className={`w-full py-3 rounded-xl font-[family-name:var(--font-display)] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${
                         tier.id === 'free'
-                          ? 'bg-ivory text-obsidian hover:bg-sand'
+                          ? 'bg-ivory text-ink hover:bg-sand'
                           : isSelected
                           ? 'bg-gold text-white hover:bg-gold-dark shadow-md'
                           : 'bg-obsidian text-white hover:bg-navy-light'
@@ -495,7 +495,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian text-center mb-10"
+              className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink text-center mb-10"
             >
               {t('pages.subscribe.comparison.title')}
             </motion.h2>
@@ -553,7 +553,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
                   <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center">
                     <Icon className="text-gold" size={24} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian">{titleAr}</h3>
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink">{titleAr}</h3>
                   <p className="text-pewter text-sm">{descAr}</p>
                 </div>
               ))}
@@ -564,7 +564,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
         {/* ── FAQ ──────────────────────────────────────────────────────── */}
         <section className="py-14 bg-ivory">
           <div className="container-luxury max-w-3xl">
-            <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian text-center mb-8">
+            <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink text-center mb-8">
               {t('pages.subscribe.faq')}
             </h2>
             <div className="space-y-4">
@@ -587,7 +587,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
                 },
               ].map((faq, i) => (
                 <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian mb-2">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink mb-2">
                     {faq.q}
                   </h3>
                   <p className="text-pewter text-sm leading-relaxed">{faq.a}</p>

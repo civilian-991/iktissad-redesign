@@ -311,7 +311,7 @@ export default function MagazinePageClient() {
                       أرشيف الأعداد
                     </span>
                   </div>
-                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-black text-navy">
+                  <h2 className="text-2xl font-[family-name:var(--font-display)] font-black text-ink">
                     {t('pages.magazine.pastIssues')}
                   </h2>
                 </div>
@@ -482,7 +482,7 @@ export default function MagazinePageClient() {
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={`w-10 h-10 rounded-lg font-[family-name:var(--font-display)] font-bold transition-all ${
-                        currentPage === page ? 'bg-navy text-white' : 'bg-white text-navy hover:bg-navy/10'
+                        currentPage === page ? 'bg-navy text-white' : 'bg-white text-ink hover:bg-navy/10'
                       }`}
                     >
                       {page}

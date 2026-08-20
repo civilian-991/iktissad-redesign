@@ -147,7 +147,7 @@ export default function TagPageClient({ params }: { params: Promise<{ tag: strin
                             </span>
                           )}
                         </div>
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-2 line-clamp-2 group-hover:text-gold transition-colors flex-1">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg mb-2 line-clamp-2 group-hover:text-gold transition-colors flex-1">
                           {article.title}
                         </h3>
                         {article.excerpt && (

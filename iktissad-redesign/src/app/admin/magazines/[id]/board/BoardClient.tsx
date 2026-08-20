@@ -72,7 +72,7 @@ function ArticleCard({
       {/* Section badge */}
       {article.sectionName && (
         <span
-          className="inline-block px-2 py-0.5 rounded-md text-xs font-[family-name:var(--font-display)] text-obsidian font-semibold"
+          className="inline-block px-2 py-0.5 rounded-md text-xs font-[family-name:var(--font-display)] text-ink font-semibold"
           style={{ backgroundColor: article.sectionColor ?? '#DDA853' }}
         >
           {article.sectionName}

@@ -26,7 +26,7 @@ export default function LatestNews() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('components.latestNews.title')}
             </h2>
           </div>
@@ -84,7 +84,7 @@ export default function LatestNews() {
 
                 {/* Content */}
                 <div className="flex flex-col justify-between flex-1 p-4 gap-3">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-relaxed line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm leading-relaxed line-clamp-2 group-hover:text-gold transition-colors duration-300">
                     {article.title}
                   </h3>
                   {article.publishedAt && (

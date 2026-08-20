@@ -62,14 +62,14 @@ export default function ColorsPage() {
   return (
     <div className="min-h-screen bg-white p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2 font-[family-name:var(--font-display)]">
+        <h1 className="text-3xl font-bold text-ink mb-2 font-[family-name:var(--font-display)]">
           Iktissad Color Palette
         </h1>
-        <p className="text-slate-600 mb-8">Brand Color: #005B9F | Inspired by Bloomberg & Financial Times</p>
+        <p className="text-graphite mb-8">Brand Color: #005B9F | Inspired by Bloomberg & Financial Times</p>
 
         {colorGroups.map((group) => (
           <div key={group.name} className="mb-10">
-            <h2 className="text-lg font-bold text-slate-800 mb-4 font-[family-name:var(--font-display)]">
+            <h2 className="text-lg font-bold text-ink mb-4 font-[family-name:var(--font-display)]">
               {group.name}
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -79,8 +79,8 @@ export default function ColorsPage() {
                     className="w-20 h-16 rounded-lg shadow-sm border border-slate-200"
                     style={{ backgroundColor: color.value }}
                   />
-                  <p className="text-xs font-medium text-slate-700 mt-1">{color.name}</p>
-                  <p className="text-[10px] text-slate-500">{color.value}</p>
+                  <p className="text-xs font-medium text-graphite mt-1">{color.name}</p>
+                  <p className="text-[10px] text-pewter">{color.value}</p>
                 </div>
               ))}
             </div>
@@ -89,14 +89,14 @@ export default function ColorsPage() {
 
         {/* Preview Sections */}
         <div className="mt-12 space-y-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">Live Preview</h2>
+          <h2 className="text-lg font-bold text-ink mb-4">Live Preview</h2>
 
           {/* Brand Header */}
           <div className="bg-brand p-6 rounded-lg">
             <h3 className="text-xl font-bold text-white mb-2">Brand Blue Header</h3>
             <p className="text-white/80 mb-4">Primary brand color background</p>
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-accent text-slate-900 font-bold rounded text-sm">
+              <button className="px-4 py-2 bg-accent text-ink font-bold rounded text-sm">
                 Amber Button
               </button>
               <button className="px-4 py-2 bg-white text-brand font-bold rounded text-sm">
@@ -113,7 +113,7 @@ export default function ColorsPage() {
             <h3 className="text-xl font-bold text-white mb-2">Dark Section</h3>
             <p className="text-slate-400 mb-4">For video sections and dark themes</p>
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-accent text-slate-900 font-bold rounded text-sm">
+              <button className="px-4 py-2 bg-accent text-ink font-bold rounded text-sm">
                 Amber CTA
               </button>
               <button className="px-4 py-2 bg-brand text-white font-bold rounded text-sm">
@@ -125,37 +125,37 @@ export default function ColorsPage() {
           {/* Light Cards */}
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-white p-5 rounded-lg shadow-card border-t-4 border-brand">
-              <h4 className="font-bold text-slate-900 mb-1">Brand Accent</h4>
-              <p className="text-slate-600 text-sm">Card with blue top border</p>
+              <h4 className="font-bold text-ink mb-1">Brand Accent</h4>
+              <p className="text-graphite text-sm">Card with blue top border</p>
             </div>
             <div className="bg-white p-5 rounded-lg shadow-card border-t-4 border-accent">
-              <h4 className="font-bold text-slate-900 mb-1">Amber Accent</h4>
-              <p className="text-slate-600 text-sm">Card with amber top border</p>
+              <h4 className="font-bold text-ink mb-1">Amber Accent</h4>
+              <p className="text-graphite text-sm">Card with amber top border</p>
             </div>
             <div className="bg-slate-50 p-5 rounded-lg border border-slate-200">
-              <h4 className="font-bold text-slate-900 mb-1">Neutral Card</h4>
-              <p className="text-slate-600 text-sm">Subtle gray background</p>
+              <h4 className="font-bold text-ink mb-1">Neutral Card</h4>
+              <p className="text-graphite text-sm">Subtle gray background</p>
             </div>
           </div>
 
           {/* Market Data */}
           <div className="bg-white p-5 rounded-lg border border-slate-200">
-            <h4 className="font-bold text-slate-900 mb-3">Market Data Colors</h4>
+            <h4 className="font-bold text-ink mb-3">Market Data Colors</h4>
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-profit"></span>
                 <span className="text-profit font-bold">+2.45%</span>
-                <span className="text-slate-500 text-sm">Profit</span>
+                <span className="text-pewter text-sm">Profit</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-loss"></span>
                 <span className="text-loss font-bold">-1.23%</span>
-                <span className="text-slate-500 text-sm">Loss</span>
+                <span className="text-pewter text-sm">Loss</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-warning"></span>
                 <span className="text-warning font-bold">Alert</span>
-                <span className="text-slate-500 text-sm">Warning</span>
+                <span className="text-pewter text-sm">Warning</span>
               </div>
             </div>
           </div>

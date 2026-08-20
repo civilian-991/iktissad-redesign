@@ -30,13 +30,13 @@ export default function FilesSection() {
         <div className="flex items-center justify-between mb-7">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-navy" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-lg">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg">
               {t('components.filesSection.title')}
             </h2>
           </div>
           <Link
             href="/reports"
-            className="text-navy text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
+            className="text-ink text-sm font-[family-name:var(--font-display)] font-semibold flex items-center gap-1 hover:underline"
           >
             {t('common.actions.viewMore')}
             <ArrowUpLeft size={13} />
@@ -45,7 +45,7 @@ export default function FilesSection() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-52">
-            <Loader2 className="text-navy animate-spin" size={28} />
+            <Loader2 className="text-ink animate-spin" size={28} />
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-5">
@@ -130,12 +130,12 @@ export default function FilesSection() {
 
                   {/* Content */}
                   <div className="flex flex-col justify-center py-3 pe-4 gap-1 flex-1 min-w-0">
-                    <h4 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-navy transition-colors duration-300">
+                    <h4 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm leading-snug line-clamp-2 group-hover:text-ink transition-colors duration-300">
                       {s.title}
                     </h4>
                     <div className="flex items-center gap-2">
                       {s.articleCount !== undefined && s.articleCount > 0 && (
-                        <span className="text-navy/60 text-xs font-[family-name:var(--font-display)] font-semibold">
+                        <span className="text-ink/60 text-xs font-[family-name:var(--font-display)] font-semibold">
                           {t('components.filesSection.articlesCount', { count: s.articleCount })}
                         </span>
                       )}
@@ -150,7 +150,7 @@ export default function FilesSection() {
 
               <Link
                 href="/reports"
-                className="flex items-center justify-center gap-2 py-3 border border-dashed border-navy/30 text-navy text-sm font-[family-name:var(--font-display)] font-semibold hover:border-navy hover:bg-navy/5 transition-all duration-200"
+                className="flex items-center justify-center gap-2 py-3 border border-dashed border-navy/30 text-ink text-sm font-[family-name:var(--font-display)] font-semibold hover:border-navy hover:bg-navy/5 transition-all duration-200"
               >
                 {t('components.filesSection.viewAllFiles')}
                 <ArrowUpLeft size={14} />

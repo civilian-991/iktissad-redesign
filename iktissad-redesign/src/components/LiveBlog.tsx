@@ -139,7 +139,7 @@ export default function LiveBlog({ articleId }: LiveBlogProps) {
               )}
             </div>
             <div
-              className="text-[14px] font-[family-name:var(--font-display)] text-obsidian leading-relaxed"
+              className="text-[14px] font-[family-name:var(--font-display)] text-ink leading-relaxed"
               dangerouslySetInnerHTML={{ __html: sanitizeLiveBlogHtml(update.content) }}
             />
           </div>

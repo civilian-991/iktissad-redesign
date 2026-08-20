@@ -51,3 +51,4 @@ public/workbox-*.js
 public/sw.js.map
 iktissad-redesign/test-results/
 iktissad-redesign/playwright-report/
+graphify-out/

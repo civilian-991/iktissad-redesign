@@ -283,7 +283,7 @@ function QuickCreateModal({ date, sections, onClose, onCreated }: QuickCreateMod
             <button
               type="submit"
               disabled={!title.trim() || saving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-gold text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-gold text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
               إنشاء المقال
@@ -501,7 +501,7 @@ function DayCell({
       {/* Day number */}
       <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-[family-name:var(--font-display)] font-semibold mb-1 ${
         isToday
-          ? 'bg-gold text-obsidian'
+          ? 'bg-gold text-ink'
           : isCurrentMonth
             ? 'text-white/70'
             : 'text-white/30'
@@ -736,7 +736,7 @@ export default function CalendarClient() {
                 onClick={() => setViewMode(mode)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-[family-name:var(--font-display)] font-semibold transition-all ${
                   viewMode === mode
-                    ? 'bg-gold text-obsidian'
+                    ? 'bg-gold text-ink'
                     : 'text-white/60 hover:text-white'
                 }`}
               >

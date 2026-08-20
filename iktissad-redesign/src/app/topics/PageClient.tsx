@@ -137,7 +137,7 @@ export default function SectionsPageClient() {
                           </div>
 
                           {/* Content */}
-                          <h3 className="font-[family-name:var(--font-display)] font-bold text-xl text-navy mb-2 group-hover:text-gold transition-colors">
+                          <h3 className="font-[family-name:var(--font-display)] font-bold text-xl text-ink mb-2 group-hover:text-gold transition-colors">
                             {section.name}
                           </h3>
                           <p className="text-slate text-sm mb-4 line-clamp-2">

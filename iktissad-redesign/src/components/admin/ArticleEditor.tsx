@@ -63,6 +63,7 @@ import ArticleVersionPanel from '@/components/admin/ArticleVersionPanel';
 import SharePreviewModal from '@/components/admin/SharePreviewModal';
 import FactCheckPanel from '@/components/admin/FactCheckPanel';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion, aiAutoTag, aiSummarize, aiGenerateSocialCards } from '@/lib/api-client';
+import { asTipTapDoc } from '@/lib/tiptap-body';
 import { slugify } from '@/lib/slugify';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
@@ -107,21 +108,28 @@ function extractText(node: JSONContent | null | undefined): string {
  *   - `body` (jsonb)           — the TipTap JSON object
  *   - `content` (text/string)  — JSON.stringify of the same object (legacy)
  *
- * When loading, prefer `body`. If absent, attempt to parse `content` as JSON
- * (older drafts may still have only this). Fall back to the raw string so
- * pre-TipTap HTML content still renders.
+ * When loading, prefer `body`. If absent or empty, attempt to parse `content`
+ * as JSON (older drafts may still have only this). Fall back to the raw string
+ * so pre-TipTap HTML content still renders.
  */
 function resolveInitialBody(article: Article): JSONContent | string {
   // body is set by the mapper from row.body (jsonb)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const body = (article as any).body as JSONContent | string | null | undefined;
-  if (body && typeof body === 'object') return body as JSONContent;
+  const doc = asTipTapDoc(body);
+  if (doc) return doc;
   if (typeof body === 'string' && body.trim()) {
-    try { return JSON.parse(body) as JSONContent; } catch { /* fall through */ }
+    try {
+      const parsed = asTipTapDoc(JSON.parse(body));
+      if (parsed) return parsed;
+    } catch { /* fall through */ }
   }
   const content = article.content ?? '';
   if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
-    try { return JSON.parse(content) as JSONContent; } catch { /* fall through */ }
+    try {
+      const parsed = asTipTapDoc(JSON.parse(content));
+      if (parsed) return parsed;
+    } catch { /* fall through */ }
   }
   return content;
 }
@@ -683,7 +691,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
           >
             {isSaving ? (
               <motion.div
@@ -708,7 +716,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       >
         {[
           { label: t('admin.articles.table.stats'), value: article.views.toLocaleString(), icon: Eye, color: 'text-gold' },
-          { label: t('admin.articles.table.date'), value: article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn') : '-', icon: Calendar, color: 'text-teal' },
+          { label: t('admin.articles.table.date'), value: article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn') : '-', icon: Calendar, color: 'text-ink' },
           { label: t('admin.articles.table.status'), value: t(`admin.articles.status.${article.status}`), icon: Send, color: 'text-profit' },
           { label: t('admin.articles.table.section'), value: article.section || '-', icon: FileText, color: 'text-purple-400' },
         ].map((stat) => (
@@ -1211,7 +1219,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                   <button
                     onClick={handleGenerateSocialCards}
                     disabled={isGeneratingSocialCards || !title.trim()}
-                    className="flex items-center gap-1 px-2 py-1 bg-teal/10 border border-teal/20 rounded-lg text-teal text-[10px] font-[family-name:var(--font-display)] hover:bg-teal/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1 px-2 py-1 bg-teal/10 border border-teal/20 rounded-lg text-ink text-[10px] font-[family-name:var(--font-display)] hover:bg-teal/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     title={t('admin.articles.editor.seo.generateSocialCards')}
                   >
                     {isGeneratingSocialCards ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
@@ -1336,7 +1344,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
               {[
                 { value: 'draft' as const, labelKey: 'draft', icon: FileText, color: 'text-white/60' },
                 { value: 'review' as const, labelKey: 'review', icon: Clock, color: 'text-gold' },
-                { value: 'scheduled' as const, labelKey: 'scheduled', icon: Calendar, color: 'text-teal' },
+                { value: 'scheduled' as const, labelKey: 'scheduled', icon: Calendar, color: 'text-ink' },
                 { value: 'published' as const, labelKey: 'published', icon: Send, color: 'text-profit' },
               ].map((opt) => (
                 <label
@@ -1411,7 +1419,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                     <p className="text-white/30 text-xs font-[family-name:var(--font-display)]">{flag.desc}</p>
                   </div>
                   <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${flag.value ? 'bg-gold border-gold' : 'border-white/20'}`}>
-                    {flag.value && <Check size={10} className="text-obsidian" />}
+                    {flag.value && <Check size={10} className="text-ink" />}
                   </div>
                 </button>
               ))}

@@ -154,7 +154,7 @@ export default function NewslettersPage() {
           </p>
         </div>
         <Link href="/admin/newsletters/new">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-lg hover:shadow-gold/20 transition-all text-sm">
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold/80 text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-lg hover:shadow-gold/20 transition-all text-sm">
             <Plus size={iconSizes.md} />
             نشرة جديدة
           </button>
@@ -169,7 +169,7 @@ export default function NewslettersPage() {
             onClick={() => { setStatusFilter(tab.key); setPage(1); }}
             className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-[family-name:var(--font-display)] transition-all ${
               statusFilter === tab.key
-                ? 'bg-gold text-obsidian font-bold'
+                ? 'bg-gold text-ink font-bold'
                 : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -380,7 +380,7 @@ export default function NewslettersPage() {
                     onClick={() => setPage(p)}
                     className={`w-8 h-8 rounded-lg text-sm font-[family-name:var(--font-display)] transition-colors ${
                       p === page
-                        ? 'bg-gold text-obsidian font-bold'
+                        ? 'bg-gold text-ink font-bold'
                         : 'text-white/60 hover:bg-white/10 hover:text-white'
                     }`}
                   >

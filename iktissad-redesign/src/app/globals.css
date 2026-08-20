@@ -82,12 +82,12 @@
   /* ─────────────────────────────────────────────────────────────────
      TEXT COLORS — Deep, readable hierarchy
      ───────────────────────────────────────────────────────────────── */
-  --color-ink: #183B4E;
-  --color-ink-soft: #1E4A60;
-  --color-charcoal: #2A5A6E;
-  --color-graphite: #3D6E7E;
-  --color-pewter: #548490;
-  --color-silver: #6E98A2;
+  --color-ink: #000000;
+  --color-ink-soft: #141414;
+  --color-charcoal: #1A1A1A;
+  --color-graphite: #3D3D3D;
+  --color-pewter: #5C5C5C;
+  --color-silver: #757575;
 
   /* ─────────────────────────────────────────────────────────────────
      SEMANTIC — MARKET DATA
@@ -417,7 +417,7 @@ h3 {
 
 .btn-gold {
   background: var(--color-gold);
-  color: var(--color-obsidian);
+  color: var(--color-ink);
   padding: 0.75rem 1.75rem;
   font-family: var(--font-display);
   font-weight: 700;
@@ -475,7 +475,7 @@ h3 {
 
 .btn-outline {
   background: transparent;
-  color: var(--color-obsidian);
+  color: var(--color-ink);
   padding: 0.75rem 2rem;
   font-family: var(--font-display);
   font-weight: 700;
@@ -590,7 +590,7 @@ h3 {
   font-weight: 700;
   padding: 0.35rem 0.875rem;
   background: var(--color-gold);
-  color: var(--color-obsidian);
+  color: var(--color-ink);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -780,7 +780,7 @@ h3 {
 
 ::selection {
   background: var(--color-gold);
-  color: var(--color-obsidian);
+  color: var(--color-ink);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -959,7 +959,7 @@ h3 {
   font-family: var(--font-body, 'Tajawal', sans-serif);
   font-size: clamp(1rem, 1.5vw, 1.125rem);
   line-height: 1.8;
-  color: #183B4E;
+  color: #1A1A1A;
 }
 
 /**

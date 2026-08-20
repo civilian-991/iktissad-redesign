@@ -32,7 +32,7 @@ export default function FeaturedMagazine() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('nav.group.magazine')}
             </h2>
           </div>
@@ -84,7 +84,7 @@ export default function FeaturedMagazine() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-brand-light/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
-                        <span className="px-4 py-2 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold text-sm flex items-center gap-2">
+                        <span className="px-4 py-2 bg-gold text-ink font-[family-name:var(--font-display)] font-bold text-sm flex items-center gap-2">
                           <BookOpen size={16} />
                           {t('components.featuredMagazine.browseNow')}
                         </span>
@@ -98,7 +98,7 @@ export default function FeaturedMagazine() {
                           {latestIssue.subtitle}
                         </span>
                       )}
-                      <h3 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-obsidian mt-1 mb-4">
+                      <h3 className="text-xl md:text-2xl font-[family-name:var(--font-display)] font-bold text-ink mt-1 mb-4">
                         {latestIssue.title}
                       </h3>
 
@@ -136,14 +136,14 @@ export default function FeaturedMagazine() {
                       <div className="flex gap-3">
                         <Link
                           href={`/magazine/${latestIssue.id}/browse`}
-                          className="flex items-center gap-2 px-6 py-3 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
+                          className="flex items-center gap-2 px-6 py-3 bg-gold text-ink font-[family-name:var(--font-display)] font-bold hover:bg-gold-dark transition-colors"
                         >
                           <BookOpen size={18} />
                           {t('components.featuredMagazine.browseIssue')}
                         </Link>
                         <Link
                           href="/magazine"
-                          className="flex items-center gap-2 px-6 py-3 border border-obsidian text-obsidian font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
+                          className="flex items-center gap-2 px-6 py-3 border border-obsidian text-ink font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
                         >
                           {t('components.featuredMagazine.archive')}
                         </Link>
@@ -161,7 +161,7 @@ export default function FeaturedMagazine() {
               viewport={{ once: true }}
               className="space-y-4"
             >
-              <h4 className="text-obsidian font-[family-name:var(--font-display)] font-semibold mb-4">
+              <h4 className="text-ink font-[family-name:var(--font-display)] font-semibold mb-4">
                 {t('pages.magazine.pastIssues')}
               </h4>
 
@@ -186,7 +186,7 @@ export default function FeaturedMagazine() {
                     </div>
                   )}
                   <div className="flex-1">
-                    <h5 className="font-[family-name:var(--font-display)] font-bold text-obsidian group-hover:text-gold transition-colors">
+                    <h5 className="font-[family-name:var(--font-display)] font-bold text-ink group-hover:text-gold transition-colors">
                       {issue.title}
                     </h5>
                     {issue.subtitle && <p className="text-graphite text-sm">{issue.subtitle}</p>}

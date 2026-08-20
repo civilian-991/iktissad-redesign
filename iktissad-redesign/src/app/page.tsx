@@ -16,6 +16,7 @@ import VideoSection from '@/components/VideoSection';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
 import OpinionSection from '@/components/OpinionSection';
 import FilesSection from '@/components/FilesSection';
+import HomeSectionBlocks from '@/components/HomeSectionBlocks';
 import FeaturedMagazine from '@/components/FeaturedMagazine';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
@@ -49,6 +50,8 @@ export default function Home() {
         <OpinionSection />
         {/* 9. ملفات */}
         <FilesSection />
+        {/* 10. Auto-generated blocks for all remaining sections (society, innovation, …) */}
+        <HomeSectionBlocks />
         {/* 11. Magazine */}
         <FeaturedMagazine />
         <Newsletter />

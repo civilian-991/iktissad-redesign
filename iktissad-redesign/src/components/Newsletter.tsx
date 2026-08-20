@@ -168,8 +168,8 @@ export default function Newsletter() {
                   isSubmitted
                     ? 'bg-profit text-white cursor-default'
                     : isLoading
-                    ? 'bg-gold/70 text-obsidian cursor-wait'
-                    : 'bg-gold text-obsidian hover:bg-gold-light'
+                    ? 'bg-gold/70 text-ink cursor-wait'
+                    : 'bg-gold text-ink hover:bg-gold-light'
                 }`}
               >
                 {isSubmitted ? (

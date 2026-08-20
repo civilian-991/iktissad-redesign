@@ -146,7 +146,7 @@ export default function AddAuthorModal({ onClose, onCreated }: Props) {
             <button
               type="submit"
               disabled={!name.trim() || saving}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-obsidian hover:bg-gold/90 rounded-xl text-sm font-[family-name:var(--font-display)] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-ink hover:bg-gold/90 rounded-xl text-sm font-[family-name:var(--font-display)] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>

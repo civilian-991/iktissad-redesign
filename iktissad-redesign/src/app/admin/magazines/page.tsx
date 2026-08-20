@@ -161,7 +161,7 @@ export default function MagazinesPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/magazines/new"
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all"
           >
             <Plus size={18} />
             {t('admin.magazines.newIssue')}
@@ -331,7 +331,7 @@ export default function MagazinesPage() {
                   }`}
                 >
                   {selectedMagazines.includes(magazine.id) && (
-                    <Check size={14} className="text-obsidian" />
+                    <Check size={14} className="text-ink" />
                   )}
                 </button>
               </div>
@@ -356,7 +356,7 @@ export default function MagazinesPage() {
                 <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-obsidian/50">
                   <Link
                     href={`/admin/magazines/${magazine.id}`}
-                    className="p-2.5 bg-gold rounded-lg text-obsidian hover:bg-gold-muted transition-colors"
+                    className="p-2.5 bg-gold rounded-lg text-ink hover:bg-gold-muted transition-colors"
                   >
                     <Edit3 size={16} />
                   </Link>
@@ -425,7 +425,7 @@ export default function MagazinesPage() {
                 }`}
               >
                 {selectedMagazines.length === filteredMagazines.length && filteredMagazines.length > 0 && (
-                  <Check size={12} className="text-obsidian" />
+                  <Check size={12} className="text-ink" />
                 )}
               </button>
             </div>
@@ -455,7 +455,7 @@ export default function MagazinesPage() {
                   }`}
                 >
                   {selectedMagazines.includes(magazine.id) && (
-                    <Check size={12} className="text-obsidian" />
+                    <Check size={12} className="text-ink" />
                   )}
                 </button>
               </div>
@@ -539,7 +539,7 @@ export default function MagazinesPage() {
           </p>
           <Link
             href="/admin/magazines/new"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:bg-gold-muted transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:bg-gold-muted transition-colors"
           >
             <Plus size={18} />
             إضافة عدد جديد

@@ -200,7 +200,7 @@ export default function ListenButton({
             {/* Play/Pause */}
             <button
               onClick={isPaused ? play : pause}
-              className="w-8 h-8 rounded-full bg-gold text-obsidian flex items-center justify-center hover:bg-gold-bright transition-colors"
+              className="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center hover:bg-gold-bright transition-colors"
             >
               {isPaused ? <Play size={14} /> : <Pause size={14} />}
             </button>

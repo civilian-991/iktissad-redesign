@@ -135,14 +135,14 @@ function CommentItem({ comment, articleId, currentUserId, onReplyPosted }: Comme
       <AvatarCircle user={comment.user} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian">
+          <span className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink">
             {comment.user?.name ?? 'مجهول'}
           </span>
           <span className="text-[10px] text-charcoal/35">
             {formatDate(comment.created_at)}
           </span>
         </div>
-        <p className="text-[13px] font-[family-name:var(--font-display)] text-navy/80 leading-relaxed whitespace-pre-wrap">
+        <p className="text-[13px] font-[family-name:var(--font-display)] text-ink/80 leading-relaxed whitespace-pre-wrap">
           {comment.body}
         </p>
 
@@ -173,7 +173,7 @@ function CommentItem({ comment, articleId, currentUserId, onReplyPosted }: Comme
               placeholder={t('comments.placeholder')}
               rows={2}
               dir="rtl"
-              className="flex-1 resize-none text-[12px] font-[family-name:var(--font-display)] bg-cream border border-sand/60 focus:border-gold/50 focus:outline-none px-3 py-2 text-obsidian placeholder:text-charcoal/30 transition-colors"
+              className="flex-1 resize-none text-[12px] font-[family-name:var(--font-display)] bg-cream border border-sand/60 focus:border-gold/50 focus:outline-none px-3 py-2 text-ink placeholder:text-charcoal/30 transition-colors"
             />
             <button
               onClick={submitReply}
@@ -311,7 +311,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       {/* Section heading */}
       <div className="flex items-center gap-2.5 mb-6">
         <div className="w-[3px] h-5 bg-gold flex-shrink-0" />
-        <h2 className="text-[15px] font-[family-name:var(--font-display)] font-black text-obsidian tracking-wide">
+        <h2 className="text-[15px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
           {t('comments.title')}
         </h2>
         {(data?.pagination?.total ?? 0) > 0 && (
@@ -330,7 +330,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             placeholder={t('comments.placeholder')}
             rows={3}
             dir="rtl"
-            className="w-full resize-none text-[13px] font-[family-name:var(--font-display)] bg-transparent focus:outline-none text-obsidian placeholder:text-charcoal/30 leading-relaxed"
+            className="w-full resize-none text-[13px] font-[family-name:var(--font-display)] bg-transparent focus:outline-none text-ink placeholder:text-charcoal/30 leading-relaxed"
           />
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-sand/40">
             {pendingMsg ? (
@@ -400,14 +400,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                       <AvatarCircle user={reply.user} size="sm" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[12px] font-[family-name:var(--font-display)] font-bold text-obsidian">
+                          <span className="text-[12px] font-[family-name:var(--font-display)] font-bold text-ink">
                             {reply.user?.name ?? 'مجهول'}
                           </span>
                           <span className="text-[9px] text-charcoal/30">
                             {formatDate(reply.created_at)}
                           </span>
                         </div>
-                        <p className="text-[12px] font-[family-name:var(--font-display)] text-navy/75 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-[12px] font-[family-name:var(--font-display)] text-ink/75 leading-relaxed whitespace-pre-wrap">
                           {reply.body}
                         </p>
                         {reply.status === 'pending' && (

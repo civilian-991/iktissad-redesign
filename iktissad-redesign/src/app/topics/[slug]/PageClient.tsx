@@ -131,7 +131,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                         </span>
                       )}
                     </div>
-                    <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4 group-hover:text-gold transition-colors">
+                    <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4 group-hover:text-gold transition-colors">
                       {featuredArticle.title}
                     </h2>
                     {featuredArticle.excerpt && (
@@ -179,7 +179,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                             </span>
                           )}
                         </div>
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-lg mb-2 line-clamp-2 group-hover:text-gold transition-colors">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-lg mb-2 line-clamp-2 group-hover:text-gold transition-colors">
                           {article.title}
                         </h3>
                         {article.excerpt && (

@@ -71,7 +71,7 @@ function ArticleTile({ article, index }: { article: Article; index: number }) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-navy/5 to-navy/15 flex items-center justify-center">
-            <span className="text-navy/20 font-[family-name:var(--font-display)] font-black text-4xl select-none">
+            <span className="text-ink/20 font-[family-name:var(--font-display)] font-black text-4xl select-none">
               اقتصاد
             </span>
           </div>
@@ -84,7 +84,7 @@ function ArticleTile({ article, index }: { article: Article; index: number }) {
       </div>
 
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base leading-snug line-clamp-2 group-hover:text-navy transition-colors duration-200 mb-2">
+        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-base leading-snug line-clamp-2 group-hover:text-ink transition-colors duration-200 mb-2">
           {article.title}
         </h3>
         {article.excerpt && (
@@ -162,7 +162,7 @@ export default function AuthorDetailPageClient() {
             <div className="w-20 h-20 rounded-full bg-obsidian mx-auto mb-6 flex items-center justify-center">
               <User size={28} className="text-gold/70" />
             </div>
-            <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy mb-3">
+            <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink mb-3">
               {t('authors.detail.notFound.title')}
             </h1>
             <p className="text-charcoal/60 font-[family-name:var(--font-display)] mb-8">
@@ -250,7 +250,7 @@ export default function AuthorDetailPageClient() {
                   </span>
                 </div>
 
-                <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-display)] font-black text-navy mb-2">
+                <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-display)] font-black text-ink mb-2">
                   {author.name}
                 </h1>
                 <p className="text-base text-charcoal/60 font-[family-name:var(--font-display)]">
@@ -265,7 +265,7 @@ export default function AuthorDetailPageClient() {
         <section className="pb-16">
           <div className="container-luxury">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-sand">
-              <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-navy flex items-center gap-2">
+              <h2 className="text-2xl font-[family-name:var(--font-display)] font-bold text-ink flex items-center gap-2">
                 <BookOpen size={22} className="text-gold" />
                 {t('authors.detail.articlesHeading')}
               </h2>

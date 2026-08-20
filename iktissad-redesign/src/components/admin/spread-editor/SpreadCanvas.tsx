@@ -200,7 +200,7 @@ function ZoneCell({
 
       {/* Selected indicator (zone label) */}
       {isSelected && (
-        <div className="absolute top-1 start-1 bg-gold text-obsidian text-[9px] font-bold px-1.5 py-0.5 rounded z-20 pointer-events-none">
+        <div className="absolute top-1 start-1 bg-gold text-ink text-[9px] font-bold px-1.5 py-0.5 rounded z-20 pointer-events-none">
           {zone.labelAr}
         </div>
       )}

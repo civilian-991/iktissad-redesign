@@ -161,7 +161,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             className={`
-              block font-medium text-slate-700
+              block font-medium text-graphite
               ${labelSizeStyles[size]}
             `}
           >
@@ -201,7 +201,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                  className="text-slate-400 hover:text-graphite transition-colors"
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -220,7 +220,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={error ? `${props.id}-error` : `${props.id}-helper`}
             className={`
               mt-1.5 text-sm
-              ${hasError ? 'text-loss' : 'text-slate-500'}
+              ${hasError ? 'text-loss' : 'text-pewter'}
             `}
           >
             {error || helperText}
@@ -281,7 +281,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             className={`
-              block font-medium text-slate-700
+              block font-medium text-graphite
               ${labelSizeStyles[size]}
             `}
           >
@@ -311,7 +311,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             id={error ? `${props.id}-error` : `${props.id}-helper`}
             className={`
               mt-1.5 text-sm
-              ${hasError ? 'text-loss' : 'text-slate-500'}
+              ${hasError ? 'text-loss' : 'text-pewter'}
             `}
           >
             {error || helperText}
@@ -352,7 +352,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={onClear}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-slate-400 hover:text-graphite transition-colors"
               aria-label="مسح البحث"
             >
               <X size={18} />

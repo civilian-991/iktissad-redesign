@@ -84,7 +84,7 @@ function CountryContent({ country }: { country: ViewCountry }) {
               </div>
             )}
             <div className="flex-1 min-w-0 flex flex-col justify-between">
-              <h4 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300">
+              <h4 className="font-[family-name:var(--font-display)] font-bold text-ink text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300">
                 {article.title}
               </h4>
               {article.publishedAt && (
@@ -180,7 +180,7 @@ export default function CountryNews() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('components.countryNews.title')}
             </h2>
           </div>
@@ -201,7 +201,7 @@ export default function CountryNews() {
               className={`px-5 py-2.5 font-[family-name:var(--font-display)] font-bold text-sm transition-all duration-200 border-b-2 -mb-px ${
                 activeRegion.id === region.id
                   ? 'text-gold border-gold'
-                  : 'text-charcoal/50 border-transparent hover:text-obsidian hover:border-sand'
+                  : 'text-charcoal/50 border-transparent hover:text-ink hover:border-sand'
               }`}
             >
               {region.name}
@@ -225,7 +225,7 @@ export default function CountryNews() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-display)] border transition-all duration-200 ${
                   activeCountry.slug === country.slug
                     ? 'bg-obsidian text-white border-obsidian'
-                    : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-obsidian'
+                    : 'bg-paper text-charcoal/60 border-sand hover:border-charcoal/30 hover:text-ink'
                 }`}
               >
                 {country.name}

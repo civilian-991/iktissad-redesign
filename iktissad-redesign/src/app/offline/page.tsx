@@ -36,7 +36,7 @@ export default function OfflinePage() {
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-obsidian">أنت غير متصل بالإنترنت</h1>
+        <h1 className="text-2xl font-bold text-ink">أنت غير متصل بالإنترنت</h1>
         <p className="text-charcoal/60 text-sm max-w-xs">
           تحقق من اتصالك بالإنترنت ثم أعد المحاولة. المقالات التي قرأتها مؤخراً متاحة دون اتصال.
         </p>

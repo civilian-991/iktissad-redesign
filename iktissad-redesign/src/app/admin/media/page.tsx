@@ -124,7 +124,7 @@ export default function MediaLibraryPage() {
     const type = getMediaType(mimeType);
     switch (type) {
       case 'image':
-        return <ImageIcon size={16} className="text-teal" />;
+        return <ImageIcon size={16} className="text-ink" />;
       case 'video':
         return <Video size={16} className="text-loss" />;
       case 'document':
@@ -231,7 +231,7 @@ export default function MediaLibraryPage() {
           </button>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
           >
             <Upload size={18} />
             {t('admin.media.upload')}
@@ -281,7 +281,7 @@ export default function MediaLibraryPage() {
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-gold text-obsidian'
+                  ? 'bg-gold text-ink'
                   : 'text-white/50 hover:text-white'
               }`}
             >
@@ -291,7 +291,7 @@ export default function MediaLibraryPage() {
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-lg transition-all ${
                 viewMode === 'list'
-                  ? 'bg-gold text-obsidian'
+                  ? 'bg-gold text-ink'
                   : 'text-white/50 hover:text-white'
               }`}
             >
@@ -427,7 +427,7 @@ export default function MediaLibraryPage() {
           </p>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all"
           >
             <Upload size={16} />
             {t('admin.media.upload')}
@@ -475,7 +475,7 @@ export default function MediaLibraryPage() {
                     : 'border-white/30 bg-obsidian/50 opacity-0 group-hover:opacity-100'
                 }`}>
                   {selectedItems.includes(item.id) && (
-                    <Check size={14} className="text-obsidian" />
+                    <Check size={14} className="text-ink" />
                   )}
                 </div>
 

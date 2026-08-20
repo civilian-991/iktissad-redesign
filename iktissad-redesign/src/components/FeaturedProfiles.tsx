@@ -27,7 +27,7 @@ export default function FeaturedProfiles() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('components.featuredProfiles.sectionTitle')}
             </h2>
           </div>
@@ -82,7 +82,7 @@ export default function FeaturedProfiles() {
 
                 {/* Name */}
                 <div className="p-3 flex flex-col gap-1">
-                  <p className="font-[family-name:var(--font-display)] font-bold text-obsidian text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300 text-center">
+                  <p className="font-[family-name:var(--font-display)] font-bold text-ink text-sm leading-snug line-clamp-2 group-hover:text-gold transition-colors duration-300 text-center">
                     {profile.title}
                   </p>
                   {profile.sector && (

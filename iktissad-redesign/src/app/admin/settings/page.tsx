@@ -356,7 +356,7 @@ export default function SettingsPage() {
               </label>
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-gold via-gold-muted to-bronze rounded-xl flex items-center justify-center">
-                  <span className="text-obsidian font-[family-name:var(--font-display)] font-black text-3xl">إ</span>
+                  <span className="text-ink font-[family-name:var(--font-display)] font-black text-3xl">إ</span>
                 </div>
                 <label className="px-4 py-2 bg-white/10 text-white rounded-lg cursor-pointer hover:bg-white/20 transition-colors font-[family-name:var(--font-display)] text-sm flex items-center gap-2">
                   <Upload size={16} />
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                     onClick={() => setFontSize(size.value)}
                     className={`flex-1 py-2.5 rounded-xl font-[family-name:var(--font-display)] text-sm transition-all ${
                       fontSize === size.value
-                        ? 'bg-gold text-obsidian font-semibold'
+                        ? 'bg-gold text-ink font-semibold'
                         : 'bg-white/5 text-white/60 hover:bg-white/10'
                     }`}
                   >
@@ -557,7 +557,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleChangePassword}
                   disabled={isChangingPassword}
-                  className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {isChangingPassword && <Loader2 size={14} className="animate-spin" />}
                   {t('admin.settings.security.updatePassword')}
@@ -643,7 +643,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <button className="px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all flex items-center gap-2">
+                <button className="px-4 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all flex items-center gap-2">
                   <Database size={16} />
                   {t('admin.settings.backup.createBackup')}
                 </button>
@@ -834,7 +834,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={isSaving || isLoading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50"
         >
           {isSaving ? (
             <Loader2 size={16} className="animate-spin" />

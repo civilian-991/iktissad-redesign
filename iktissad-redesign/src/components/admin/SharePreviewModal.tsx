@@ -177,7 +177,7 @@ export default function SharePreviewModal({
                 <button
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-gold to-gold/80 text-obsidian font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-gold to-gold/80 text-ink font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-[family-name:var(--font-display)] text-sm"
                 >
                   {generating ? (
                     <>

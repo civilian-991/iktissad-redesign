@@ -170,7 +170,7 @@ export default function ReadingAnalyticsClient() {
               onClick={() => setDateRange(r)}
               className={`px-3 py-1.5 rounded-lg text-sm font-[family-name:var(--font-display)] transition-all ${
                 dateRange === r
-                  ? 'bg-gold text-obsidian font-semibold'
+                  ? 'bg-gold text-ink font-semibold'
                   : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
               }`}
             >
@@ -181,7 +181,7 @@ export default function ReadingAnalyticsClient() {
             onClick={() => setDateRange('custom')}
             className={`px-3 py-1.5 rounded-lg text-sm font-[family-name:var(--font-display)] transition-all ${
               dateRange === 'custom'
-                ? 'bg-gold text-obsidian font-semibold'
+                ? 'bg-gold text-ink font-semibold'
                 : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >

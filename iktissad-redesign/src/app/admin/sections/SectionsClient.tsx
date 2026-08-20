@@ -102,7 +102,7 @@ export default function SectionsClient() {
         </div>
         <button
           onClick={() => { setForm(emptyForm); setCreateOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 transition-colors"
         >
           <Plus size={iconSizes.md} />
           {t('admin.sections.addNew')}

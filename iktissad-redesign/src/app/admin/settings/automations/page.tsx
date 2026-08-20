@@ -212,7 +212,7 @@ export default function AutomationsPage() {
                       <button
                         onClick={() => handleSaveConfig(rule)}
                         disabled={savingId === rule.id}
-                        className="flex items-center gap-2 px-4 py-2 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-50"
                       >
                         {savingId === rule.id && <Loader2 size={14} className="animate-spin" />}
                         حفظ

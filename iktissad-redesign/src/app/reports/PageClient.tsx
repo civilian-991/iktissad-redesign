@@ -37,7 +37,7 @@ function FeaturedDossierCard({ series }: { series: ArticleSeries }) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-navy/8 to-navy/20 flex items-center justify-center">
-            <FolderOpen className="text-navy/20" size={56} />
+            <FolderOpen className="text-ink/20" size={56} />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent lg:hidden" />
@@ -48,7 +48,7 @@ function FeaturedDossierCard({ series }: { series: ArticleSeries }) {
 
       <div className="flex flex-col justify-between p-8 lg:p-10 bg-white">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] font-black text-obsidian text-2xl lg:text-3xl leading-snug group-hover:text-navy transition-colors duration-200 mb-4">
+          <h2 className="font-[family-name:var(--font-display)] font-black text-ink text-2xl lg:text-3xl leading-snug group-hover:text-ink transition-colors duration-200 mb-4">
             {series.title}
           </h2>
           {series.description && (
@@ -59,7 +59,7 @@ function FeaturedDossierCard({ series }: { series: ArticleSeries }) {
         </div>
         <div className="flex items-center gap-3 mt-6 pt-6 border-t border-charcoal/8">
           {series.articleCount !== undefined && series.articleCount > 0 && (
-            <span className="text-xs font-[family-name:var(--font-display)] bg-navy/8 text-navy px-2.5 py-1">
+            <span className="text-xs font-[family-name:var(--font-display)] bg-navy/8 text-ink px-2.5 py-1">
               {series.articleCount} مقال
             </span>
           )}
@@ -101,7 +101,7 @@ function DossierCard({ series, index }: { series: ArticleSeries; index: number }
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-navy/5 to-navy/15 flex items-center justify-center">
-            <FolderOpen className="text-navy/20" size={32} />
+            <FolderOpen className="text-ink/20" size={32} />
           </div>
         )}
         <span className="absolute top-3 end-3 bg-gold text-white text-xs font-bold font-[family-name:var(--font-display)] px-2.5 py-1 leading-none">
@@ -110,7 +110,7 @@ function DossierCard({ series, index }: { series: ArticleSeries; index: number }
       </div>
 
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base leading-snug line-clamp-2 group-hover:text-navy transition-colors duration-200 mb-2">
+        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-base leading-snug line-clamp-2 group-hover:text-ink transition-colors duration-200 mb-2">
           {series.title}
         </h3>
         {series.description && (
@@ -120,7 +120,7 @@ function DossierCard({ series, index }: { series: ArticleSeries; index: number }
         )}
         <div className="flex items-center gap-2 mt-4 pt-4 border-t border-charcoal/8">
           {series.articleCount !== undefined && series.articleCount > 0 && (
-            <span className="text-xs font-[family-name:var(--font-display)] text-navy/60">
+            <span className="text-xs font-[family-name:var(--font-display)] text-ink/60">
               {series.articleCount} مقال
             </span>
           )}

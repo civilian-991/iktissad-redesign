@@ -182,7 +182,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
           <span
             className={`absolute top-3 right-3 inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg font-[family-name:var(--font-display)] ${
               isScheduled
-                ? 'bg-teal/20 text-teal border border-teal/30'
+                ? 'bg-teal/20 text-ink border border-teal/30'
                 : 'bg-profit/20 text-profit border border-profit/30'
             }`}
           >
@@ -202,7 +202,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
           <span
             className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg font-[family-name:var(--font-display)] ${
               isScheduled
-                ? 'bg-teal/20 text-teal border border-teal/30'
+                ? 'bg-teal/20 text-ink border border-teal/30'
                 : 'bg-profit/20 text-profit border border-profit/30'
             }`}
           >

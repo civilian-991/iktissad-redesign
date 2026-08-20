@@ -225,7 +225,7 @@ export default function ArticleLinkModal({ sourceId, onClose, onSave }: Props) {
           <button
             onClick={handleLink}
             disabled={!selectedArticle || saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gold text-obsidian rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="flex items-center gap-2 px-6 py-2.5 bg-gold text-ink rounded-xl font-[family-name:var(--font-display)] font-semibold text-sm hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             ربط المقالة

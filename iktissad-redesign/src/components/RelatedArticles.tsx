@@ -47,7 +47,7 @@ function RelatedArticlesContent({ articleId, sectionSlug, limit = 5 }: RelatedAr
     <section className="mt-12 pt-8 border-t border-sand/60">
       <div className="flex items-center gap-2.5 mb-6">
         <div className="w-[3px] h-6 bg-gold flex-shrink-0" />
-        <h2 className="text-[15px] font-[family-name:var(--font-display)] font-black text-obsidian tracking-wide">
+        <h2 className="text-[15px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
           {t('engagement.related.title')}
         </h2>
         {isAiPowered && (
@@ -88,7 +88,7 @@ function RelatedArticlesContent({ articleId, sectionSlug, limit = 5 }: RelatedAr
               </span>
             )}
 
-            <h3 className="text-[13px] font-[family-name:var(--font-display)] font-bold text-obsidian leading-snug line-clamp-3 group-hover:text-gold transition-colors mb-2">
+            <h3 className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink leading-snug line-clamp-3 group-hover:text-gold transition-colors mb-2">
               {article.title}
             </h3>
 

@@ -71,7 +71,7 @@ export default function ProfilesPageClient() {
                 placeholder={t('common.actions.search')}
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-                className="w-full px-4 py-3 pr-12 bg-white shadow-sm font-[family-name:var(--font-display)] text-navy placeholder:text-slate focus:outline-none focus:ring-2 focus:ring-gold/30 rounded-lg"
+                className="w-full px-4 py-3 pr-12 bg-white shadow-sm font-[family-name:var(--font-display)] text-ink placeholder:text-slate focus:outline-none focus:ring-2 focus:ring-gold/30 rounded-lg"
               />
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gold" size={20} />
             </div>
@@ -123,7 +123,7 @@ export default function ProfilesPageClient() {
                       {/* Content */}
                       <div className="p-5 relative flex-1 flex flex-col">
                         <div className="absolute top-0 right-5 w-12 h-1 bg-gradient-to-l from-gold to-transparent -translate-y-0.5" />
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-base mb-2 group-hover:text-gold transition-colors line-clamp-2">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-base mb-2 group-hover:text-gold transition-colors line-clamp-2">
                           {profile.title}
                         </h3>
                         {profile.excerpt && (

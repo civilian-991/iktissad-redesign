@@ -113,7 +113,7 @@ export default function NewUserPage() {
         <button
           onClick={handleSave}
           disabled={isSaving || !name || !email}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-semibold text-sm rounded-xl hover:shadow-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSaving ? (
             <Loader2 size={16} className="animate-spin" />
@@ -288,7 +288,7 @@ export default function NewUserPage() {
                     <motion.svg
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="w-full h-full text-obsidian p-0.5"
+                      className="w-full h-full text-ink p-0.5"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"

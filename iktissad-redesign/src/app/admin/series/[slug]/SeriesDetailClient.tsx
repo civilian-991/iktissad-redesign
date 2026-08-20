@@ -399,7 +399,7 @@ function EditSeriesModal({ series, onClose, onSaved }: EditSeriesModalProps) {
               إلغاء
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all disabled:opacity-60 flex items-center justify-center gap-2">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات'}
             </button>
@@ -586,7 +586,7 @@ export default function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
           </h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-gold-muted text-obsidian font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all text-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-gold-muted text-ink font-[family-name:var(--font-display)] font-bold rounded-xl hover:shadow-gold transition-all text-sm"
           >
             <Plus size={16} />
             إضافة مقالة

@@ -82,7 +82,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
                   className="bg-white rounded-xl p-6 text-center shadow-sm"
                 >
                   <stat.icon className="mx-auto text-gold mb-3" size={32} />
-                  <div className="text-3xl font-[family-name:var(--font-display)] font-black text-navy mb-1">
+                  <div className="text-3xl font-[family-name:var(--font-display)] font-black text-ink mb-1">
                     {stat.value}
                   </div>
                   <div className="text-slate text-sm">{stat.label}</div>
@@ -101,7 +101,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.advertise.whyUsTitle')}
               </h2>
             </motion.div>
@@ -119,7 +119,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
                   <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
                     <Icon className="text-gold" size={28} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-xl mb-2">
                     {t(`pages.advertise.whyUs.${index}.title`)}
                   </h3>
                   <p className="text-slate">
@@ -140,7 +140,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+              <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                 {t('pages.advertise.formatsTitle')}
               </h2>
             </motion.div>
@@ -158,7 +158,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center mb-4">
                     <format.icon className="text-white" size={24} />
                   </div>
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-navy text-xl mb-2">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-xl mb-2">
                     {format.title}
                   </h3>
                   <p className="text-charcoal mb-4">
@@ -187,7 +187,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-navy mb-4">
+                <h2 className="text-3xl font-[family-name:var(--font-display)] font-bold text-ink mb-4">
                   {t('pages.advertise.audienceTitle')}
                 </h2>
                 <p className="text-charcoal leading-relaxed mb-8">
@@ -198,7 +198,7 @@ export default function AdvertisePageClient({ advertiseStats }: AdvertisePageCli
                   {audience.map((item) => (
                     <div key={item.label}>
                       <div className="flex justify-between mb-1">
-                        <span className="font-[family-name:var(--font-display)] text-navy font-semibold">
+                        <span className="font-[family-name:var(--font-display)] text-ink font-semibold">
                           {item.label}
                         </span>
                         <span className="text-gold font-bold">{item.percentage}%</span>

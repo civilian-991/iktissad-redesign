@@ -130,7 +130,7 @@ function CancelDialog({
         dir="rtl"
       >
         <XCircle className="text-loss mx-auto mb-4" size={48} />
-        <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian mb-3">
+        <h3 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-3">
           {t('pages.account.subscription.cancel')}
         </h3>
         <p className="text-pewter text-sm mb-6 leading-relaxed">
@@ -223,7 +223,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
               className="bg-white rounded-2xl p-10 shadow-md text-center"
             >
               <AlertCircle className="text-gold mx-auto mb-4" size={48} />
-              <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-obsidian mb-3">
+              <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-3">
                 {t('pages.account.subscription.noSubscription')}
               </h2>
               <p className="text-pewter text-sm mb-6">
@@ -332,7 +332,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
                 </Link>
                 <Link
                   href="/checkout/portal"
-                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-obsidian text-obsidian rounded-xl text-sm font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-5 py-2.5 border-2 border-obsidian text-ink rounded-xl text-sm font-[family-name:var(--font-display)] font-semibold hover:bg-obsidian hover:text-white transition-colors"
                 >
                   <CreditCard size={16} />
                   {t('pages.account.subscription.managePayment')}
@@ -358,7 +358,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
             className="bg-white rounded-2xl shadow-md overflow-hidden"
           >
             <div className="p-6 border-b border-ivory">
-              <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-obsidian flex items-center gap-2">
+              <h2 className="text-lg font-[family-name:var(--font-display)] font-bold text-ink flex items-center gap-2">
                 <CreditCard className="text-gold" size={20} />
                 {t('pages.account.subscription.paymentHistory')}
               </h2>
@@ -391,7 +391,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
                         <td className="px-6 py-4 text-charcoal">
                           {payment.description ?? 'اشتراك'}
                         </td>
-                        <td className="px-6 py-4 font-semibold text-obsidian">
+                        <td className="px-6 py-4 font-semibold text-ink">
                           {payment.amount.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} {payment.currency}
                         </td>
                         <td className="px-6 py-4">

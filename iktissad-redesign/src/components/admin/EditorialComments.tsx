@@ -378,7 +378,7 @@ function Thread({ note, currentUserId: _currentUserId, onResolutionToggle, onRep
               <button
                 onClick={handleReplySubmit}
                 disabled={submitting || !replyBody.trim()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gold text-obsidian text-xs font-semibold rounded-lg hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)]"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gold text-ink text-xs font-semibold rounded-lg hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)]"
               >
                 {submitting ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />}
                 إرسال
@@ -540,7 +540,7 @@ export default function EditorialComments({
         >
           <MessageSquare size={16} className="text-gold" />
           {unresolvedCount > 0 && (
-            <span className="w-4 h-4 bg-gold rounded-full text-obsidian text-[9px] font-bold flex items-center justify-center">
+            <span className="w-4 h-4 bg-gold rounded-full text-ink text-[9px] font-bold flex items-center justify-center">
               {unresolvedCount > 9 ? '9+' : unresolvedCount}
             </span>
           )}
@@ -651,7 +651,7 @@ export default function EditorialComments({
               <button
                 onClick={() => handleSubmit(false)}
                 disabled={submitting || !composeBody.trim()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gold text-obsidian text-xs font-bold rounded-lg hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)]"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gold text-ink text-xs font-bold rounded-lg hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-[family-name:var(--font-display)]"
               >
                 {submitting && !sendingReview ? (
                   <Loader2 size={11} className="animate-spin" />

@@ -119,7 +119,7 @@ export default function TermsPageClient() {
                     transition={{ delay: index * 0.05 }}
                     className="bg-white rounded-xl p-6 lg:p-8 shadow-md"
                   >
-                    <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-navy mb-4 flex items-center gap-3">
+                    <h2 className="text-xl font-[family-name:var(--font-display)] font-bold text-ink mb-4 flex items-center gap-3">
                       <span className="w-6 h-6 bg-gold text-white text-sm flex items-center justify-center rounded">
                         {index + 1}
                       </span>

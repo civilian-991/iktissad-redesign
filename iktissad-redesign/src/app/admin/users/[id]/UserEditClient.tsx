@@ -223,7 +223,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
     switch (role) {
       case 'super_admin': return <ShieldAlert size={iconSizes.sm} className="text-loss" />;
       case 'editor': return <ShieldCheck size={iconSizes.sm} className="text-gold" />;
-      case 'writer': return <Shield size={iconSizes.sm} className="text-teal" />;
+      case 'writer': return <Shield size={iconSizes.sm} className="text-ink" />;
       default: return <User size={iconSizes.sm} className="text-white/50" />;
     }
   }, []);
@@ -293,7 +293,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
               <img src={avatar} alt={user.name} className="w-20 h-20 rounded-2xl object-cover" />
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gold to-bronze flex items-center justify-center">
-                <span className="text-obsidian font-bold text-2xl">{user.name.charAt(0)}</span>
+                <span className="text-ink font-bold text-2xl">{user.name.charAt(0)}</span>
               </div>
             )}
             {adminRole && (

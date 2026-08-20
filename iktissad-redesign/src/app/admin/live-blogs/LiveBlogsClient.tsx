@@ -113,7 +113,7 @@ export default function LiveBlogsClient() {
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-[family-name:var(--font-display)] font-bold hover:bg-gold-bright transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gold text-ink rounded-xl text-sm font-[family-name:var(--font-display)] font-bold hover:bg-gold-bright transition-colors"
         >
           <Plus size={16} />
           {t('engagement.liveBlog.start_blog')}
@@ -141,7 +141,7 @@ export default function LiveBlogsClient() {
             <button
               onClick={handleCreate}
               disabled={creating || !articleId.trim()}
-              className="px-5 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-[family-name:var(--font-display)] font-bold disabled:opacity-50 hover:bg-gold-bright transition-colors"
+              className="px-5 py-2.5 bg-gold text-ink rounded-xl text-sm font-[family-name:var(--font-display)] font-bold disabled:opacity-50 hover:bg-gold-bright transition-colors"
             >
               {creating ? <Loader2 size={14} className="animate-spin" /> : t('engagement.liveBlog.start_blog')}
             </button>
@@ -224,7 +224,7 @@ export default function LiveBlogsClient() {
                   <button
                     onClick={handlePostUpdate}
                     disabled={posting || !updateContent.trim()}
-                    className="self-end px-4 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-[family-name:var(--font-display)] font-bold disabled:opacity-50 hover:bg-gold-bright transition-colors"
+                    className="self-end px-4 py-2.5 bg-gold text-ink rounded-xl text-sm font-[family-name:var(--font-display)] font-bold disabled:opacity-50 hover:bg-gold-bright transition-colors"
                   >
                     {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                   </button>

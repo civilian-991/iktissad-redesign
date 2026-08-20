@@ -43,7 +43,7 @@ function DossierArticleCard({
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-navy/10 to-navy/25 flex items-center justify-center">
-            <FolderOpen className="text-navy/30" size={20} />
+            <FolderOpen className="text-ink/30" size={20} />
           </div>
         )}
         <span className="absolute top-2 start-2 w-6 h-6 rounded-full bg-navy text-white text-xs font-bold font-[family-name:var(--font-display)] flex items-center justify-center">
@@ -53,7 +53,7 @@ function DossierArticleCard({
 
       {/* Content */}
       <div className="flex flex-col justify-center py-4 pe-5 gap-1.5 flex-1 min-w-0">
-        <h3 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base leading-snug line-clamp-2 group-hover:text-navy transition-colors duration-200">
+        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-base leading-snug line-clamp-2 group-hover:text-ink transition-colors duration-200">
           {article.title}
         </h3>
         {article.excerpt && (
@@ -156,7 +156,7 @@ export default function DossierPageClient({ slug }: { slug: string }) {
           <div className="container-editorial max-w-3xl">
             {isLoading ? (
               <div className="flex items-center justify-center h-64">
-                <Loader2 className="text-navy animate-spin" size={36} />
+                <Loader2 className="text-ink animate-spin" size={36} />
               </div>
             ) : !series ? (
               <div className="text-center py-24">
@@ -166,7 +166,7 @@ export default function DossierPageClient({ slug }: { slug: string }) {
                 </p>
                 <Link
                   href="/reports"
-                  className="mt-3 inline-block text-navy text-sm font-[family-name:var(--font-display)] hover:underline"
+                  className="mt-3 inline-block text-ink text-sm font-[family-name:var(--font-display)] hover:underline"
                 >
                   العودة إلى الملفات
                 </Link>

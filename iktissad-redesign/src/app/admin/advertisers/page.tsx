@@ -211,7 +211,7 @@ function SlidePanel({ open, onClose, title, form, onChange, onSubmit, saving }: 
           <button
             onClick={onSubmit}
             disabled={saving || !form.name.trim()}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-gold to-amber-400 text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm transition-opacity disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-gold to-amber-400 text-ink font-[family-name:var(--font-display)] font-semibold text-sm transition-opacity disabled:opacity-50"
           >
             {saving ? <Loader2 size={iconSizes.md} className="animate-spin" /> : null}
             {saving ? 'جاري الحفظ...' : 'حفظ'}
@@ -358,7 +358,7 @@ export default function AdvertisersPage() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold to-amber-400 text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm transition-opacity hover:opacity-90"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold to-amber-400 text-ink font-[family-name:var(--font-display)] font-semibold text-sm transition-opacity hover:opacity-90"
         >
           <Plus size={iconSizes.md} />
           إضافة معلن

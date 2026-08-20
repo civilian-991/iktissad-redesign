@@ -49,7 +49,7 @@ export default function Hero() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-gold" />
-            <h2 className="font-[family-name:var(--font-display)] font-bold text-obsidian text-base">
+            <h2 className="font-[family-name:var(--font-display)] font-bold text-ink text-base">
               {t('components.hero.sectionTitle')}
             </h2>
           </div>
@@ -116,7 +116,7 @@ export default function Hero() {
                         </span>
                       )}
                     </div>
-                    <h2 className="!text-xl md:!text-2xl font-[family-name:var(--font-display)] !font-bold text-obsidian !leading-snug mb-2 group-hover:text-gold transition-colors">
+                    <h2 className="!text-xl md:!text-2xl font-[family-name:var(--font-display)] !font-bold text-ink !leading-snug mb-2 group-hover:text-gold transition-colors">
                       {main.title}
                     </h2>
                     {main.excerpt && (
@@ -180,7 +180,7 @@ export default function Hero() {
                           )}
                         </div>
                         <h3 className={`font-[family-name:var(--font-display)] font-bold text-sm leading-snug line-clamp-2 transition-colors ${
-                          i === active ? 'text-gold' : 'text-obsidian group-hover:text-gold'
+                          i === active ? 'text-gold' : 'text-ink group-hover:text-gold'
                         }`}>
                           {article.title}
                         </h3>

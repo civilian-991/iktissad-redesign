@@ -323,7 +323,7 @@ function CampaignForm({
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 bg-gold text-obsidian font-bold rounded-lg py-3 text-sm font-[family-name:var(--font-display)] hover:bg-gold/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="flex-1 bg-gold text-ink font-bold rounded-lg py-3 text-sm font-[family-name:var(--font-display)] hover:bg-gold/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
         >
           {saving && <Loader2 size={15} className="animate-spin" />}
           {initial ? 'حفظ التعديلات' : 'إنشاء الحملة'}
@@ -458,7 +458,7 @@ function AdForm({
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 bg-gold text-obsidian font-bold rounded-lg py-3 text-sm font-[family-name:var(--font-display)] hover:bg-gold/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="flex-1 bg-gold text-ink font-bold rounded-lg py-3 text-sm font-[family-name:var(--font-display)] hover:bg-gold/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
         >
           {saving && <Loader2 size={15} className="animate-spin" />}
           {initial ? 'حفظ التعديلات' : 'إنشاء الإعلان'}
@@ -510,7 +510,7 @@ function CampaignsTab() {
         </p>
         <button
           onClick={openNew}
-          className="flex items-center gap-2 bg-gold text-obsidian font-bold text-sm rounded-xl px-4 py-2.5 hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)]"
+          className="flex items-center gap-2 bg-gold text-ink font-bold text-sm rounded-xl px-4 py-2.5 hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)]"
         >
           <Plus size={16} />
           حملة جديدة
@@ -679,7 +679,7 @@ function AdsTab() {
         </p>
         <button
           onClick={openNew}
-          className="flex items-center gap-2 bg-gold text-obsidian font-bold text-sm rounded-xl px-4 py-2.5 hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)]"
+          className="flex items-center gap-2 bg-gold text-ink font-bold text-sm rounded-xl px-4 py-2.5 hover:bg-gold/90 transition-colors font-[family-name:var(--font-display)]"
         >
           <Plus size={16} />
           إعلان جديد
@@ -859,7 +859,7 @@ export default function AdsPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold font-[family-name:var(--font-display)] transition-all ${
               tab === key
-                ? 'bg-gold text-obsidian shadow-sm'
+                ? 'bg-gold text-ink shadow-sm'
                 : 'text-white/50 hover:text-white'
             }`}
           >

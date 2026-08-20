@@ -366,7 +366,7 @@ function BriefDisplay({ brief }: { brief: ArticleBrief }) {
       <div className="flex items-center gap-3 pt-2">
         <button
           onClick={handleStartArticle}
-          className="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-gold hover:bg-gold/90 text-obsidian font-[family-name:var(--font-display)] font-semibold text-sm transition-all"
+          className="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-gold hover:bg-gold/90 text-ink font-[family-name:var(--font-display)] font-semibold text-sm transition-all"
         >
           <FileText size={iconSizes.sm} />
           ابدأ مقالاً من الموجز
@@ -500,7 +500,7 @@ export default function ArticleBriefGenerator() {
             <button
               onClick={generate}
               disabled={loading || !topic.trim()}
-              className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-gold hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed text-obsidian font-[family-name:var(--font-display)] font-bold text-sm transition-all sm:min-w-[160px]"
+              className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-gold hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed text-ink font-[family-name:var(--font-display)] font-bold text-sm transition-all sm:min-w-[160px]"
             >
               {loading ? (
                 <>

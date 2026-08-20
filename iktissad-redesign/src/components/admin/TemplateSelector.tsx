@@ -94,7 +94,7 @@ export default function TemplateSelector({ onSelect }: TemplateSelectorProps) {
                 {CATEGORY_ICONS[tpl.category] || CATEGORY_ICONS.general}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-[family-name:var(--font-display)] font-semibold text-obsidian">
+                <p className="text-[13px] font-[family-name:var(--font-display)] font-semibold text-ink">
                   {locale === 'en' && tpl.name_en ? tpl.name_en : tpl.name}
                 </p>
                 {tpl.description && (

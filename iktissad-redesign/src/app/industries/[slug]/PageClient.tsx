@@ -156,13 +156,13 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                 <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-gold text-white' : 'text-slate hover:text-navy'}`}
+                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-gold text-white' : 'text-slate hover:text-ink'}`}
                   >
                     <Grid3X3 size={18} />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-gold text-white' : 'text-slate hover:text-navy'}`}
+                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-gold text-white' : 'text-slate hover:text-ink'}`}
                   >
                     <List size={18} />
                   </button>
@@ -193,7 +193,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                         </div>
                       )}
                       <div className="p-5">
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy leading-snug line-clamp-2 group-hover:text-gold transition-colors mb-3">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink leading-snug line-clamp-2 group-hover:text-gold transition-colors mb-3">
                           {article.title}
                         </h3>
                         <div className="flex items-center justify-between text-sm text-slate">
@@ -219,7 +219,7 @@ export default function SectorPageClient({ params }: { params: Promise<{ slug: s
                         </div>
                       )}
                       <div className="flex-1 flex flex-col justify-center">
-                        <h3 className="font-[family-name:var(--font-display)] font-bold text-navy leading-snug group-hover:text-gold transition-colors mb-2">
+                        <h3 className="font-[family-name:var(--font-display)] font-bold text-ink leading-snug group-hover:text-gold transition-colors mb-2">
                           {article.title}
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-slate">

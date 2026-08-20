@@ -159,7 +159,7 @@ export default function SectorEditClient({ slug }: { slug: string }) {
         />
 
         <div>
-          <label className="block text-slate-700 text-sm font-semibold mb-2">
+          <label className="block text-graphite text-sm font-semibold mb-2">
             {t('admin.sectors.icon')}
           </label>
           <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function SectorEditClient({ slug }: { slug: string }) {
         </div>
 
         <div>
-          <label className="block text-slate-700 text-sm font-semibold mb-2">
+          <label className="block text-graphite text-sm font-semibold mb-2">
             {t('admin.sectors.color')}
           </label>
           <div className="flex items-center gap-3">
