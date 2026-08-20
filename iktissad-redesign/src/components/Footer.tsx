@@ -203,7 +203,7 @@ export default function Footer() {
                 <div>
                   <h4 className="font-[family-name:var(--font-display)] font-bold text-lg mb-6 flex items-center gap-3">
                     <span className="w-1 h-5 bg-gold" />
-                    <span className="text-gold">{t('nav.main.sections')}</span>
+                    <span className="text-gold">{t('nav.main.allSections')}</span>
                   </h4>
                   <ul className="space-y-3">
                     {sectionLinks.map((link) => (

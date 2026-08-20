@@ -8,12 +8,18 @@ import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, Country } from '@/types';
+import type { CountryRegion } from '@/lib/countries';
 
-export default function CountriesPageClient() {
+interface CountriesPageClientProps {
+  /** Scope the page to one region of جغرافيا الاقتصاد. Omitted = all countries. */
+  region?: CountryRegion;
+}
+
+export default function CountriesPageClient({ region }: CountriesPageClientProps = {}) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useSWR<ApiResponse<Country[]>>(
-    '/api/countries',
+    region ? `/api/countries?region=${region}` : '/api/countries',
     swrFetcher
   );
 
@@ -23,6 +29,8 @@ export default function CountriesPageClient() {
   const countries = (data?.data ?? []).filter(
     (c) => (c.articleCount ?? 0) > 0 && c.slug !== 'world'
   );
+
+  const heading = region ? t(`nav.regions.${region}`) : t('pages.countries.title');
 
   return (
     <>
@@ -43,11 +51,11 @@ export default function CountriesPageClient() {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <MapPin className="text-gold" size={24} />
                 <span className="text-gold font-[family-name:var(--font-display)] text-sm font-semibold tracking-wider">
-                  تغطية إقليمية
+                  {t('nav.main.geography')}
                 </span>
               </div>
               <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mt-2 mb-4">
-                {t('pages.countries.title')}
+                {heading}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
                 تغطية اقتصادية شاملة للدول العربية والشرق الأوسط

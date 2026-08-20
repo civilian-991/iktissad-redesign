@@ -106,11 +106,33 @@ export const en = {
   // ═══════════════════════════════════════════════════════════════
   nav: {
     main: {
-      home: 'Home',
-      sections: 'Sections',
-      sectors: 'Sectors',
+      // The 15 أبواب. Section labels fall back to these when the DB has not
+      // loaded yet; the live name in the `sections` table wins once it does.
+      home: 'Top Stories',
+      analysis: 'Depth',
+      economy: 'Economic Landscape',
+      markets: 'Market Pulse',
+      business: 'Business Movement',
+      companies: 'Corporate World',
+      sectors: 'Under the Lens',
+      files: 'Files',
+      leaders: 'Leaders',
+      numbers: 'By the Numbers',
+      opinion: 'Columns',
+      videos: 'Videos',
+      events: 'On the Scene',
+      society: 'Business Community',
+      geography: 'Economic Geography',
+      // Kept for the footer and secondary menus
+      allSections: 'Sections',
       magazine: 'Magazine',
       group: 'Iktissad Group',
+    },
+    regions: {
+      gulf: 'The Gulf',
+      mashreq: 'The Levant',
+      northafrica: 'North Africa',
+      world: 'World',
     },
     sections: {
       economy: 'Economy',

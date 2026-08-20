@@ -106,11 +106,33 @@ export const ar = {
   // ═══════════════════════════════════════════════════════════════
   nav: {
     main: {
-      home: 'الرئيسية',
-      sections: 'الأبواب',
-      sectors: 'قطاعات',
+      // The 15 أبواب. Section labels fall back to these when the DB has not
+      // loaded yet; the live name in the `sections` table wins once it does.
+      home: 'أبرز المواضيع',
+      analysis: 'عمق',
+      economy: 'المشهد الاقتصادي',
+      markets: 'نبض الأسواق',
+      business: 'حركة الأعمال',
+      companies: 'عالم الشركات',
+      sectors: 'تحت المجهر',
+      files: 'ملفات',
+      leaders: 'قيادات',
+      numbers: 'بالأرقام',
+      opinion: 'أقلام',
+      videos: 'فيديو',
+      events: 'على الساحة',
+      society: 'المجتمع الاقتصادي',
+      geography: 'جغرافيا الاقتصاد',
+      // Kept for the footer and secondary menus
+      allSections: 'الأبواب',
       magazine: 'المجلة',
       group: 'مجموعة الإقتصاد والأعمال',
+    },
+    regions: {
+      gulf: 'الخليج',
+      mashreq: 'المشرق العربي',
+      northafrica: 'شمال أفريقيا',
+      world: 'العالم',
     },
     sections: {
       economy: 'اقتصاد',

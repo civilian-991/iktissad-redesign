@@ -29,6 +29,7 @@ import { XIcon } from '@/components/icons/SocialIcons';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
 import PushNotificationToggle from '@/components/PushNotificationToggle';
+import { COUNTRY_REGIONS } from '@/lib/countries';
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION DATA
@@ -77,12 +78,14 @@ export default function Header() {
   const { data: sectionsResp } = useSWR<ApiResponse<Section[]>>('/api/sections', swrFetcher, swrOpts);
   const { data: sectorsResp }  = useSWR<ApiResponse<Sector[]>>('/api/sectors',  swrFetcher, swrOpts);
 
-  const dynamicSections: NavSubItem[] = useMemo(() =>
-    (sectionsResp?.data ?? []).map(s => ({
-      key: s.slug,
-      href: `/topics/${s.slug}`,
-      label: locale === 'ar' ? s.name : (s.nameEn || s.name),
-    })), [sectionsResp, locale]);
+  // Live section names, so a rename in the CMS reaches the nav without a deploy.
+  const sectionNameBySlug = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const sec of sectionsResp?.data ?? []) {
+      m.set(sec.slug, locale === 'ar' ? sec.name : (sec.nameEn || sec.name));
+    }
+    return m;
+  }, [sectionsResp, locale]);
 
   const dynamicSectors: NavSubItem[] = useMemo(() =>
     (sectorsResp?.data ?? []).map(s => ({
@@ -91,25 +94,38 @@ export default function Header() {
       label: locale === 'ar' ? s.name : (s.nameEn || s.name),
     })), [sectorsResp, locale]);
 
-  const navigationConfig: NavItem[] = useMemo(() => [
-    { key: 'home', href: '/' },
-    { key: 'sections', href: '/topics',     submenu: dynamicSections },
-    { key: 'sectors',  href: '/industries', wide: true, submenu: dynamicSectors },
-    { key: 'magazine', href: '/magazine' },
-    { key: 'group',    href: '/about' },
-  ], [dynamicSections, dynamicSectors]);
+  const regionItems: NavSubItem[] = useMemo(() =>
+    COUNTRY_REGIONS.map(r => ({
+      key: r,
+      href: `/countries/region/${r}`,
+      label: t(`nav.regions.${r}`),
+    })), [t]);
 
-  // Get navigation item name from translations
-  const getNavName = (key: string): string => {
-    const navKeys: Record<string, string> = {
-      home: t('nav.main.home'),
-      sections: t('nav.main.sections'),
-      sectors: t('nav.main.sectors'),
-      magazine: t('nav.main.magazine'),
-      group: t('nav.main.group'),
-    };
-    return navKeys[key] || key;
-  };
+  // The 15 أبواب, in editorial order. Twelve are sections; تحت المجهر is the
+  // sectors taxonomy, جغرافيا الاقتصاد is countries by region, and أبرز
+  // المواضيع is the homepage.
+  const navigationConfig: NavItem[] = useMemo(() => [
+    { key: 'home',      href: '/' },
+    { key: 'analysis',  href: '/topics/analysis' },
+    { key: 'economy',   href: '/topics/economy' },
+    { key: 'markets',   href: '/topics/markets' },
+    { key: 'business',  href: '/topics/business' },
+    { key: 'companies', href: '/topics/companies' },
+    { key: 'sectors',   href: '/industries', wide: true, submenu: dynamicSectors },
+    { key: 'files',     href: '/topics/files' },
+    { key: 'leaders',   href: '/topics/leaders' },
+    { key: 'numbers',   href: '/topics/numbers' },
+    { key: 'opinion',   href: '/topics/opinion' },
+    { key: 'videos',    href: '/topics/videos' },
+    { key: 'events',    href: '/topics/events' },
+    { key: 'society',   href: '/topics/society' },
+    { key: 'geography', href: '/countries', submenu: regionItems },
+  ], [dynamicSectors, regionItems]);
+
+  // Prefer the live section name; fall back to the bundled translation while
+  // /api/sections is still in flight (and for the three non-section أبواب).
+  const getNavName = (key: string): string =>
+    sectionNameBySlug.get(key) || t(`nav.main.${key}`);
 
   // Submenu label: prefer DB-provided label, else fall back to slug
   const getSubmenuName = (item: NavSubItem): string => item.label || item.key;
@@ -270,68 +286,25 @@ export default function Header() {
               </AnimatePresence>
             </motion.button>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navigationConfig.map((item) => (
-                <div
-                  key={item.key}
-                  className="relative"
-                  onMouseEnter={() => item.submenu && setActiveSubmenu(item.key)}
-                  onMouseLeave={() => setActiveSubmenu(null)}
-                >
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-1.5 px-4 py-2 font-[family-name:var(--font-display)] font-semibold text-sm text-ink hover:text-gold transition-colors duration-300 relative group"
-                  >
-                    <span>{getNavName(item.key)}</span>
-                    {item.submenu && (
-                      <ChevronDown
-                        size={12}
-                        className={`transition-transform duration-300 ${
-                          activeSubmenu === item.key ? 'rotate-180' : ''
-                        }`}
-                      />
-                    )}
-                    <span className="absolute bottom-1 start-4 end-4 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
-                  </Link>
-
-                  {/* Dropdown Menu */}
-                  <AnimatePresence>
-                    {item.submenu && activeSubmenu === item.key && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: animations.durationMs.fast / 1000 }}
-                        className={`absolute top-full start-0 bg-paper shadow-elevated border-t-2 border-gold overflow-hidden`}
-                        style={{ width: item.wide ? config.submenu.wideWidth : config.submenu.normalWidth }}
-                      >
-                        <div className={`py-3 ${item.wide ? 'grid grid-cols-2 gap-x-4 px-2' : ''}`}>
-                          {item.submenu.map((subItem, index) => (
-                            <motion.div
-                              key={subItem.key}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * config.stagger.fast }}
-                            >
-                              <Link
-                                href={subItem.href}
-                                className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:ps-7 transition-all duration-200"
-                              >
-                                {getSubmenuName(subItem)}
-                              </Link>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </nav>
 
             {/* Actions */}
             <div className="flex items-center gap-3 ms-auto lg:ms-0">
+              {/* Not أبواب, but they still need a way in */}
+              <div className="hidden lg:flex items-center gap-4 me-2">
+                <Link
+                  href="/magazine"
+                  className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
+                >
+                  {t('nav.main.magazine')}
+                </Link>
+                <Link
+                  href="/about"
+                  className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
+                >
+                  {t('nav.main.group')}
+                </Link>
+              </div>
+
               {/* Search Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -361,6 +334,71 @@ export default function Header() {
                 </motion.span>
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* الأبواب strip */}
+        <div className="hidden lg:block border-t border-sand/60 bg-paper">
+          <div className="container-editorial">
+          {/* الأبواب — the 15 top-level sections, on their own strip */}
+          <nav className="hidden lg:flex flex-wrap items-center justify-center gap-x-0.5">
+            {navigationConfig.map((item) => (
+              <div
+                key={item.key}
+                className="relative"
+                onMouseEnter={() => item.submenu && setActiveSubmenu(item.key)}
+                onMouseLeave={() => setActiveSubmenu(null)}
+              >
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-1 px-2.5 py-2 font-[family-name:var(--font-display)] font-semibold text-[13px] whitespace-nowrap text-ink hover:text-gold transition-colors duration-300 relative group"
+                >
+                  <span>{getNavName(item.key)}</span>
+                  {item.submenu && (
+                    <ChevronDown
+                      size={12}
+                      className={`transition-transform duration-300 ${
+                        activeSubmenu === item.key ? 'rotate-180' : ''
+                      }`}
+                    />
+                  )}
+                  <span className="absolute bottom-1 start-2.5 end-2.5 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
+                </Link>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {item.submenu && activeSubmenu === item.key && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: animations.durationMs.fast / 1000 }}
+                      className={`absolute top-full start-0 bg-paper shadow-elevated border-t-2 border-gold overflow-hidden`}
+                      style={{ width: item.wide ? config.submenu.wideWidth : config.submenu.normalWidth }}
+                    >
+                      <div className={`py-3 ${item.wide ? 'grid grid-cols-2 gap-x-4 px-2' : ''}`}>
+                        {item.submenu.map((subItem, index) => (
+                          <motion.div
+                            key={subItem.key}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * config.stagger.fast }}
+                          >
+                            <Link
+                              href={subItem.href}
+                              className="block px-5 py-2.5 font-[family-name:var(--font-display)] text-sm text-charcoal hover:bg-cream hover:text-gold hover:ps-7 transition-all duration-200"
+                            >
+                              {getSubmenuName(subItem)}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </nav>
           </div>
         </div>
 
