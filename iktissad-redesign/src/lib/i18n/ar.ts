@@ -2396,7 +2396,7 @@ export const ar = {
   components: {
     hero: {
       badge: 'عاجل',
-      sectionTitle: 'مواضيع رئيسية',
+      sectionTitle: 'أبرز المواضيع',
       mainHeadline: 'أهم الأخبار',
       subHeadline: 'آخر التطورات الاقتصادية والمالية',
       readMore: 'اقرأ المزيد',
@@ -2410,10 +2410,10 @@ export const ar = {
       title: 'آخر الأخبار',
     },
     companiesSection: {
-      title: 'شركات',
+      title: 'عالم الشركات',
     },
     opinionSection: {
-      title: 'رأي',
+      title: 'أقلام',
     },
     filesSection: {
       title: 'ملفات',
@@ -2422,7 +2422,7 @@ export const ar = {
       articlesCount: '{count} مقال',
     },
     sectorNews: {
-      title: 'أخبار القطاعات',
+      title: 'تحت المجهر',
       subtitle: 'تغطية شاملة',
       viewAll: 'عرض جميع الأخبار',
       noNews: 'لا توجد أخبار متاحة حالياً لهذا القطاع',
@@ -2431,7 +2431,7 @@ export const ar = {
       pageLabel: 'الصفحة {page}',
     },
     videoSection: {
-      title: 'الفيديو',
+      title: 'فيديو',
       watchNow: 'شاهد الآن',
       duration: '{minutes} دقيقة',
       views: '{count} مشاهدة',
@@ -2467,7 +2467,7 @@ export const ar = {
     },
     featuredProfiles: {
       title: 'ملفات تعريفية مميزة',
-      sectionTitle: 'بروفايل',
+      sectionTitle: 'قيادات',
       subtitle: 'شخصيات مؤثرة',
       description: 'قادة الأعمال والشخصيات المؤثرة في عالم الاقتصاد والمال العربي',
       viewAll: 'عرض جميع الملفات',

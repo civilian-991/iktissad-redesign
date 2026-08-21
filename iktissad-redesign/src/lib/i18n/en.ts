@@ -2396,7 +2396,7 @@ export const en = {
   components: {
     hero: {
       badge: 'Breaking',
-      sectionTitle: 'Top Topics',
+      sectionTitle: 'Top Stories',
       mainHeadline: 'Top Stories',
       subHeadline: 'Latest economic and financial developments',
       readMore: 'Read More',
@@ -2410,10 +2410,10 @@ export const en = {
       title: 'Latest News',
     },
     companiesSection: {
-      title: 'Companies',
+      title: 'Corporate World',
     },
     opinionSection: {
-      title: 'Opinion',
+      title: 'Columns',
     },
     filesSection: {
       title: 'Dossiers',
@@ -2422,7 +2422,7 @@ export const en = {
       articlesCount: '{count} articles',
     },
     sectorNews: {
-      title: 'Sector News',
+      title: 'Under the Lens',
       subtitle: 'Comprehensive Coverage',
       viewAll: 'View All News',
       noNews: 'No news currently available for this sector',
@@ -2431,7 +2431,7 @@ export const en = {
       pageLabel: 'Page {page}',
     },
     videoSection: {
-      title: 'Video',
+      title: 'Videos',
       watchNow: 'Watch Now',
       duration: '{minutes} min',
       views: '{count} views',
@@ -2467,7 +2467,7 @@ export const en = {
     },
     featuredProfiles: {
       title: 'Featured Profiles',
-      sectionTitle: 'Profiles',
+      sectionTitle: 'Leaders',
       subtitle: 'Influential Figures',
       description: 'Business leaders and influential figures in the Arab world of economics and finance',
       viewAll: 'View All Profiles',

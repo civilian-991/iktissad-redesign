@@ -11,7 +11,9 @@ import type { Article, ApiResponse, Section } from '@/types';
 // Sections already represented by dedicated homepage components — everything
 // else with published articles gets an auto-generated block below, so new
 // sections created in the admin appear on the homepage without code changes.
-const HARDCODED_SECTION_SLUGS = new Set(['companies', 'videos', 'opinion', 'files']);
+// `leaders` is here because FeaturedProfiles is the قيادات block; without it
+// the homepage carries two blocks under the same heading.
+const HARDCODED_SECTION_SLUGS = new Set(['companies', 'videos', 'opinion', 'files', 'leaders']);
 
 function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
   const { t, locale } = useTranslation();
