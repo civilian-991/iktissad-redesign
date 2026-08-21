@@ -47,7 +47,13 @@ export const metadata: Metadata = {
     description: "المصدر الأول للأخبار الاقتصادية والمالية في العالم العربي",
   },
   icons: {
-    icon: "/favicon.ico",
+    // /favicon.ico is emitted by the file convention (src/app/favicon.ico) —
+    // listing it here as well produced two <link rel="icon"> tags for the same
+    // file. These are the PNG sizes that convention does not cover.
+    icon: [
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
     apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.json",
