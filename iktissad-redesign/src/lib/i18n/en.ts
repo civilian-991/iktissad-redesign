@@ -2478,7 +2478,7 @@ export const en = {
       newlyAdded: 'Newly Added',
     },
     countryNews: {
-      title: 'Country News',
+      title: 'Economic Geography',
       subtitle: 'Regional Coverage',
       selectCountry: 'Select Country',
       moreNews: 'More news from {country}',
@@ -2487,8 +2487,8 @@ export const en = {
       noNews: 'No news currently available for this country',
       economicIndicators: 'Economic Indicators',
       regions: {
-        gulf: 'Gulf',
-        mashreq: 'Mashreq',
+        gulf: 'The Gulf',
+        mashreq: 'The Levant',
         northafrica: 'North Africa',
         world: 'World',
       },

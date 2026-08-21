@@ -2478,7 +2478,7 @@ export const ar = {
       newlyAdded: 'أضيف حديثاً',
     },
     countryNews: {
-      title: 'أخبار الدول',
+      title: 'جغرافيا الاقتصاد',
       subtitle: 'تغطية إقليمية',
       selectCountry: 'اختر الدولة',
       moreNews: 'المزيد من أخبار {country}',
@@ -2488,7 +2488,7 @@ export const ar = {
       economicIndicators: 'المؤشرات الاقتصادية',
       regions: {
         gulf: 'الخليج',
-        mashreq: 'المشرق',
+        mashreq: 'المشرق العربي',
         northafrica: 'شمال أفريقيا',
         world: 'العالم',
       },
