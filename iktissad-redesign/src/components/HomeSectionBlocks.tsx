@@ -55,6 +55,9 @@ function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
             <Loader2 className="text-gold animate-spin" size={28} />
           </div>
         ) : (
+          /* Four across, where CompaniesSection runs three — the tile is 25%
+             narrower, so the title is scaled to match. Left at the 3-column
+             sizing it clamped to three lines and buried the photo. */
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {articles.map((article, i) => (
               <motion.a
@@ -88,8 +91,8 @@ function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
                 />
 
                 {/* Bottom text */}
-                <div className="absolute bottom-0 inset-x-0 p-3">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-xs leading-relaxed line-clamp-3 mb-2">
+                <div className="absolute bottom-0 inset-x-0 p-2.5">
+                  <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-[11px] leading-snug line-clamp-2 mb-1.5">
                     {article.title}
                   </h3>
                   {article.publishedAt && (

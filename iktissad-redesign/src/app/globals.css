@@ -254,29 +254,42 @@ bdi, [dir="ltr"] {
    TYPOGRAPHY
    ═══════════════════════════════════════════════════════════════ */
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 800;
-  line-height: 1.5; /* slightly more generous for Arabic diacritics */
-  letter-spacing: 0;
-  font-feature-settings: 'liga' 1, 'calt' 1;
-}
+/*
+ * These are DEFAULTS, so they belong in @layer base.
+ *
+ * Unlayered CSS beats anything inside a layer, and Tailwind v4 emits every
+ * utility into @layer utilities. Left unlayered, the bare `h3` rule below
+ * silently overrode `text-xs`, `text-sm`, `text-[11px]` — every Tailwind text
+ * size on every heading in the app, 345 of them across 151 files. Each one
+ * rendered at the element default instead: a card title asking for 12px came
+ * out at 24px. Inside @layer base, a utility on the element wins, and a
+ * heading with no size class still gets these.
+ */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1.5; /* slightly more generous for Arabic diacritics */
+    letter-spacing: 0;
+    font-feature-settings: 'liga' 1, 'calt' 1;
+  }
 
-html[lang="en"] :is(h1, h2, h3, h4, h5, h6) {
-  line-height: 1.3;
-}
+  html[lang="en"] :is(h1, h2, h3, h4, h5, h6) {
+    line-height: 1.3;
+  }
 
-h1 {
-  font-size: clamp(2.75rem, 5.5vw, 4.5rem);
-  font-weight: 900;
-}
+  h1 {
+    font-size: clamp(2.75rem, 5.5vw, 4.5rem);
+    font-weight: 900;
+  }
 
-h2 {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-}
+  h2 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+  }
 
-h3 {
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  h3 {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+  }
 }
 
 /* Editorial Title - For major headlines */
