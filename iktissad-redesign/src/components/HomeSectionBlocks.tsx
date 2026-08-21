@@ -15,7 +15,65 @@ import type { Article, ApiResponse, Section } from '@/types';
 // the homepage carries two blocks under the same heading.
 const HARDCODED_SECTION_SLUGS = new Set(['companies', 'videos', 'opinion', 'files', 'leaders']);
 
-function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
+
+/** The dark overlay card. `large` is the lead slot in the lead+list variant. */
+function ArticleTile({
+  article, i, fmtDate, large = false,
+}: {
+  article: Article;
+  i: number;
+  fmtDate: (d: string, o?: Intl.DateTimeFormatOptions) => string;
+  large?: boolean;
+}) {
+  return (
+    <motion.a
+      href={`/${article.slug}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.05 }}
+      className="group relative overflow-hidden aspect-[16/9] block"
+    >
+      {/* Full-bleed image */}
+      {article.featuredImage ? (
+        <img
+          src={article.featuredImage}
+          alt={article.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{ background: 'var(--color-brand-800)' }}
+        />
+      )}
+
+      {/* Gradient overlay — stronger at bottom */}
+      <div
+        className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-90"
+        style={{
+          background: 'linear-gradient(to top, rgba(12,30,42,0.92) 0%, rgba(12,30,42,0.3) 55%, transparent 100%)',
+        }}
+      />
+
+      {/* Bottom text */}
+      <div className="absolute bottom-0 inset-x-0 p-2.5">
+        <h3 className={`font-[family-name:var(--font-display)] font-bold text-white leading-snug line-clamp-2 mb-1.5 ${large ? 'text-sm' : 'text-[11px]'}`}>
+          {article.title}
+        </h3>
+        {article.publishedAt && (
+          <span className="flex items-center gap-1 text-white/50 font-[family-name:var(--font-display)]" style={{ fontSize: '0.65rem' }}>
+            <Clock size={8} />
+            {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
+          </span>
+        )}
+      </div>
+    </motion.a>
+  );
+}
+
+type Variant = 'tiles' | 'lead';
+
+function SectionBlock({ section, alt, variant }: { section: Section; alt: boolean; variant: Variant }) {
   const { t, locale } = useTranslation();
   const { fmtDate } = useFormatters();
 
@@ -27,6 +85,7 @@ function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
 
   if (!isLoading && articles.length === 0) return null;
 
+  const [lead, ...rest] = articles;
   const title = locale === 'ar' ? section.name : (section.nameEn || section.name);
 
   return (
@@ -54,56 +113,52 @@ function SectionBlock({ section, alt }: { section: Section; alt: boolean }) {
           <div className="flex items-center justify-center h-44">
             <Loader2 className="text-gold animate-spin" size={28} />
           </div>
-        ) : (
+        ) : variant === 'tiles' ? (
           /* Four across, where CompaniesSection runs three — the tile is 25%
              narrower, so the title is scaled to match. Left at the 3-column
              sizing it clamped to three lines and buried the photo. */
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {articles.map((article, i) => (
-              <motion.a
-                key={article.id}
-                href={`/${article.slug}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="group relative overflow-hidden aspect-[16/9] block"
-              >
-                {/* Full-bleed image */}
-                {article.featuredImage ? (
-                  <img
-                    src={article.featuredImage}
-                    alt={article.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: 'var(--color-brand-800)' }}
-                  />
-                )}
-
-                {/* Gradient overlay — stronger at bottom */}
-                <div
-                  className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-90"
-                  style={{
-                    background: 'linear-gradient(to top, rgba(12,30,42,0.92) 0%, rgba(12,30,42,0.3) 55%, transparent 100%)',
-                  }}
-                />
-
-                {/* Bottom text */}
-                <div className="absolute bottom-0 inset-x-0 p-2.5">
-                  <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-[11px] leading-snug line-clamp-2 mb-1.5">
-                    {article.title}
-                  </h3>
-                  {article.publishedAt && (
-                    <span className="flex items-center gap-1 text-white/50 font-[family-name:var(--font-display)]" style={{ fontSize: '0.65rem' }}>
-                      <Clock size={8} />
-                      {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
-                    </span>
-                  )}
-                </div>
-              </motion.a>
+              <ArticleTile key={article.id} article={article} i={i} fmtDate={fmtDate} />
             ))}
+          </div>
+        ) : (
+          /* Lead + list. Alternating with the tile grid is the whole point:
+             ten auto blocks in a row all rendering the same 4-across grid read
+             as one long undifferentiated strip. */
+          <div className="grid md:grid-cols-2 gap-3">
+            {lead && <ArticleTile article={lead} i={0} fmtDate={fmtDate} large />}
+            <div className="border border-sand bg-paper divide-y divide-sand flex flex-col">
+              {rest.map((article, i) => (
+                <motion.a
+                  key={article.id}
+                  href={`/${article.slug}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group flex flex-1 items-center gap-3 p-3 hover:bg-cream transition-colors"
+                >
+                  {article.featuredImage && (
+                    <img
+                      src={article.featuredImage}
+                      alt=""
+                      className="w-20 h-14 object-cover shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <h3 className="font-[family-name:var(--font-display)] font-bold text-ink text-[13px] leading-snug line-clamp-2 group-hover:text-gold transition-colors">
+                      {article.title}
+                    </h3>
+                    {article.publishedAt && (
+                      <span className="flex items-center gap-1 text-pewter font-[family-name:var(--font-display)] mt-1" style={{ fontSize: '0.65rem' }}>
+                        <Clock size={8} />
+                        {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
+                </motion.a>
+              ))}
+            </div>
           </div>
         )}
 
@@ -125,7 +180,14 @@ export default function HomeSectionBlocks() {
   return (
     <>
       {sections.map((s, i) => (
-        <SectionBlock key={s.slug} section={s} alt={i % 2 === 1} />
+        <SectionBlock
+          key={s.slug}
+          section={s}
+          alt={i % 2 === 1}
+          /* Alternate layout AND background: four combinations, so no two
+             adjacent blocks — and no block two down — look the same. */
+          variant={i % 2 === 0 ? 'tiles' : 'lead'}
+        />
       ))}
     </>
   );
