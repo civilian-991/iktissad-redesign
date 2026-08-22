@@ -239,15 +239,32 @@ export default function Header() {
             : 'bg-paper'
         }`}
       >
-        {/* Masthead — the logo stays optically centred while the utility
-            links and the actions occupy the space either side of it. On their
-            own row these left a mostly empty band with a void down the middle,
-            and pushed the أبواب a whole row further down the page. */}
-        <div className={`container-editorial grid grid-cols-[1fr_auto_1fr] items-center gap-4 transition-all duration-500 ${
-          isScrolled ? 'py-2.5 border-b border-sand/60' : 'py-5 border-b border-sand'
+        {/* Logo Row — centered, nothing beside it */}
+        <div className={`flex items-center justify-center transition-all duration-500 ${
+          isScrolled ? 'py-2 border-b border-sand/60' : 'py-5 border-b border-sand'
         }`}>
-          {/* Start edge — mobile menu, and the two destinations that are not أبواب */}
-          <div className="flex items-center gap-5">
+          <Link href="/" className="flex items-center group">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Image
+                src="/logo.png"
+                alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
+                width={280}
+                height={60}
+                className={`w-auto transition-all duration-500 ${
+                  isScrolled ? 'h-10 md:h-12' : 'h-14 md:h-16'
+                }`}
+                priority
+              />
+            </motion.div>
+          </Link>
+        </div>
+
+        {/* Nav Row — menu + actions */}
+        <div className="container-editorial">
+          <div className="flex items-center justify-between py-1.5">
             {/* Hamburger — mobile only, inline-start = right in RTL */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -269,6 +286,7 @@ export default function Header() {
               </AnimatePresence>
             </motion.button>
 
+
             {/* Not أبواب, but they still need a way in. Anchored to the start
                 edge so the row is not a single cluster with a dead half. */}
             <div className="hidden lg:flex items-center gap-5">
@@ -285,29 +303,7 @@ export default function Header() {
                 {t('nav.main.group')}
               </Link>
             </div>
-          </div>
 
-          {/* Centre — masthead */}
-          <Link href="/" className="flex items-center group justify-self-center">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Image
-                src="/logo.png"
-                alt={`${t('common.brand.name')} - ${t('common.brand.nameEn')}`}
-                width={280}
-                height={60}
-                className={`w-auto transition-all duration-500 ${
-                  isScrolled ? 'h-9 md:h-11' : 'h-[3.25rem] md:h-16'
-                }`}
-                priority
-              />
-            </motion.div>
-          </Link>
-
-          {/* End edge — actions */}
-          <div className="justify-self-end">
             {/* Actions — end edge */}
             <div className="flex items-center gap-3 ms-auto">
               {/* Search Button */}
@@ -345,9 +341,8 @@ export default function Header() {
         {/* الأبواب strip. One type size at every width: the container is
             capped at 1440px, so a larger step at 2xl had no extra room to use
             and simply wrapped the row. justify-between only from xl up, where
-            the 15 items fit on one line and can sit flush with the masthead
-            above; below that they wrap, and a spread-out last row reads as
-            broken. */}
+            the 15 items fit on one line and can sit flush with the row above;
+            below that they wrap, and a spread-out last row reads as broken. */}
         <div className="hidden lg:block bg-obsidian">
           <div className="container-editorial">
           {/* الأبواب — the 15 top-level sections, on their own strip */}
