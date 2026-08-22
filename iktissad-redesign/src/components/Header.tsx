@@ -28,7 +28,6 @@ import {
 import { XIcon } from '@/components/icons/SocialIcons';
 import { useTranslation } from '@/lib/i18n';
 import { config, iconSizes, animations } from '@/lib/design-tokens';
-import PushNotificationToggle from '@/components/PushNotificationToggle';
 import { COUNTRY_REGIONS } from '@/lib/countries';
 
 // ═══════════════════════════════════════════════════════════════
@@ -316,24 +315,6 @@ export default function Header() {
               >
                 <Search size={iconSizes.md} />
               </motion.button>
-
-              {/* Push Notification Toggle */}
-              <div className="hidden md:block">
-                <PushNotificationToggle />
-              </div>
-
-              {/* Subscribe Button */}
-              <Link
-                href="/subscribe"
-                className="hidden md:flex btn-gold items-center gap-2"
-              >
-                <motion.span
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {t('common.actions.subscribe')}
-                </motion.span>
-              </Link>
             </div>
           </div>
         </div>
@@ -451,13 +432,6 @@ export default function Header() {
                 ))}
               </nav>
               <div className="bg-paper px-5 py-4 border-t border-sand">
-                <Link
-                  href="/subscribe"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full btn-gold text-center mb-4"
-                >
-                  <span>{t('common.actions.subscribe')}</span>
-                </Link>
                 <div className="flex items-center justify-center gap-5">
                   {socialLinks.map((social) => (
                     <a
