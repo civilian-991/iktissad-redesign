@@ -261,8 +261,10 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Nav Row — menu + actions */}
-        <div className="container-editorial">
+        {/* Mobile bar — hamburger + search. There is no desktop equivalent:
+            this row only ever held المجلة and مجموعة الإقتصاد والأعمال, which
+            the footer already carries, and search now sits in the أبواب bar. */}
+        <div className="container-editorial lg:hidden">
           <div className="flex items-center justify-between py-1.5">
             {/* Hamburger — mobile only, inline-start = right in RTL */}
             <motion.button
@@ -286,23 +288,6 @@ export default function Header() {
             </motion.button>
 
 
-            {/* Not أبواب, but they still need a way in. Anchored to the start
-                edge so the row is not a single cluster with a dead half. */}
-            <div className="hidden lg:flex items-center gap-5">
-              <Link
-                href="/magazine"
-                className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
-              >
-                {t('nav.main.magazine')}
-              </Link>
-              <Link
-                href="/about"
-                className="font-[family-name:var(--font-display)] text-[13px] font-semibold text-graphite hover:text-gold transition-colors"
-              >
-                {t('nav.main.group')}
-              </Link>
-            </div>
-
             {/* Actions — end edge */}
             <div className="flex items-center gap-3 ms-auto">
               {/* Search Button */}
@@ -325,9 +310,9 @@ export default function Header() {
             the 15 items fit on one line and can sit flush with the row above;
             below that they wrap, and a spread-out last row reads as broken. */}
         <div className="hidden lg:block bg-obsidian">
-          <div className="container-editorial">
+          <div className="container-editorial flex items-center gap-2">
           {/* الأبواب — the 15 top-level sections, on their own strip */}
-          <nav className="hidden lg:flex flex-wrap items-center justify-center xl:justify-between gap-x-0.5">
+          <nav className="hidden lg:flex flex-1 flex-wrap items-center justify-center xl:justify-between gap-x-0.5">
             {navigationConfig.map((item) => (
               <div
                 key={item.key}
@@ -337,7 +322,7 @@ export default function Header() {
               >
                 <Link
                   href={item.href}
-                  className="flex items-center gap-1 px-1.5 py-2.5 font-[family-name:var(--font-display)] font-semibold text-[12.5px] whitespace-nowrap text-champagne hover:text-gold transition-colors duration-300 relative group"
+                  className="flex items-center gap-1 px-1 py-2.5 font-[family-name:var(--font-display)] font-semibold text-[12.5px] whitespace-nowrap text-champagne hover:text-gold transition-colors duration-300 relative group"
                 >
                   <span>{getNavName(item.key)}</span>
                   {item.submenu && (
@@ -348,7 +333,7 @@ export default function Header() {
                       }`}
                     />
                   )}
-                  <span className="absolute bottom-1 start-1.5 end-1.5 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
+                  <span className="absolute bottom-1 start-1 end-1 h-0.5 bg-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-[100%_50%] rtl:origin-[0%_50%]" />
                 </Link>
 
                 {/* Dropdown Menu */}
@@ -385,6 +370,17 @@ export default function Header() {
               </div>
             ))}
           </nav>
+
+          {/* Search — pinned to the end edge of the bar */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsSearchOpen(true)}
+            className="shrink-0 w-8 h-8 text-champagne/70 hover:text-gold flex items-center justify-center transition-colors duration-300"
+            aria-label={t('common.actions.search')}
+          >
+            <Search size={iconSizes.md} />
+          </motion.button>
           </div>
         </div>
 
