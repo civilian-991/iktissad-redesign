@@ -8,7 +8,6 @@ export const revalidate = 300; // 5 minutes — homepage shows latest news
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
-import LatestNews from '@/components/LatestNews';
 import CompaniesSection from '@/components/CompaniesSection';
 import SectorNews from '@/components/SectorNews';
 import CountryNews from '@/components/CountryNews';
@@ -34,25 +33,23 @@ export default function Home() {
         <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
         {/* 1. Featured */}
         <Hero />
-        {/* 2. Latest News */}
-        <LatestNews />
-        {/* 3. Companies */}
+        {/* 2. Companies */}
         <CompaniesSection />
-        {/* 4. Sectors */}
+        {/* 3. Sectors */}
         <SectorNews />
-        {/* 5. Countries */}
+        {/* 4. Countries */}
         <CountryNews />
-        {/* 6. Video */}
+        {/* 5. Video */}
         <VideoSection />
-        {/* 7. Profiles */}
+        {/* 6. Profiles */}
         <FeaturedProfiles />
-        {/* 8. Opinion */}
+        {/* 7. Opinion */}
         <OpinionSection />
-        {/* 9. ملفات */}
+        {/* 8. ملفات */}
         <FilesSection />
-        {/* 10. Auto-generated blocks for all remaining sections (society, innovation, …) */}
+        {/* 9. Auto-generated blocks for all remaining sections (society, innovation, …) */}
         <HomeSectionBlocks />
-        {/* 11. Magazine */}
+        {/* 10. Magazine */}
         <FeaturedMagazine />
         <Newsletter />
       </main>
