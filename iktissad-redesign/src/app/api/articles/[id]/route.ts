@@ -5,6 +5,12 @@ import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import {
+  ARTICLE_COUNTRIES_EMBED,
+  countriesEmbed,
+  resolveCountrySlugs,
+  setArticleCountries,
+} from "@/lib/articles/countries";
 import { slugify } from "@/lib/slugify";
 import { notifyIndexNow } from "@/lib/indexnow";
 import { autoPostOnPublish } from "@/lib/social-posting";
@@ -15,7 +21,8 @@ const ARTICLE_SELECT = `
   users:author_id ( name, avatar ),
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
-  countries:country_id ( slug, name )
+  countries:country_id ( slug, name ),
+  ${ARTICLE_COUNTRIES_EMBED}
 `;
 
 export async function GET(
@@ -73,6 +80,8 @@ const updateArticleSchema = z.object({
   sectionSlug: z.string().optional(),
   sectorSlug: z.string().optional(),
   countrySlug: z.string().optional(),
+  /** Full country set, primary first. Replaces the whole set when sent. */
+  countrySlugs: z.array(z.string()).optional(),
   authorId: z.string().uuid().optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(["published", "draft", "review", "scheduled"]).optional(),
@@ -222,10 +231,15 @@ export async function PUT(
     const { data: sec } = await admin.from("sectors").select("id").eq("slug", data.sectorSlug).single() as { data: any };
     updateData.sector_id = sec?.id ?? null;
   }
-  if (data.countrySlug !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: c } = await admin.from("countries").select("id").eq("slug", data.countrySlug).single() as { data: any };
-    updateData.country_id = c?.id ?? null;
+  // Countries: `countrySlugs` (ordered, primary first) replaces the whole set;
+  // a lone `countrySlug` from an older client is treated as a one-item list.
+  // country_id stays in sync as the primary so every existing embed still works.
+  const countrySlugList =
+    data.countrySlugs ?? (data.countrySlug !== undefined ? [data.countrySlug] : null);
+  const countries =
+    countrySlugList === null ? null : await resolveCountrySlugs(admin, countrySlugList);
+  if (countries !== null) {
+    updateData.country_id = countries[0]?.id ?? null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,7 +263,15 @@ export async function PUT(
     );
   }
 
-  const article = mapArticleRow(row);
+  if (countries !== null) {
+    await setArticleCountries(admin, id, countries.map((c) => c.id));
+  }
+
+  const article = mapArticleRow(
+    countries === null
+      ? row
+      : { ...row, article_countries: countriesEmbed(countries) }
+  );
 
   // Notify search engines when an article is published or updated while published
   if (article.status === 'published' && article.slug) {

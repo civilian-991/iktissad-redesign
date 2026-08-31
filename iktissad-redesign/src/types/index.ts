@@ -167,8 +167,11 @@ export interface Article {
   sectionSlug: string;
   sector: string;
   sectorSlug: string;
+  /** Primary country (first of `countries`). Kept for cards/badges/back-compat. */
   country: string;
   countrySlug: string;
+  /** Every country the article is filed under, primary first. */
+  countries?: Array<{ name: string; slug: string }>;
   author: {
     id?: string;
     slug?: string;

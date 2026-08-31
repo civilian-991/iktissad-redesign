@@ -530,6 +530,42 @@ export type Database = {
           },
         ];
       };
+      article_countries: {
+        Row: {
+          article_id: string;
+          country_id: string;
+          position: number;
+          created_at: string;
+        };
+        Insert: {
+          article_id: string;
+          country_id: string;
+          position?: number;
+          created_at?: string;
+        };
+        Update: {
+          article_id?: string;
+          country_id?: string;
+          position?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "article_countries_article_id_fkey";
+            columns: ["article_id"];
+            isOneToOne: false;
+            referencedRelation: "articles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "article_countries_country_id_fkey";
+            columns: ["country_id"];
+            isOneToOne: false;
+            referencedRelation: "countries";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       magazine_issues: {
         Row: {
           id: string;

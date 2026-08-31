@@ -40,6 +40,7 @@ import {
   User,
   Link as LinkIcon,
   Plus,
+  X,
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import dynamic from 'next/dynamic';
@@ -150,7 +151,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [imageCreditUrl, setImageCreditUrl] = useState('');
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
   const [scheduledAt, setScheduledAt] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
   const [editorChoice, setEditorChoice] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
@@ -224,8 +225,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getContentHash = useCallback(() =>
-    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex }),
-    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex]
+    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex }),
+    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex]
   );
 
   const buildSavePayload = useCallback(() => ({
@@ -234,7 +235,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     ...(editorBody && typeof editorBody === 'object' ? { body: editorBody } : {}),
     sectionSlug: section || undefined,
     sectorSlug: selectedSector || undefined,
-    countrySlug: selectedCountry || undefined,
+    countrySlug: selectedCountries[0] || undefined,
+    countrySlugs: selectedCountries,
     authorId: selectedAuthorId || undefined,
     tags: selectedTags,
     featuredImage: featuredImage || '',
@@ -254,7 +256,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     canonicalUrl: canonicalUrl || undefined,
     noIndex,
     ...(articleType ? { article_type: articleType } : {}),
-  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountry, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
+  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountries, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
 
   const performAutoSave = useCallback(async () => {
     if (!title.trim()) return;
@@ -281,7 +283,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountry, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
+  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -314,7 +316,12 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       if (article.publishedAt && article.status === 'scheduled') {
         setScheduledAt(article.publishedAt.slice(0, 16));
       }
-      if (article.countrySlug) setSelectedCountry(article.countrySlug);
+      const loadedCountries = article.countries?.length
+        ? article.countries.map((c) => c.slug)
+        : article.countrySlug
+          ? [article.countrySlug]
+          : [];
+      setSelectedCountries(loadedCountries);
       if (article.articleType) setArticleType(article.articleType as ArticleType);
       if (article.featuredImageFocalX !== undefined) setFocalX(article.featuredImageFocalX);
       if (article.featuredImageFocalY !== undefined) setFocalY(article.featuredImageFocalY);
@@ -1030,7 +1037,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
             </select>
           </motion.div>
 
-          {/* Country */}
+          {/* Countries — an article can be filed under several; the first is
+              the primary one shown on cards and used as the article's country. */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1040,16 +1048,62 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
             <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
               {t('admin.articles.editor.countryLabel')}
             </label>
+
+            {selectedCountries.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedCountries.map((slug, i) => (
+                  <span
+                    key={slug}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-[family-name:var(--font-display)] border ${
+                      i === 0
+                        ? 'bg-gold/15 border-gold/30 text-gold'
+                        : 'bg-white/5 border-gold/10 text-white/80'
+                    }`}
+                    title={i === 0 ? t('admin.articles.editor.primaryCountry') : undefined}
+                  >
+                    {countries.find((c) => c.slug === slug)?.name ?? slug}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedCountries(selectedCountries.filter((s) => s !== slug))
+                      }
+                      className="text-current/60 hover:text-current transition-colors"
+                      aria-label={t('admin.articles.editor.removeCountry')}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
             <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
+              value=""
+              onChange={(e) => {
+                const slug = e.target.value;
+                if (slug && !selectedCountries.includes(slug)) {
+                  setSelectedCountries([...selectedCountries, slug]);
+                }
+              }}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
-              <option value="" className="bg-midnight">{t('admin.articles.editor.selectCountry')}</option>
-              {countries.map((c) => (
-                <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
-              ))}
+              <option value="" className="bg-midnight">
+                {selectedCountries.length > 0
+                  ? t('admin.articles.editor.addCountry')
+                  : t('admin.articles.editor.selectCountry')}
+              </option>
+              {countries
+                .filter((c) => !selectedCountries.includes(c.slug))
+                .map((c) => (
+                  <option key={c.slug} value={c.slug} className="bg-midnight">{c.name}</option>
+                ))}
             </select>
+
+            {selectedCountries.length > 1 && (
+              <p className="mt-2 text-white/40 text-xs font-[family-name:var(--font-display)]">
+                {t('admin.articles.editor.primaryCountryHint')}
+              </p>
+            )}
           </motion.div>
 
           {/* Author */}

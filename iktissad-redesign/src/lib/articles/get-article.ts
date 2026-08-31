@@ -2,6 +2,7 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import { ARTICLE_COUNTRIES_EMBED } from "@/lib/articles/countries";
 import type { Database } from "@/lib/supabase/types";
 import type { Article } from "@/types";
 
@@ -12,7 +13,8 @@ const ARTICLE_SELECT = `
   users:author_id ( name, avatar ),
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
-  countries:country_id ( slug, name )
+  countries:country_id ( slug, name ),
+  ${ARTICLE_COUNTRIES_EMBED}
 `;
 
 /**

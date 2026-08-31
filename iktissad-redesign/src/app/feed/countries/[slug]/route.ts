@@ -25,12 +25,14 @@ export async function GET(
     return new Response('Not Found', { status: 404 });
   }
 
+  // Multi-country: match through article_countries so an article filed under
+  // several countries appears in each of their feeds.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (supabase as any)
     .from('articles')
-    .select(ARTICLE_SELECT)
+    .select(`${ARTICLE_SELECT}, country_filter:article_countries!inner ( country_id )`)
     .eq('status', 'published')
-    .eq('country_id', (country as { id: string; name: string }).id)
+    .eq('country_filter.country_id', (country as { id: string; name: string }).id)
     .order('published_at', { ascending: false })
     .limit(50);
 

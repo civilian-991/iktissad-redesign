@@ -126,6 +126,20 @@ CREATE INDEX idx_articles_author     ON articles (author_id);
 CREATE INDEX idx_articles_status     ON articles (status);
 CREATE INDEX idx_articles_published  ON articles (published_at DESC);
 
+-- An article can be filed under several countries. `articles.country_id` is the
+-- primary one (position 0) and still feeds every countries:country_id embed;
+-- this table is the authoritative set and is what country pages, country feeds
+-- and per-country counts filter on. See migration 051.
+CREATE TABLE article_countries (
+  article_id UUID NOT NULL REFERENCES articles(id)  ON DELETE CASCADE,
+  country_id UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  position   INT  NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (article_id, country_id)
+);
+
+CREATE INDEX idx_article_countries_country ON article_countries (country_id);
+
 -- ──────────────────────────────────────────────────────────────
 -- MAGAZINE ISSUES
 -- ──────────────────────────────────────────────────────────────

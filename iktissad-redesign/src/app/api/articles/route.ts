@@ -5,6 +5,12 @@ import { requireAuth, unauthorizedResponse, csrfForbiddenResponse } from "@/lib/
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapArticleRow } from "@/lib/supabase/mappers";
+import {
+  ARTICLE_COUNTRIES_EMBED,
+  countriesEmbed,
+  resolveCountrySlugs,
+  setArticleCountries,
+} from "@/lib/articles/countries";
 import { notifyIndexNow } from "@/lib/indexnow";
 import { autoPostOnPublish } from "@/lib/social-posting";
 import {
@@ -20,7 +26,8 @@ const ARTICLE_SELECT = `
   users:author_id ( name, avatar, slug ),
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
-  countries:country_id ( slug, name )
+  countries:country_id ( slug, name ),
+  ${ARTICLE_COUNTRIES_EMBED}
 `;
 
 export async function GET(request: NextRequest) {
@@ -62,16 +69,29 @@ export async function GET(request: NextRequest) {
       : Promise.resolve({ data: null }),
   ]);
 
+  // Country filter runs through the article_countries join table so an article
+  // filed under several countries shows up on every one of them. The embed is
+  // aliased and only added when filtering, so unfiltered lists aren't turned
+  // into inner joins (which would drop countryless articles).
+  const countryFilterId =
+    country && countryResult.data ? (countryResult.data as { id: string }).id : null;
+
   let query = supabase
     .from("articles")
-    .select(ARTICLE_SELECT, { count: "exact" });
+    .select(
+      countryFilterId
+        ? `${ARTICLE_SELECT}, country_filter:article_countries!inner ( country_id )`
+        : ARTICLE_SELECT,
+      { count: "exact" }
+    );
 
   if (section && sectionResult.data) {
     query = query.eq("section_id", (sectionResult.data as { id: string }).id);
   }
 
-  if (country && countryResult.data) {
-    query = query.eq("country_id", (countryResult.data as { id: string }).id);
+  if (countryFilterId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = (query as any).eq("country_filter.country_id", countryFilterId);
   }
 
   if (sector && sectorResult.data) {
@@ -204,6 +224,8 @@ const createArticleSchema = z.object({
   sectionSlug: z.string().optional(),
   sectorSlug: z.string().optional(),
   countrySlug: z.string().optional(),
+  /** Full country set, primary first. Falls back to [countrySlug] when omitted. */
+  countrySlugs: z.array(z.string()).optional(),
   authorId: z.string().uuid().optional(),
   tags: z.array(z.string()).optional().default([]),
   status: z.enum(["published", "draft", "review", "scheduled"]).optional().default("draft"),
@@ -264,10 +286,12 @@ export async function POST(request: NextRequest) {
     const { data: sec } = await admin.from("sectors").select("id").eq("slug", data.sectorSlug).single();
     sectorId = (sec as { id: string } | null)?.id ?? null;
   }
-  if (data.countrySlug) {
-    const { data: c } = await admin.from("countries").select("id").eq("slug", data.countrySlug).single();
-    countryId = (c as { id: string } | null)?.id ?? null;
-  }
+  // Countries: `countrySlugs` (ordered, primary first) is authoritative; a lone
+  // `countrySlug` from an older client is treated as a one-item list.
+  const countrySlugList =
+    data.countrySlugs ?? (data.countrySlug ? [data.countrySlug] : []);
+  const countries = await resolveCountrySlugs(admin, countrySlugList);
+  countryId = countries[0]?.id ?? null;
 
   // Build insert — only include optional fields when provided so DB defaults apply
   const insertData: Record<string, unknown> = {
@@ -324,7 +348,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const article = mapArticleRow(row);
+  await setArticleCountries(
+    admin,
+    (row as { id: string }).id,
+    countries.map((c) => c.id)
+  );
+
+  const article = mapArticleRow({ ...row, article_countries: countriesEmbed(countries) });
 
   // Notify search engines immediately when a new article is published
   if (article.status === 'published' && article.slug) {

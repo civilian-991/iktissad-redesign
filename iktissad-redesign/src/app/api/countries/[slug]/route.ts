@@ -9,6 +9,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapCountryRow, mapArticleRow } from "@/lib/supabase/mappers";
+import { ARTICLE_COUNTRIES_EMBED } from "@/lib/articles/countries";
 import { slugify } from "@/lib/slugify";
 import { COUNTRY_REGIONS } from "@/lib/countries";
 import type { ApiResponse, Country } from "@/types";
@@ -18,7 +19,8 @@ const ARTICLE_SELECT = `
   users:author_id ( name, avatar ),
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
-  countries:country_id ( slug, name )
+  countries:country_id ( slug, name ),
+  ${ARTICLE_COUNTRIES_EMBED}
 `;
 
 export async function GET(
@@ -46,8 +48,8 @@ export async function GET(
    
   const { data: articleRows } = await supabase
     .from("articles")
-    .select(ARTICLE_SELECT)
-    .eq("country_id", row.id)
+    .select(`${ARTICLE_SELECT}, country_filter:article_countries!inner ( country_id )`)
+    .eq("country_filter.country_id", row.id)
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(10) as { data: any[] | null };

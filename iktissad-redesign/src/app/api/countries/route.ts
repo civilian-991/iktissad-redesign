@@ -16,15 +16,14 @@ import type { ApiResponse, Country } from "@/types";
 export async function GET() {
   const supabase = await createClient();
 
-  const [countriesRes, articlesRes] = await Promise.all([
+  const [countriesRes, countsRes] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).from("countries").select("*").order("name", { ascending: true }),
+    // Counts come from article_countries (an article can be filed under several
+    // countries) and are aggregated in SQL — the previous version pulled every
+    // published article's country_id over the wire to tally in JS.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from("articles")
-      .select("country_id")
-      .eq("status", "published")
-      .eq("archived", false),
+    (supabase as any).rpc("country_article_counts"),
   ]);
 
   if (countriesRes.error) {
@@ -34,12 +33,13 @@ export async function GET() {
     );
   }
 
-  // Tally published-article counts per country_id in JS
   const counts = new Map<string, number>();
-  if (!articlesRes.error) {
-    for (const row of (articlesRes.data ?? []) as Array<{ country_id: string | null }>) {
-      if (!row.country_id) continue;
-      counts.set(row.country_id, (counts.get(row.country_id) ?? 0) + 1);
+  if (!countsRes.error) {
+    for (const row of (countsRes.data ?? []) as Array<{
+      country_id: string;
+      article_count: number;
+    }>) {
+      counts.set(row.country_id, Number(row.article_count) || 0);
     }
   }
 

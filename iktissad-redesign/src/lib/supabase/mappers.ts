@@ -66,8 +66,30 @@ export function mapArticleRow(
     sections?: { slug: string; name: string } | null;
     sectors?: { slug: string; name: string } | null;
     countries?: { slug: string; name: string } | null;
+    /** Full country set (join table). Only present on selects that embed it. */
+    article_countries?: Array<{
+      position?: number | null;
+      countries?: { slug: string; name: string } | null;
+    }> | null;
   }
 ): Article {
+  // Multi-country: the join-table embed is the authoritative set, ordered by
+  // `position` (0 = primary). Selects that don't embed it fall back to the
+  // single primary country so older callers keep working.
+  const countrySet = (row.article_countries ?? [])
+    .filter((ac) => ac.countries?.slug)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((ac) => ({
+      slug: ac.countries!.slug,
+      name: ac.countries!.name || ac.countries!.slug,
+    }));
+  const countries =
+    countrySet.length > 0
+      ? countrySet
+      : row.countries?.slug
+        ? [{ slug: row.countries.slug, name: row.countries.name || row.countries.slug }]
+        : [];
+
   return {
     id: row.id,
     title: stripHtml(row.title),
@@ -82,8 +104,9 @@ export function mapArticleRow(
     sectionSlug: row.sections?.slug ?? "",
     sector: row.sectors?.name ?? row.sectors?.slug ?? "",
     sectorSlug: row.sectors?.slug ?? "",
-    country: row.countries?.name ?? row.countries?.slug ?? "",
-    countrySlug: row.countries?.slug ?? "",
+    country: row.countries?.name ?? row.countries?.slug ?? countries[0]?.name ?? "",
+    countrySlug: row.countries?.slug ?? countries[0]?.slug ?? "",
+    countries,
     author: {
       id: row.author_id ?? undefined,
       slug: row.users?.slug ?? undefined,
