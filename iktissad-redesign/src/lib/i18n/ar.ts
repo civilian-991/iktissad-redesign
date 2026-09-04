@@ -2626,6 +2626,11 @@ export const ar = {
     related_ai: 'مقالات ذات صلة',
     print: 'طباعة المقال',
     imageSource: 'المصدر',
+    copyLink: 'نسخ الرابط',
+    linkCopied: 'تم نسخ الرابط',
+    readTime: '{count} دقائق',
+    fontSmaller: 'تصغير الخط',
+    fontLarger: 'تكبير الخط',
   },
   magazine: {
     teaser_heading: 'اقرأ هذا العدد كاملاً',

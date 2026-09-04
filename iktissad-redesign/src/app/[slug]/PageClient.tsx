@@ -520,27 +520,27 @@ export default function ArticlePageClient({
                 {article.title}
               </h1>
 
-              {/* Share row */}
+              {/* Share row — share targets only. The read time (metadata) and the
+                  print + type-size controls (reading tools) live in the byline
+                  row below, so this row does one job and has room to breathe.
+                  Mobile spreads the buttons edge to edge; the label and the
+                  fixed gap only appear once there's width for them. */}
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-sand/60">
-                <span className="text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 flex items-center gap-1.5 ml-1">
+                <span className="hidden sm:flex text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 items-center gap-1.5 ml-1 shrink-0">
                   مشاركة
                 </span>
-                {/* min-w-0 so this cluster can shrink below its content width.
-                    Without it the row's intrinsic 459px pinned the whole
-                    document to 479px on every phone, pushing the font-size
-                    controls and read time off-screen. */}
-                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-x-auto">
+                <div className="flex flex-1 min-w-0 items-center justify-between sm:justify-start sm:gap-2">
                   {[
-                    { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2', label: 'Facebook' },
-                    { p: 'twitter', icon: <XIcon size={12} />, bg: '#0f1419', label: 'X' },
-                    { p: 'whatsapp', icon: <WhatsAppIcon size={13} />, bg: '#25d366', label: 'WhatsApp' },
-                    { p: 'telegram', icon: <TelegramIcon size={13} />, bg: '#229ed9', label: 'Telegram' },
-                    { p: 'linkedin', icon: <Linkedin size={12} />, bg: '#0a66c2', label: 'LinkedIn' },
+                    { p: 'facebook', icon: <Facebook size={15} />, bg: '#1877f2', label: 'Facebook' },
+                    { p: 'twitter', icon: <XIcon size={15} />, bg: '#0f1419', label: 'X' },
+                    { p: 'whatsapp', icon: <WhatsAppIcon size={16} />, bg: '#25d366', label: 'WhatsApp' },
+                    { p: 'telegram', icon: <TelegramIcon size={16} />, bg: '#229ed9', label: 'Telegram' },
+                    { p: 'linkedin', icon: <Linkedin size={15} />, bg: '#0a66c2', label: 'LinkedIn' },
                   ].map(({ p, icon, bg, label }) => (
                     <button
                       key={p}
                       onClick={() => handleShare(p)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-opacity hover:opacity-80"
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-white shrink-0 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold motion-reduce:transition-none motion-reduce:hover:scale-100"
                       style={{ backgroundColor: bg }}
                       title={label}
                       aria-label={label}
@@ -550,49 +550,17 @@ export default function ArticlePageClient({
                   ))}
                   <button
                     onClick={() => handleShare('copy')}
-                    className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                    title={copied ? t('article.linkCopied') : t('article.copyLink')}
+                    aria-label={copied ? t('article.linkCopied') : t('article.copyLink')}
+                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border flex items-center justify-center shrink-0 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
                       copied
-                        ? 'border-emerald-400 text-emerald-600 bg-emerald-50'
-                        : 'border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-ink'
+                        ? 'border-gold bg-gold/10 text-gold'
+                        : 'border-sand text-charcoal/40 hover:border-obsidian/40 hover:text-ink'
                     }`}
                   >
-                    {copied ? <Check size={12} /> : <Link2 size={12} />}
+                    {copied ? <Check size={15} /> : <Link2 size={15} />}
                   </button>
-                  <button
-                    onClick={() => window.print()}
-                    className="no-print w-8 h-8 rounded-full border border-sand text-charcoal/35 hover:border-obsidian/40 hover:text-ink flex items-center justify-center transition-all"
-                    title={t('article.print')}
-                    aria-label={t('article.print')}
-                  >
-                    <Printer size={12} />
-                  </button>
-
-                  {/* Font size controls */}
-                  <div className="no-print flex items-center border border-sand rounded-full overflow-hidden mr-1">
-                    <button
-                      onClick={() => changeFontSize(-1)}
-                      disabled={fontSizeIdx === 0}
-                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
-                      aria-label="تصغير الخط"
-                    >
-                      أ-
-                    </button>
-                    <button
-                      onClick={() => changeFontSize(1)}
-                      disabled={fontSizeIdx === 2}
-                      className="px-2.5 h-8 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand"
-                      aria-label="تكبير الخط"
-                    >
-                      أ+
-                    </button>
-                  </div>
                 </div>
-                {readTime > 0 && (
-                  <span className="flex items-center gap-1.5 text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 mr-auto">
-                    <BookOpen size={11} className="text-gold/60" />
-                    {readTime} دقائق
-                  </span>
-                )}
               </div>
 
               {/* Featured media — video embed or image */}
@@ -675,11 +643,17 @@ export default function ArticlePageClient({
                           {article.author.name}
                         </p>
                       )}
-                      <div className="flex items-center gap-3 mt-0.5">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
                         {publishedDate && (
                           <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Clock size={10} className="text-gold/60" />
                             {publishedDate}
+                          </span>
+                        )}
+                        {readTime > 0 && (
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <BookOpen size={10} className="text-gold/60" />
+                            {t('article.readTime').replace('{count}', String(readTime))}
                           </span>
                         )}
                       </div>
@@ -703,17 +677,56 @@ export default function ArticlePageClient({
                           {article.author.name}
                         </p>
                       )}
-                      <div className="flex items-center gap-3 mt-0.5">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
                         {publishedDate && (
                           <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
                             <Clock size={10} className="text-gold/60" />
                             {publishedDate}
                           </span>
                         )}
+                        {readTime > 0 && (
+                          <span className="flex items-center gap-1 text-[13px] font-[family-name:var(--font-display)] text-charcoal/40">
+                            <BookOpen size={10} className="text-gold/60" />
+                            {t('article.readTime').replace('{count}', String(readTime))}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                 )}
+
+                {/* Reading tools — how you consume the document, so they sit
+                    with the byline rather than among the share targets. Print
+                    is desktop-only: 7 targets at a 44px tap size can't fit a
+                    320px row, and printing from a phone is vanishingly rare. */}
+                <div className="no-print flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => window.print()}
+                    className="hidden sm:flex w-10 h-10 rounded-full border border-sand text-charcoal/40 hover:border-obsidian/40 hover:text-ink items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                    title={t('article.print')}
+                    aria-label={t('article.print')}
+                  >
+                    <Printer size={14} />
+                  </button>
+                  <div className="flex items-center border border-sand rounded-full overflow-hidden">
+                    <button
+                      onClick={() => changeFontSize(-1)}
+                      disabled={fontSizeIdx === 0}
+                      className="px-3 h-10 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-l border-sand focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold"
+                      aria-label={t('article.fontSmaller')}
+                    >
+                      أ-
+                    </button>
+                    <button
+                      onClick={() => changeFontSize(1)}
+                      disabled={fontSizeIdx === 2}
+                      className="px-3 h-10 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/40 hover:text-ink hover:bg-sand/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold"
+                      aria-label={t('article.fontLarger')}
+                    >
+                      أ+
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Excerpt */}

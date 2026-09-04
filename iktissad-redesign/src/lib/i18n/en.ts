@@ -2626,6 +2626,11 @@ export const en = {
     related_ai: 'Related Articles',
     print: 'Print article',
     imageSource: 'Source',
+    copyLink: 'Copy link',
+    linkCopied: 'Link copied',
+    readTime: '{count} min read',
+    fontSmaller: 'Smaller text',
+    fontLarger: 'Larger text',
   },
   magazine: {
     teaser_heading: 'Read This Issue in Full',
