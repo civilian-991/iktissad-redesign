@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, Pause, Play, X, Gauge } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { csrfJsonHeaders } from '@/lib/csrf-client';
 
 interface ListenButtonProps {
   /** The plain-text content to read aloud */
@@ -57,16 +58,21 @@ export default function ListenButton({
   const trackListen = useCallback(() => {
     if (trackedRef.current || !articleId) return;
     trackedRef.current = true;
-    fetch('/api/track/article-read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        articleId,
-        sessionId: 'tts-' + Date.now(),
-        scrollDepth: 100,
-        readThrough: true,
-      }),
-    }).catch(() => {});
+    // CSRF header required — the proxy 403s /api/ mutations without it.
+    void csrfJsonHeaders()
+      .then((headers) =>
+        fetch('/api/track/article-read', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            articleId,
+            sessionId: 'tts-' + Date.now(),
+            scrollDepth: 100,
+            readThrough: true,
+          }),
+        })
+      )
+      .catch(() => {});
   }, [articleId]);
 
   const play = useCallback(() => {

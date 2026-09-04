@@ -13,8 +13,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const CSRF_COOKIE = "csrf-token";
-export const CSRF_HEADER = "x-csrf-token";
+// Defined in the client-safe module so both sides share one source of truth.
+export { CSRF_COOKIE, CSRF_HEADER } from "./csrf-client";
+import { CSRF_COOKIE, CSRF_HEADER } from "./csrf-client";
 
 /** Generate a cryptographically random hex token. */
 export function generateCsrfToken(): string {

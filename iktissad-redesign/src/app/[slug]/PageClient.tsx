@@ -37,6 +37,7 @@ import LiveBlog from '@/components/LiveBlog';
 import type { JSONContent } from '@tiptap/core';
 import { addBidiIsolation } from '@/lib/i18n/format';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
+import { csrfJsonHeaders } from '@/lib/csrf-client';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
@@ -290,16 +291,22 @@ export default function ArticlePageClient({
       setAnonReadCount(newCount);
     }
 
-    // Post reading session (best-effort, non-blocking)
-    fetch('/api/track/article-read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        articleId: article.id,
-        sessionId,
-        referrer: document.referrer || undefined,
-      }),
-    }).catch(() => { /* ignore */ });
+    // Post reading session (best-effort, non-blocking). Needs the CSRF header —
+    // the proxy 403s any /api/ mutation without it, which silently killed the
+    // metered-paywall counter for every anonymous reader.
+    void csrfJsonHeaders()
+      .then((headers) =>
+        fetch('/api/track/article-read', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            articleId: article.id,
+            sessionId,
+            referrer: document.referrer || undefined,
+          }),
+        })
+      )
+      .catch(() => { /* ignore */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [article?.id]);
 
@@ -518,7 +525,11 @@ export default function ArticlePageClient({
                 <span className="text-[13px] font-[family-name:var(--font-display)] text-charcoal/35 flex items-center gap-1.5 ml-1">
                   مشاركة
                 </span>
-                <div className="flex items-center gap-2 flex-1">
+                {/* min-w-0 so this cluster can shrink below its content width.
+                    Without it the row's intrinsic 459px pinned the whole
+                    document to 479px on every phone, pushing the font-size
+                    controls and read time off-screen. */}
+                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-x-auto">
                   {[
                     { p: 'facebook', icon: <Facebook size={12} />, bg: '#1877f2', label: 'Facebook' },
                     { p: 'twitter', icon: <XIcon size={12} />, bg: '#0f1419', label: 'X' },

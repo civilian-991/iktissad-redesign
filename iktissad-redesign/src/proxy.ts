@@ -16,6 +16,7 @@ const CSRF_EXEMPT_PATTERNS = [
   /^\/api\/newsletter$/,         // Public newsletter signup
   /^\/api\/indexnow\//,          // Search-engine ping (no session)
   /^\/monitoring/,               // Sentry tunnel
+  /^\/api\/analytics\/web-vitals$/, // navigator.sendBeacon — cannot set headers
 ];
 
 // ─── CSRF validation (double-submit cookie) ──────────────────────
