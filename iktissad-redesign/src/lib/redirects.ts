@@ -100,3 +100,29 @@ export const lookupAwalanArticle = cache(async (id: string): Promise<string | nu
     .maybeSingle();
   return data?.to_path ?? null;
 });
+
+/**
+ * Resolve a short share id (`/a/<public_id>`) to the canonical article path.
+ *
+ * `public_id` is a plain counter on `articles`, so this is an indexed lookup
+ * rather than a row in `article_redirects` — the map is for legacy URLs that
+ * had to be reconstructed, while this one is generated and always current. A
+ * renamed slug therefore fixes every short link that was ever shared, without
+ * a migration.
+ *
+ * Unpublished articles return null: a short link must not leak a draft.
+ */
+export const lookupArticleByPublicId = cache(async (id: string): Promise<string | null> => {
+  // Reject anything the BIGINT column cannot hold before it reaches Postgres —
+  // an out-of-range literal errors rather than returning empty.
+  if (!/^\d{1,18}$/.test(id)) return null;
+
+  const { data } = await anon
+    .from('articles')
+    .select('slug')
+    .eq('public_id', Number(id))
+    .eq('status', 'published')
+    .maybeSingle();
+
+  return data?.slug ? `/${data.slug}` : null;
+});

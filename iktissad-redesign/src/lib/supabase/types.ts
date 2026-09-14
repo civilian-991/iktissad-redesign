@@ -408,6 +408,7 @@ export type Database = {
           source_site: string | null;
           source_id: number | null;
           legacy_url: string | null;
+          public_id: number;
         };
         Insert: {
           id?: string;
@@ -453,6 +454,8 @@ export type Database = {
           source_site?: string | null;
           source_id?: number | null;
           legacy_url?: string | null;
+          /** Assigned by the articles_public_id_seq default — never set by hand. */
+          public_id?: number;
         };
         Update: {
           id?: string;
@@ -498,6 +501,8 @@ export type Database = {
           source_site?: string | null;
           source_id?: number | null;
           legacy_url?: string | null;
+          /** Assigned by the articles_public_id_seq default — never set by hand. */
+          public_id?: number;
         };
         Relationships: [
           {

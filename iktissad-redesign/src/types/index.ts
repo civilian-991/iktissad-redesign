@@ -139,6 +139,8 @@ export type ArticleBlock =
 
 export interface Article {
   id: string;
+  /** Short public counter behind the shareable /a/<id> link. Stable forever. */
+  publicId?: number;
   title: string;
   titleEn: string;
   slug: string;

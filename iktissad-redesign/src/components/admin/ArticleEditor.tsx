@@ -66,6 +66,7 @@ import FactCheckPanel from '@/components/admin/FactCheckPanel';
 import { swrFetcher, updateArticle, deleteArticle, aiTranslate, aiGenerateExcerpt, createArticleVersion, aiAutoTag, aiSummarize, aiGenerateSocialCards } from '@/lib/api-client';
 import { resolveArticleBody } from '@/lib/tiptap-body';
 import { slugify } from '@/lib/slugify';
+import { SITE_URL } from '@/lib/site-config';
 import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
@@ -150,6 +151,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [imageCredit, setImageCredit] = useState('');
   const [imageCreditUrl, setImageCreditUrl] = useState('');
   const [status, setStatus] = useState<'draft' | 'review' | 'scheduled' | 'published'>('draft');
+  const [shortLinkCopied, setShortLinkCopied] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
@@ -799,6 +801,57 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                   className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white text-sm font-mono placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
                 />
               </div>
+
+              {/* Short share link — the URL to hand out, since the Arabic slug
+                  above percent-encodes to ~330 characters. Read-only: public_id
+                  is assigned once and never changes, so a link printed in the
+                  magazine or pasted into a newsletter keeps resolving even if
+                  the slug is later rewritten. */}
+              {article?.publicId && (
+                <div className="mt-3">
+                  <label className="flex items-center gap-2 text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                    <Share2 size={14} />
+                    {t('admin.articles.editor.shortLinkLabel')}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={`${SITE_URL}/a/${article.publicId}`}
+                      readOnly
+                      dir="ltr"
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="flex-1 bg-white/5 border border-gold/10 rounded-xl py-2.5 px-4 text-white/80 text-sm font-mono focus:outline-none focus:border-gold/30 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard
+                          .writeText(`${SITE_URL}/a/${article.publicId}`)
+                          .then(() => {
+                            setShortLinkCopied(true);
+                            toast.success(t('admin.articles.editor.shortLinkCopied'));
+                            setTimeout(() => setShortLinkCopied(false), 2000);
+                          })
+                          .catch(() => toast.error(t('common.error')));
+                      }}
+                      title={t('admin.articles.editor.shortLinkCopy')}
+                      aria-label={t('admin.articles.editor.shortLinkCopy')}
+                      className={`shrink-0 flex items-center justify-center w-11 h-11 border rounded-xl transition-all ${
+                        shortLinkCopied
+                          ? 'bg-gold/10 border-gold/30 text-gold'
+                          : 'bg-white/5 border-gold/10 text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {shortLinkCopied ? <Check size={16} /> : <LinkIcon size={16} />}
+                    </button>
+                  </div>
+                  {status !== 'published' && (
+                    <p className="mt-1.5 text-white/40 text-xs font-[family-name:var(--font-display)]">
+                      {t('admin.articles.editor.shortLinkDraftHint')}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">

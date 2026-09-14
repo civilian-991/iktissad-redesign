@@ -92,6 +92,7 @@ export function mapArticleRow(
 
   return {
     id: row.id,
+    publicId: row.public_id,
     title: stripHtml(row.title),
     titleEn: row.title_en,
     slug: row.slug,

@@ -38,6 +38,7 @@ import type { JSONContent } from '@tiptap/core';
 import { addBidiIsolation } from '@/lib/i18n/format';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { csrfJsonHeaders } from '@/lib/csrf-client';
+import { SITE_URL } from '@/lib/site-config';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
@@ -371,9 +372,30 @@ export default function ArticlePageClient({
     }
   }, [article?.content]);
 
+  /**
+   * The URL we hand out, which is NOT the one in the address bar.
+   *
+   * `window.location.href` is always the percent-encoded serialisation, and our
+   * slugs are Arabic: 55 characters on average, 6 encoded characters each, so a
+   * shared link arrived as ~330 characters of %D8%AD. The short /a/<id> link
+   * 301s to the same article and survives being pasted into WhatsApp, an email
+   * or a printed page.
+   *
+   * Fallback covers an article rendered from a cached payload predating
+   * public_id: decodeURI at least yields readable Arabic rather than escapes.
+   */
+  const shareUrl = () => {
+    if (article?.publicId) return `${SITE_URL}/a/${article.publicId}`;
+    try {
+      return decodeURI(window.location.href);
+    } catch {
+      return window.location.href;
+    }
+  };
+
   const handleShare = (platform: string) => {
     if (typeof window === 'undefined') return;
-    const url = window.location.href;
+    const url = shareUrl();
     const text = article?.title ?? '';
 
     // Track share event (fire-and-forget)
@@ -488,7 +510,7 @@ export default function ArticlePageClient({
                   <strong>الإقتصاد والأعمال</strong> — iktissad.com
                 </div>
                 <div style={{ fontSize: '10pt', color: '#666', marginBottom: '8px' }}>
-                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA-u-nu-latn')} · URL: {typeof window !== 'undefined' ? window.location.href : ''}
+                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA-u-nu-latn')} · URL: {typeof window !== 'undefined' ? shareUrl() : ''}
                 </div>
               </div>
 
