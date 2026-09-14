@@ -52,6 +52,11 @@ export function IconPreview({ name, color, size = 18 }: { name?: string; color?:
   if (!Icon) {
     return <HelpCircle size={size} className="text-white/30" />;
   }
+  // react-hooks/static-components flags any capitalised binding rendered from a
+  // local variable. Here `Icon` is not created during render — it is a reference
+  // pulled out of the static LucideIcons module map, so its identity is stable
+  // for a given `name` and React remounts only when the icon actually changes.
+  // eslint-disable-next-line react-hooks/static-components
   return <Icon size={size} style={color ? { color } : undefined} />;
 }
 

@@ -69,6 +69,27 @@ export async function GET(request: NextRequest) {
       : Promise.resolve({ data: null }),
   ]);
 
+  // A requested taxonomy filter that does not resolve must yield NO articles —
+  // never the unfiltered list. These lookups match on `slug`, and callers that
+  // passed a display NAME instead (e.g. the Arabic "مال ومصارف" rather than
+  // "finance") used to fall through the `if (x && xResult.data)` guards below,
+  // dropping the filter entirely and returning the whole corpus dressed up as a
+  // filtered result. Measured: ?sector=<Arabic name> returned 27,987 rows
+  // instead of 3,751.
+  const unresolved = [
+    section && !sectionResult.data ? `section=${section}` : null,
+    country && !countryResult.data ? `country=${country}` : null,
+    sector  && !sectorResult.data  ? `sector=${sector}`   : null,
+  ].filter(Boolean);
+
+  if (unresolved.length > 0) {
+    console.warn(`[api/articles] unresolved taxonomy slug(s): ${unresolved.join(", ")}`);
+    return NextResponse.json({
+      data: [],
+      pagination: { page, pageSize, total: 0, totalPages: 0 },
+    } satisfies ApiResponse<Article[]>);
+  }
+
   // Country filter runs through the article_countries join table so an article
   // filed under several countries shows up on every one of them. The embed is
   // aliased and only added when filtering, so unfiltered lists aren't turned

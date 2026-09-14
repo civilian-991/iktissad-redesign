@@ -791,7 +791,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 {t('admin.articles.editor.slugLabel')}
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-white/30 text-sm font-[family-name:var(--font-display)] shrink-0">/news/</span>
+                <span className="text-white/30 text-sm font-[family-name:var(--font-display)] shrink-0">/</span>
                 <input
                   type="text"
                   value={slug}

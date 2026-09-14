@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 import NextImage from 'next/image';
 import Link from 'next/link';
-import { Clock, BookOpen } from 'lucide-react';
+import { Clock, BookOpen, ArrowLeft } from 'lucide-react';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -11,10 +11,14 @@ import type { Article, ApiResponse } from '@/types';
 
 interface RelatedArticlesProps {
   articleId: string;
+  /** Sector SLUG (not the display name) — powers the "more from this sector" link. */
+  sectorSlug?: string;
+  /** Sector display name, for the link label. */
+  sectorName?: string;
   limit?: number;
 }
 
-function RelatedArticlesContent({ articleId, limit = 5 }: RelatedArticlesProps) {
+function RelatedArticlesContent({ articleId, sectorSlug, sectorName, limit = 5 }: RelatedArticlesProps) {
   const { t } = useTranslation();
   const { fmtDate } = useFormatters();
 
@@ -89,6 +93,19 @@ function RelatedArticlesContent({ articleId, limit = 5 }: RelatedArticlesProps) 
           </Link>
         ))}
       </div>
+
+      {/* "More from this sector". Links by SLUG: the old sidebar version used
+          `article.sector` — the Arabic display name — so /industries/<name>
+          resolved to nothing and the page came up empty. */}
+      {sectorSlug && sectorName && (
+        <a
+          href={`/industries/${sectorSlug}`}
+          className="flex items-center justify-center gap-2 w-full mt-6 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/50 border border-sand/80 hover:border-gold hover:text-gold transition-all group rounded-sm"
+        >
+          {t('engagement.related.more_from_section')} — {sectorName}
+          <ArrowLeft size={10} className="group-hover:-translate-x-0.5 transition-transform" />
+        </a>
+      )}
     </section>
   );
 }

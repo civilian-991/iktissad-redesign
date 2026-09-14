@@ -12,7 +12,6 @@ import {
   User,
   BookOpen,
   Check,
-  ArrowLeft,
   Loader2,
   ChevronLeft,
   Printer,
@@ -250,23 +249,6 @@ export default function ArticlePageClient({
   const giftValid = access?.giftValid ?? false;
   const paywallSettings = access?.paywallSettings;
   const dbUserId = access?.dbUserId ?? null;
-
-  // Related articles, ranked server-side by find_similar_articles (tag overlap +
-  // full-text overlap on the rare terms of the title + shared country, with
-  // sector/section as weak tiebreakers).
-  //
-  // The same-section fallback that used to sit here is gone: it passed
-  // `article.section` — the Arabic section NAME — to /api/articles?section=,
-  // which matches on slug, so the filter was dropped and the sidebar quietly
-  // filled with the newest articles site-wide.
-  const { data: similarData } = useSWR<ApiResponse<Article[]>>(
-    article?.id ? `/api/search/similar?articleId=${article.id}&limit=4` : null,
-    swrFetcher
-  );
-
-  const relatedArticles: Article[] = (similarData?.data ?? [])
-    .filter((a) => a.id !== article?.id)
-    .slice(0, 4);
 
   // ── Anonymous meter: count from localStorage for non-authenticated users ─────
   const [anonReadCount, setAnonReadCount] = useState(0);
@@ -899,7 +881,12 @@ export default function ArticlePageClient({
               </div>
 
               {/* Phase 6.2 — Related articles grid below content */}
-              <RelatedArticles articleId={article.id} limit={4} />
+              <RelatedArticles
+                articleId={article.id}
+                sectorSlug={article.sectorSlug}
+                sectorName={article.sector}
+                limit={4}
+              />
             </motion.article>
 
             {/* ── Sidebar ── */}
@@ -910,68 +897,6 @@ export default function ArticlePageClient({
             >
               <div className="sticky top-[calc(var(--header-offset-public)+1rem)] space-y-6">
 
-                {/* Related articles — F2.5: semantic similar with AI indicator */}
-                {relatedArticles.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2.5 mb-4">
-                      <div className="w-[3px] h-5 bg-gold flex-shrink-0" />
-                      <h3 className="text-[13px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
-                        {t('article.related_ai')}
-                      </h3>
-                    </div>
-                    <div className="space-y-0 divide-y divide-sand/50 border border-sand/60">
-                      {relatedArticles.map((related) => (
-                        <a
-                          key={related.id}
-                          href={`/${related.id}`}
-                          className="flex gap-3 p-3.5 hover:bg-cream/60 transition-colors group"
-                        >
-                          {related.featuredImage ? (
-                            <div className="relative w-[68px] h-[54px] flex-shrink-0 overflow-hidden">
-                              <NextImage
-                                src={related.featuredImage}
-                                alt={related.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                sizes="68px"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-[68px] h-[54px] flex-shrink-0 bg-obsidian/[0.04] flex items-center justify-center">
-                              <BookOpen size={14} className="text-charcoal/20" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            {related.sector && (
-                              <span className="text-[9px] font-[family-name:var(--font-display)] font-black text-gold uppercase tracking-widest block mb-0.5">
-                                {related.sector}
-                              </span>
-                            )}
-                            <h4 className="text-[12px] font-[family-name:var(--font-display)] font-semibold text-ink/90 leading-snug line-clamp-3 group-hover:text-gold transition-colors">
-                              {related.title}
-                            </h4>
-                            {related.publishedAt && (
-                              <span className="flex items-center gap-1 text-[9px] text-charcoal/30 mt-1.5">
-                                <Clock size={8} />
-                                {new Date(related.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { month: 'short', day: 'numeric' })}
-                              </span>
-                            )}
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-
-                    {article.sector && (
-                      <a
-                        href={`/industries/${article.sector}`}
-                        className="flex items-center justify-center gap-2 w-full mt-3 py-2.5 text-[13px] font-[family-name:var(--font-display)] font-bold text-charcoal/50 border border-sand/80 hover:border-gold hover:text-gold transition-all group rounded-sm"
-                      >
-                        المزيد من {article.sector}
-                        <ArrowLeft size={10} className="group-hover:-translate-x-0.5 transition-transform" />
-                      </a>
-                    )}
-                  </div>
-                )}
 
                 {/* Newsletter */}
                 <div className="relative overflow-hidden bg-obsidian p-5">

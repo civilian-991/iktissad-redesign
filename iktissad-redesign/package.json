@@ -138,6 +138,12 @@
       "minimatch": {
         "brace-expansion": "^2.0.3"
       }
+    },
+    "@eslint/eslintrc": {
+      "ajv": "^6.12.6"
+    },
+    "eslint": {
+      "ajv": "^6.12.6"
     }
   }
 }
