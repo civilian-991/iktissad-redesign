@@ -31,6 +31,10 @@ export interface SimilarArticle {
   excerpt: string;
   slug: string;
   featuredImage: string;
+  /** Section name, for the badge on related cards. */
+  section: string;
+  /** Sector name; takes precedence over section on the badge. */
+  sector: string;
   publishedAt: string;
   /** Composite similarity score (0–1). Higher = more similar. */
   similarity: number;
@@ -66,11 +70,16 @@ export async function updateArticleSearchVector(articleId: string): Promise<void
 // ---------------------------------------------------------------------------
 
 /**
- * Returns articles similar to `articleId` using section/sector overlap and
- * title-word full-text matching.  Falls back to the Supabase RPC
- * `find_similar_articles` when available, otherwise runs a direct query.
+ * Returns articles similar to `articleId`, ranked by the `find_similar_articles`
+ * RPC: tag overlap + full-text overlap on the rare terms of the title + shared
+ * country, with sector/section as weak tiebreakers and a mild freshness term.
  *
- * Results are sorted by descending similarity then descending `published_at`.
+ * There is deliberately no JS-side fallback. The previous one caught the RPC's
+ * error and quietly answered with "newest articles in the same section" — it
+ * applied ORDER BY published_at and LIMIT in SQL, then computed a similarity
+ * score in JS that nothing sorted on. The RPC had been raising 42702 on every
+ * call since it was written, and the fallback is why nobody noticed. An error
+ * here now surfaces as a 500 rather than as plausible-looking wrong answers.
  */
 export async function findSimilarArticles(
   articleId: string,
@@ -78,75 +87,40 @@ export async function findSimilarArticles(
 ): Promise<SimilarArticle[]> {
   const supabase = createAdminClient();
 
-  // Attempt the DB-side RPC first (preferred — handles scoring in SQL).
-  // Cast to any: the new RPC functions aren't in the generated Database type
-  // until the migration is applied and types are regenerated (project gotcha).
+  // Cast to any: the RPC is not in the generated Database type (project gotcha).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rpcData, error: rpcError } = await (supabase as any).rpc(
-    "find_similar_articles",
-    { source_article_id: articleId, result_limit: limit }
-  );
+  const { data, error } = await (supabase as any).rpc("find_similar_articles", {
+    source_article_id: articleId,
+    result_limit: limit,
+  });
 
-  if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-
-    return rpcData.map((row: {
-      id: string;
-      title: string;
-      excerpt: string;
-      slug: string;
-      published_at: string;
-      similarity: number;
-      featured_image?: string | null;
-    }) => ({
-      id: row.id,
-      title: row.title,
-      excerpt: row.excerpt ?? "",
-      slug: row.slug,
-      publishedAt: row.published_at ?? "",
-      similarity: row.similarity ?? 0,
-      featuredImage: row.featured_image ?? "",
-    }));
+  if (error) {
+    throw new Error(`find_similar_articles failed for ${articleId}: ${error.message}`);
   }
 
-  // Fallback: fetch the source article's metadata then do a section/sector query
-  const { data: source, error: sourceError } = await supabase
-    .from("articles")
-    .select("title, section_id, sector_id")
-    .eq("id", articleId)
-    .single();
+  if (!Array.isArray(data)) return [];
 
-  if (sourceError || !source) return [];
-
-  // Build OR filter: same section OR same sector
-  const orParts: string[] = [];
-  if (source.section_id) orParts.push(`section_id.eq.${source.section_id}`);
-  if (source.sector_id)  orParts.push(`sector_id.eq.${source.sector_id}`);
-  if (orParts.length === 0) return [];
-
-  const { data: rows, error: rowsError } = await supabase
-    .from("articles")
-    .select("id, title, excerpt, slug, featured_image, published_at, section_id, sector_id")
-    .eq("status", "published")
-    .neq("id", articleId)
-    .or(orParts.join(","))
-    .order("published_at", { ascending: false })
-    .limit(limit);
-
-  if (rowsError || !rows) return [];
-
-  return rows.map((row) => {
-    const sectionScore = row.section_id === source.section_id ? 0.4 : 0;
-    const sectorScore  = row.sector_id  === source.sector_id  ? 0.3 : 0;
-    return {
-      id: row.id,
-      title: row.title,
-      excerpt: (row.excerpt as string) ?? "",
-      slug: row.slug,
-      featuredImage: (row.featured_image as string) ?? "",
-      publishedAt: (row.published_at as string) ?? "",
-      similarity: sectionScore + sectorScore,
-    };
-  });
+  return data.map((row: {
+    id: string;
+    title: string;
+    excerpt: string | null;
+    slug: string;
+    featured_image: string | null;
+    section: string | null;
+    sector: string | null;
+    published_at: string | null;
+    similarity: number | null;
+  }) => ({
+    id: row.id,
+    title: row.title,
+    excerpt: row.excerpt ?? "",
+    slug: row.slug,
+    featuredImage: row.featured_image ?? "",
+    section: row.section ?? "",
+    sector: row.sector ?? "",
+    publishedAt: row.published_at ?? "",
+    similarity: row.similarity ?? 0,
+  }));
 }
 
 // ---------------------------------------------------------------------------

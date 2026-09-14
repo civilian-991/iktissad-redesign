@@ -16,7 +16,6 @@ import {
   Loader2,
   ChevronLeft,
   Printer,
-  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -252,26 +251,22 @@ export default function ArticlePageClient({
   const paywallSettings = access?.paywallSettings;
   const dbUserId = access?.dbUserId ?? null;
 
-  // F2.5 — Semantic "More Like This": try pgvector similar endpoint first,
-  // fall back to same-section articles if the semantic result is empty/errors.
-  const { data: similarData, error: similarError } = useSWR<ApiResponse<Article[]>>(
+  // Related articles, ranked server-side by find_similar_articles (tag overlap +
+  // full-text overlap on the rare terms of the title + shared country, with
+  // sector/section as weak tiebreakers).
+  //
+  // The same-section fallback that used to sit here is gone: it passed
+  // `article.section` — the Arabic section NAME — to /api/articles?section=,
+  // which matches on slug, so the filter was dropped and the sidebar quietly
+  // filled with the newest articles site-wide.
+  const { data: similarData } = useSWR<ApiResponse<Article[]>>(
     article?.id ? `/api/search/similar?articleId=${article.id}&limit=4` : null,
     swrFetcher
   );
-  const hasSimilar = !similarError && (similarData?.data?.length ?? 0) > 0;
 
-  const { data: sectionData } = useSWR<ApiResponse<Article[]>>(
-    !hasSimilar && article?.section
-      ? `/api/articles?section=${article.section}&status=published&pageSize=5`
-      : null,
-    swrFetcher
-  );
-
-  const relatedArticles: Article[] = hasSimilar
-    ? (similarData!.data as unknown as Article[]).filter((a) => a.id !== article?.id).slice(0, 4)
-    : (sectionData?.data ?? []).filter((a) => a.id !== article?.id).slice(0, 4);
-
-  const relatedIsAi = hasSimilar;
+  const relatedArticles: Article[] = (similarData?.data ?? [])
+    .filter((a) => a.id !== article?.id)
+    .slice(0, 4);
 
   // ── Anonymous meter: count from localStorage for non-authenticated users ─────
   const [anonReadCount, setAnonReadCount] = useState(0);
@@ -904,11 +899,7 @@ export default function ArticlePageClient({
               </div>
 
               {/* Phase 6.2 — Related articles grid below content */}
-              <RelatedArticles
-                articleId={article.id}
-                sectionSlug={article.section}
-                limit={4}
-              />
+              <RelatedArticles articleId={article.id} limit={4} />
             </motion.article>
 
             {/* ── Sidebar ── */}
@@ -927,9 +918,6 @@ export default function ArticlePageClient({
                       <h3 className="text-[13px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
                         {t('article.related_ai')}
                       </h3>
-                      {relatedIsAi && (
-                        <Sparkles size={11} className="text-gold/60 flex-shrink-0" aria-label="مدعوم بالذكاء الاصطناعي" />
-                      )}
                     </div>
                     <div className="space-y-0 divide-y divide-sand/50 border border-sand/60">
                       {relatedArticles.map((related) => (

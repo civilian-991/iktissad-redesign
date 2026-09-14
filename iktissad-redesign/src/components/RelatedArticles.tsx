@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 import NextImage from 'next/image';
 import Link from 'next/link';
-import { Clock, BookOpen, Sparkles } from 'lucide-react';
+import { Clock, BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import { useTranslation, useFormatters } from '@/lib/i18n';
@@ -11,35 +11,29 @@ import type { Article, ApiResponse } from '@/types';
 
 interface RelatedArticlesProps {
   articleId: string;
-  sectionSlug?: string;
   limit?: number;
 }
 
-function RelatedArticlesContent({ articleId, sectionSlug, limit = 5 }: RelatedArticlesProps) {
+function RelatedArticlesContent({ articleId, limit = 5 }: RelatedArticlesProps) {
   const { t } = useTranslation();
   const { fmtDate } = useFormatters();
 
-  // Try AI-based recommendations first
-  const { data: similarData, error: similarError } = useSWR<ApiResponse<Article[]>>(
+  // Ranked server-side by find_similar_articles: tag overlap + full-text overlap
+  // on the rare terms of the title + shared country, with sector/section as weak
+  // tiebreakers. The RPC always fills the rail when the article has a section.
+  //
+  // There is no same-section fallback here any more. It passed `article.section`
+  // — the Arabic section NAME — to /api/articles?section=, which matches on slug.
+  // The lookup missed, the route dropped the filter (see api/articles/route.ts),
+  // and the rail quietly filled with the newest articles site-wide.
+  const { data: similarData } = useSWR<ApiResponse<Article[]>>(
     `/api/search/similar?articleId=${articleId}&limit=${limit}`,
     swrFetcher
   );
 
-  const hasSimilar = !similarError && (similarData?.data?.length ?? 0) > 0;
-
-  // Fallback to same-section articles
-  const { data: sectionData } = useSWR<ApiResponse<Article[]>>(
-    !hasSimilar && sectionSlug
-      ? `/api/articles?section=${sectionSlug}&status=published&pageSize=${limit + 1}`
-      : null,
-    swrFetcher
-  );
-
-  const articles: Article[] = hasSimilar
-    ? (similarData!.data as unknown as Article[]).filter((a) => a.id !== articleId).slice(0, limit)
-    : (sectionData?.data ?? []).filter((a) => a.id !== articleId).slice(0, limit);
-
-  const isAiPowered = hasSimilar;
+  const articles: Article[] = (similarData?.data ?? [])
+    .filter((a) => a.id !== articleId)
+    .slice(0, limit);
 
   if (articles.length === 0) return null;
 
@@ -50,12 +44,6 @@ function RelatedArticlesContent({ articleId, sectionSlug, limit = 5 }: RelatedAr
         <h2 className="text-[15px] font-[family-name:var(--font-display)] font-black text-ink tracking-wide">
           {t('engagement.related.title')}
         </h2>
-        {isAiPowered && (
-          <span className="flex items-center gap-1 text-[10px] font-[family-name:var(--font-display)] text-gold/60">
-            <Sparkles size={10} />
-            {t('engagement.related.ai_powered')}
-          </span>
-        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
