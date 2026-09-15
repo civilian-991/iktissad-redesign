@@ -1,4 +1,4 @@
-import { SITE_URL } from '@/lib/site-config';
+import { SITE_URL, GA_MEASUREMENT_ID } from '@/lib/site-config';
 import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
@@ -78,6 +78,12 @@ export default async function RootLayout({
   // Pass it to Script components so inline scripts are nonce-approved.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
+  // Keep preview deployments and local builds out of the production GA property.
+  // VERCEL_ENV is server-only, which is fine — this is a server component, and
+  // the resolved value is what gets handed to the client component below.
+  const analyticsEnabled =
+    process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview";
+
   const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
     ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
     : null;
@@ -109,7 +115,7 @@ export default async function RootLayout({
         {/* GA + GAM load only after cookie consent (analytics/advertising) */}
         <ConsentScripts
           nonce={nonce}
-          gaMeasurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}
+          gaMeasurementId={analyticsEnabled ? GA_MEASUREMENT_ID : undefined}
           gamNetworkCode={process.env.NEXT_PUBLIC_GAM_NETWORK_CODE}
         />
       </body>

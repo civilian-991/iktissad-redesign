@@ -28,6 +28,21 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || 'https://www.iktissad.com'
 ).replace(/\/+$/, '');
 
+/**
+ * GA4 measurement ID.
+ *
+ * Not a secret — it ships in the page source of every site that uses it, which
+ * is why it lives here with the same `env || default` shape as SITE_URL rather
+ * than only in the Vercel dashboard. NEXT_PUBLIC_GA_MEASUREMENT_ID still wins,
+ * so a separate property can be pointed at any environment without a code change.
+ *
+ * Whether it actually loads is decided twice more: `analyticsEnabled` in
+ * src/app/layout.tsx keeps preview and local builds out of the property, and
+ * ConsentScripts only injects gtag once the visitor accepts analytics cookies.
+ */
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-FCRSHXCDP4';
+
 export const siteConfig = {
   name: 'الإقتصاد والأعمال',
   url: SITE_URL,
