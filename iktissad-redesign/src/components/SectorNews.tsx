@@ -52,10 +52,10 @@ function SectorCard({ sector }: { sector: Sector }) {
   return (
     <div className="bg-paper border border-sand hover:border-gold/50 hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-obsidian to-brand-darker p-4 flex items-center justify-between">
+      <div className="bg-brand-darker p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gold/20 border border-gold/30 flex items-center justify-center">
-            <Icon className="text-gold" size={20} />
+          <div className="w-10 h-10 bg-gold flex items-center justify-center">
+            <Icon className="text-brand-darker" size={20} />
           </div>
           <h3 className="font-[family-name:var(--font-display)] font-bold text-white text-lg">
             {sector.name}
@@ -86,12 +86,12 @@ function SectorCard({ sector }: { sector: Sector }) {
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-obsidian to-brand-darker" />
           )}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/5 backdrop-blur-md border-t border-white/10">
+          <div className="absolute inset-x-0 bottom-0 px-4 pb-4 pt-8 bg-gradient-to-t from-brand-darker/95 via-brand-darker/80 to-transparent">
             <h4 className="font-[family-name:var(--font-display)] font-bold text-white text-sm leading-relaxed line-clamp-2 mb-2">
               {featured.title}
             </h4>
             {featured.publishedAt && (
-              <span className="text-white/60 text-sm flex items-center gap-1.5">
+              <span className="text-white/70 text-sm flex items-center gap-1.5">
                 <Clock size={12} />
                 {fmtDate(featured.publishedAt)}
               </span>
@@ -106,15 +106,12 @@ function SectorCard({ sector }: { sector: Sector }) {
 
       {/* Article List */}
       <div className="divide-y divide-sand">
-        {rest.map((article, index) => (
+        {rest.map((article) => (
           <a
             key={article.id}
             href={`/${article.slug}`}
             className="flex items-start gap-3 p-4 hover:bg-cream transition-colors group/item"
           >
-            <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-obsidian to-brand-darker text-white text-xs flex items-center justify-center font-[family-name:var(--font-display)] font-bold">
-              {index + 1}
-            </span>
             <div className="flex-1 min-w-0">
               <h5 className="font-[family-name:var(--font-display)] font-semibold text-sm text-ink leading-relaxed line-clamp-2 group-hover/item:text-gold transition-colors duration-300">
                 {article.title}
