@@ -20,7 +20,7 @@ function getNumberFormatter(locale: Locale, options?: Intl.NumberFormatOptions):
   if (!fmt) {
     // Force Western (Latin) digits in Arabic via the -u-nu-latn extension —
     // the site uses Western Arabic numerals (0-9), not Arabic-Indic (٠-٩).
-    const intlLocale = locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
+    const intlLocale = locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-US';
     fmt = new Intl.NumberFormat(intlLocale, options);
     numberFormatters.set(key, fmt);
   }
@@ -85,8 +85,9 @@ function getDateFormatter(locale: Locale, options: Intl.DateTimeFormatOptions): 
   const key = `${locale}-${JSON.stringify(options)}`;
   let fmt = dateFormatters.get(key);
   if (!fmt) {
-    // -u-nu-latn forces Western digits in Arabic dates (keeps Arabic month names).
-    const intlLocale = locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
+    // -u-ca-gregory pins the Gregorian calendar: ar-SA defaults to Hijri (islamic-umalqura)
+    // in some browsers. -u-nu-latn forces Western digits (keeps Arabic month names).
+    const intlLocale = locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-US';
     fmt = new Intl.DateTimeFormat(intlLocale, options);
     dateFormatters.set(key, fmt);
   }

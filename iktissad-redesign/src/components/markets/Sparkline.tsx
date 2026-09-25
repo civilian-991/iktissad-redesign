@@ -3,14 +3,14 @@
 /**
  * Sparkline — TradingView lightweight-charts v5 (plan v4 §2 / research appendix
  * §14). Canvas is client-only; use real-time `.update()` not `setData()`.
- * Western numerals via locale `ar-SA-u-nu-latn` (the site forces 0-9). RTL is
+ * Western numerals via locale `ar-SA-u-ca-gregory-nu-latn` (the site forces 0-9). RTL is
  * handled by the surrounding DOM; the price axis is hidden for a clean sparkline.
  */
 
 import { useEffect, useRef } from 'react';
 import { createChart, AreaSeries, type IChartApi, type ISeriesApi, type UTCTimestamp } from 'lightweight-charts';
 
-const AR_WESTERN = 'ar-SA-u-nu-latn';
+const AR_WESTERN = 'ar-SA-u-ca-gregory-nu-latn';
 
 export interface SparkPoint {
   time: number; // unix seconds

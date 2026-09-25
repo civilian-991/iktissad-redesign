@@ -274,7 +274,7 @@ function stripHtml(html: string): string {
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('ar-SA-u-nu-latn', {
+  return d.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

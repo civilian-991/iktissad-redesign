@@ -300,6 +300,6 @@ export function useFormatters() {
     fmtRelative: (d: Date | string) => _fmtRelative(d, locale),
     /** Locale string for direct Intl use (Western digits via -u-nu-latn). */
     dateLocale: locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-US',
-    numberLocale: locale === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US',
+    numberLocale: locale === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-US',
   }), [locale]);
 }

@@ -487,7 +487,7 @@ export default function ArticlePageClient({
                   <strong>الإقتصاد والأعمال</strong> — iktissad.com
                 </div>
                 <div style={{ fontSize: '10pt', color: '#666', marginBottom: '8px' }}>
-                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA-u-nu-latn')} · URL: {typeof window !== 'undefined' ? shareUrl() : ''}
+                  {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn')} · URL: {typeof window !== 'undefined' ? shareUrl() : ''}
                 </div>
               </div>
 

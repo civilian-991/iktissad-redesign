@@ -132,7 +132,7 @@ function CharCounter({ text, max }: { text: string; max: number }) {
         over ? 'text-red-400 font-semibold' : 'text-white/40'
       }`}
     >
-      {len.toLocaleString('ar-SA-u-nu-latn')} / {max.toLocaleString('ar-SA-u-nu-latn')}
+      {len.toLocaleString('ar-SA-u-ca-gregory-nu-latn')} / {max.toLocaleString('ar-SA-u-ca-gregory-nu-latn')}
     </span>
   )
 }
@@ -296,7 +296,7 @@ function PlatformPanel({ tab, article, socialStatus }: PlatformPanelProps) {
       toast.error('اختر تاريخ ووقت الجدولة أولاً')
       return
     }
-    toast.success(`تمت جدولة النشر على ${tab.label} في ${new Date(scheduleDate).toLocaleString('ar-SA-u-nu-latn')}`)
+    toast.success(`تمت جدولة النشر على ${tab.label} في ${new Date(scheduleDate).toLocaleString('ar-SA-u-ca-gregory-nu-latn')}`)
   }, [scheduleDate, tab.label])
 
   const handlePostNow = useCallback(() => {

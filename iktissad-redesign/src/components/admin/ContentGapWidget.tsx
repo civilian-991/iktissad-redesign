@@ -161,7 +161,7 @@ function GeoCoverageTab({ countries }: { countries: CountryCoverage[] }) {
         const flag = COUNTRY_FLAGS[c.country] ?? '🌍';
         const pct = Math.round((c.articleCount / maxCount) * 100);
         const dateLabel = c.lastArticleDate
-          ? new Date(c.lastArticleDate).toLocaleDateString('ar-SA-u-nu-latn', {
+          ? new Date(c.lastArticleDate).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {
               day: 'numeric',
               month: 'short',
             })
