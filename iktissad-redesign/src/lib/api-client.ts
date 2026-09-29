@@ -17,6 +17,12 @@
 
 import { toast } from "sonner";
 
+import {
+  CSRF_HEADER,
+  getCsrfToken,
+  invalidateCsrfToken,
+} from "./csrf-client";
+
 import type {
   ApiResponse,
   Article,
@@ -119,29 +125,15 @@ export class ApiError extends Error {
   }
 }
 
-// ─── CSRF token cache ────────────────────────────────────────────
+// ─── CSRF token ──────────────────────────────────────────────────
+// Sourced from csrf-client.ts, which reads the csrf-token cookie on every
+// call. Holding the token in memory here used to outlive the cookie: the
+// cookie expires after 24h and any other tab can rotate it, after which every
+// mutation from this page 403'd until a full reload.
 
-let cachedCsrfToken: string | null = null;
-
-/**
- * Fetch (and cache) the CSRF token from /api/auth/csrf.
- * Called automatically before any mutation request.
- */
-async function fetchCsrfToken(): Promise<string> {
-  if (cachedCsrfToken) return cachedCsrfToken;
-  try {
-    const res = await fetch("/api/auth/csrf");
-    if (res.ok) {
-      const data = (await res.json()) as { csrfToken?: string };
-      if (data.csrfToken) {
-        cachedCsrfToken = data.csrfToken;
-        return cachedCsrfToken;
-      }
-    }
-  } catch {
-    // CSRF fetch failure is non-fatal — server will return 403 if required
-  }
-  return "";
+/** True for the proxy's "Invalid CSRF token" rejection (src/proxy.ts). */
+function isCsrfRejection(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 403 && /csrf/i.test(err.message);
 }
 
 // ─── Rate-limit queue & state ────────────────────────────────────
@@ -356,22 +348,36 @@ async function api<T>(
   init?: RequestInit & { signal?: AbortSignal }
 ): Promise<ApiResponse<T>> {
   const method = (init?.method ?? "GET").toUpperCase();
-  const extraHeaders: Record<string, string> = {};
 
-  // Automatically include CSRF token for all mutation requests
-  if (MUTATION_METHODS.has(method)) {
-    const csrfToken = await fetchCsrfToken();
-    if (csrfToken) {
-      extraHeaders["x-csrf-token"] = csrfToken;
-    }
+  if (!MUTATION_METHODS.has(method)) {
+    return fetchWithRetry<T>(path, init ?? {});
   }
 
-  const mergedInit: RequestInit & { signal?: AbortSignal } = {
-    ...init,
-    headers: { ...extraHeaders, ...(init?.headers ?? {}) },
+  // Every mutation carries the CSRF token the proxy will compare against.
+  const send = async (): Promise<ApiResponse<T>> => {
+    const csrfToken = await getCsrfToken();
+    const extraHeaders: Record<string, string> = csrfToken
+      ? { [CSRF_HEADER]: csrfToken }
+      : {};
+
+    return fetchWithRetry<T>(path, {
+      ...init,
+      headers: { ...extraHeaders, ...(init?.headers ?? {}) },
+    });
   };
 
-  return fetchWithRetry<T>(path, mergedInit);
+  try {
+    return await send();
+  } catch (err) {
+    // A CSRF 403 means the token we sent no longer matches the cookie — it
+    // expired, or a newer tab rotated it. Drop it, mint a fresh one, and
+    // replay the mutation once so the user never sees the failure.
+    if (isCsrfRejection(err)) {
+      invalidateCsrfToken();
+      return send();
+    }
+    throw err;
+  }
 }
 
 /**
