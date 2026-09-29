@@ -11,10 +11,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function LegacyNewsPath({
   params,
+  searchParams,
 }: {
   params: Promise<{ path: string[] }>;
+  searchParams: Promise<{ filter?: string }>;
 }) {
   const { path } = await params;
+  // /news/group?filter=countries|sectors — the old "browse by" index pages.
+  if (path.length === 1 && path[0] === 'group') {
+    const { filter } = await searchParams;
+    permanentRedirect(filter === 'sectors' ? '/industries' : '/countries');
+  }
   const to = await lookupRedirect('/news/' + path.map((s) => decodeURIComponent(s)).join('/'));
   if (to) permanentRedirect(encodePath(to));
   notFound();

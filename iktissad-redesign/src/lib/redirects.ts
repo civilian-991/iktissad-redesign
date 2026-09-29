@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { permanentRedirect, notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 /**
@@ -74,16 +75,22 @@ export const lookupRedirect = cache(async (path: string): Promise<string | null>
     .eq('from_path', from)
     .maybeSingle();
 
-  if (error || !data) {
+  // A failed lookup (statement timeout, network) must not become a 404: a
+  // crawler that sees 404 on an old URL drops it, while a 5xx makes it retry.
+  // Throwing renders the route's error page with a 500.
+  if (error) throw new Error(`redirect lookup failed for ${from}: ${error.message}`);
+
+  if (!data) {
     // Try the still-encoded form: a few legacy slugs contain characters that do
     // not survive a decode/encode round-trip (quotation marks, for one).
     const raw = path.startsWith('/') ? path : '/' + path;
     if (raw !== from) {
-      const { data: alt } = await anon
+      const { data: alt, error: altError } = await anon
         .from('article_redirects')
         .select('to_path')
         .eq('from_path', raw)
         .maybeSingle();
+      if (altError) throw new Error(`redirect lookup failed for ${raw}: ${altError.message}`);
       return alt?.to_path ?? null;
     }
     return null;
@@ -126,3 +133,17 @@ export const lookupArticleByPublicId = cache(async (id: string): Promise<string 
 
   return data?.slug ? `/${data.slug}` : null;
 });
+
+/**
+ * Body of the legacy catch-all routes (/issues, /taxonomy, /events, …):
+ * 301 to the mapped page if the path is in the map, otherwise a real 404.
+ * `segments` are the catch-all params, which Next passes percent-encoded.
+ */
+export async function redirectLegacyPath(prefix: string, segments: string[]): Promise<never> {
+  const path = `/${prefix}/` + segments.map((s) => {
+    try { return decodeURIComponent(s); } catch { return s; }
+  }).join('/');
+  const to = await lookupRedirect(path);
+  if (to) permanentRedirect(encodePath(to));
+  notFound();
+}

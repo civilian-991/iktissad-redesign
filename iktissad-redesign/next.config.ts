@@ -63,8 +63,23 @@ const nextConfig: NextConfig = {
   // string; they are not, because Drupal slugified the article's <br> tags into a
   // literal "-br-". Measured against production, 6,681 of 8,490 legacy article
   // URLs (78.7%) 404'd as a result.
+  //
+  // The few fixed legacy pages that need no lookup are plain redirects here;
+  // every data-backed legacy page (countries, sectors, tags, magazine issues,
+  // profiles) is in article_redirects via scripts/rebuild/32-build-page-redirects.
   async redirects() {
-    return [];
+    return [
+      { source: '/news', destination: '/articles', permanent: true },
+      { source: '/issues', destination: '/magazine', permanent: true },
+      { source: '/issues/:publication', destination: '/magazine', permanent: true },
+      { source: '/about/contact', destination: '/contact', permanent: true },
+      { source: '/publications/:publication', destination: '/publications', permanent: true },
+      { source: '/activities', destination: '/topics/events', permanent: true },
+      { source: '/events', destination: '/topics/events', permanent: true },
+      { source: '/rss.xml', destination: '/feed.xml', permanent: true },
+      { source: '/user', destination: '/login', permanent: true },
+      { source: '/user/:path*', destination: '/login', permanent: true },
+    ];
   },
   async rewrites() {
     return [
