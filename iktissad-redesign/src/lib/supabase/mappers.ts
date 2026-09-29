@@ -170,6 +170,12 @@ export function mapMagazineIssueRow(
     featured: row.featured,
     status: row.status,
     highlights: row.highlights,
+    pagesImages: row.pages_images ?? [],
+    pagesReady: row.pages_ready ?? false,
+    publication: row.publication ?? "aiwa",
+    issueType: row.issue_type ?? "regular",
+    pageLabels: row.page_labels ?? [],
+    rkvid: row.rkvid ?? null,
   };
 }
 

@@ -245,10 +245,24 @@ export interface MagazineIssue {
   featured: boolean;
   status: "published" | "draft" | "scheduled";
   highlights: string[];
-  /** Spread page images for in-browser reader (Phase 1A — not yet in DB) */
+  /** Ordered page images for the in-browser reader. */
   pagesImages?: string[];
-  /** Whether spread pages are processed and ready (Phase 1A — not yet in DB) */
+  /** Whether every page of the issue is present. */
   pagesReady?: boolean;
+  /**
+   * Which magazine this issue belongs to. The archive holds three publications
+   * and they must not be listed as one: `aiwa` is الاقتصاد والأعمال, `lubnaniya`
+   * is اللبنانية — a different title entirely.
+   */
+  publication?: "aiwa" | "lubnaniya";
+  issueType?: "regular" | "special";
+  /**
+   * Printed label per page, parallel to `pagesImages`. Mostly "1", "2", … but
+   * covers and inserts are named: FC, IFC, G.F 1, OBC, AD 1, IV.
+   */
+  pageLabels?: string[];
+  /** Source issue key (e.g. "AR0544"). */
+  rkvid?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

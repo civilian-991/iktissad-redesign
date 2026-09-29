@@ -8,10 +8,18 @@ import type { ApiResponse, MagazineIssue } from "@/types";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+  // Clamped rather than trusted. The archive page used to ask for pageSize=100
+  // against 205 issues and then paginate the answer client-side, so everything
+  // published before Oct 2018 — half the archive — was simply unreachable.
+  const pageSize = Math.min(
+    500,
+    Math.max(1, parseInt(searchParams.get("pageSize") || "10", 10) || 10)
+  );
   const status = searchParams.get("status");
   const year = searchParams.get("year");
+  const publication = searchParams.get("publication");
+  const issueType = searchParams.get("issueType");
 
   const supabase = await createClient();
 
@@ -21,6 +29,16 @@ export async function GET(request: NextRequest) {
 
   if (status) {
     query = query.eq("status", status as "published" | "draft" | "scheduled");
+  }
+
+  // The table holds three publications. Without this filter the archive lists
+  // 64 issues of اللبنانية interleaved by date under the الاقتصاد والأعمال masthead.
+  if (publication === "aiwa" || publication === "lubnaniya") {
+    query = query.eq("publication", publication);
+  }
+
+  if (issueType === "regular" || issueType === "special") {
+    query = query.eq("issue_type", issueType);
   }
 
   if (year) {
@@ -72,6 +90,9 @@ const createMagazineSchema = z.object({
   highlights: z.array(z.string()).optional().default([]),
   pagesImages: z.array(z.string()).optional().default([]),
   pagesReady: z.boolean().optional().default(false),
+  publication: z.enum(["aiwa", "lubnaniya"]).optional().default("aiwa"),
+  issueType: z.enum(["regular", "special"]).optional().default("regular"),
+  pageLabels: z.array(z.string()).optional().default([]),
 });
 
 export async function POST(request: NextRequest) {
@@ -117,6 +138,9 @@ export async function POST(request: NextRequest) {
       highlights: data.highlights,
       pages_images: data.pagesImages,
       pages_ready: data.pagesReady,
+      publication: data.publication,
+      issue_type: data.issueType,
+      page_labels: data.pageLabels,
     })
     .select()
     .single();

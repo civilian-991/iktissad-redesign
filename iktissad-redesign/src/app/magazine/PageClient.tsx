@@ -11,16 +11,47 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { MagazineIssue, ApiResponse } from '@/types';
 
+/**
+ * The archive holds three publications, not one. `aiwa` is الاقتصاد والأعمال —
+ * 131 regular issues plus 10 عدد خاص — and `lubnaniya` is اللبنانية, a separate
+ * magazine with its own issue numbering (47–131). They were migrated into one
+ * table with no column to tell them apart, so this page used to list all three
+ * interleaved by date under the الاقتصاد والأعمال masthead.
+ */
+const PUBLICATIONS = [
+  {
+    key: 'aiwa',
+    label: 'الاقتصاد والأعمال',
+    heading: '',  // falls back to the translated masthead line below
+    blurb: 'أكثر من 65 عاماً من التميز في الصحافة الاقتصادية العربية. تصفح أعدادنا الرقمية',
+  },
+  {
+    key: 'lubnaniya',
+    label: 'اللبنانية',
+    heading: 'مجلة اللبنانية',
+    blurb: 'أرشيف الأعداد الرقمية لمجلة اللبنانية',
+  },
+] as const;
+
+type PublicationKey = (typeof PUBLICATIONS)[number]['key'];
+
 export default function MagazinePageClient() {
   const { t } = useTranslation();
+  const [publication, setPublication] = useState<PublicationKey>('aiwa');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // pageSize=500 covers the largest publication (131 issues) in one request.
+  // The old call asked for 100 against 205 rows and then paginated the answer
+  // client-side, which quietly hid every issue published before Oct 2018.
   const { data, isLoading, error } = useSWR<ApiResponse<MagazineIssue[]>>(
-    '/api/magazines?status=published&pageSize=100',
+    `/api/magazines?status=published&pageSize=500&publication=${publication}`,
     swrFetcher
   );
+
+  const activePublication =
+    PUBLICATIONS.find(p => p.key === publication) ?? PUBLICATIONS[0];
 
   const magazines = data?.data ?? [];
   const featuredIssue = magazines.find(m => m.featured) ?? magazines[0];
@@ -62,11 +93,14 @@ export default function MagazinePageClient() {
                   أرشيف المجلة
                 </span>
               </div>
+              {/* The archive covers two magazines, so the masthead has to follow
+                  the selected tab — otherwise the page claims الاقتصاد والأعمال
+                  while the grid below is showing اللبنانية covers. */}
               <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-display)] font-black text-white mb-4">
-                {t('pages.magazine.subtitle')}
+                {activePublication.heading || t('pages.magazine.subtitle')}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                أكثر من 65 عاماً من التميز في الصحافة الاقتصادية العربية. تصفح أعدادنا الرقمية
+                {activePublication.blurb}
               </p>
             </motion.div>
           </div>
@@ -314,6 +348,30 @@ export default function MagazinePageClient() {
                   <h2 className="text-2xl font-[family-name:var(--font-display)] font-black text-ink">
                     {t('pages.magazine.pastIssues')}
                   </h2>
+                  <p className="mt-1 text-xs font-[family-name:var(--font-display)] text-[#548490]">
+                    {filteredMagazines.length} عدد
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {PUBLICATIONS.map(p => (
+                    <button
+                      key={p.key}
+                      onClick={() => {
+                        setPublication(p.key);
+                        setSelectedYear(null);
+                        setCurrentPage(1);
+                      }}
+                      aria-pressed={publication === p.key}
+                      className="px-4 py-1.5 text-xs font-[family-name:var(--font-display)] font-bold transition-all rounded-[3px]"
+                      style={publication === p.key
+                        ? { background: '#183B4E', color: '#DDA853', border: '1px solid rgba(221,168,83,0.4)' }
+                        : { background: 'white', color: '#548490', border: '1px solid rgba(24,59,78,0.12)' }
+                      }
+                    >
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
 
                 {years.length > 1 && (
