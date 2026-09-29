@@ -1,4 +1,4 @@
-import { SITE_URL, GA_MEASUREMENT_ID } from '@/lib/site-config';
+import { SITE_URL, GA_MEASUREMENT_IDS, GAM_NETWORK_CODE } from '@/lib/site-config';
 import type { Metadata } from "next";
 import { Tajawal, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
@@ -8,6 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import ConsentScripts from "@/components/ConsentScripts";
 import SentryUserIdentification from "@/components/SentryUserIdentification";
 import WebVitalsReporter from "@/components/WebVitalsReporter";
+import AudiencePing from "@/components/AudiencePing";
 import StagingBanner from "@/components/StagingBanner";
 
 const tajawal = Tajawal({
@@ -101,6 +102,8 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://securepubads.g.doubleclick.net" />
+        {/* Ad Manager network for <GamSlot> — production only, like GA. */}
+        {analyticsEnabled && GAM_NETWORK_CODE && <meta name="ikt-gam" content={GAM_NETWORK_CODE} />}
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
       </head>
       <body className="antialiased min-h-screen bg-cream">
@@ -111,12 +114,13 @@ export default async function RootLayout({
         </Providers>
         <CookieConsent />
         <WebVitalsReporter />
+        <AudiencePing />
 
         {/* GA + GAM load only after cookie consent (analytics/advertising) */}
         <ConsentScripts
           nonce={nonce}
-          gaMeasurementId={analyticsEnabled ? GA_MEASUREMENT_ID : undefined}
-          gamNetworkCode={process.env.NEXT_PUBLIC_GAM_NETWORK_CODE}
+          gaMeasurementIds={analyticsEnabled ? GA_MEASUREMENT_IDS : undefined}
+          gamNetworkCode={analyticsEnabled ? GAM_NETWORK_CODE : undefined}
         />
       </body>
     </html>

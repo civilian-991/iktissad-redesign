@@ -29,19 +29,37 @@ export const SITE_URL = (
 ).replace(/\/+$/, '');
 
 /**
- * GA4 measurement ID.
+ * GA4 measurement IDs — every hit goes to each property listed.
  *
- * Not a secret — it ships in the page source of every site that uses it, which
- * is why it lives here with the same `env || default` shape as SITE_URL rather
- * than only in the Vercel dashboard. NEXT_PUBLIC_GA_MEASUREMENT_ID still wins,
- * so a separate property can be pointed at any environment without a code change.
+ *   G-9BXDFP1487  the legacy iktissadonline.com property. Reporting here keeps
+ *                 the audience history continuous across the migration: the
+ *                 years of traffic advertisers are sold on live in this one.
+ *   G-FCRSHXCDP4  the property created for the new site (collecting since
+ *                 2026-09-15), kept so its data doesn't stop.
  *
- * Whether it actually loads is decided twice more: `analyticsEnabled` in
- * src/app/layout.tsx keeps preview and local builds out of the property, and
- * ConsentScripts only injects gtag once the visitor accepts analytics cookies.
+ * Not secrets — they ship in the page source. NEXT_PUBLIC_GA_MEASUREMENT_ID
+ * (comma-separated) overrides the list without a code change.
+ *
+ * Whether gtag actually loads is decided twice more: `analyticsEnabled` in
+ * src/app/layout.tsx keeps preview and local builds out, and ConsentScripts
+ * only injects it once the visitor accepts analytics cookies.
  */
-export const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-FCRSHXCDP4';
+export const GA_MEASUREMENT_IDS: string[] = (
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-9BXDFP1487,G-FCRSHXCDP4'
+)
+  .split(',')
+  .map((id) => id.trim())
+  .filter(Boolean);
+
+/**
+ * Google Ad Manager network — the legacy site's network, so the orders and
+ * line items already trafficked against its ad units keep delivering on the
+ * new site (see GAM_UNITS in src/lib/ads/placements.ts). Public: it appears in
+ * every ad request. NEXT_PUBLIC_GAM_NETWORK_CODE overrides; set it to "off"
+ * to disable Ad Manager entirely.
+ */
+const gamEnv = process.env.NEXT_PUBLIC_GAM_NETWORK_CODE;
+export const GAM_NETWORK_CODE = gamEnv === 'off' ? '' : gamEnv || '21805397792';
 
 export const siteConfig = {
   name: 'الإقتصاد والأعمال',

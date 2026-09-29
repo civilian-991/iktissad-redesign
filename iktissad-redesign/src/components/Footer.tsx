@@ -46,6 +46,7 @@ const aboutLinks: FooterLink[] = [
   { key: 'team', href: '/team' },
   { key: 'contactUs', href: '/contact' },
   { key: 'advertise', href: '/advertise' },
+  { key: 'partnerContent', href: '/partner-content' },
 ];
 
 const socialLinks = [
@@ -99,6 +100,7 @@ export default function Footer() {
       team: t('nav.footer.team'),
       contactUs: t('nav.footer.contactUs'),
       advertise: t('nav.footer.advertise'),
+      partnerContent: t('sponsored.pageTitle'),
     };
     return aboutKeys[key] || key;
   };

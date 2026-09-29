@@ -97,7 +97,8 @@ export default async function ArticlePage({
 
   const newsArticleJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
+    // Paid partner content must not present itself as news.
+    '@type': article.sponsorship ? 'AdvertiserContentArticle' : 'NewsArticle',
     headline: article.metaTitle || article.title,
     description: article.metaDescription || article.excerpt || '',
     image: (article.ogImage || article.featuredImage)

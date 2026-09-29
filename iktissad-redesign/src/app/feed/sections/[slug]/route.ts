@@ -30,6 +30,7 @@ export async function GET(
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('status', 'published')
+    .is('sponsorship', null)
     .eq('section_id', (sec as { id: string; name: string }).id)
     .order('published_at', { ascending: false })
     .limit(50);

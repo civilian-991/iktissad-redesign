@@ -10,10 +10,14 @@ import { useTranslation } from '@/lib/i18n';
 import useSWRInfinite from 'swr/infinite';
 import { swrFetcher } from '@/lib/api-client';
 import type { Article, Section, ApiResponse } from '@/types';
+import AdUnit, { StickyMobileAd } from '@/components/ads/AdUnit';
 
 const PAGE_SIZE = 12;
 
-type SectionPage = Section & { articles: Article[] };
+type SectionPage = Section & {
+  articles: Article[];
+  sponsor?: { advertiserName: string; logoUrl: string | null; websiteUrl: string | null } | null;
+};
 
 export default function SectionPageClient({ params }: { params: Promise<{ slug: string }> }) {
   const { t } = useTranslation();
@@ -79,6 +83,7 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                   {sectionMeta.description}
                 </p>
               )}
+              {sectionMeta?.sponsor && <SectionSponsorLine sponsor={sectionMeta.sponsor} label={t('sponsored.sponsoredBy')} />}
             </motion.div>
           </div>
         </section>
@@ -147,6 +152,8 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
                 </div>
               </motion.a>
             )}
+
+            <AdUnit slot="section_inline" section={slug} className="mb-12" />
 
             {/* Articles Grid */}
             {restArticles.length > 0 && (
@@ -217,6 +224,37 @@ export default function SectionPageClient({ params }: { params: Promise<{ slug: 
         </section>
       </main>
       <Footer />
+      <StickyMobileAd section={slug} />
     </>
+  );
+}
+
+/** Section Sponsorship: logo in the section header with a "Sponsored by" line. */
+function SectionSponsorLine({
+  sponsor,
+  label,
+}: {
+  sponsor: NonNullable<SectionPage['sponsor']>;
+  label: string;
+}) {
+  const mark = sponsor.logoUrl ? (
+    <span className="inline-flex items-center rounded bg-white px-3 py-1.5">
+      {/* eslint-disable-next-line @next/next/no-img-element -- rate card: 300×100 advertiser logo */}
+      <img src={sponsor.logoUrl} alt={sponsor.advertiserName} width={150} height={50} className="h-[50px] w-auto max-w-[150px] object-contain" />
+    </span>
+  ) : (
+    <span className="font-bold text-white">{sponsor.advertiserName}</span>
+  );
+  return (
+    <div className="mt-6 flex items-center justify-center gap-3 text-sm text-white/60 font-[family-name:var(--font-display)]">
+      <span>{label}</span>
+      {sponsor.websiteUrl ? (
+        <a href={sponsor.websiteUrl} target="_blank" rel="sponsored noopener" className="hover:opacity-90">
+          {mark}
+        </a>
+      ) : (
+        mark
+      )}
+    </div>
   );
 }

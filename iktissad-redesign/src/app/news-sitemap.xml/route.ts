@@ -26,6 +26,8 @@ export async function GET() {
       .select("slug, title, published_at, tags")
       .eq("status", "published")
       .eq("archived", false)
+      // Google News does not accept paid content.
+      .is("sponsorship", null)
       .gte("published_at", cutoff)
       .order("published_at", { ascending: false })
       .limit(1000);

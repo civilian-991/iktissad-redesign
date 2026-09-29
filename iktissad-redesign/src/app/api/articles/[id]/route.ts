@@ -22,6 +22,7 @@ const ARTICLE_SELECT = `
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
   countries:country_id ( slug, name ),
+  sponsor:sponsor_advertiser_id ( id, name, logo_url, website_url ),
   ${ARTICLE_COUNTRIES_EMBED}
 `;
 
@@ -105,6 +106,9 @@ const updateArticleSchema = z.object({
   canonicalUrl: z.string().url().optional().or(z.literal('')),
   noIndex: z.boolean().optional(),
   autoPost: z.boolean().optional(),
+  /** 'sponsored' = client-written, 'partner' = written by our team for a client; null = editorial. */
+  sponsorship: z.enum(["sponsored", "partner"]).nullable().optional(),
+  sponsorAdvertiserId: z.string().uuid().nullable().optional(),
 });
 
 export async function PUT(
@@ -171,6 +175,8 @@ export async function PUT(
   if (data.canonicalUrl !== undefined) updateData.canonical_url = data.canonicalUrl || null;
   if (data.noIndex !== undefined) updateData.no_index = data.noIndex;
   if (data.autoPost !== undefined) updateData.auto_post = data.autoPost;
+  if (data.sponsorship !== undefined) updateData.sponsorship = data.sponsorship;
+  if (data.sponsorAdvertiserId !== undefined) updateData.sponsor_advertiser_id = data.sponsorAdvertiserId;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {

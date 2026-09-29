@@ -125,8 +125,8 @@ const nextConfig: NextConfig = {
       "font-src 'self' data: https://fonts.gstatic.com",
       `img-src 'self' data: blob: ${imgHosts}`,
       "media-src 'self' https:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://challenges.cloudflare.com https://*.google-analytics.com https://*.googletagmanager.com https://*.mastercard.com.au https://*.mastercard.com",
-      "frame-src 'self' https://challenges.cloudflare.com https://*.mastercard.com.au https://*.mastercard.com https://*.youtube.com https://www.youtube-nocookie.com https://securepubads.g.doubleclick.net",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://challenges.cloudflare.com https://*.google-analytics.com https://*.googletagmanager.com https://*.doubleclick.net https://*.googlesyndication.com https://*.googleadservices.com https://*.google.com https://*.adtrafficquality.google https://*.mastercard.com.au https://*.mastercard.com",
+      "frame-src 'self' https:", // HTML5 ad creatives — see src/proxy.ts
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
       "base-uri 'self'",

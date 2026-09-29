@@ -21,7 +21,10 @@ import {
   RefreshCw,
   ChevronRight,
   ChevronLeft,
+  FileBarChart,
 } from 'lucide-react';
+import Link from 'next/link';
+import ImageUploader from '@/components/admin/ImageUploader';
 import { iconSizes } from '@/lib/design-tokens';
 import {
   swrFetcher,
@@ -41,6 +44,8 @@ interface AdvertiserForm {
   contactEmail: string;
   contactPhone: string;
   notes: string;
+  logoUrl: string;
+  websiteUrl: string;
 }
 
 const EMPTY_FORM: AdvertiserForm = {
@@ -50,6 +55,8 @@ const EMPTY_FORM: AdvertiserForm = {
   contactEmail: '',
   contactPhone: '',
   notes: '',
+  logoUrl: '',
+  websiteUrl: '',
 };
 
 // ─── Skeleton row ─────────────────────────────────────────────────────────────
@@ -193,6 +200,35 @@ function SlidePanel({ open, onClose, title, form, onChange, onSubmit, saving }: 
             />
           </div>
 
+          {/* Logo — shown on sponsored articles, section headers, newsletters */}
+          <div>
+            <label className={labelCls}>الشعار</label>
+            <ImageUploader
+              folder="advertisers"
+              currentImage={form.logoUrl || null}
+              onUpload={(url) => onChange('logoUrl', url)}
+              onRemove={() => onChange('logoUrl', '')}
+              maxSizeMB={0.5}
+              accept="image/png,image/jpeg,image/svg+xml"
+              formatHint="PNG شفاف مفضّل — يظهر مع «بالشراكة مع» و«برعاية»"
+              aspectClass="aspect-[3/1]"
+              enableEditor={false}
+            />
+          </div>
+
+          {/* Website */}
+          <div>
+            <label className={labelCls}>الموقع الإلكتروني</label>
+            <input
+              type="url"
+              value={form.websiteUrl}
+              onChange={(e) => onChange('websiteUrl', e.target.value)}
+              placeholder="https://"
+              className={inputCls}
+              dir="ltr"
+            />
+          </div>
+
           {/* Notes */}
           <div>
             <label className={labelCls}>ملاحظات</label>
@@ -283,6 +319,8 @@ export default function AdvertisersPage() {
       contactEmail: adv.contactEmail ?? '',
       contactPhone: adv.contactPhone ?? '',
       notes: adv.notes ?? '',
+      logoUrl: adv.logoUrl ?? '',
+      websiteUrl: adv.websiteUrl ?? '',
     });
     setPanelOpen(true);
   }, []);
@@ -308,6 +346,9 @@ export default function AdvertisersPage() {
         contactEmail: form.contactEmail.trim() || undefined,
         contactPhone: form.contactPhone.trim() || undefined,
         notes: form.notes.trim() || undefined,
+        // Sent as-is so clearing the field removes the logo/website.
+        logoUrl: form.logoUrl.trim(),
+        websiteUrl: form.websiteUrl.trim(),
       };
 
       if (editTarget) {
@@ -491,7 +532,15 @@ export default function AdvertisersPage() {
 
                     {/* Actions */}
                     <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <Link
+                          href={`/admin/ads/report?advertiser=${adv.id}`}
+                          title="تقرير المعلن"
+                          aria-label="تقرير المعلن"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-gold hover:bg-gold/10 transition-all"
+                        >
+                          <FileBarChart size={14} />
+                        </Link>
                         <button
                           onClick={() => openEdit(adv)}
                           title="تعديل"

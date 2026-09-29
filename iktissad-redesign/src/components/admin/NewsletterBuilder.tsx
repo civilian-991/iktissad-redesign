@@ -59,6 +59,7 @@ import {
   Save,
   Type,
   AlignLeft,
+  BadgeDollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
 import { swrFetcher } from '@/lib/api-client';
@@ -139,7 +140,27 @@ const BLOCK_LIBRARY: BlockConfig[] = [
       buttonUrl:   '/subscribe',
     },
   },
+  {
+    type: 'sponsor',
+    label: 'راعي العدد',
+    description: 'رعاية النشرة — معلن واحد لكل عدد',
+    icon: <BadgeDollarSign size={iconSizes.md} />,
+    defaultData: {
+      advertiserId: '',
+      advertiserName: '',
+      label: 'برعاية',
+      logoUrl: '',
+      message: '',
+      url: '',
+      bannerUrl: '',
+    },
+  },
 ];
+
+/** Rate card: the sponsor message is 40–60 words. */
+function wordCount(text: string): number {
+  return text.trim() ? text.trim().split(/\s+/).length : 0;
+}
 
 // ─── Block preview renderers ─────────────────────────────────────
 
@@ -224,6 +245,22 @@ function BlockPreview({ block }: { block: NewsletterBlock }) {
           <span className="inline-block mt-1 px-3 py-1 bg-gold/80 text-ink text-xs font-bold rounded-sm">
             {(d.buttonLabel as string) || 'اشترك الآن'}
           </span>
+        </div>
+      );
+    case 'sponsor':
+      return (
+        <div className="border border-gold/30 bg-gold/5 rounded-lg p-3 text-center space-y-1.5">
+          <p className="text-gold/70 text-[10px] tracking-widest font-[family-name:var(--font-display)]">
+            {(d.label as string) || 'برعاية'}
+          </p>
+          {(d.logoUrl as string) ? (
+            <img src={d.logoUrl as string} alt="" className="h-8 w-auto mx-auto object-contain" />
+          ) : (
+            <p className="text-white text-sm font-bold">{(d.advertiserName as string) || 'اختر المعلن'}</p>
+          )}
+          {(d.message as string) && (
+            <p className="text-white/60 text-xs line-clamp-2">{d.message as string}</p>
+          )}
         </div>
       );
     default:
@@ -374,6 +411,8 @@ function BlockEditor({
         </>
       )}
 
+      {block.type === 'sponsor' && <SponsorBlockFields data={d} onChange={onChange} field={field} />}
+
       <button
         onClick={onClose}
         className="w-full text-center text-white/40 hover:text-white/60 text-xs font-[family-name:var(--font-display)] transition-colors"
@@ -381,6 +420,62 @@ function BlockEditor({
         إغلاق التحرير
       </button>
     </motion.div>
+  );
+}
+
+function SponsorBlockFields({
+  data: d,
+  onChange,
+  field,
+}: {
+  data: Record<string, unknown>;
+  onChange: (data: Record<string, unknown>) => void;
+  field: (key: string, label: string, type?: 'text' | 'textarea' | 'url', placeholder?: string) => React.ReactNode;
+}) {
+  const { data: advRes } = useSWR<ApiResponse<{ id: string; name: string; logoUrl: string | null; websiteUrl: string | null }[]>>(
+    '/api/advertisers?pageSize=200',
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+  const advertisers = advRes?.data ?? [];
+  const words = wordCount((d.message as string) ?? '');
+
+  return (
+    <>
+      <div>
+        <label className="block text-white/60 text-xs font-[family-name:var(--font-display)] mb-1.5">المعلن</label>
+        <select
+          value={(d.advertiserId as string) ?? ''}
+          onChange={(e) => {
+            const adv = advertisers.find((a) => a.id === e.target.value);
+            onChange({
+              ...d,
+              advertiserId: e.target.value,
+              advertiserName: adv?.name ?? '',
+              // Prefill from the advertiser profile; still editable below.
+              logoUrl: (d.logoUrl as string) || adv?.logoUrl || '',
+              url: (d.url as string) || adv?.websiteUrl || '',
+            });
+          }}
+          className="w-full bg-white/5 border border-gold/10 rounded-lg py-2.5 px-3 text-white text-sm font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30"
+        >
+          <option value="" className="bg-midnight">— اختر المعلن —</option>
+          {advertisers.map((a) => (
+            <option key={a.id} value={a.id} className="bg-midnight">{a.name}</option>
+          ))}
+        </select>
+      </div>
+      {field('label', 'العبارة', 'text', 'برعاية')}
+      {field('logoUrl', 'رابط الشعار (200×60)', 'url', 'https://...')}
+      <div>
+        {field('message', 'رسالة الراعي', 'textarea', '40 إلى 60 كلمة')}
+        <p className={`mt-1 text-[11px] font-[family-name:var(--font-display)] ${words >= 40 && words <= 60 ? 'text-emerald-400' : 'text-amber-400'}`}>
+          {words} كلمة — المطلوب 40 إلى 60
+        </p>
+      </div>
+      {field('url', 'رابط الراعي', 'url', 'https://')}
+      {field('bannerUrl', 'بانر اختياري (600×150)', 'url', 'https://...')}
+    </>
   );
 }
 
@@ -394,7 +489,7 @@ function ArticlePickerModal({
   onClose: () => void;
 }) {
   const [search, setSearch] = useState('');
-  const swrKey = `/api/articles?status=published&pageSize=20${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+  const swrKey = `/api/articles?status=published&sponsored=include&pageSize=20${search ? `&search=${encodeURIComponent(search)}` : ''}`;
   const { data, isLoading } = useSWR<ApiResponse<Article[]>>(swrKey, swrFetcher, {
     revalidateOnFocus: false,
   });
@@ -829,6 +924,11 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
 
   // ── Block operations ───────────────────────────────────────────
   const addBlock = useCallback((config: BlockConfig) => {
+    // Rate card: one sponsor per issue.
+    if (config.type === 'sponsor' && blocks.some((b) => b.type === 'sponsor')) {
+      toast.error('يوجد راعٍ لهذا العدد بالفعل — راعٍ واحد لكل عدد');
+      return;
+    }
     const newBlock: NewsletterBlock = {
       id: uuidv4(),
       type: config.type,
@@ -842,7 +942,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
     }
     // Switch to canvas on mobile
     setActiveTab('canvas');
-  }, []);
+  }, [blocks]);
 
   const updateBlockData = useCallback((id: string, data: Record<string, unknown>) => {
     setBlocks((prev) =>

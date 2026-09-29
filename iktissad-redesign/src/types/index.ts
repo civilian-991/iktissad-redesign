@@ -211,6 +211,11 @@ export interface Article {
   summary?: string | null;
   /** AI-generated 2-3 sentence English summary (TLDR). */
   summaryEn?: string | null;
+  /** Paid content label: 'sponsored' (client-written) or 'partner' (our team, for a client). */
+  sponsorship?: 'sponsored' | 'partner' | null;
+  sponsorAdvertiserId?: string | null;
+  /** Public display fields of the sponsoring advertiser. */
+  sponsor?: { id: string; name: string; logoUrl: string | null; websiteUrl: string | null } | null;
 }
 
 export interface ArticleVersion {
@@ -325,6 +330,7 @@ export interface Country {
 }
 
 export interface Section {
+  id?: string;
   slug: string;
   name: string;
   nameEn: string;
@@ -663,6 +669,7 @@ export type NewsletterBlockType =
   | 'divider'
   | 'image'
   | 'upgrade_cta'
+  | 'sponsor'
 
 export interface NewsletterBlock {
   id: string

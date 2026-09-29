@@ -32,6 +32,7 @@ export async function GET(
     .from('articles')
     .select(`${ARTICLE_SELECT}, country_filter:article_countries!inner ( country_id )`)
     .eq('status', 'published')
+    .is('sponsorship', null)
     .eq('country_filter.country_id', (country as { id: string; name: string }).id)
     .order('published_at', { ascending: false })
     .limit(50);

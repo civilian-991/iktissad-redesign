@@ -143,6 +143,16 @@ export function mapArticleRow(
     noIndex: (row as any).no_index ?? false,
     summary: (row as any).summary ?? null,
     summaryEn: (row as any).summary_en ?? null,
+    sponsorship: (row as any).sponsorship ?? null,
+    sponsorAdvertiserId: (row as any).sponsor_advertiser_id ?? null,
+    sponsor: (row as any).sponsor
+      ? {
+          id: (row as any).sponsor.id,
+          name: (row as any).sponsor.name,
+          logoUrl: (row as any).sponsor.logo_url ?? null,
+          websiteUrl: (row as any).sponsor.website_url ?? null,
+        }
+      : null,
   };
 }
 
@@ -273,6 +283,7 @@ export function mapSectionRow(
   articleCount: number = 0
 ): Section {
   return {
+    id: row.id,
     slug: row.slug,
     name: row.name,
     nameEn: row.name_en,

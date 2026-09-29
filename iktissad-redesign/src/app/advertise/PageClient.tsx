@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Users, Eye, TrendingUp, Target, Monitor, Smartphone, Mail, Newspaper, Award } from 'lucide-react';
+import { Users, Eye, TrendingUp, Target, Monitor, Handshake, Mail, Newspaper, Award } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
@@ -10,7 +10,7 @@ import type { AdvertiseStats } from '@/lib/site-settings';
 
 const statsIcons = [Users, Eye, TrendingUp, Target];
 
-const adFormatIcons = [Monitor, Newspaper, Mail, Smartphone];
+const adFormatIcons = [Monitor, Newspaper, Mail, Handshake];
 
 interface AdvertisePageClientProps {
   advertiseStats?: AdvertiseStats | null;

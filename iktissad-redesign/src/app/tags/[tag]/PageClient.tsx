@@ -21,7 +21,7 @@ export default function TagPageClient({ params }: { params: Promise<{ tag: strin
   const [allArticles, setAllArticles] = useState<Article[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
-  const url = `/api/articles?tag=${encodeURIComponent(decoded)}&pageSize=${PAGE_SIZE}&page=1`;
+  const url = `/api/articles?tag=${encodeURIComponent(decoded)}&status=published&pageSize=${PAGE_SIZE}&page=1`;
 
   const { data, error, isLoading } = useSWR<ApiResponse<Article[]>>(
     url,
@@ -44,7 +44,7 @@ export default function TagPageClient({ params }: { params: Promise<{ tag: strin
     setLoadingMore(true);
     try {
       const res = await fetch(
-        `/api/articles?tag=${encodeURIComponent(decoded)}&pageSize=${PAGE_SIZE}&page=${nextPage}`
+        `/api/articles?tag=${encodeURIComponent(decoded)}&status=published&pageSize=${PAGE_SIZE}&page=${nextPage}`
       );
       const json: ApiResponse<Article[]> = await res.json();
       const newArticles = json.data ?? [];

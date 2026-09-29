@@ -51,6 +51,7 @@ export async function GET(
     .select(`${ARTICLE_SELECT}, country_filter:article_countries!inner ( country_id )`)
     .eq("country_filter.country_id", row.id)
     .eq("status", "published")
+    .filter("sponsorship", "is", null)
     .order("published_at", { ascending: false })
     .limit(10) as { data: any[] | null };
 

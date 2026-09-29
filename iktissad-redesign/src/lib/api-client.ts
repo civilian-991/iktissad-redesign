@@ -417,6 +417,8 @@ export interface ArticleListParams {
   status?: string;
   search?: string;
   sortBy?: 'date' | 'views' | 'title';
+  /** Paid partner content is left out of status=published lists unless asked for. */
+  sponsored?: 'include' | 'only';
 }
 
 function buildQuery(

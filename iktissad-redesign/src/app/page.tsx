@@ -19,6 +19,7 @@ import HomeSectionBlocks from '@/components/HomeSectionBlocks';
 import FeaturedMagazine from '@/components/FeaturedMagazine';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
+import AdUnit, { StickyMobileAd } from '@/components/ads/AdUnit';
 
 export default function Home() {
   return (
@@ -31,12 +32,16 @@ export default function Home() {
           الإقتصاد والأعمال — أخبار الاقتصاد والأعمال والأسواق المالية في العالم العربي
         </h1>
         <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+        {/* Homepage Billboard — top of the homepage, below the navigation.
+            Collapses to nothing when unsold. */}
+        <AdUnit slot="homepage_billboard" className="px-4 pt-6" />
         {/* 1. Featured */}
         <Hero />
         {/* 2. Companies */}
         <CompaniesSection />
         {/* 3. Sectors */}
         <SectorNews />
+        <AdUnit slot="homepage_mid" className="px-4 py-8" />
         {/* 4. Countries */}
         <CountryNews />
         {/* 5. Video */}
@@ -54,6 +59,7 @@ export default function Home() {
         <Newsletter />
       </main>
       <Footer />
+      <StickyMobileAd />
     </>
   );
 }

@@ -42,6 +42,36 @@ export async function POST(request: NextRequest) {
   const dbUserId: string | null = user?.id ?? null;
 
   const admin = createAdminClient();
+
+  // The page sends a second, closing event when the reader leaves (time on
+  // page + how far they scrolled). Fold it into the row the opening event
+  // created rather than counting a second read.
+  if (timeOnPage > 0) {
+    const since = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+    const { data: open } = await (admin as any)
+      .from('reading_sessions')
+      .select('id, time_on_page, scroll_depth, read_through')
+      .eq('article_id', articleId)
+      .eq('session_id', sessionId)
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (open) {
+      const { error: updateError } = await (admin as any)
+        .from('reading_sessions')
+        .update({
+          time_on_page: Math.max(open.time_on_page ?? 0, timeOnPage),
+          scroll_depth: Math.max(open.scroll_depth ?? 0, scrollDepth),
+          read_through: open.read_through || readThrough,
+        })
+        .eq('id', open.id);
+      if (updateError) console.error('[track/article-read]', updateError.message);
+      return NextResponse.json({ ok: true });
+    }
+  }
+
   const { error } = await (admin as any)
     .from('reading_sessions')
     .insert({

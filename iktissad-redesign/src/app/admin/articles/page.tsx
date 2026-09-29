@@ -91,6 +91,7 @@ export default function ArticlesPage() {
     search: searchQuery || undefined,
     country: filterCountry || undefined,
     sortBy,
+    sponsored: 'include',
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

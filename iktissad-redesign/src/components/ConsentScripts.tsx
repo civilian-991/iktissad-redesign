@@ -3,8 +3,11 @@
 /**
  * ConsentScripts
  *
- * Loads Google Analytics and Google Ad Manager scripts only after
- * the user has given consent (analytics / advertising categories).
+ * Google Analytics loads for every visitor, as it did on the legacy
+ * iktissadonline.com site, so the GA4 history the audience figures are sold on
+ * stays comparable across the migration (a consent-gated GA only counts the
+ * visitors who accept, which reads as a traffic drop). Google Ad Manager —
+ * advertising cookies — still loads only after advertising consent.
  *
  * Listens for the 'cookie-consent-saved' event fired by CookieConsent.tsx,
  * and also checks stored consent on initial mount for returning visitors.
@@ -15,7 +18,8 @@ import Script from 'next/script';
 import type { CookiePreferences } from '@/components/CookieConsent';
 
 interface ConsentScriptsProps {
-  gaMeasurementId?: string;
+  /** GA4 properties to report to; the first also loads gtag.js. */
+  gaMeasurementIds?: string[];
   gamNetworkCode?: string;
   nonce?: string;
 }
@@ -32,7 +36,8 @@ function readStoredPreferences(): CookiePreferences | null {
   }
 }
 
-export default function ConsentScripts({ gaMeasurementId, gamNetworkCode, nonce }: ConsentScriptsProps) {
+export default function ConsentScripts({ gaMeasurementIds, gamNetworkCode, nonce }: ConsentScriptsProps) {
+  const gaIds = gaMeasurementIds ?? [];
   const [prefs, setPrefs] = useState<CookiePreferences | null>(null);
 
   useEffect(() => {
@@ -49,15 +54,13 @@ export default function ConsentScripts({ gaMeasurementId, gamNetworkCode, nonce 
     return () => window.removeEventListener('cookie-consent-saved', handler);
   }, []);
 
-  if (!prefs) return null;
-
   return (
     <>
-      {/* Google Analytics 4 — loaded only with analytics consent */}
-      {prefs.analytics && gaMeasurementId && (
+      {/* Google Analytics 4 — every visitor (see file comment) */}
+      {gaIds.length > 0 && (
         <>
           <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaIds[0]}`}
             strategy="afterInteractive"
             nonce={nonce}
           />
@@ -70,7 +73,7 @@ export default function ConsentScripts({ gaMeasurementId, gamNetworkCode, nonce 
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${gaMeasurementId}', { anonymize_ip: true });
+                ${gaIds.map((id) => `gtag('config', ${JSON.stringify(id)}, { anonymize_ip: true });`).join('\n                ')}
               `,
             }}
           />
@@ -78,7 +81,7 @@ export default function ConsentScripts({ gaMeasurementId, gamNetworkCode, nonce 
       )}
 
       {/* Google Ad Manager — loaded only with advertising consent */}
-      {prefs.advertising && gamNetworkCode && (
+      {prefs?.advertising && gamNetworkCode && (
         <>
           <Script
             id="gpt-init"

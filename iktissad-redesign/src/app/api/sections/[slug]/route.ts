@@ -53,13 +53,15 @@ export async function GET(
       .from("articles")
       .select("id", { count: "exact", head: true })
       .eq("section_id", row.id)
-      .eq("status", "published" as const),
+      .eq("status", "published" as const)
+      .filter("sponsorship", "is", null),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("articles")
       .select(ARTICLE_SELECT, { count: "exact" })
       .eq("section_id", row.id)
       .eq("status", "published")
+      .is("sponsorship", null)
       .order("published_at", { ascending: false, nullsFirst: false })
       .range(offset, offset + pageSize - 1),
   ]);

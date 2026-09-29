@@ -1,153 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  adsGuard,
+  badRequest,
+  serverError,
+  mapAdvertiserRow,
+  advertiserSchema,
+  type Advertiser,
+} from "@/lib/ads/admin";
 import type { ApiResponse } from "@/types";
-import type { Advertiser } from "../route";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRow(row: any): Advertiser {
-  return {
-    id: row.id,
-    name: row.name,
-    nameEn: row.name_en ?? null,
-    contactName: row.contact_name ?? null,
-    contactEmail: row.contact_email ?? null,
-    contactPhone: row.contact_phone ?? null,
-    notes: row.notes ?? null,
-    createdAt: row.created_at,
-  };
-}
+type Params = { params: Promise<{ id: string }> };
 
 // ─── GET /api/advertisers/[id] ────────────────────────────────────────────────
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const auth = await requireAuth();
-  if (!auth.authenticated) {
-    return unauthorizedResponse();
-  }
+export async function GET(request: NextRequest, { params }: Params) {
+  const denied = await adsGuard(request, "read");
+  if (denied) return denied;
 
   const { id } = await params;
-  const supabase = await createClient();
-
+  const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: row, error } = await (supabase.from("advertisers") as any)
+  const { data: row } = await (admin.from("advertisers") as any)
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error || !row) {
-    return NextResponse.json(
-      { error: "Advertiser not found" } satisfies ApiResponse<never>,
-      { status: 404 }
-    );
+  if (!row) {
+    return NextResponse.json({ error: "Advertiser not found" } satisfies ApiResponse<never>, { status: 404 });
   }
-
-  const response: ApiResponse<Advertiser> = { data: mapRow(row) };
-  return NextResponse.json(response);
+  return NextResponse.json({ data: mapAdvertiserRow(row) } satisfies ApiResponse<Advertiser>);
 }
 
 // ─── PUT /api/advertisers/[id] ────────────────────────────────────────────────
 
-const updateAdvertiserSchema = z.object({
-  name: z.string().min(1, "الاسم مطلوب").optional(),
-  nameEn: z.string().optional(),
-  contactName: z.string().optional(),
-  contactEmail: z.string().email("بريد إلكتروني غير صالح").optional().or(z.literal("")).nullable(),
-  contactPhone: z.string().optional(),
-  notes: z.string().optional().nullable(),
-});
+const updateSchema = advertiserSchema.partial();
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: Params) {
+  const denied = await adsGuard(request, "write");
+  if (denied) return denied;
+
   const { id } = await params;
-  const auth = await requireAuth();
-  if (!auth.authenticated) {
-    return unauthorizedResponse();
-  }
-
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" } satisfies ApiResponse<never>,
-      { status: 400 }
-    );
+    return badRequest("Invalid JSON body");
   }
 
-  const parsed = updateAdvertiserSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues.map((i) => i.message).join(", ") } satisfies ApiResponse<never>,
-      { status: 400 }
-    );
-  }
+  const parsed = updateSchema.safeParse(body);
+  if (!parsed.success) return badRequest(parsed.error.issues.map((i) => i.message).join(", "));
 
-  const data = parsed.data;
+  const d = parsed.data;
+  const update: Record<string, unknown> = {};
+  if (d.name !== undefined) update.name = d.name;
+  if (d.nameEn !== undefined) update.name_en = d.nameEn || null;
+  if (d.contactName !== undefined) update.contact_name = d.contactName || null;
+  if (d.contactEmail !== undefined) update.contact_email = d.contactEmail || null;
+  if (d.contactPhone !== undefined) update.contact_phone = d.contactPhone || null;
+  if (d.notes !== undefined) update.notes = d.notes || null;
+  if (d.logoUrl !== undefined) update.logo_url = d.logoUrl || null;
+  if (d.websiteUrl !== undefined) update.website_url = d.websiteUrl || null;
+
   const admin = createAdminClient();
-
-  const updateData: Record<string, unknown> = {};
-  if (data.name !== undefined) updateData.name = data.name;
-  if (data.nameEn !== undefined) updateData.name_en = data.nameEn;
-  if (data.contactName !== undefined) updateData.contact_name = data.contactName;
-  if (data.contactEmail !== undefined) updateData.contact_email = data.contactEmail || null;
-  if (data.contactPhone !== undefined) updateData.contact_phone = data.contactPhone;
-  if (data.notes !== undefined) updateData.notes = data.notes;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: row, error } = await (admin.from("advertisers") as any)
-    .update(updateData)
+    .update(update)
     .eq("id", id)
     .select("*")
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    return NextResponse.json(
-      { error: error.message } satisfies ApiResponse<never>,
-      { status: 500 }
-    );
-  }
-
+  if (error) return serverError(error.message);
   if (!row) {
-    return NextResponse.json(
-      { error: "Advertiser not found" } satisfies ApiResponse<never>,
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Advertiser not found" } satisfies ApiResponse<never>, { status: 404 });
   }
-
-  const response: ApiResponse<Advertiser> = { data: mapRow(row) };
-  return NextResponse.json(response);
+  return NextResponse.json({ data: mapAdvertiserRow(row) } satisfies ApiResponse<Advertiser>);
 }
 
 // ─── DELETE /api/advertisers/[id] ─────────────────────────────────────────────
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const auth = await requireAuth();
-  if (!auth.authenticated) {
-    return unauthorizedResponse();
-  }
+export async function DELETE(request: NextRequest, { params }: Params) {
+  const denied = await adsGuard(request, "write");
+  if (denied) return denied;
 
+  const { id } = await params;
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin.from("advertisers") as any).delete().eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: error.message } satisfies ApiResponse<never>,
-      { status: 500 }
-    );
-  }
+  if (error) return serverError(error.message);
 
   return NextResponse.json({ data: { success: true } });
 }

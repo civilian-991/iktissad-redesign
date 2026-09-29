@@ -34,7 +34,6 @@ export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
-  const [analytics, setAnalytics] = useState(true);
   const [advertising, setAdvertising] = useState(true);
   const bannerRef = useRef<HTMLDivElement>(null);
 
@@ -84,15 +83,17 @@ export default function CookieConsent() {
 
   const handleRejectAll = () => {
     localStorage.setItem(CONSENT_KEY, 'declined');
-    localStorage.setItem(PREFS_KEY, JSON.stringify({ necessary: true, analytics: false, advertising: false }));
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ necessary: true, analytics: true, advertising: false }));
     setVisible(false);
     window.dispatchEvent(new CustomEvent('cookie-consent-saved', {
-      detail: { necessary: true, analytics: false, advertising: false },
+      detail: { necessary: true, analytics: true, advertising: false },
     }));
   };
 
+  // Audience measurement is not optional (see ConsentScripts); `analytics`
+  // stays in the stored shape for compatibility.
   const handleSavePreferences = () =>
-    saveAndClose({ necessary: true, analytics, advertising });
+    saveAndClose({ necessary: true, analytics: true, advertising });
 
   if (!mounted) return null;
 
@@ -131,24 +132,15 @@ export default function CookieConsent() {
               </div>
             </div>
 
-            {/* Analytics */}
+            {/* Audience measurement — always on */}
             <div className="flex items-center justify-between py-2 border-b border-white/5">
               <div className="text-right">
-                <p className="text-sm font-semibold" style={{ color: '#E5E7EB' }}>التحليلات</p>
-                <p className="text-xs" style={{ color: '#6E98A2' }}>Google Analytics — يساعدنا على تحسين المحتوى</p>
+                <p className="text-sm font-semibold" style={{ color: '#E5E7EB' }}>قياس الزيارات</p>
+                <p className="text-xs" style={{ color: '#6E98A2' }}>Google Analytics — عدد الزوار والصفحات الأكثر قراءة</p>
               </div>
-              <button
-                onClick={() => setAnalytics(!analytics)}
-                className={`w-11 h-6 rounded-full transition-all relative shrink-0 ${analytics ? '' : 'bg-white/10'}`}
-                style={analytics ? { backgroundColor: '#DDA853' } : {}}
-                aria-checked={analytics}
-                role="switch"
-              >
-                <span
-                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all"
-                  style={{ right: analytics ? '2px' : 'auto', left: analytics ? 'auto' : '2px' }}
-                />
-              </button>
+              <div className="px-3 py-1 rounded text-xs font-bold" style={{ backgroundColor: 'rgba(221,168,83,0.15)', color: '#DDA853' }}>
+                دائماً مفعّلة
+              </div>
             </div>
 
             {/* Advertising */}
@@ -189,7 +181,7 @@ export default function CookieConsent() {
               ملفات تعريف الارتباط (Cookies)
             </p>
             <p className="text-sm leading-relaxed" style={{ color: '#B5CCD2' }}>
-              نستخدم ملفات تعريف الارتباط لتحسين تجربتك وتحليل حركة الزيارات.{' '}
+              نقيس الزيارات لتحسين المحتوى، ونستخدم ملفات تعريف الارتباط الإعلانية بموافقتك فقط.{' '}
               <Link href="/privacy" className="underline underline-offset-2" style={{ color: '#E5BA6F' }}>
                 سياسة الخصوصية
               </Link>

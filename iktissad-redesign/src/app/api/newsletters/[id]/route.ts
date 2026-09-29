@@ -65,7 +65,7 @@ export async function GET(
 
 const newsletterBlockSchema = z.object({
   id: z.string(),
-  type: z.enum(["headline", "article_card", "text", "quote", "cta", "divider", "image"]),
+  type: z.enum(["headline", "article_card", "text", "quote", "cta", "divider", "image", "upgrade_cta", "sponsor"]),
   data: z.record(z.string(), z.unknown()),
 });
 

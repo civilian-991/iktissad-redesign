@@ -27,6 +27,7 @@ const ARTICLE_SELECT = `
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
   countries:country_id ( slug, name ),
+  sponsor:sponsor_advertiser_id ( id, name, logo_url, website_url ),
   ${ARTICLE_COUNTRIES_EMBED}
 `;
 
@@ -121,6 +122,18 @@ export async function GET(request: NextRequest) {
 
   if (status) {
     query = query.eq("status", status as "published" | "draft" | "review" | "scheduled");
+  }
+
+  // Paid partner content lives in its own section (/partner-content), apart
+  // from newsroom coverage, so public feeds (status=published) leave it out.
+  // ?sponsored=only lists it; ?sponsored=include lists everything (admin).
+  const sponsored = searchParams.get("sponsored");
+  if (sponsored === "only") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = (query as any).not("sponsorship", "is", null);
+  } else if (sponsored !== "include" && status === "published") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = (query as any).is("sponsorship", null);
   }
 
   // Exclude archived articles by default (Phase 10.5)

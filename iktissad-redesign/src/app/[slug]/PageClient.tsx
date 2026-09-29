@@ -37,26 +37,18 @@ import { addBidiIsolation } from '@/lib/i18n/format';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { csrfJsonHeaders } from '@/lib/csrf-client';
 import { SITE_URL } from '@/lib/site-config';
+import AdUnit, { StickyMobileAd } from '@/components/ads/AdUnit';
+import { SponsorDisclosure } from '@/components/SponsoredLabel';
+import { useReadingBeacon } from '@/lib/articles/use-reading-beacon';
+import { getOrCreateVisitorId } from '@/lib/visitor-id';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
 
 // ── Anonymous session helpers ─────────────────────────────────────────────────
-const SESSION_COOKIE = 'ikt_sid';
+// The session id is the shared anonymous visitor id (ikt_sid).
+const getOrCreateSessionId = getOrCreateVisitorId;
 const ANON_METER_KEY = 'ikt_reads';
-
-function getOrCreateSessionId(): string {
-  if (typeof document === 'undefined') return '';
-  const existing = document.cookie
-    .split('; ')
-    .find(r => r.startsWith(`${SESSION_COOKIE}=`))
-    ?.split('=')[1];
-  if (existing) return existing;
-  const id = crypto.randomUUID();
-  // 30-day session cookie
-  document.cookie = `${SESSION_COOKIE}=${id}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-  return id;
-}
 
 /** Returns count of unique articles read this calendar month by anonymous user. */
 function getAnonReadCount(): number {
@@ -154,6 +146,66 @@ function truncateHtmlToParagraphs(html: string, maxParagraphs = 3): string {
     count++;
   }
   return count > 0 ? html.slice(0, idx) : html.slice(0, 500);
+}
+
+// ── In-article MPU: split the body after its third paragraph ──────────────────
+const MPU_AFTER_PARAGRAPH = 3;
+
+const CONTAINER_TAGS = ['blockquote', 'ul', 'ol', 'table', 'figure', 'div', 'section', 'aside'];
+
+/** True when every container opened in `html` is also closed — i.e. we're at the top level. */
+function isTopLevel(html: string): boolean {
+  return CONTAINER_TAGS.every((tag) => {
+    const opens = html.match(new RegExp(`<${tag}[\\s>]`, 'gi'))?.length ?? 0;
+    const closes = html.match(new RegExp(`</${tag}>`, 'gi'))?.length ?? 0;
+    return opens === closes;
+  });
+}
+
+/**
+ * [head, tail] split after the Nth top-level </p> (paragraphs inside quotes or
+ * lists don't count, so the split never cuts a container in half), or null when
+ * there is no text left to show after it.
+ */
+function splitHtmlAfterParagraph(html: string, n: number): [string, string] | null {
+  let idx = 0;
+  let seen = 0;
+  while (seen < n) {
+    const next = html.indexOf('</p>', idx);
+    if (next === -1) return null;
+    idx = next + 4;
+    if (isTopLevel(html.slice(0, idx))) seen++;
+  }
+  const tail = html.slice(idx);
+  return tail.replace(/<[^>]*>/g, '').trim() ? [html.slice(0, idx), tail] : null;
+}
+
+/** Same split for a TipTap document: after the Nth top-level paragraph node. */
+function splitDocAfterParagraph(doc: JSONContent, n: number): [JSONContent, JSONContent] | null {
+  const nodes = doc.content ?? [];
+  let seen = 0;
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].type === 'paragraph' && ++seen === n) {
+      if (i + 1 >= nodes.length) return null;
+      return [
+        { ...doc, content: nodes.slice(0, i + 1) },
+        { ...doc, content: nodes.slice(i + 1) },
+      ];
+    }
+  }
+  return null;
+}
+
+/** Outbound links in paid content are marked rel="sponsored" (search-engine guidelines). */
+function markLinksSponsored(html: string): string {
+  return html.replace(/<a\s([^>]*href=["']https?:\/\/[^"']+["'][^>]*)>/gi, (tag, attrs: string) => {
+    if (/\brel=/i.test(attrs)) {
+      return tag.replace(/\brel=(["'])([^"']*)\1/i, (_m, q: string, v: string) =>
+        /\bsponsored\b/.test(v) ? _m : `rel=${q}${v} sponsored${q}`
+      );
+    }
+    return `<a ${attrs} rel="sponsored noopener">`;
+  });
 }
 
 interface PaywallSettings {
@@ -287,6 +339,9 @@ export default function ArticlePageClient({
       .catch(() => { /* ignore */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [article?.id]);
+
+  // Closing event: time actually spent reading + scroll depth.
+  useReadingBeacon(article?.id, getOrCreateSessionId);
 
   // ── Paywall gate logic ─────────────────────────────────────────────────────
   // Bypass conditions: paid subscriber, purchased article, or valid gift link.
@@ -433,6 +488,39 @@ export default function ArticlePageClient({
       })
     : '';
 
+  // ── Body rendering (full, non-paywalled) with the in-article MPU ──────────
+  const bodyStyle = { '--article-font-size': articleFontSize } as React.CSSProperties;
+  const showAds = !article.sponsorship;
+  const mpu = <AdUnit slot="in_article_mpu" section={article.sectionSlug} className="my-8" />;
+
+  let fullBody: React.ReactNode = null;
+  if (!isPaywalled) {
+    if (isJsonContent) {
+      const doc: JSONContent | string =
+        typeof rawContent === 'string'
+          ? ((): JSONContent | null => {
+              try { return JSON.parse(rawContent); } catch { return null; }
+            })() ?? rawContent
+          : rawContent as JSONContent;
+      const renderDoc = (d: JSONContent | string) => (
+        <div className="article-body-slug" style={bodyStyle}>
+          <TipTapRenderer content={d} className="article-body-slug-tiptap" />
+        </div>
+      );
+      const split = showAds && typeof doc === 'object' ? splitDocAfterParagraph(doc, MPU_AFTER_PARAGRAPH) : null;
+      fullBody = split ? <>{renderDoc(split[0])}{mpu}{renderDoc(split[1])}</> : renderDoc(doc);
+    } else {
+      let html = sanitizeArticleHtml(rawContent as string);
+      if (article.sponsorship) html = markLinksSponsored(html);
+      html = addBidiIsolation(html);
+      const renderHtml = (h: string) => (
+        <div className="article-body-slug" style={bodyStyle} dangerouslySetInnerHTML={{ __html: h }} />
+      );
+      const split = showAds ? splitHtmlAfterParagraph(html, MPU_AFTER_PARAGRAPH) : null;
+      fullBody = split ? <>{renderHtml(split[0])}{mpu}{renderHtml(split[1])}</> : renderHtml(html);
+    }
+  }
+
   const authorInitials = article.author?.name
     ? article.author.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('')
     : '';
@@ -491,6 +579,12 @@ export default function ArticlePageClient({
                 </div>
               </div>
 
+              {/* Article Top Leaderboard — above the headline. Paid partner
+                  content carries no third-party ads. */}
+              {!article.sponsorship && (
+                <AdUnit slot="article_leaderboard" section={article.sectionSlug} className="mb-6" />
+              )}
+
               {/* Category pill */}
               <div className="mb-4">
                 {article.sector && (
@@ -510,6 +604,9 @@ export default function ArticlePageClient({
                   </a>
                 )}
               </div>
+
+              {/* Paid content disclosure (editorial policy §8) */}
+              <SponsorDisclosure article={article} />
 
               {/* Title */}
               <h1
@@ -795,27 +892,8 @@ export default function ArticlePageClient({
                   />
                 </div>
               ) : (
-                /* ── Full content: TipTap JSON or legacy HTML ── */
-                isJsonContent ? (
-                  <div className="article-body-slug" style={{ '--article-font-size': articleFontSize } as React.CSSProperties}>
-                    <TipTapRenderer
-                      content={
-                        typeof rawContent === 'string'
-                          ? ((): JSONContent | null => {
-                              try { return JSON.parse(rawContent); } catch { return null; }
-                            })() ?? rawContent
-                          : rawContent as JSONContent
-                      }
-                      className="article-body-slug-tiptap"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="article-body-slug"
-                    style={{ '--article-font-size': articleFontSize } as React.CSSProperties}
-                    dangerouslySetInnerHTML={{ __html: addBidiIsolation(sanitizeArticleHtml(rawContent as string)) }}
-                  />
-                )
+                /* ── Full content (TipTap JSON or legacy HTML), MPU after ¶3 ── */
+                fullBody
               )}
 
               {/* Phase 6.4 — Live Blog */}
@@ -896,7 +974,7 @@ export default function ArticlePageClient({
               transition={{ delay: 0.2 }}
             >
               <div className="sticky top-[calc(var(--header-offset-public)+1rem)] space-y-6">
-
+                {showAds && <AdUnit slot="article_sidebar" section={article.sectionSlug} />}
 
                 {/* Newsletter */}
                 <div className="relative overflow-hidden bg-obsidian p-5">
@@ -932,6 +1010,7 @@ export default function ArticlePageClient({
       </main>
 
       <Footer />
+      {showAds && <StickyMobileAd section={article.sectionSlug} />}
 
       <style>{`
         .article-body-slug {

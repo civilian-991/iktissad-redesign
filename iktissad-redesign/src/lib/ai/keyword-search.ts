@@ -91,7 +91,8 @@ export async function findSimilarArticles(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any).rpc("find_similar_articles", {
     source_article_id: articleId,
-    result_limit: limit,
+    // Over-fetch: paid partner content is dropped below.
+    result_limit: limit + 5,
   });
 
   if (error) {
@@ -100,7 +101,21 @@ export async function findSimilarArticles(
 
   if (!Array.isArray(data)) return [];
 
-  return data.map((row: {
+  // Related articles sit under newsroom coverage, so paid partner content is
+  // never recommended there.
+  const ids = data.map((r: { id: string }) => r.id);
+  const sponsored = new Set<string>();
+  if (ids.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: paid } = await (supabase as any)
+      .from("articles")
+      .select("id")
+      .in("id", ids)
+      .not("sponsorship", "is", null);
+    for (const r of paid ?? []) sponsored.add(r.id);
+  }
+
+  return data.filter((r: { id: string }) => !sponsored.has(r.id)).slice(0, limit).map((row: {
     id: string;
     title: string;
     excerpt: string | null;

@@ -17,6 +17,8 @@ const CSRF_EXEMPT_PATTERNS = [
   /^\/api\/indexnow\//,          // Search-engine ping (no session)
   /^\/monitoring/,               // Sentry tunnel
   /^\/api\/analytics\/web-vitals$/, // navigator.sendBeacon — cannot set headers
+  /^\/api\/ads\/event$/,         // ad impression beacon (sendBeacon); only increments a live ad's counter
+  /^\/api\/track\/pageview$/,    // audience page-view beacon (sendBeacon); only increments an anonymous counter
 ];
 
 // ─── CSRF validation (double-submit cookie) ──────────────────────
@@ -74,8 +76,10 @@ export function proxy(request: NextRequest) {
       `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
       `img-src 'self' data: blob: https:`,
       `font-src 'self' data: https://fonts.gstatic.com`,
-      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://challenges.cloudflare.com https://sentry.io https://*.sentry.io https://*.mastercard.com.au https://*.mastercard.com`,
-      `frame-src 'self' https://challenges.cloudflare.com https://*.mastercard.com.au https://*.mastercard.com https://*.youtube.com https://www.youtube-nocookie.com https://securepubads.g.doubleclick.net`,
+      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.doubleclick.net https://*.googlesyndication.com https://*.googleadservices.com https://*.google.com https://*.adtrafficquality.google https://challenges.cloudflare.com https://sentry.io https://*.sentry.io https://*.mastercard.com.au https://*.mastercard.com`,
+      // `https:` admits HTML5 ad creatives, which live on the advertiser's own
+      // ad host. They render in a sandboxed iframe with no same-origin access.
+      `frame-src 'self' https:`,
       `media-src 'self' https:`,
       `worker-src 'self' blob:`,
       `object-src 'none'`,

@@ -15,6 +15,7 @@ export async function GET() {
     .select(ARTICLE_SELECT)
     .eq('status', 'published')
     .eq('archived', false)
+    .is('sponsorship', null)
     .order('published_at', { ascending: false })
     .limit(50);
 

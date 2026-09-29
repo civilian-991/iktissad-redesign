@@ -162,6 +162,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [ogImage, setOgImage] = useState('');
   const [canonicalUrl, setCanonicalUrl] = useState('');
   const [noIndex, setNoIndex] = useState(false);
+  const [sponsorship, setSponsorship] = useState<'' | 'sponsored' | 'partner'>('');
+  const [sponsorAdvertiserId, setSponsorAdvertiserId] = useState('');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: countriesRes } = useSWR<any>('/api/countries', swrFetcher, { revalidateOnFocus: false });
@@ -227,8 +229,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getContentHash = useCallback(() =>
-    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex }),
-    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex]
+    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId }),
+    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId]
   );
 
   const buildSavePayload = useCallback(() => ({
@@ -257,8 +259,10 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     ogImage: ogImage || undefined,
     canonicalUrl: canonicalUrl || undefined,
     noIndex,
+    sponsorship: sponsorship || null,
+    sponsorAdvertiserId: sponsorship && sponsorAdvertiserId ? sponsorAdvertiserId : null,
     ...(articleType ? { article_type: articleType } : {}),
-  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountries, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, articleType]);
+  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountries, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId, articleType]);
 
   const performAutoSave = useCallback(async () => {
     if (!title.trim()) return;
@@ -285,7 +289,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, scheduledAt, initialized, performAutoSave]);
+  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, sponsorship, sponsorAdvertiserId, scheduledAt, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -335,6 +339,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       setOgImage(article.ogImage || '');
       setCanonicalUrl(article.canonicalUrl || '');
       setNoIndex(article.noIndex ?? false);
+      setSponsorship(article.sponsorship ?? '');
+      setSponsorAdvertiserId(article.sponsorAdvertiserId ?? '');
       // Seed contentText for SEO/Fact-check panels with the initial body's plain text.
       if (typeof initialBody !== 'string') setContentText(extractText(initialBody));
       setInitialized(true);
@@ -1509,6 +1515,14 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
               ))}
             </div>
           </motion.div>
+
+          {/* Paid content — sponsored / partner article */}
+          <SponsorshipPanel
+            sponsorship={sponsorship}
+            onSponsorshipChange={setSponsorship}
+            advertiserId={sponsorAdvertiserId}
+            onAdvertiserChange={setSponsorAdvertiserId}
+          />
         </div>
       </div>
 
@@ -1597,5 +1611,77 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
         </motion.div>
       )}
     </div>
+  );
+}
+
+/**
+ * Marks an article as paid content. A sponsored/partner article is labeled
+ * on the page, names its advertiser, and is kept out of the newsroom feeds
+ * (it lists under /partner-content instead).
+ */
+function SponsorshipPanel({
+  sponsorship,
+  onSponsorshipChange,
+  advertiserId,
+  onAdvertiserChange,
+}: {
+  sponsorship: '' | 'sponsored' | 'partner';
+  onSponsorshipChange: (v: '' | 'sponsored' | 'partner') => void;
+  advertiserId: string;
+  onAdvertiserChange: (v: string) => void;
+}) {
+  const { t } = useTranslation();
+  const { data: advertisersRes } = useSWR<ApiResponse<{ id: string; name: string }[]>>(
+    sponsorship ? '/api/advertisers?pageSize=200' : null,
+    swrFetcher,
+    { revalidateOnFocus: false }
+  );
+  const advertisers = advertisersRes?.data ?? [];
+  const selectCls =
+    'w-full bg-white/5 border border-gold/10 rounded-lg py-2 px-3 text-white text-sm font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className={`bg-midnight/50 backdrop-blur-sm border rounded-xl p-6 ${sponsorship ? 'border-gold/40' : 'border-gold/10'}`}
+    >
+      <label htmlFor="sponsorship-type" className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-3">
+        {t('sponsored.editorTitle')}
+      </label>
+      <select
+        id="sponsorship-type"
+        value={sponsorship}
+        onChange={(e) => onSponsorshipChange(e.target.value as '' | 'sponsored' | 'partner')}
+        className={selectCls}
+      >
+        <option value="" className="bg-midnight">{t('sponsored.editorNone')}</option>
+        <option value="sponsored" className="bg-midnight">{t('sponsored.editorSponsored')}</option>
+        <option value="partner" className="bg-midnight">{t('sponsored.editorPartner')}</option>
+      </select>
+
+      {sponsorship && (
+        <>
+          <label htmlFor="sponsor-advertiser" className="block text-white/60 text-xs font-[family-name:var(--font-display)] mt-4 mb-1.5">
+            {t('sponsored.editorAdvertiser')}
+          </label>
+          <select
+            id="sponsor-advertiser"
+            value={advertiserId}
+            onChange={(e) => onAdvertiserChange(e.target.value)}
+            className={selectCls}
+          >
+            <option value="" className="bg-midnight">{t('sponsored.editorPickAdvertiser')}</option>
+            {advertisers.map((a) => (
+              <option key={a.id} value={a.id} className="bg-midnight">{a.name}</option>
+            ))}
+          </select>
+          <p className="mt-3 text-white/40 text-xs leading-relaxed font-[family-name:var(--font-display)]">
+            {t('sponsored.editorHint')}
+          </p>
+        </>
+      )}
+    </motion.div>
   );
 }

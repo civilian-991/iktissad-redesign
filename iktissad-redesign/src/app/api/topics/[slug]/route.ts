@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { mapSectionRow, mapArticleRow } from "@/lib/supabase/mappers";
+import { getSectionSponsor } from "@/lib/ads/serve";
 import type { ApiResponse, Section, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -11,7 +12,8 @@ const ARTICLE_SELECT = `
   countries:country_id ( slug, name )
 `;
 
-type SectionPage = Section & { articles: Article[] };
+type SectionSponsor = Awaited<ReturnType<typeof getSectionSponsor>>;
+type SectionPage = Section & { articles: Article[]; sponsor: SectionSponsor };
 
 export async function GET(
   request: NextRequest,
@@ -48,6 +50,7 @@ export async function GET(
     .select(ARTICLE_SELECT, { count: "exact" })
     .eq("section_id", sectionRowAny.id)
     .eq("status", "published")
+    .filter("sponsorship", "is", null)
     .order("published_at", { ascending: false })
     .range(start, start + pageSize - 1) as any);
 
@@ -59,12 +62,15 @@ export async function GET(
   }
 
   const total = count ?? 0;
+  // "Sponsored by" line for a section sold as a Section Sponsorship. Only the
+  // first page renders the header, so skip the lookup for the rest.
+  const sponsor = page === 1 ? await getSectionSponsor(slug).catch(() => null) : null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const articles: Article[] = (articleRows ?? []).map((r: any) => mapArticleRow(r));
   const section = mapSectionRow(sectionRowAny, total);
 
   const response: ApiResponse<SectionPage> = {
-    data: { ...section, articles },
+    data: { ...section, articles, sponsor },
     pagination: {
       page,
       pageSize,

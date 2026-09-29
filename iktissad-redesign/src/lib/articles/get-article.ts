@@ -14,6 +14,7 @@ const ARTICLE_SELECT = `
   sections:section_id ( slug, name ),
   sectors:sector_id ( slug, name ),
   countries:country_id ( slug, name ),
+  sponsor:sponsor_advertiser_id ( id, name, logo_url, website_url ),
   ${ARTICLE_COUNTRIES_EMBED}
 `;
 

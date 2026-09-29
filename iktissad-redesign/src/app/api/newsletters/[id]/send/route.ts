@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, unauthorizedResponse } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ApiResponse, Newsletter, NewsletterBlock } from "@/types";
+import { SITE_URL } from "@/lib/site-config";
 
 // ─── Row → Frontend mapper ───────────────────────────────────────
 
@@ -34,13 +35,49 @@ function mapNewsletterRow(row: any): Newsletter {
 // Arabic-safe font stack for email clients
 const EMAIL_FONT = "'Segoe UI', Tahoma, 'Noto Sans Arabic', Arial, sans-serif";
 
-function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject: string): string {
+const escapeHtml = (v: unknown) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
+const isHttpUrl = (v: unknown): v is string => typeof v === "string" && /^https?:\/\//i.test(v);
+
+/**
+ * Newsletter Sponsorship (rate card 4.5): one sponsor slot per issue — logo
+ * (200×60), a 40–60 word message, optional 600×150 banner. The link goes
+ * through /api/ads/newsletter-click so sponsor clicks are counted for the
+ * sponsor's report.
+ */
+function renderSponsorBlock(block: NewsletterBlock, newsletterId: string): string {
+  const d = block.data;
+  const href = isHttpUrl(d.url)
+    ? `${SITE_URL}/api/ads/newsletter-click/${newsletterId}/${encodeURIComponent(block.id)}`
+    : null;
+  const wrap = (inner: string) => (href ? `<a href="${href}" style="text-decoration:none">${inner}</a>` : inner);
+  const name = escapeHtml(d.advertiserName);
+  const logo = isHttpUrl(d.logoUrl)
+    ? wrap(`<img src="${escapeHtml(d.logoUrl)}" alt="${name}" width="200" height="60" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0">`)
+    : `<p style="font-family:${EMAIL_FONT};font-weight:bold;color:#183b4e;margin:0">${name}</p>`;
+  const banner = isHttpUrl(d.bannerUrl)
+    ? `<div style="margin-top:14px">${wrap(`<img src="${escapeHtml(d.bannerUrl)}" alt="${name}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0">`)}</div>`
+    : "";
+  const message = d.message
+    ? `<p style="font-family:${EMAIL_FONT};color:#374151;font-size:15px;line-height:1.8;margin:12px 0 0">${escapeHtml(d.message)}</p>`
+    : "";
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;border:1px solid #e8d5b7;background:#fbf7ef"><tr><td style="padding:18px;direction:rtl;text-align:center">
+  <p style="font-family:${EMAIL_FONT};color:#9a7b45;font-size:11px;letter-spacing:1px;margin:0 0 10px">${escapeHtml(d.label || "برعاية")}</p>
+  ${logo}${message}${banner}
+</td></tr></table>`;
+}
+
+function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject: string, newsletterId: string): string {
   const blocksHtml = blocks.map((block) => {
     const d = block.data;
     switch (block.type) {
+      case "sponsor":
+        return renderSponsorBlock(block, newsletterId);
       case "headline": {
         const text = String(d.text ?? "");
-        const level = Number(d.level ?? 2);
+        // The builder stores "h1"/"h2"/"h3"; older rows store a number.
+        const level = Number(String(d.level ?? 2).replace(/^h/i, "")) || 2;
         const tag = level === 1 ? "h1" : level === 3 ? "h3" : "h2";
         const size = level === 1 ? "28px" : level === 3 ? "18px" : "22px";
         return `<${tag} style="font-family:${EMAIL_FONT};color:#183b4e;margin:24px 0 12px;font-size:${size};line-height:1.5;direction:rtl;text-align:right">${text}</${tag}>`;
@@ -57,16 +94,17 @@ function renderBlocksToHtml(blocks: import("@/types").NewsletterBlock[], subject
         return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border:1px solid #e5e7eb"><tr><td style="padding:16px;direction:rtl;text-align:right">${img}<h3 style="font-family:${EMAIL_FONT};color:#183b4e;margin:0 0 8px;font-size:18px;line-height:1.5">${title}</h3><p style="font-family:${EMAIL_FONT};color:#6b7280;margin:0 0 12px;line-height:1.8;font-size:16px">${excerpt}</p>${link}</td></tr></table>`;
       }
       case "text":
-        return `<p style="font-family:${EMAIL_FONT};color:#374151;line-height:1.85;margin:16px 0;font-size:16px;direction:rtl;text-align:right">${String(d.content ?? "")}</p>`;
+        // The builder stores `html`; `content` is the older field name.
+        return `<div style="font-family:${EMAIL_FONT};color:#374151;line-height:1.85;margin:16px 0;font-size:16px;direction:rtl;text-align:right">${String(d.html ?? d.content ?? "")}</div>`;
       case "cta": {
-        const text = String(d.text ?? "اقرأ المزيد");
+        const text = String(d.label ?? d.text ?? "اقرأ المزيد");
         const url = String(d.url ?? "#");
         return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td align="center"><a href="${url}" style="background:#dda853;color:#0a1628;padding:14px 36px;text-decoration:none;font-family:${EMAIL_FONT};font-weight:bold;font-size:16px;display:inline-block">${text}</a></td></tr></table>`;
       }
       case "divider":
         return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td style="border-top:1px solid #e5e7eb;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
       case "image": {
-        const url = String(d.url ?? "");
+        const url = String(d.src ?? d.url ?? "");
         const alt = String(d.alt ?? "");
         const caption = d.caption
           ? `<p style="font-family:${EMAIL_FONT};color:#9ca3af;font-size:12px;text-align:center;margin:4px 0">${d.caption}</p>`
@@ -235,7 +273,7 @@ export async function POST(
       const sgMail = (await import("@sendgrid/mail")).default;
       sgMail.setApiKey(sgApiKey);
 
-      const html = renderBlocksToHtml(fullRow.blocks ?? [], fullRow.subject as string);
+      const html = renderBlocksToHtml(fullRow.blocks ?? [], fullRow.subject as string, id);
       const BATCH = 1000;
 
       for (let i = 0; i < emails.length; i += BATCH) {
