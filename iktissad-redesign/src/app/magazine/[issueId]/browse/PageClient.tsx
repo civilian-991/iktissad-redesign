@@ -492,8 +492,17 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 48, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-0 inset-x-0 z-40 h-10 flex items-center gap-3 px-6"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)' }}
+            className="fixed inset-x-0 z-40 h-10 flex items-center gap-3 px-6"
+            style={{
+              // Sit above the cookie banner while it is showing. This view is
+              // h-screen/overflow-hidden, so without the offset the banner
+              // (z-50, ~90px) simply covers the counter and scrubber.
+              // --consent-height is published by CookieConsent and returns to
+              // 0px once consent is answered.
+              bottom: 'var(--consent-height, 0px)',
+              transition: 'bottom 200ms ease-out',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+            }}
           >
             <span className="text-white/30 text-[11px] font-mono w-6 text-start tabular-nums">
               {currentPage + 1}

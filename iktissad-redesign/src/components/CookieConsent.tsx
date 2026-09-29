@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -36,6 +36,7 @@ export default function CookieConsent() {
   const [showCustomize, setShowCustomize] = useState(false);
   const [analytics, setAnalytics] = useState(true);
   const [advertising, setAdvertising] = useState(true);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -45,6 +46,31 @@ export default function CookieConsent() {
       return () => clearTimeout(timer);
     }
   }, []);
+
+  // Publish the banner's height so anything pinned to the bottom of the viewport
+  // can sit above it. Most pages scroll, so an overlay there is harmless — but
+  // the magazine reader is h-screen/overflow-hidden, which leaves its own footer
+  // (z-40, the page counter and scrubber) no room to escape into. This banner is
+  // z-50 and ~90px tall, so it covered that footer outright.
+  //
+  // Keyed off `visible` rather than height: when dismissed the banner stays in
+  // the DOM and is merely translated off-screen, so it still measures ~90px.
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!el || !visible) {
+      root.style.setProperty('--consent-height', '0px');
+      return;
+    }
+    const publish = () => root.style.setProperty('--consent-height', `${el.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty('--consent-height', '0px');
+    };
+  }, [visible, showCustomize]);
 
   function saveAndClose(prefs: CookiePreferences) {
     localStorage.setItem(CONSENT_KEY, 'accepted');
@@ -72,6 +98,7 @@ export default function CookieConsent() {
 
   return (
     <div
+      ref={bannerRef}
       role="dialog"
       aria-modal="false"
       aria-label="إشعار ملفات تعريف الارتباط"
