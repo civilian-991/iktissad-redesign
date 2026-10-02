@@ -196,19 +196,13 @@ export async function GET(request: NextRequest) {
     // explicit opt-in for editors who want most-recently-modified
     orderedQuery = orderedQuery.order("updated_at", { ascending: false });
   } else {
-    // default "date":
-    //  - public traffic that asks for status=published: sort by published_at desc
-    //  - admin/editor traffic (no status filter, or status=draft/review/scheduled): sort by
-    //    updated_at desc so freshly-edited unpublished items aren't buried behind 34k published rows
-    if (status === "published") {
-      orderedQuery = orderedQuery
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .order("created_at",   { ascending: false });
-    } else {
-      orderedQuery = orderedQuery
-        .order("updated_at", { ascending: false })
-        .order("created_at", { ascending: false });
-    }
+    // default "date": newest published_at first, matching the date the admin list shows.
+    // Admin/editor traffic (no status filter, or draft/review) puts unpublished rows
+    // (published_at null) on top so they aren't buried behind 34k published rows.
+    // Not updated_at: background jobs touch old published rows constantly.
+    orderedQuery = orderedQuery
+      .order("published_at", { ascending: false, nullsFirst: status !== "published" })
+      .order("created_at",   { ascending: false });
   }
 
   const { data: rows, count, error } = await orderedQuery.range(start, start + pageSize - 1);
