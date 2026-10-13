@@ -109,6 +109,9 @@ const updateArticleSchema = z.object({
   /** 'sponsored' = client-written, 'partner' = written by our team for a client; null = editorial. */
   sponsorship: z.enum(["sponsored", "partner"]).nullable().optional(),
   sponsorAdvertiserId: z.string().uuid().nullable().optional(),
+  /** AI TLDR. null/'' clears it so the article shows no summary box. */
+  summary: z.string().nullable().optional(),
+  summaryEn: z.string().nullable().optional(),
 });
 
 export async function PUT(
@@ -177,6 +180,8 @@ export async function PUT(
   if (data.autoPost !== undefined) updateData.auto_post = data.autoPost;
   if (data.sponsorship !== undefined) updateData.sponsorship = data.sponsorship;
   if (data.sponsorAdvertiserId !== undefined) updateData.sponsor_advertiser_id = data.sponsorAdvertiserId;
+  if (data.summary !== undefined) updateData.summary = data.summary || null;
+  if (data.summaryEn !== undefined) updateData.summary_en = data.summaryEn || null;
 
   // Handle body: string → legacy content column; object/array → JSONB body column
   if (data.body !== undefined) {

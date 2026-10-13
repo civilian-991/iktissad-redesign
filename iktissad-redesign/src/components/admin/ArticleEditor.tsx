@@ -182,6 +182,12 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [isGeneratingExcerpt, setIsGeneratingExcerpt] = useState(false);
   const [isAutoTagging, setIsAutoTagging] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isDeletingSummary, setIsDeletingSummary] = useState(false);
+  const [summary, setSummary] = useState('');
+  // Status as last saved. The TLDR is auto-generated only on the save that
+  // first publishes the article — regenerating on every save would bring
+  // back a summary the editor deliberately deleted.
+  const savedStatusRef = useRef<string | null>(null);
   const [isGeneratingSocialCards, setIsGeneratingSocialCards] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -316,6 +322,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       setSelectedTags(article.tags || []);
       setFeaturedImage(article.featuredImage || null);
       setStatus(article.status);
+      savedStatusRef.current = article.status;
+      setSummary(article.summary || '');
       setFeatured(article.featured ?? false);
       setEditorChoice(article.editorChoice ?? false);
       setIsBreaking(article.isBreaking ?? false);
@@ -392,8 +400,12 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       await updateArticle(id, buildSavePayload() as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
       void createArticleVersion(id).catch(() => {/* silent — versioning is best-effort */});
-      if (status === 'published' && content.trim()) {
-        void aiSummarize(id, content, title).catch(() => {/* silent — summary is best-effort */});
+      const firstPublish = status === 'published' && savedStatusRef.current !== 'published';
+      savedStatusRef.current = status;
+      if (firstPublish && !summary && content.trim()) {
+        void aiSummarize(id, content, title)
+          .then((res) => { if (res.data?.summary) setSummary(res.data.summary); })
+          .catch(() => {/* silent — summary is best-effort */});
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -515,6 +527,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     try {
       const res = await aiSummarize(id, content, title);
       if (res.data?.summary) {
+        setSummary(res.data.summary);
         toast.success(t('admin.articles.editor.ai.summarizeSuccess'));
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -522,6 +535,20 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       toast.error(err.message || t('admin.articles.editor.ai.summarizeFailed'));
     } finally {
       setIsSummarizing(false);
+    }
+  };
+
+  const handleDeleteSummary = async () => {
+    setIsDeletingSummary(true);
+    try {
+      await updateArticle(id, { summary: null, summaryEn: null });
+      setSummary('');
+      toast.success(t('admin.articles.editor.ai.summaryDeleted'));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err.message || t('admin.articles.editor.ai.deleteSummaryFailed'));
+    } finally {
+      setIsDeletingSummary(false);
     }
   };
 
@@ -1255,6 +1282,23 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 {isSummarizing ? t('admin.articles.editor.ai.generating') : t('admin.articles.editor.ai.generateSummary')}
               </button>
             </div>
+            {summary ? (
+              <div className="mb-3 rounded-lg border border-purple-500/15 bg-purple-500/5 p-3">
+                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{summary}</p>
+                <button
+                  onClick={handleDeleteSummary}
+                  disabled={isDeletingSummary}
+                  className="mt-2 flex items-center gap-1.5 text-red-400/80 text-xs font-[family-name:var(--font-display)] hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isDeletingSummary ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  {t('admin.articles.editor.ai.deleteSummary')}
+                </button>
+              </div>
+            ) : (
+              <p className="mb-2 text-white/50 text-xs font-[family-name:var(--font-display)]">
+                {t('admin.articles.editor.ai.noSummary')}
+              </p>
+            )}
             <p className="text-white/30 text-xs font-[family-name:var(--font-display)] leading-relaxed">
               {t('admin.articles.editor.ai.smartSummaryHint')}
             </p>
