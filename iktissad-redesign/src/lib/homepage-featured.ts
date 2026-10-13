@@ -13,7 +13,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const HOMEPAGE_FEATURED_KEY = "homepage_featured";
-export const HOMEPAGE_FEATURED_SLOTS = 4;
+export { HOMEPAGE_FEATURED_SLOTS } from "@/lib/homepage-featured-slots";
 
 export interface HomepageFeaturedSetting {
   order: string[];

@@ -3,7 +3,7 @@
 /**
  * Homepage Featured lineup
  *
- * Editors pin up to four featured articles into the homepage Hero and drag
+ * Editors pin up to HOMEPAGE_FEATURED_SLOTS featured articles into the homepage Hero and drag
  * them into order (slot 1 = lead story). Unpinned slots preview the newest
  * featured articles that will fill them automatically.
  */
@@ -50,9 +50,8 @@ import {
 } from '@/lib/api-client';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import { iconSizes } from '@/lib/design-tokens';
+import { HOMEPAGE_FEATURED_SLOTS as SLOTS } from '@/lib/homepage-featured-slots';
 import type { ApiResponse, Article } from '@/types';
-
-const SLOTS = 4;
 
 function isEligible(a: Article): boolean {
   return a.status === 'published' && a.featured;

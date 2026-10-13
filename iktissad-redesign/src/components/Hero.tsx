@@ -7,7 +7,10 @@ import { Clock, ArrowUpLeft, Loader2, TrendingUp } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
+import { HOMEPAGE_FEATURED_SLOTS } from '@/lib/homepage-featured-slots';
 import type { Article, ApiResponse } from '@/types';
+
+const ROTATE_MS = 6000;
 
 export default function Hero() {
   const { t } = useTranslation();
@@ -16,7 +19,7 @@ export default function Hero() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const { data: featuredData } = useSWR<ApiResponse<Article[]>>(
-    '/api/articles?status=published&featured=true&pageSize=4&sortBy=homepage',
+    `/api/articles?status=published&featured=true&pageSize=${HOMEPAGE_FEATURED_SLOTS}&sortBy=homepage`,
     swrFetcher
   );
 
@@ -29,7 +32,7 @@ export default function Hero() {
 
   useEffect(() => {
     if (!isAutoPlaying || articles.length === 0) return;
-    const id = setInterval(next, 6000);
+    const id = setInterval(next, ROTATE_MS);
     return () => clearInterval(id);
   }, [isAutoPlaying, next, articles.length]);
 
@@ -129,7 +132,7 @@ export default function Hero() {
               </AnimatePresence>
             </div>
 
-            {/* All 5 articles list — active one highlighted */}
+            {/* Every featured article — the one in the main panel is highlighted */}
             <div className="lg:col-span-5 flex flex-col bg-paper">
               <div className="bg-obsidian px-4 py-3 flex items-center justify-end">
                 <Link href="/articles?featured=true" className="text-gold text-sm flex items-center gap-1 hover:underline font-[family-name:var(--font-display)]">
@@ -143,64 +146,71 @@ export default function Hero() {
                   <Loader2 className="text-gold animate-spin" size={24} />
                 </div>
               ) : (
-                articles.map((article, i) => (
-                  <button
-                    key={article.id}
-                    onClick={() => setActive(i)}
-                    className={`flex-1 flex gap-3 p-4 text-start transition-colors group w-full ${
-                      i !== articles.length - 1 ? 'border-b border-charcoal/10' : ''
-                    } ${i === active ? 'bg-gold/15' : 'hover:bg-gold/5'}`}
-                  >
-                    {/* Thumb */}
-                    {article.featuredImage && (
-                      <div className="w-20 h-16 flex-shrink-0 overflow-hidden">
-                        <img
-                          src={article.featuredImage}
-                          alt={article.title}
-                          className={`w-full h-full object-cover transition-all duration-300 ${
-                            i === active ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-                          }`}
-                        />
-                      </div>
-                    )}
+                articles.map((article, i) => {
+                  const isActive = i === active;
+                  return (
+                    <button
+                      key={article.id}
+                      onClick={() => setActive(i)}
+                      aria-current={isActive ? 'true' : undefined}
+                      className={`relative flex-1 flex items-center gap-3 px-4 py-3 text-start transition-colors group w-full border-s-2 ${
+                        i !== articles.length - 1 ? 'border-b border-b-charcoal/10' : ''
+                      } ${isActive ? 'bg-gold/10 border-s-gold' : 'border-s-transparent hover:bg-gold/5'}`}
+                    >
+                      {/* Thumb */}
+                      {article.featuredImage && (
+                        <div className="w-20 h-14 flex-shrink-0 overflow-hidden">
+                          <img
+                            src={article.featuredImage}
+                            alt=""
+                            className={`w-full h-full object-cover transition-opacity duration-300 ${
+                              isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
+                            }`}
+                          />
+                        </div>
+                      )}
 
-                    <div className="flex-1 min-w-0 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 text-xs">
                           {article.sector && (
-                            <span className={`text-sm font-bold font-[family-name:var(--font-display)] ${i === active ? 'text-gold' : 'text-gold/70'}`}>
+                            <span className={`font-bold font-[family-name:var(--font-display)] ${isActive ? 'text-gold-dark' : 'text-gold'}`}>
                               {article.sector}
                             </span>
                           )}
+                          {article.publishedAt && (
+                            <span className="text-charcoal/40 flex items-center gap-1">
+                              <Clock size={10} />
+                              {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
                           {article.views > 1000 && (
-                            <span className="flex items-center gap-0.5 text-profit text-sm font-semibold">
+                            <span className="flex items-center gap-0.5 text-profit font-semibold">
                               <TrendingUp size={10} />
                               {t('common.labels.trending')}
                             </span>
                           )}
                         </div>
                         <h3 className={`font-[family-name:var(--font-display)] font-bold text-sm leading-snug line-clamp-2 transition-colors ${
-                          i === active ? 'text-gold' : 'text-ink group-hover:text-gold'
+                          isActive ? 'text-ink' : 'text-ink/80 group-hover:text-gold'
                         }`}>
                           {article.title}
                         </h3>
                       </div>
-                      {article.publishedAt && (
-                        <span className="text-charcoal/40 text-sm flex items-center gap-1 mt-1">
-                          <Clock size={10} />
-                          {fmtDate(article.publishedAt, { month: 'short', day: 'numeric' })}
-                        </span>
-                      )}
-                    </div>
 
-                    {/* Active indicator */}
-                    {i === active && (
-                      <div className="flex-shrink-0 self-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gold" />
-                      </div>
-                    )}
-                  </button>
-                ))
+                      {/* Time until the carousel moves on */}
+                      {isActive && isAutoPlaying && articles.length > 1 && (
+                        <motion.span
+                          key={`progress-${active}`}
+                          aria-hidden
+                          className="absolute bottom-0 start-0 h-0.5 bg-gold"
+                          initial={{ width: '0%' }}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: ROTATE_MS / 1000, ease: 'linear' }}
+                        />
+                      )}
+                    </button>
+                  );
+                })
               )}
             </div>
 
