@@ -184,6 +184,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isDeletingSummary, setIsDeletingSummary] = useState(false);
   const [summary, setSummary] = useState('');
+  const [summaryEn, setSummaryEn] = useState('');
   const [isGeneratingSocialCards, setIsGeneratingSocialCards] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -231,8 +232,8 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getContentHash = useCallback(() =>
-    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId }),
-    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId]
+    JSON.stringify({ title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId, summary, summaryEn }),
+    [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featured, editorChoice, isBreaking, scheduledAt, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId, summary, summaryEn]
   );
 
   const buildSavePayload = useCallback(() => ({
@@ -263,8 +264,11 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     noIndex,
     sponsorship: sponsorship || null,
     sponsorAdvertiserId: sponsorship && sponsorAdvertiserId ? sponsorAdvertiserId : null,
+    // Empty clears it, which hides the summary box on the article page.
+    summary: summary.trim() || null,
+    summaryEn: summaryEn.trim() || null,
     ...(articleType ? { article_type: articleType } : {}),
-  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountries, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId, articleType]);
+  }), [title, titleEn, slug, deck, excerpt, excerptEn, content, editorBody, section, selectedSector, selectedCountries, selectedAuthorId, selectedTags, featuredImage, status, scheduledAt, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, metaTitle, metaDescription, ogImage, canonicalUrl, noIndex, sponsorship, sponsorAdvertiserId, summary, summaryEn, articleType]);
 
   const performAutoSave = useCallback(async () => {
     if (!title.trim()) return;
@@ -291,7 +295,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, sponsorship, sponsorAdvertiserId, scheduledAt, initialized, performAutoSave]);
+  }, [title, titleEn, slug, deck, excerpt, excerptEn, content, section, selectedSector, selectedTags, selectedCountries, selectedAuthorId, featuredImage, focalX, focalY, imageCaption, imageCredit, imageCreditUrl, featured, editorChoice, isBreaking, sponsorship, sponsorAdvertiserId, summary, summaryEn, scheduledAt, initialized, performAutoSave]);
 
   // Populate form when article loads
   useEffect(() => {
@@ -319,6 +323,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       setFeaturedImage(article.featuredImage || null);
       setStatus(article.status);
       setSummary(article.summary || '');
+      setSummaryEn(article.summaryEn || '');
       setFeatured(article.featured ?? false);
       setEditorChoice(article.editorChoice ?? false);
       setIsBreaking(article.isBreaking ?? false);
@@ -516,6 +521,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       const res = await aiSummarize(id, content, title);
       if (res.data?.summary) {
         setSummary(res.data.summary);
+        setSummaryEn(res.data.summaryEn || '');
         toast.success(t('admin.articles.editor.ai.summarizeSuccess'));
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -531,6 +537,7 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
     try {
       await updateArticle(id, { summary: null, summaryEn: null });
       setSummary('');
+      setSummaryEn('');
       toast.success(t('admin.articles.editor.ai.summaryDeleted'));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -1270,22 +1277,30 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
                 {isSummarizing ? t('admin.articles.editor.ai.generating') : t('admin.articles.editor.ai.generateSummary')}
               </button>
             </div>
-            {summary ? (
-              <div className="mb-3 rounded-lg border border-purple-500/15 bg-purple-500/5 p-3">
-                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{summary}</p>
-                <button
-                  onClick={handleDeleteSummary}
-                  disabled={isDeletingSummary}
-                  className="mt-2 flex items-center gap-1.5 text-red-400/80 text-xs font-[family-name:var(--font-display)] hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {isDeletingSummary ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                  {t('admin.articles.editor.ai.deleteSummary')}
-                </button>
-              </div>
-            ) : (
-              <p className="mb-2 text-white/50 text-xs font-[family-name:var(--font-display)]">
-                {t('admin.articles.editor.ai.noSummary')}
-              </p>
+            <textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              placeholder={t('admin.articles.editor.ai.noSummary')}
+              rows={4}
+              className="w-full bg-white/5 border border-purple-500/15 rounded-lg py-2 px-3 text-white text-sm leading-relaxed font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-purple-500/40 transition-colors resize-y"
+            />
+            <textarea
+              value={summaryEn}
+              onChange={(e) => setSummaryEn(e.target.value)}
+              placeholder="Summary in English (EN)…"
+              rows={3}
+              dir="ltr"
+              className="mt-2 w-full bg-white/5 border border-purple-500/15 rounded-lg py-2 px-3 text-white text-sm leading-relaxed font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-purple-500/40 transition-colors resize-y"
+            />
+            {(summary || summaryEn) && (
+              <button
+                onClick={handleDeleteSummary}
+                disabled={isDeletingSummary}
+                className="mt-2 mb-2 flex items-center gap-1.5 text-red-400/80 text-xs font-[family-name:var(--font-display)] hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isDeletingSummary ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                {t('admin.articles.editor.ai.deleteSummary')}
+              </button>
             )}
             <p className="text-white/30 text-xs font-[family-name:var(--font-display)] leading-relaxed">
               {t('admin.articles.editor.ai.smartSummaryHint')}
