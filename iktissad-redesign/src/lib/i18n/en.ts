@@ -468,7 +468,7 @@ export const en = {
           generateCard: 'Generate Card',
           smartSummaryTitle: 'Smart Summary (TLDR)',
           smartSummaryDesc: 'Shown to readers at top of article',
-          smartSummaryHint: 'Auto-generated on publish. Can be generated manually anytime.',
+          smartSummaryHint: 'Only generated when you press Generate Summary.',
           deleteSummary: 'Delete summary',
           summaryDeleted: 'AI summary deleted',
           noSummary: 'No summary yet.',

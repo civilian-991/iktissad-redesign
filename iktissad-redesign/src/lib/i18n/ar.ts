@@ -468,7 +468,7 @@ export const ar = {
           generateCard: 'توليد بطاقة',
           smartSummaryTitle: 'الملخص الذكي (TLDR)',
           smartSummaryDesc: 'يُعرض للقراء أعلى المقال',
-          smartSummaryHint: 'يُولَّد تلقائياً عند النشر. يمكن توليده يدوياً في أي وقت.',
+          smartSummaryHint: 'لا يُولَّد إلا عند الضغط على زر توليد الملخص.',
           deleteSummary: 'حذف الملخص',
           summaryDeleted: 'تم حذف الملخص الذكي',
           noSummary: 'لا يوجد ملخص بعد.',

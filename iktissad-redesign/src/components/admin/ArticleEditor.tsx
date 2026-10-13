@@ -184,10 +184,6 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isDeletingSummary, setIsDeletingSummary] = useState(false);
   const [summary, setSummary] = useState('');
-  // Status as last saved. The TLDR is auto-generated only on the save that
-  // first publishes the article — regenerating on every save would bring
-  // back a summary the editor deliberately deleted.
-  const savedStatusRef = useRef<string | null>(null);
   const [isGeneratingSocialCards, setIsGeneratingSocialCards] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -322,7 +318,6 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       setSelectedTags(article.tags || []);
       setFeaturedImage(article.featuredImage || null);
       setStatus(article.status);
-      savedStatusRef.current = article.status;
       setSummary(article.summary || '');
       setFeatured(article.featured ?? false);
       setEditorChoice(article.editorChoice ?? false);
@@ -400,13 +395,6 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
       await updateArticle(id, buildSavePayload() as any);
       toast.success(t('admin.articles.editor.saveSuccess'));
       void createArticleVersion(id).catch(() => {/* silent — versioning is best-effort */});
-      const firstPublish = status === 'published' && savedStatusRef.current !== 'published';
-      savedStatusRef.current = status;
-      if (firstPublish && !summary && content.trim()) {
-        void aiSummarize(id, content, title)
-          .then((res) => { if (res.data?.summary) setSummary(res.data.summary); })
-          .catch(() => {/* silent — summary is best-effort */});
-      }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || t('admin.common.error'));
