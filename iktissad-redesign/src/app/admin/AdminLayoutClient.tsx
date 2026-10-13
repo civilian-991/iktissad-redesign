@@ -56,6 +56,7 @@ import {
   Tags,
   Briefcase,
   Globe,
+  Star,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
@@ -94,6 +95,7 @@ interface SubNavItem {
 const navigationConfig: NavItem[] = [
   { key: 'dashboard',   href: '/admin/dashboard',   icon: LayoutDashboard },
   { key: 'articles',    href: '/admin/articles',     icon: FileText, badge: 12 },
+  { key: 'homepageFeatured', href: '/admin/homepage-featured', icon: Star },
   { key: 'assignments', href: '/admin/assignments',  icon: KanbanSquare },
   { key: 'calendar',    href: '/admin/calendar',     icon: CalendarDays },
   { key: 'headlines',   href: '/admin/headlines',    icon: FlaskConical },
@@ -205,6 +207,7 @@ export default function AdminLayoutClient({
       aiAgent:             t('admin.common.aiAgent'),
       magazine:            t('admin.common.magazine'),
       series:              t('admin.common.series'),
+      homepageFeatured:    t('admin.common.homepageFeatured'),
       sources:             t('admin.common.sources'),
       users:       t('admin.common.users'),
       media:       t('admin.common.media'),

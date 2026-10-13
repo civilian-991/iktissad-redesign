@@ -19,6 +19,7 @@ import {
   getClientIp,
   rateLimitedResponse,
 } from "@/lib/rate-limit";
+import { getHomepageFeaturedOrder } from "@/lib/homepage-featured";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -205,7 +206,21 @@ export async function GET(request: NextRequest) {
       .order("created_at",   { ascending: false });
   }
 
-  const { data: rows, count, error } = await orderedQuery.range(start, start + pageSize - 1);
+  // sortBy=homepage: editor-pinned articles (site_settings.homepage_featured)
+  // take the first slots in their chosen order; the rest stay newest-first.
+  // Pins only apply to page 1 of the plain feed — any taxonomy/tag/author/search
+  // filter falls back to the date order above.
+  const pinnedOrder =
+    sortBy === "homepage" && page === 1 && !section && !country && !sector && !tag && !authorId && !search
+      ? await getHomepageFeaturedOrder()
+      : [];
+
+  // Over-fetch by the pin count so dropping pinned ids from the date-ordered
+  // rows still leaves a full page.
+  const { data: rows, count, error } = await orderedQuery.range(
+    start,
+    start + pageSize - 1 + pinnedOrder.length
+  );
 
   if (error) {
     return NextResponse.json(
@@ -216,7 +231,36 @@ export async function GET(request: NextRequest) {
 
   const total = count ?? 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articles: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
+  let resultRows: any[] = rows ?? [];
+
+  if (pinnedOrder.length > 0) {
+    // A pin only counts while its article still passes this feed's filters
+    // (e.g. un-featuring or unpublishing an article drops it from the slots).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: pinRows } = await (supabase.from("articles") as any)
+      .select(ARTICLE_SELECT)
+      .in("id", pinnedOrder);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eligible = (r: any) =>
+      r.title !== "" &&
+      (!status || r.status === status) &&
+      (featured === null || r.featured === (featured === "true")) &&
+      (editorChoice === null || r.editor_choice === (editorChoice === "true")) &&
+      (breaking === null || r.is_breaking === (breaking === "true")) &&
+      (includeArchived || !r.archived) &&
+      (sponsored === "only"
+        ? r.sponsorship !== null
+        : sponsored === "include" || status !== "published" || r.sponsorship === null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const byId = new Map<string, any>((pinRows ?? []).filter(eligible).map((r: any) => [r.id, r]));
+    const pinned = pinnedOrder.filter((id) => byId.has(id)).map((id) => byId.get(id));
+    const pinnedIds = new Set(pinned.map((r) => r.id));
+
+    resultRows = [...pinned, ...resultRows.filter((r) => !pinnedIds.has(r.id))];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const articles: Article[] = resultRows.slice(0, pageSize).map((r: any) => mapArticleRow(r));
 
   const response: ApiResponse<Article[]> = {
     data: articles,

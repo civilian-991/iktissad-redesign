@@ -1990,3 +1990,21 @@ export async function deleteAdvertiser(
 // Silence "unused" for re-exported source type
 export type { Source };
 
+
+// ─── Homepage featured lineup ────────────────────────────────────────────────
+
+export const HOMEPAGE_FEATURED_ADMIN_KEY = "/api/admin/homepage-featured";
+
+export interface HomepageFeaturedLineup {
+  order: string[];
+  articles: Article[];
+}
+
+export async function saveHomepageFeaturedOrder(
+  order: string[]
+): Promise<ApiResponse<HomepageFeaturedLineup>> {
+  return api<HomepageFeaturedLineup>(HOMEPAGE_FEATURED_ADMIN_KEY, {
+    method: "PUT",
+    body: JSON.stringify({ order }),
+  });
+}
