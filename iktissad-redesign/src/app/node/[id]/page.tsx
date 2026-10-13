@@ -1,4 +1,4 @@
-import { permanentRedirect, notFound } from 'next/navigation';
+import { permanentRedirect, redirect } from 'next/navigation';
 import { lookupRedirect, encodePath } from '@/lib/redirects';
 
 /**
@@ -14,9 +14,9 @@ export default async function LegacyNodePath({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  if (!/^\d+$/.test(id)) notFound();
+  if (!/^\d+$/.test(id)) redirect('/');
 
   const to = await lookupRedirect(`/node/${id}`);
   if (to) permanentRedirect(encodePath(to));
-  notFound();
+  redirect('/');
 }

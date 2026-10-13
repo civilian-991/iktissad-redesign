@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { permanentRedirect, notFound } from 'next/navigation';
+import { permanentRedirect, redirect } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 /**
@@ -135,8 +135,49 @@ export const lookupArticleByPublicId = cache(async (id: string): Promise<string 
 });
 
 /**
+ * Search words from a legacy slug: "-br-" artefacts (Drupal slugified the
+ * headline's <br> tags, sometimes with no separator), bare numbers and file
+ * extensions dropped.
+ */
+function slugWords(segment: string): string {
+  let s = segment;
+  try { s = decodeURIComponent(s); } catch { /* use as-is */ }
+  return s
+    .replace(/\.[a-z0-9]{2,4}$/i, '')
+    .replace(/(?<=[؀-ۿ])br(?=[؀-ۿ])/g, ' ')
+    .split(/[-_\s+]+/)
+    .filter((w) => w && w.toLowerCase() !== 'br' && !/^\d+$/.test(w))
+    .slice(0, 8)
+    .join(' ');
+}
+
+/**
+ * Where an old URL goes when it is NOT in the redirect map. Never a 404: a
+ * reader following an old link lands on the closest listing, or on a search
+ * for the words in the old slug (which finds the article if it exists under
+ * another URL).
+ */
+export function legacyFallback(path: string): string {
+  const segments = normalisePath(path).split('/').filter(Boolean);
+  switch (segments[0]) {
+    case 'issues':
+      return '/magazine';
+    case 'events':
+      return '/topics/events';
+    case 'taxonomy':
+      return '/articles';
+    case 'node':
+    case 'iktnode':
+      return '/';
+  }
+  const q = slugWords(segments.at(-1) ?? '');
+  return q ? `/search?q=${encodeURIComponent(q)}` : '/';
+}
+
+/**
  * Body of the legacy catch-all routes (/issues, /taxonomy, /events, …):
- * 301 to the mapped page if the path is in the map, otherwise a real 404.
+ * 301 to the mapped page if the path is in the map, otherwise a temporary
+ * redirect to the closest page (temporary, so a later map entry takes over).
  * `segments` are the catch-all params, which Next passes percent-encoded.
  */
 export async function redirectLegacyPath(prefix: string, segments: string[]): Promise<never> {
@@ -145,5 +186,5 @@ export async function redirectLegacyPath(prefix: string, segments: string[]): Pr
   }).join('/');
   const to = await lookupRedirect(path);
   if (to) permanentRedirect(encodePath(to));
-  notFound();
+  redirect(legacyFallback(path));
 }

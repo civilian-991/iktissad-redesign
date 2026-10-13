@@ -1,5 +1,5 @@
-import { permanentRedirect, notFound } from 'next/navigation';
-import { lookupAwalanArticle, lookupRedirect, encodePath } from '@/lib/redirects';
+import { permanentRedirect, redirect } from 'next/navigation';
+import { lookupAwalanArticle, lookupRedirect, encodePath, legacyFallback } from '@/lib/redirects';
 
 /**
  * awalan.com served every article at /Article/<id>/<slug>.
@@ -21,7 +21,9 @@ export default async function LegacyAwalanArticle({
     const byId = await lookupAwalanArticle(id);
     if (byId) permanentRedirect(encodePath(byId));
   }
-  const byPath = await lookupRedirect('/Article/' + rest.map((s) => decodeURIComponent(s)).join('/'));
+  const from = '/Article/' + rest.map((s) => { try { return decodeURIComponent(s); } catch { return s; } }).join('/');
+  const byPath = await lookupRedirect(from);
   if (byPath) permanentRedirect(encodePath(byPath));
-  notFound();
+  // /Article/<id> alone has no words to search for.
+  redirect(rest.length > 1 ? legacyFallback(from) : '/');
 }

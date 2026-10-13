@@ -542,7 +542,7 @@ export default function ArticlePageClient({
               {article.section && (
                 <>
                   <ChevronLeft size={9} />
-                  <a href={`/topics/${article.section}`} className="hover:text-gold transition-colors">{article.section}</a>
+                  <a href={`/topics/${article.sectionSlug || article.section}`} className="hover:text-gold transition-colors">{article.section}</a>
                 </>
               )}
               {article.sector && (
@@ -589,7 +589,7 @@ export default function ArticlePageClient({
               <div className="mb-4">
                 {article.sector && (
                   <a
-                    href={`/industries/${article.sector}`}
+                    href={`/industries/${article.sectorSlug || article.sector}`}
                     className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-ink transition-all"
                   >
                     {article.sector}
@@ -597,7 +597,7 @@ export default function ArticlePageClient({
                 )}
                 {!article.sector && article.section && (
                   <a
-                    href={`/topics/${article.section}`}
+                    href={`/topics/${article.sectionSlug || article.section}`}
                     className="inline-block text-[13px] font-[family-name:var(--font-display)] font-bold text-gold border border-gold/40 rounded-full px-3.5 py-1 hover:bg-gold hover:text-ink transition-all"
                   >
                     {article.section}

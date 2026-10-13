@@ -1,5 +1,5 @@
-import { permanentRedirect, notFound } from 'next/navigation';
-import { lookupRedirect, encodePath } from '@/lib/redirects';
+import { permanentRedirect, redirect } from 'next/navigation';
+import { lookupRedirect, encodePath, legacyFallback } from '@/lib/redirects';
 
 /**
  * iktissadonline.com served every article at /news/YYYY/MM/DD/<alias>.
@@ -22,7 +22,8 @@ export default async function LegacyNewsPath({
     const { filter } = await searchParams;
     permanentRedirect(filter === 'sectors' ? '/industries' : '/countries');
   }
-  const to = await lookupRedirect('/news/' + path.map((s) => decodeURIComponent(s)).join('/'));
+  const from = '/news/' + path.map((s) => { try { return decodeURIComponent(s); } catch { return s; } }).join('/');
+  const to = await lookupRedirect(from);
   if (to) permanentRedirect(encodePath(to));
-  notFound();
+  redirect(legacyFallback(from));
 }

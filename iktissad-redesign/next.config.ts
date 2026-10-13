@@ -79,6 +79,16 @@ const nextConfig: NextConfig = {
       { source: '/rss.xml', destination: '/feed.xml', permanent: true },
       { source: '/user', destination: '/login', permanent: true },
       { source: '/user/:path*', destination: '/login', permanent: true },
+      // An issue's home is its page browser; legacy issue redirects and the
+      // reader's "back to issue" link point at the bare issue URL.
+      {
+        source: '/magazine/:issueId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+        destination: '/magazine/:issueId/browse',
+        permanent: true,
+      },
+      // Drupal's search pages: /search/node/<terms>
+      { source: '/search/node/:q', destination: '/search?q=:q', permanent: true },
+      { source: '/search/node', destination: '/search', permanent: true },
     ];
   },
   async rewrites() {
