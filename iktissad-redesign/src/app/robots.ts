@@ -4,7 +4,9 @@ import { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      // Default: allow all crawlers except protected paths
+      // Every crawler, AI ones included: being read and cited by ChatGPT,
+      // Perplexity, Gemini and Claude is a traffic source (GEO), and
+      // /llms.txt points them at the content.
       {
         userAgent: "*",
         allow: "/",
@@ -17,21 +19,6 @@ export default function robots(): MetadataRoute.Robots {
           "/magazine/*/read/",   // Article reading mode — subscriber-only
         ],
       },
-      // AI training crawlers — blocked by policy.
-      // Our content is proprietary journalism; we do not consent to AI training use.
-      // Crawling for search indexing and news aggregation is permitted via separate agreements.
-      { userAgent: "GPTBot", disallow: "/" },
-      { userAgent: "ChatGPT-User", disallow: "/" },
-      { userAgent: "CCBot", disallow: "/" },
-      { userAgent: "anthropic-ai", disallow: "/" },
-      { userAgent: "ClaudeBot", disallow: "/" },
-      { userAgent: "Claude-Web", disallow: "/" },
-      { userAgent: "Omgilibot", disallow: "/" },
-      { userAgent: "Bytespider", disallow: "/" },
-      { userAgent: "FacebookBot", disallow: "/" },
-      { userAgent: "cohere-ai", disallow: "/" },
-      { userAgent: "PerplexityBot", disallow: "/" },
-      { userAgent: "Applebot-Extended", disallow: "/" },
     ],
     sitemap: [
       `${SITE_URL}/sitemap.xml`,
