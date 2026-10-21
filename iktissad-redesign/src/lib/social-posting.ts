@@ -3,10 +3,17 @@ import { SITE_URL } from '@/lib/site-config';
  * Social Media Auto-Posting Utility
  *
  * Posts article content to connected social platforms (Twitter/X, LinkedIn, Telegram).
- * Uses AI-generated social copy from /api/ai/social-content when available.
+ * LinkedIn and Telegram copy is AI-written (src/lib/ai/social-content.ts) when
+ * the model is reachable; otherwise, and always for X, a template is used.
  */
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { generateText } from 'ai';
+import {
+  SOCIAL_CONTENT_MODEL,
+  buildSocialSystem,
+  buildSocialPrompt,
+} from '@/lib/ai/social-content';
 
 const BASE_URL = SITE_URL;
 
@@ -95,52 +102,66 @@ export async function postArticleToSocial(
   return results;
 }
 
+/** AI copy for one platform, or null if the model call fails. */
+async function generateAiCopy(
+  platform: 'linkedin' | 'telegram',
+  article: ArticleForPost
+): Promise<string | null> {
+  try {
+    const { text } = await generateText({
+      model: SOCIAL_CONTENT_MODEL,
+      system: buildSocialSystem(platform),
+      prompt: buildSocialPrompt({
+        articleId: article.id,
+        platform,
+        title: article.title,
+        excerpt: article.excerpt ?? '',
+        content: '',
+      }),
+      maxOutputTokens: 800,
+    });
+    return text.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/** The Telegram prompt writes **bold** markdown; the bot sends HTML. */
+function telegramMarkdownToHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+}
+
 /**
- * Generate social media copy for an article.
- * Tries AI endpoint first, falls back to a template.
+ * Generate social media copy for an article. X gets a headline + link
+ * (the AI writes a 5-tweet thread, and only a single tweet is posted).
  */
 async function generateSocialCopy(
   article: ArticleForPost
 ): Promise<Record<string, string>> {
   const articleUrl = `${BASE_URL}/${article.slug}`;
 
-  // Try AI-generated social content
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/ai/social-content`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        articleId: article.id,
-        platforms: ['twitter', 'linkedin', 'telegram'],
-      }),
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-      if (json.posts) {
-        // Append URL to each
-        const posts: Record<string, string> = {};
-        for (const [platform, text] of Object.entries(json.posts)) {
-          posts[platform] = `${text}\n\n${articleUrl}`;
-        }
-        posts.default = posts.twitter || posts.linkedin || `${article.title}\n\n${articleUrl}`;
-        return posts;
-      }
-    }
-  } catch {
-    // Fall through to template
-  }
-
-  // Fallback: simple template
   const hashtags = (article.tags ?? [])
     .slice(0, 3)
     .map(t => `#${t.replace(/\s+/g, '_')}`)
     .join(' ');
 
   const twitterText = `${article.title}\n\n${article.excerpt?.slice(0, 100) || ''}\n\n${articleUrl}\n\n${hashtags}`;
-  const linkedinText = `📰 ${article.title}\n\n${article.excerpt || ''}\n\n🔗 ${articleUrl}\n\n${hashtags}`;
-  const telegramText = `<b>${article.title}</b>\n\n${article.excerpt || ''}\n\n<a href="${articleUrl}">اقرأ المزيد</a>`;
+
+  const [aiLinkedin, aiTelegram] = await Promise.all([
+    generateAiCopy('linkedin', article),
+    generateAiCopy('telegram', article),
+  ]);
+
+  const linkedinText = aiLinkedin
+    ? `${aiLinkedin}\n\n🔗 ${articleUrl}`
+    : `📰 ${article.title}\n\n${article.excerpt || ''}\n\n🔗 ${articleUrl}\n\n${hashtags}`;
+  const telegramText = aiTelegram
+    ? `${telegramMarkdownToHtml(aiTelegram)}\n\n<a href="${articleUrl}">اقرأ المزيد</a>`
+    : `<b>${article.title}</b>\n\n${article.excerpt || ''}\n\n<a href="${articleUrl}">اقرأ المزيد</a>`;
 
   return {
     twitter: twitterText,

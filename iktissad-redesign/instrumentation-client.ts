@@ -19,6 +19,18 @@ Sentry.init({
 
   integrations: [Sentry.replayIntegration()],
 
+  // A request cancelled by the browser (navigation, back button, tab closed)
+  // or by a third-party tag surfaces as an unhandled AbortError rejection.
+  // Nothing failed for the reader, so drop those; aborts our own code awaits
+  // are caught where they happen and never reach this handler.
+  beforeSend(event) {
+    const ex = event.exception?.values?.[0];
+    const unhandledAbort =
+      ex?.mechanism?.type === "auto.browser.global_handlers.onunhandledrejection" &&
+      (ex.type === "AbortError" || /^AbortError\b|aborted/i.test(ex.value ?? ""));
+    return unhandledAbort ? null : event;
+  },
+
   debug: !isProd,
 });
 
