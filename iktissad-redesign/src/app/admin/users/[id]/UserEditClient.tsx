@@ -31,6 +31,7 @@ import { Button } from '@/components/ui';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { swrFetcher } from '@/lib/api-client';
 import type { AdminUser, ApiResponse } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
     }
     setIsSaving(true);
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await csrfFetch(`/api/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -158,7 +159,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
 
     setIsSaving(true);
     try {
-      const res = await fetch(`/api/admin/roles/${userId}`, {
+      const res = await csrfFetch(`/api/admin/roles/${userId}`, {
         method: adminRole ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
@@ -184,7 +185,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
     if (!window.confirm(t('admin.users.edit.revokeConfirm'))) return;
     setIsRevokingRole(true);
     try {
-      const res = await fetch(`/api/admin/roles/${userId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/admin/roles/${userId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || t('admin.users.edit.revokeRoleFailed'));
@@ -205,7 +206,7 @@ export default function UserEditClient({ userId }: UserEditClientProps) {
     }
     setIsDeletingUser(true);
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/users/${userId}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || t('admin.users.edit.deleteUserFailed'));

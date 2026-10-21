@@ -94,7 +94,7 @@ export function reportSlowRender(
 
   if (IS_PROD) {
     // Fire-and-forget — intentionally not awaited
-    fetch('/api/admin/perf-report', {
+    csrfFetch('/api/admin/perf-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(report),
@@ -105,3 +105,5 @@ export function reportSlowRender(
     });
   }
 }
+
+import { csrfFetch } from '@/lib/csrf-client';

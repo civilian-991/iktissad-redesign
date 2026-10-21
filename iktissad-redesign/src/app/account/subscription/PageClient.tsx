@@ -20,6 +20,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 interface Plan {
@@ -168,7 +169,7 @@ export default function SubscriptionPageClient({ subscriber, payments, userEmail
   async function handleCancel() {
     setIsCanceling(true);
     try {
-      const res = await fetch(`/api/subscriptions/${subscriber!.id}`, {
+      const res = await csrfFetch(`/api/subscriptions/${subscriber!.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'canceled', canceled_at: new Date().toISOString() }),

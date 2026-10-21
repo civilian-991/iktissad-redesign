@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { swrFetcher } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
 import type { ApiResponse } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -109,7 +110,7 @@ function CommentItem({ comment, articleId, currentUserId, onReplyPosted }: Comme
     if (!replyText.trim() || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch('/api/comments', {
+      const res = await csrfFetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId, body: replyText.trim(), parentId: comment.id }),
@@ -281,7 +282,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     setCommentText('');
 
     try {
-      const res = await fetch('/api/comments', {
+      const res = await csrfFetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId, body: text.trim() }),

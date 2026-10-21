@@ -19,6 +19,7 @@ const CSRF_EXEMPT_PATTERNS = [
   /^\/api\/analytics\/web-vitals$/, // navigator.sendBeacon — cannot set headers
   /^\/api\/ads\/event$/,         // ad impression beacon (sendBeacon); only increments a live ad's counter
   /^\/api\/track\/pageview$/,    // audience page-view beacon (sendBeacon); only increments an anonymous counter
+  /^\/api\/analytics\/read$/,     // reading-depth beacon (sendBeacon on page hide); anonymous analytics only
 ];
 
 // ─── CSRF validation (double-submit cookie) ──────────────────────

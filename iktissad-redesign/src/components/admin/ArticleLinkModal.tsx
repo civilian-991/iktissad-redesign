@@ -15,6 +15,7 @@ import { iconSizes } from '@/lib/design-tokens';
 import { swrFetcher } from '@/lib/api-client';
 import useSWR from 'swr';
 import type { ApiResponse, Article } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ export default function ArticleLinkModal({ sourceId, onClose, onSave }: Props) {
     }
     setSaving(true);
     try {
-      const res = await fetch(`/api/sources/${sourceId}/articles`, {
+      const res = await csrfFetch(`/api/sources/${sourceId}/articles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

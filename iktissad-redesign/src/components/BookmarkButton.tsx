@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface BookmarkButtonProps {
   articleId: string;
@@ -74,14 +75,14 @@ export default function BookmarkButton({
     try {
       if (wasBookmarked) {
         // Remove bookmark
-        const res = await fetch(`/api/bookmarks/${articleId}`, {
+        const res = await csrfFetch(`/api/bookmarks/${articleId}`, {
           method: 'DELETE',
         });
         if (!res.ok) throw new Error('Failed to remove bookmark');
         showFeedback(t('pages.bookmark.removed'));
       } else {
         // Add bookmark
-        const res = await fetch('/api/bookmarks', {
+        const res = await csrfFetch('/api/bookmarks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ articleId }),

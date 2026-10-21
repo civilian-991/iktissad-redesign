@@ -34,6 +34,7 @@ import { Button } from '@/components/ui'
 import type { Article, ApiResponse } from '@/types'
 import type { HeadlineVariant } from '@/app/api/ai/headline-variants/route'
 import type { ABTest } from '@/app/api/admin/ab-tests/route'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -418,7 +419,7 @@ export default function HeadlineABLab({
     setVariants([])
 
     try {
-      const res = await fetch('/api/ai/headline-variants', {
+      const res = await csrfFetch('/api/ai/headline-variants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -454,7 +455,7 @@ export default function HeadlineABLab({
 
       setIsSavingMain(true)
       try {
-        const res = await fetch(`/api/articles/${selectedArticleId}`, {
+        const res = await csrfFetch(`/api/articles/${selectedArticleId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: headline }),

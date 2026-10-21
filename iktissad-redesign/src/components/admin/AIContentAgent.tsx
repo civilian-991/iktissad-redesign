@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { iconSizes } from '@/lib/design-tokens'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -431,7 +432,7 @@ export default function AIContentAgent() {
       abortRef.current = controller
 
       try {
-        const response = await fetch('/api/ai/agent', {
+        const response = await csrfFetch('/api/ai/agent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

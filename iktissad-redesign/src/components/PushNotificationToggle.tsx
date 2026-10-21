@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { csrfFetch } from '@/lib/csrf-client';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -63,7 +64,7 @@ export default function PushNotificationToggle() {
       });
 
       const subJson = sub.toJSON();
-      await fetch('/api/notifications/push/subscribe', {
+      await csrfFetch('/api/notifications/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,7 +90,7 @@ export default function PushNotificationToggle() {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await fetch('/api/notifications/push/unsubscribe', {
+        await csrfFetch('/api/notifications/push/unsubscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ endpoint: sub.endpoint }),

@@ -20,6 +20,7 @@ import {
   Image as ImageIcon,
   Search,
 } from 'lucide-react';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -168,7 +169,7 @@ export default function AIPerformanceRecommendations({
       setIsLoading(true);
       setFetchError(false);
       try {
-        const res = await fetch('/api/ai/performance-recommendations', {
+        const res = await csrfFetch('/api/ai/performance-recommendations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ articleId }),

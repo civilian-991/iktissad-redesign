@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { csrfFetch } from '@/lib/csrf-client';
 
 type SetupStep = 'idle' | 'enrolling' | 'verifying' | 'success' | 'recovery-codes';
 
@@ -133,7 +134,7 @@ export default function TwoFactorSetup() {
 
       // Generate recovery codes immediately after successful enrollment
       try {
-        const res = await fetch('/api/auth/2fa/recovery-codes', { method: 'POST' });
+        const res = await csrfFetch('/api/auth/2fa/recovery-codes', { method: 'POST' });
         if (res.ok) {
           const json = await res.json() as { data?: { codes?: string[] } };
           if (json.data?.codes) {
@@ -178,7 +179,7 @@ export default function TwoFactorSetup() {
       setEnrollment(null);
       setRecoveryCodes([]);
       // Delete recovery codes server-side
-      void fetch('/api/auth/2fa/recovery-codes', { method: 'DELETE' }).catch(() => {});
+      void csrfFetch('/api/auth/2fa/recovery-codes', { method: 'DELETE' }).catch(() => {});
       toast.success('تم تعطيل المصادقة الثنائية');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء تعطيل المصادقة الثنائية';

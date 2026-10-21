@@ -14,6 +14,7 @@ import type { SEOAnalysisResult, SEOIssue } from "@/app/api/ai/seo-analysis/rout
 import SEOInternalLinks from "@/components/admin/SEOInternalLinks";
 import SEOConversionSignal from "@/components/admin/SEOConversionSignal";
 import SEOCompetitorGap from "@/components/admin/SEOCompetitorGap";
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -269,7 +270,7 @@ export default function SEOPanel({
     setFetchError(null);
 
     try {
-      const res = await fetch("/api/ai/seo-analysis", {
+      const res = await csrfFetch("/api/ai/seo-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

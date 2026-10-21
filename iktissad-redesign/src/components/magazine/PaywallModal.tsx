@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -142,7 +143,7 @@ export default function PaywallModal({
     if (!articleId || buyingArticle) return;
     setBuyingArticle(true);
     try {
-      const res = await fetch('/api/checkout/article', {
+      const res = await csrfFetch('/api/checkout/article', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId }),

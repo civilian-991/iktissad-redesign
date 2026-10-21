@@ -33,6 +33,7 @@ import { swrFetcher } from '@/lib/api-client'
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary'
 import type { Article, ApiResponse } from '@/types'
 import type { SocialAccountsStatus } from '@/app/api/admin/social-accounts/route'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -242,7 +243,7 @@ function PlatformPanel({ tab, article, socialStatus }: PlatformPanelProps) {
     setContent('')
 
     try {
-      const res = await fetch('/api/ai/social-content', {
+      const res = await csrfFetch('/api/ai/social-content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

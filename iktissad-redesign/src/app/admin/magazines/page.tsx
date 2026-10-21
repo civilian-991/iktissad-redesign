@@ -26,6 +26,7 @@ import { useTranslation } from '@/lib/i18n';
 import type { MagazineIssue, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
 import DefaiyaPromoCard from '@/components/admin/DefaiyaPromoCard';
+import { csrfFetch } from '@/lib/csrf-client';
 
 
 const years = [2026, 2025, 2024, 2023];
@@ -95,7 +96,7 @@ export default function MagazinesPage() {
     let failed = 0;
     for (const id of selectedMagazines) {
       try {
-        await fetch(`/api/magazines/${id}`, {
+        await csrfFetch(`/api/magazines/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ featured: true }),

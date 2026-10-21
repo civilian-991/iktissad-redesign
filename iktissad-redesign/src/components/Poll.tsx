@@ -6,6 +6,7 @@ import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface PollData {
   id: string;
@@ -93,7 +94,7 @@ function PollCard({ poll }: { poll: PollData }) {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/polls/${poll.id}/vote`, {
+      const res = await csrfFetch(`/api/polls/${poll.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -12,6 +12,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { Sparkles, Loader2, RefreshCw, AlertCircle } from 'lucide-react'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -53,7 +54,7 @@ export default function SEOCompetitorGap({
     setResult('')
 
     try {
-      const response = await fetch('/api/ai/seo-competitor-gap', {
+      const response = await csrfFetch('/api/ai/seo-competitor-gap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content, targetKeyword, articleType }),

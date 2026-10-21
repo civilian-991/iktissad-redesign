@@ -27,6 +27,7 @@ import {
   FileText,
   Wand2,
 } from 'lucide-react'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -65,7 +66,7 @@ async function runStreamAction(
   onChunk: (text: string) => void,
   signal: AbortSignal
 ): Promise<void> {
-  const response = await fetch('/api/ai/stream-action', {
+  const response = await csrfFetch('/api/ai/stream-action', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
@@ -406,7 +407,7 @@ export default function AISidebar({
     setCardState('headlines', { loading: true, result: '', error: null, headlines: [] })
 
     try {
-      const response = await fetch('/api/ai/stream-action', {
+      const response = await csrfFetch('/api/ai/stream-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'headlines', content: getContent(), articleType }),

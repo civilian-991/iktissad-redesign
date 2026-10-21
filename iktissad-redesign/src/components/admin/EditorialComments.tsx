@@ -37,6 +37,7 @@ import { createClient } from '@/lib/supabase/client';
 import { formatRelativeTime } from '@/lib/i18n/format';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, AdminUser } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -472,7 +473,7 @@ export default function EditorialComments({
     if (isReviewRequest) setSendingReview(true);
 
     try {
-      const res = await fetch(`/api/editorial-notes/${articleId}`, {
+      const res = await csrfFetch(`/api/editorial-notes/${articleId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -497,7 +498,7 @@ export default function EditorialComments({
 
   const handleResolutionToggle = useCallback(async (noteId: string, resolved: boolean) => {
     try {
-      const res = await fetch(`/api/editorial-notes/${articleId}/${noteId}`, {
+      const res = await csrfFetch(`/api/editorial-notes/${articleId}/${noteId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resolved }),
@@ -514,7 +515,7 @@ export default function EditorialComments({
   }, [articleId, swrKey, mutate]);
 
   const handleReplySubmit = useCallback(async (parentId: string, body: string) => {
-    const res = await fetch(`/api/editorial-notes/${articleId}`, {
+    const res = await csrfFetch(`/api/editorial-notes/${articleId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ body, parentId }),

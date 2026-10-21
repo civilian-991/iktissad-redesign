@@ -32,6 +32,7 @@ import { swrFetcher } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
 import type { ApiResponse } from '@/types';
 import type { BoardArticle } from '@/app/api/magazines/[id]/articles/route';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Status columns configuration (RTL: right → left reading order) ────────
 
@@ -247,7 +248,7 @@ export function BoardClient({ issueId }: { issueId: string }) {
       setArticles(optimistic);
 
       try {
-        const res = await fetch(`/api/articles/${draggedArticle.id}/status`, {
+        const res = await csrfFetch(`/api/articles/${draggedArticle.id}/status`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: targetStatus }),

@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 import type { ContactInfo } from '@/lib/site-settings';
+import { csrfFetch } from '@/lib/csrf-client';
 
 const contactCardIcons = [MapPin, Phone, Mail, Clock];
 
@@ -36,7 +37,7 @@ export default function ContactPageClient({ contactInfo }: ContactPageClientProp
     setError(null);
 
     try {
-      const res = await fetch('/api/contact', {
+      const res = await csrfFetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formState, turnstileToken }),

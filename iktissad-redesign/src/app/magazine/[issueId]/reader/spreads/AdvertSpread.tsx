@@ -18,18 +18,11 @@ export default function AdvertSpread({ imageUrl, targetUrl, altText, adId }: Adv
     setClicking(true);
 
     try {
-      // Track impression click if we have an adId
-      if (adId) {
-        await fetch(`/api/ads/${adId}/click`, {
-          method: 'POST',
-          keepalive: true,
-        }).catch(() => {
-          // Non-critical — proceed regardless
-        });
-      }
-
-      if (targetUrl) {
-        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      // The click route counts the click and redirects to the ad's own
+      // target URL; without an adId there is nothing to count.
+      const href = adId ? `/api/ads/click/${adId}` : targetUrl;
+      if (href) {
+        window.open(href, '_blank', 'noopener,noreferrer');
       }
     } finally {
       setClicking(false);

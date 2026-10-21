@@ -83,3 +83,33 @@ export async function csrfJsonHeaders(): Promise<Record<string, string>> {
     ? { "Content-Type": "application/json", [CSRF_HEADER]: token }
     : { "Content-Type": "application/json" };
 }
+
+const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * fetch() for same-origin /api calls from the browser. Mutations get the CSRF
+ * header the proxy requires; a CSRF 403 (expired or rotated token) mints a
+ * fresh token and replays the request once. Other methods pass straight
+ * through. Prefer api-client helpers where one exists.
+ */
+export async function csrfFetch(
+  input: RequestInfo | URL,
+  init: RequestInit = {}
+): Promise<Response> {
+  const method = (init.method ?? "GET").toUpperCase();
+  if (!MUTATION_METHODS.has(method)) return fetch(input, init);
+
+  const send = async () => {
+    const headers = new Headers(init.headers);
+    const token = await getCsrfToken();
+    if (token) headers.set(CSRF_HEADER, token);
+    return fetch(input, { ...init, headers });
+  };
+
+  const res = await send();
+  if (res.status !== 403) return res;
+  const body = await res.clone().json().catch(() => null);
+  if (!/csrf/i.test(String(body?.error ?? ""))) return res;
+  invalidateCsrfToken();
+  return send();
+}

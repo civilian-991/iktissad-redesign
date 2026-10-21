@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import { Gift, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface GiftArticleButtonProps {
   articleId: string;
@@ -27,7 +28,7 @@ export default function GiftArticleButton({ articleId, compact = false }: GiftAr
     setLoading(true);
 
     try {
-      const res = await fetch('/api/gift-links', {
+      const res = await csrfFetch('/api/gift-links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId }),

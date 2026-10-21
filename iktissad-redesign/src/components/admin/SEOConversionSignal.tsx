@@ -12,6 +12,7 @@ import type {
   ConversionInsight,
   ConversionSignalResult,
 } from "@/app/api/ai/seo-conversion-signal/route";
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -87,7 +88,7 @@ export default function SEOConversionSignal({
     setLoading(true);
     setFetchError(null);
 
-    fetch("/api/ai/seo-conversion-signal", {
+    csrfFetch("/api/ai/seo-conversion-signal", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

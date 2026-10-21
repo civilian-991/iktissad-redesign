@@ -22,6 +22,7 @@ import {
   Loader2,
   Copy,
 } from 'lucide-react'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -68,7 +69,7 @@ async function streamAction(
   onChunk: (text: string) => void,
   signal: AbortSignal
 ): Promise<void> {
-  const response = await fetch('/api/ai/stream-action', {
+  const response = await csrfFetch('/api/ai/stream-action', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),

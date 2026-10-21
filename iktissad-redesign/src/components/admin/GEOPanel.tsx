@@ -26,6 +26,7 @@ import {
   Info,
 } from "lucide-react";
 import type { GEOAnalysisResult } from "@/app/api/ai/geo-analysis/route";
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
@@ -254,7 +255,7 @@ export default function GEOPanel({
     setFetchError(null);
 
     try {
-      const res = await fetch("/api/ai/geo-analysis", {
+      const res = await csrfFetch("/api/ai/geo-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

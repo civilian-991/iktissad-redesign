@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
 import { Loader2, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface LoginClientProps {
   redirectTo?: string;
@@ -221,7 +222,7 @@ export default function LoginClient({ redirectTo }: LoginClientProps) {
     setLoading(true);
     setError('');
 
-    const res = await fetch('/api/auth/2fa/recover', {
+    const res = await csrfFetch('/api/auth/2fa/recover', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: recoveryCode.trim() }),

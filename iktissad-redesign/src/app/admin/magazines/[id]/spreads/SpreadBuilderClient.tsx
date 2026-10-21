@@ -35,6 +35,7 @@ import SpreadThumbnail from '@/components/admin/spread-editor/SpreadThumbnail';
 import ZoneInspector from '@/components/admin/spread-editor/ZoneInspector';
 import TemplatePicker from '@/components/admin/spread-editor/TemplatePicker';
 import MediaLibraryPanel from '@/components/admin/spread-editor/MediaLibraryPanel';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── State ───────────────────────────────────────────────────────
 
@@ -223,7 +224,7 @@ export default function SpreadBuilderClient({ issueId }: Props) {
     async (spread: MagazineSpread, showToast = false) => {
       try {
         dispatch({ type: 'SET_SAVING', value: true });
-        const res = await fetch(`/api/magazines/${issueId}/spreads/${spread.id}`, {
+        const res = await csrfFetch(`/api/magazines/${issueId}/spreads/${spread.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ zones: spread.zones, metadata: spread.metadata }),
@@ -288,7 +289,7 @@ export default function SpreadBuilderClient({ issueId }: Props) {
         : 1;
 
       try {
-        const res = await fetch(`/api/magazines/${issueId}/spreads`, {
+        const res = await csrfFetch(`/api/magazines/${issueId}/spreads`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ pageNumber: nextPageNum, templateId }),
@@ -313,7 +314,7 @@ export default function SpreadBuilderClient({ issueId }: Props) {
   // ─── Delete spread ──────────────────────────────────────────────
   const handleDeleteSpread = async (spreadId: string) => {
     try {
-      const res = await fetch(`/api/magazines/${issueId}/spreads/${spreadId}`, {
+      const res = await csrfFetch(`/api/magazines/${issueId}/spreads/${spreadId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete');

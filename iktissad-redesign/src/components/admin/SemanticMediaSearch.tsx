@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import type { MediaItem } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface SemanticMediaSearchProps {
   onSelect?: (url: string, filename: string) => void;
@@ -19,7 +20,7 @@ export default function SemanticMediaSearch({ onSelect }: SemanticMediaSearchPro
     setLoading(true);
     setSearched(true);
     try {
-      const res = await fetch('/api/ai/media-search', {
+      const res = await csrfFetch('/api/ai/media-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),

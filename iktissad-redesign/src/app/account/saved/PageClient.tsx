@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -155,7 +156,7 @@ export default function SavedArticlesClient() {
   async function handleRemove(bookmarkId: string, articleId: string) {
     setRemovingIds((prev) => new Set(prev).add(bookmarkId));
     try {
-      const res = await fetch(`/api/bookmarks/${articleId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/bookmarks/${articleId}`, { method: 'DELETE' });
       if (res.ok) {
         // Optimistically update local data
         await mutate(

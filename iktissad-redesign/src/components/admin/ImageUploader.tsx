@@ -13,6 +13,7 @@ import { Upload, X, CheckCircle, AlertCircle, Loader2, Sparkles, Save, ImageIcon
 import { uploadFile, validateFile, type StorageBucket } from '@/lib/supabase/storage';
 import MediaPicker from '@/components/admin/MediaPicker';
 import ImageEditorModal from '@/components/admin/ImageEditorModal';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -114,7 +115,7 @@ export default function ImageUploader({
   const generateAltText = useCallback(async (imageUrl: string) => {
     setAltText((prev) => ({ ...prev, generating: true, error: '', saved: false }));
     try {
-      const res = await fetch('/api/ai/alt-text', {
+      const res = await csrfFetch('/api/ai/alt-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl, mediaId }),
@@ -129,7 +130,7 @@ export default function ImageUploader({
       onAltTextGenerated?.(altAr, altEn);
 
       // Also trigger tag generation in the background
-      fetch('/api/ai/media-tags', {
+      csrfFetch('/api/ai/media-tags', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl, mediaId }),
@@ -150,7 +151,7 @@ export default function ImageUploader({
     if (!mediaId) return;
     setAltText((prev) => ({ ...prev, saving: true, error: '' }));
     try {
-      const res = await fetch(`/api/media/${mediaId}`, {
+      const res = await csrfFetch(`/api/media/${mediaId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ alt: altText.altAr, altEn: altText.altEn }),

@@ -65,6 +65,7 @@ import Link from 'next/link';
 import { swrFetcher } from '@/lib/api-client';
 import { iconSizes } from '@/lib/design-tokens';
 import type { Newsletter, NewsletterBlock, NewsletterBlockType, Article, ApiResponse } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 // crypto.randomUUID() is available in all modern browsers and Node 14.17+
 const uuidv4 = () => crypto.randomUUID();
 
@@ -1018,13 +1019,13 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
       let res: Response;
 
       if (newsletterId) {
-        res = await fetch(`/api/newsletters/${newsletterId}`, {
+        res = await csrfFetch(`/api/newsletters/${newsletterId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch('/api/newsletters', {
+        res = await csrfFetch('/api/newsletters', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -1076,7 +1077,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
       let savedId = newsletterId;
 
       if (savedId) {
-        const updateRes = await fetch(`/api/newsletters/${savedId}`, {
+        const updateRes = await csrfFetch(`/api/newsletters/${savedId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -1086,7 +1087,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
           throw new Error(err.error || 'فشل التحديث');
         }
       } else {
-        const createRes = await fetch('/api/newsletters', {
+        const createRes = await csrfFetch('/api/newsletters', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -1109,7 +1110,7 @@ export default function NewsletterBuilder({ newsletter }: NewsletterBuilderProps
       }
 
       // Send immediately
-      const sendRes = await fetch(`/api/newsletters/${savedId}/send`, {
+      const sendRes = await csrfFetch(`/api/newsletters/${savedId}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

@@ -6,6 +6,7 @@ import type {
   InternalLinkSuggestion,
   InternalLinksResult,
 } from "@/app/api/ai/seo-internal-links/route";
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -133,7 +134,7 @@ export default function SEOInternalLinks({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ai/seo-internal-links", {
+      const res = await csrfFetch("/api/ai/seo-internal-links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

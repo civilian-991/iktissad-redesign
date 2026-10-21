@@ -33,6 +33,7 @@ import { swrFetcher } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
 import type { ApiResponse } from '@/types';
 import type { MagazineSection } from '@/app/api/magazines/[id]/sections/route';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Single Section Row ───────────────────────────────────────────────────────
 
@@ -275,7 +276,7 @@ export function SectionsClient({ issueId }: { issueId: string }) {
       if (updates.themeColor !== undefined) body.themeColor = updates.themeColor;
       if (updates.sortOrder !== undefined) body.sortOrder = updates.sortOrder;
 
-      const res = await fetch(`/api/magazines/${issueId}/sections/${id}`, {
+      const res = await csrfFetch(`/api/magazines/${issueId}/sections/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -302,7 +303,7 @@ export function SectionsClient({ issueId }: { issueId: string }) {
   // Delete section
   const handleDelete = useCallback(
     async (id: string) => {
-      const res = await fetch(`/api/magazines/${issueId}/sections/${id}`, {
+      const res = await csrfFetch(`/api/magazines/${issueId}/sections/${id}`, {
         method: 'DELETE',
       });
 
@@ -323,7 +324,7 @@ export function SectionsClient({ issueId }: { issueId: string }) {
 
   // Add new section
   const handleAddSection = useCallback(async () => {
-    const res = await fetch(`/api/magazines/${issueId}/sections`, {
+    const res = await csrfFetch(`/api/magazines/${issueId}/sections`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -361,7 +362,7 @@ export function SectionsClient({ issueId }: { issueId: string }) {
       try {
         await Promise.all(
           reordered.map((section, index) =>
-            fetch(`/api/magazines/${issueId}/sections/${section.id}`, {
+            csrfFetch(`/api/magazines/${issueId}/sections/${section.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ sortOrder: index }),

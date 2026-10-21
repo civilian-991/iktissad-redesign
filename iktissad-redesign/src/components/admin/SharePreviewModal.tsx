@@ -21,6 +21,7 @@ import {
   Clock,
   Link as LinkIcon,
 } from 'lucide-react';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Props ───────────────────────────────────────────────────────
 
@@ -46,7 +47,7 @@ export default function SharePreviewModal({
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
     try {
-      const res = await fetch('/api/preview/token', {
+      const res = await csrfFetch('/api/preview/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId }),

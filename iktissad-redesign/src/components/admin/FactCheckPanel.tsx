@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ShieldCheck, Loader2, AlertTriangle, ChevronDown, ChevronUp, ExternalLink, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { FactCheckClaim } from '@/app/api/ai/fact-check/route';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface FactCheckPanelProps {
   articleId: string;
@@ -43,7 +44,7 @@ export default function FactCheckPanel({ articleId: _articleId, content, title }
     }
     setIsChecking(true);
     try {
-      const res = await fetch('/api/ai/fact-check', {
+      const res = await csrfFetch('/api/ai/fact-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, title }),

@@ -35,7 +35,7 @@ import LiveBlog from '@/components/LiveBlog';
 import type { JSONContent } from '@tiptap/core';
 import { addBidiIsolation } from '@/lib/i18n/format';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
-import { csrfJsonHeaders } from '@/lib/csrf-client';
+import { csrfJsonHeaders, csrfFetch } from '@/lib/csrf-client';
 import { SITE_URL } from '@/lib/site-config';
 import AdUnit, { StickyMobileAd } from '@/components/ads/AdUnit';
 import { SponsorDisclosure } from '@/components/SponsoredLabel';
@@ -326,7 +326,7 @@ export default function ArticlePageClient({
     // metered-paywall counter for every anonymous reader.
     void csrfJsonHeaders()
       .then((headers) =>
-        fetch('/api/track/article-read', {
+        csrfFetch('/api/track/article-read', {
           method: 'POST',
           headers,
           body: JSON.stringify({

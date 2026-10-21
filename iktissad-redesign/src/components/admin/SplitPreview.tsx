@@ -14,6 +14,7 @@ import {
   Eye,
 } from 'lucide-react'
 import TipTapRenderer from './TipTapRenderer'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -190,7 +191,7 @@ export default function SplitPreview({
     setShare({ open: true, loading: true, url: null, error: null, copied: false })
 
     try {
-      const res = await fetch('/api/preview/token', {
+      const res = await csrfFetch('/api/preview/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleId }),

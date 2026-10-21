@@ -7,6 +7,7 @@ import { Check, X, Crown, Star, Zap, Shield, CreditCard, Tag, Loader2 } from 'lu
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
+import { csrfFetch } from '@/lib/csrf-client';
 
 interface Plan {
   id: string;
@@ -199,7 +200,7 @@ export default function SubscribePageClient({ plans = [], redirectTo: _redirectT
     const planId = getPlanId(tierSlug) ?? tierSlug;
 
     try {
-      const res = await fetch('/api/checkout/session', {
+      const res = await csrfFetch('/api/checkout/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

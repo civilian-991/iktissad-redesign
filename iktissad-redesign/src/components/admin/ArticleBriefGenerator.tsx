@@ -33,6 +33,7 @@ import {
 import { toast } from 'sonner'
 import { iconSizes } from '@/lib/design-tokens'
 import type { ArticleBrief, OutlineSection } from '@/app/api/ai/article-brief/route'
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Article type options ──────────────────────────────────────────────────────
 
@@ -411,7 +412,7 @@ export default function ArticleBriefGenerator() {
     setBrief(null)
 
     try {
-      const res = await fetch('/api/ai/article-brief', {
+      const res = await csrfFetch('/api/ai/article-brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

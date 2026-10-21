@@ -29,6 +29,7 @@ import {
 import { swrFetcher } from '@/lib/api-client';
 import { iconSizes } from '@/lib/design-tokens';
 import type { Newsletter, ApiResponse } from '@/types';
+import { csrfFetch } from '@/lib/csrf-client';
 
 // ─── Status badge ────────────────────────────────────────────────
 
@@ -117,7 +118,7 @@ export default function NewslettersPage() {
     async (id: string) => {
       if (!confirm('هل أنت متأكد من حذف هذه النشرة؟')) return;
       try {
-        const res = await fetch(`/api/newsletters/${id}`, { method: 'DELETE' });
+        const res = await csrfFetch(`/api/newsletters/${id}`, { method: 'DELETE' });
         if (!res.ok) {
           const err = await res.json();
           throw new Error(err.error || 'فشل الحذف');
@@ -322,7 +323,7 @@ export default function NewslettersPage() {
                                 <button
                                   onClick={async () => {
                                     setOpenMenu(null);
-                                    const res = await fetch(
+                                    const res = await csrfFetch(
                                       `/api/newsletters/${nl.id}/send`,
                                       { method: 'POST' }
                                     );
