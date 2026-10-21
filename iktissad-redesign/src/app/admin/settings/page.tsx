@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
 import { useTranslation } from '@/lib/i18n';
+import { csrfJsonHeaders } from '@/lib/csrf-client';
 
 const languages = [
   { code: 'ar', name: 'العربية' },
@@ -226,7 +227,7 @@ export default function SettingsPage() {
     try {
       const res = await fetch('/api/settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await csrfJsonHeaders(),
         body: JSON.stringify({ key: activeTab, value: getTabValue() }),
       });
       if (!res.ok) {
@@ -260,7 +261,7 @@ export default function SettingsPage() {
     try {
       const res = await fetch('/api/settings/change-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await csrfJsonHeaders(),
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       const json = await res.json();

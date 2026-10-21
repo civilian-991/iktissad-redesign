@@ -25,6 +25,7 @@ import { swrFetcher, magazinesKey, deleteMagazine } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n';
 import type { MagazineIssue, ApiResponse } from '@/types';
 import SectionErrorBoundary from '@/components/admin/SectionErrorBoundary';
+import DefaiyaPromoCard from '@/components/admin/DefaiyaPromoCard';
 
 
 const years = [2026, 2025, 2024, 2023];
@@ -168,6 +169,9 @@ export default function MagazinesPage() {
           </Link>
         </div>
       </div>
+
+      {/* Monthly Al Defaiya banner on the homepage */}
+      <DefaiyaPromoCard />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

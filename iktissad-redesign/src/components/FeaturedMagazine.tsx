@@ -3,11 +3,23 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { BookOpen, Eye, ArrowLeft, ArrowUpLeft, Sparkles, Loader2 } from 'lucide-react';
+import { BookOpen, Eye, ArrowLeft, ArrowUpLeft, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation, useFormatters } from '@/lib/i18n';
 import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { MagazineIssue, ApiResponse } from '@/types';
+import { createClient } from '@/lib/supabase/client';
+import { DEFAIYA_SETTING_KEY, parseDefaiyaLink, type DefaiyaPromoSetting } from '@/lib/defaiya';
+
+async function fetchDefaiyaSetting(): Promise<DefaiyaPromoSetting | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (createClient() as any)
+    .from('site_settings')
+    .select('value')
+    .eq('key', DEFAIYA_SETTING_KEY)
+    .maybeSingle();
+  return (data?.value as DefaiyaPromoSetting | undefined) ?? null;
+}
 
 export default function FeaturedMagazine() {
   const { t } = useTranslation();
@@ -20,6 +32,9 @@ export default function FeaturedMagazine() {
   const issues = data?.data ?? [];
   const latestIssue = issues[0];
   const recentIssues = issues.slice(1, 4);
+
+  const { data: defaiyaSetting } = useSWR(DEFAIYA_SETTING_KEY, fetchDefaiyaSetting);
+  const defaiya = defaiyaSetting?.enabled ? parseDefaiyaLink(defaiyaSetting.url) : null;
 
   return (
     <section className="py-20 bg-cream relative overflow-hidden">
@@ -203,6 +218,38 @@ export default function FeaturedMagazine() {
               <Link href="/magazine" className="block text-center py-3 text-gold hover:text-gold-dark font-[family-name:var(--font-display)] font-semibold transition-colors">
                 {t('components.featuredMagazine.viewAllIssues')}
               </Link>
+
+              {/* Sister publication: latest Al Defaiya issue on defaiya.com */}
+              {defaiya && (
+                <a
+                  href={defaiya.url}
+                  target="_blank"
+                  rel="noopener"
+                  className="flex items-center gap-4 p-3 bg-paper border border-gold/30 hover:border-gold transition-all duration-300 group"
+                >
+                  <div className="relative w-20 h-[6.5rem] shadow-lg shrink-0">
+                    <Image
+                      src={defaiya.cover}
+                      alt={t('components.featuredMagazine.defaiyaTitle')}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gold text-xs font-[family-name:var(--font-display)] font-semibold mb-1">
+                      {t('components.featuredMagazine.defaiyaLabel')}
+                    </p>
+                    <h5 className="font-[family-name:var(--font-display)] font-bold text-ink group-hover:text-gold transition-colors">
+                      {t('components.featuredMagazine.defaiyaTitle')}
+                    </h5>
+                    <span className="mt-1 text-graphite text-sm flex items-center gap-1">
+                      {t('components.featuredMagazine.defaiyaCta')}
+                      <ExternalLink size={13} />
+                    </span>
+                  </div>
+                </a>
+              )}
             </motion.div>
           </div>
         )}
