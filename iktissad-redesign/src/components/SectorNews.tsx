@@ -36,16 +36,10 @@ const SECTOR_ICONS: Record<string, React.ElementType> = {
 
 interface Sector { id: string; name: string; slug: string; }
 
-function SectorCard({ sector }: { sector: Sector }) {
+function SectorCard({ sector, articles, loaded }: { sector: Sector; articles: Article[]; loaded: boolean }) {
   const { t } = useTranslation();
   const { fmtDate } = useFormatters();
   const Icon = SECTOR_ICONS[sector.slug] ?? TrendingUp;
-
-  const { data } = useSWR<ApiResponse<Article[]>>(
-    `/api/articles?sector=${sector.slug}&status=published&pageSize=4`,
-    swrFetcher
-  );
-  const articles = data?.data ?? [];
   const featured = articles[0];
   const rest = articles.slice(1, 3);
 
@@ -71,7 +65,7 @@ function SectorCard({ sector }: { sector: Sector }) {
       </div>
 
       {/* Featured Article */}
-      {!data ? (
+      {!loaded ? (
         <div className="h-52 flex items-center justify-center bg-cream">
           <Loader2 className="text-gold animate-spin" size={24} />
         </div>
@@ -144,6 +138,14 @@ export default function SectorNews() {
   const totalPages = Math.ceil(sectors.length / SECTORS_PER_PAGE);
   const visibleSectors = sectors.slice(currentPage * SECTORS_PER_PAGE, (currentPage + 1) * SECTORS_PER_PAGE);
 
+  // One request for the sectors on screen (was one per sector card).
+  const { data: blocks } = useSWR<ApiResponse<Record<string, Article[]>>>(
+    visibleSectors.length
+      ? `/api/articles/section-blocks?sectors=${visibleSectors.map((s) => encodeURIComponent(s.slug)).join(',')}&pageSize=4`
+      : null,
+    swrFetcher
+  );
+
   return (
     <section className="py-24 bg-paper relative overflow-hidden">
       <div className="absolute inset-0 pattern-grid" />
@@ -210,7 +212,7 @@ export default function SectorNews() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                 >
-                  <SectorCard sector={sector} />
+                  <SectorCard sector={sector} articles={blocks?.data?.[sector.slug] ?? []} loaded={!!blocks} />
                 </motion.div>
               ))}
             </motion.div>
