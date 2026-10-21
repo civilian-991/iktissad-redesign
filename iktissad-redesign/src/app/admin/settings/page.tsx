@@ -95,6 +95,7 @@ export default function SettingsPage() {
   const [giftLinksPerMonth, setGiftLinksPerMonth] = useState(5);
   const [singleArticleDefaultPrice, setSingleArticleDefaultPrice] = useState(5);
   const [dynamicPaywall, setDynamicPaywall] = useState(false);
+  const [magazineFree, setMagazineFree] = useState(false);
   const [socialBonusArticle, setSocialBonusArticle] = useState(true);
   const [highEngagementBonus, setHighEngagementBonus] = useState(2);
   const [highEngagementThreshold, setHighEngagementThreshold] = useState(70);
@@ -163,6 +164,7 @@ export default function SettingsPage() {
           if (p.giftLinksPerMonth !== undefined) setGiftLinksPerMonth(p.giftLinksPerMonth);
           if (p.singleArticleDefaultPrice !== undefined) setSingleArticleDefaultPrice(p.singleArticleDefaultPrice);
           if (p.dynamicPaywall !== undefined) setDynamicPaywall(p.dynamicPaywall);
+          if (p.magazineFree !== undefined) setMagazineFree(p.magazineFree);
           if (p.socialBonusArticle !== undefined) setSocialBonusArticle(p.socialBonusArticle);
           if (p.highEngagementBonus !== undefined) setHighEngagementBonus(p.highEngagementBonus);
           if (p.highEngagementThreshold !== undefined) setHighEngagementThreshold(p.highEngagementThreshold);
@@ -199,6 +201,7 @@ export default function SettingsPage() {
           giftLinksPerMonth,
           singleArticleDefaultPrice,
           dynamicPaywall,
+          magazineFree,
           socialBonusArticle,
           highEngagementBonus,
           highEngagementThreshold,
@@ -215,7 +218,7 @@ export default function SettingsPage() {
     smtpHost, smtpPort, smtpUser,
     autoBackup,
     freeArticleLimit, giftLinksPerMonth, singleArticleDefaultPrice,
-    dynamicPaywall, socialBonusArticle, highEngagementBonus, highEngagementThreshold,
+    dynamicPaywall, magazineFree, socialBonusArticle, highEngagementBonus, highEngagementThreshold,
   ]);
 
   const handleSave = useCallback(async () => {
@@ -737,6 +740,30 @@ export default function SettingsPage() {
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
                 />
                 <p className="text-white/30 text-xs mt-1">{t('admin.settings.paywall.priceOverrideHint')}</p>
+              </div>
+            </div>
+
+            {/* Magazine access */}
+            <div className="p-5 bg-white/5 border border-gold/10 rounded-xl">
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <p className="text-white text-sm font-[family-name:var(--font-display)]">
+                    {t('admin.settings.paywall.magazineFree')}
+                  </p>
+                  <p className="text-white/40 text-xs">{t('admin.settings.paywall.magazineFreeDesc')}</p>
+                </div>
+                <button
+                  onClick={() => setMagazineFree(!magazineFree)}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${
+                    magazineFree ? 'bg-gold' : 'bg-white/10'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                      magazineFree ? 'right-1' : 'left-1'
+                    }`}
+                  />
+                </button>
               </div>
             </div>
 

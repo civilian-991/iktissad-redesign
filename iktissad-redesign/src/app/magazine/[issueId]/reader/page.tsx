@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { isMagazineFree } from '@/lib/magazine/access';
 import ReaderClient from './ReaderClient';
 import MagazineTeaserClient from './MagazineTeaserClient';
 import type { MagazineIssue, MagazineSpread, MagazineSection } from '@/types';
@@ -140,7 +141,8 @@ export default async function ReaderPage({ params }: PageProps) {
   }));
 
   // ── Non-subscriber: show teaser instead of redirect ─────────────────────
-  if (!hasSubscription) {
+  // (skipped while the magazine is free for everyone)
+  if (!hasSubscription && !(await isMagazineFree(supabase))) {
     return (
       <MagazineTeaserClient
         issue={issue}

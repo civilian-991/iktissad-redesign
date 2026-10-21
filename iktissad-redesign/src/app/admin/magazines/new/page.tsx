@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import {
   ArrowRight,
   Save,
-  Eye,
   Upload,
   X,
   Calendar,
@@ -26,6 +25,7 @@ import { useTranslation } from '@/lib/i18n';
 import { createMagazine, updateMagazine } from '@/lib/api-client';
 import { uploadFile } from '@/lib/supabase/storage';
 import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
+import { buildIssueTitle, buildIssueTitleEn, defaultPublishDate } from '@/lib/magazine/issue-title';
 
 const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
@@ -39,7 +39,10 @@ export default function NewMagazinePage() {
 
   const [issueNumber, setIssueNumber] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
-  const [month, setMonth] = useState(months[new Date().getMonth()]);
+  const [month, setMonth] = useState(new Date().getMonth());
+  // Last month of a double issue (e.g. July/August); null for a single month
+  const [endMonth, setEndMonth] = useState<number | null>(null);
+  const [isSpecial, setIsSpecial] = useState(false);
   const [pages, setPages] = useState('');
   const [publishDate, setPublishDate] = useState('');
   const [status, setStatus] = useState('draft');
@@ -55,6 +58,9 @@ export default function NewMagazinePage() {
   const [conversionStep, setConversionStep] = useState<ConversionStep>('idle');
   const [conversionProgress, setConversionProgress] = useState({ current: 0, total: 0 });
   const [conversionError, setConversionError] = useState<string | null>(null);
+
+  const titleInput = { issueNumber, year, month, endMonth, special: isSpecial };
+  const title = buildIssueTitle(titleInput);
 
   const isBusy = conversionStep !== 'idle' && conversionStep !== 'done' && conversionStep !== 'error';
 
@@ -78,12 +84,13 @@ export default function NewMagazinePage() {
       // ── Step 1: Create magazine record (get the ID) ──────────────────────────
       setConversionStep('creating');
       const res = await createMagazine({
-        title: `${t('admin.magazines.create.issueLabel')} ${issueNumber}`,
-        titleEn: `Issue ${issueNumber}`,
+        title,
+        titleEn: buildIssueTitleEn(titleInput),
         issueNumber: Number(issueNumber),
+        issueType: isSpecial ? 'special' : 'regular',
         coverImage: coverImage || '',
         pdfUrl: '',
-        publishDate: publishDate || undefined,
+        publishDate: publishDate || defaultPublishDate(year, month),
         status: saveStatus || status,
         featured,
         pages: pages ? Number(pages) : undefined,
@@ -162,10 +169,6 @@ export default function NewMagazinePage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-            <Eye size={18} />
-            {t('admin.magazines.create.preview')}
-          </button>
           <button
             onClick={() => handleSave()}
             disabled={isBusy}
@@ -268,11 +271,31 @@ export default function NewMagazinePage() {
                 </label>
                 <select
                   value={month}
-                  onChange={(e) => setMonth(e.target.value)}
+                  onChange={(e) => {
+                    const next = Number(e.target.value);
+                    setMonth(next);
+                    if (endMonth !== null && endMonth <= next) setEndMonth(null);
+                  }}
                   className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
                 >
-                  {months.map(m => (
-                    <option key={m} value={m}>{m}</option>
+                  {months.map((m, i) => (
+                    <option key={m} value={i}>{m}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+                  {t('admin.magazines.form.throughMonth')}
+                </label>
+                <select
+                  value={endMonth ?? ''}
+                  onChange={(e) => setEndMonth(e.target.value === '' ? null : Number(e.target.value))}
+                  className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
+                >
+                  <option value="">{t('admin.magazines.form.singleMonth')}</option>
+                  {months.map((m, i) => i > month && (
+                    <option key={m} value={i}>{m}</option>
                   ))}
                 </select>
               </div>
@@ -290,6 +313,11 @@ export default function NewMagazinePage() {
                 />
               </div>
             </div>
+
+            <p className="mt-4 text-white/50 text-sm font-[family-name:var(--font-display)]">
+              {t('admin.magazines.form.generatedTitle')}{' '}
+              <span className="text-white" dir="rtl">{title}</span>
+            </p>
           </motion.div>
 
           {/* Cover Image */}
@@ -499,6 +527,29 @@ export default function NewMagazinePage() {
               </div>
             </div>
 
+            <div className="flex items-center justify-between p-4 mb-4 bg-white/5 rounded-xl">
+              <div className="flex items-center gap-3">
+                <BookOpen size={20} className={isSpecial ? 'text-gold' : 'text-white/40'} />
+                <div>
+                  <p className="text-white font-[family-name:var(--font-display)] font-semibold">
+                    {t('admin.magazines.form.specialIssue')}
+                  </p>
+                  <p className="text-white/50 text-xs">
+                    {t('admin.magazines.form.specialIssueDesc')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSpecial(!isSpecial)}
+                className={`w-12 h-7 rounded-full transition-all ${isSpecial ? 'bg-gold' : 'bg-white/20'}`}
+              >
+                <motion.div
+                  animate={{ x: isSpecial ? 20 : 2 }}
+                  className="w-5 h-5 bg-white rounded-full shadow-lg"
+                />
+              </button>
+            </div>
+
             <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
               <div className="flex items-center gap-3">
                 <Star size={20} className={featured ? 'text-gold fill-gold' : 'text-white/40'} />
@@ -549,10 +600,12 @@ export default function NewMagazinePage() {
                   </div>
                 )}
               </div>
-              <h3 className="font-[family-name:var(--font-display)] font-bold text-white">
-                {t('admin.magazines.create.issueLabel')} {issueNumber || '---'}
+              <h3 className="font-[family-name:var(--font-display)] font-bold text-white" dir="rtl">
+                {title}
               </h3>
-              <p className="text-gold text-sm">{month} {year}</p>
+              <p className="text-gold text-sm">
+                {t('admin.magazines.create.issueLabel')} {issueNumber || '---'}
+              </p>
               {pdfFileObj && (
                 <div className="mt-2 flex items-center gap-1.5 text-white/50 text-xs">
                   <CheckCircle2 size={12} className="text-profit" />

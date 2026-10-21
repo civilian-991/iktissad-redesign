@@ -73,10 +73,12 @@ MagazinePage.displayName = 'MagazinePage';
 interface Props {
   issue: MagazineIssue;
   isSubscriber: boolean;
+  /** Subscriber, or the magazine is currently free for everyone. */
+  canReadAll: boolean;
   isLoggedIn: boolean;
 }
 
-export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props) {
+export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadAll }: Props) {
   const [currentPage, setCurrentPage] = useState(0);
   const [zoom, setZoom] = useState(1.0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -107,12 +109,12 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   useEffect(() => {
     if (!pages.length) return;
     [currentPage + 2, currentPage + 3, currentPage + 4, currentPage + 5]
-      .filter(i => i < total && (isSubscriber || i < FREE_PAGES))
+      .filter(i => i < total && (canReadAll || i < FREE_PAGES))
       .forEach(i => {
         const img = new window.Image();
         img.src = pages[i];
       });
-  }, [currentPage, pages, total, isSubscriber]);
+  }, [currentPage, pages, total, canReadAll]);
 
   // Auto-hide UI on idle — on mobile keep UI always visible
   const kickUiTimer = useCallback(() => {
@@ -161,7 +163,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
   // Paywall intercept on page flip
   function handleFlip(e: any) {
     const newPage: number = e.data;
-    if (!isSubscriber && newPage >= FREE_PAGES) {
+    if (!canReadAll && newPage >= FREE_PAGES) {
       // Snap back to last free page
       setTimeout(() => {
         flipBookRef.current?.pageFlip?.()?.flip(FREE_PAGES - 1);
@@ -396,7 +398,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
                   <Download size={17} />
                 </button>
               )}
-              {!isSubscriber && (
+              {!canReadAll && (
                 <button
                   onClick={() => setPaywallOpen(true)}
                   className="px-3 py-1.5 text-xs font-[family-name:var(--font-display)] font-semibold text-stone-900 bg-gold hover:brightness-110 rounded transition-all ms-1"
@@ -476,7 +478,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
                 key={i}
                 url={url}
                 num={i + 1}
-                locked={!isSubscriber && i >= FREE_PAGES}
+                locked={!canReadAll && i >= FREE_PAGES}
               />
             ))}
           </HTMLFlipBook>
@@ -513,7 +515,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
                 const r = e.currentTarget.getBoundingClientRect();
                 const ratio = 1 - (e.clientX - r.left) / r.width;
                 const target = Math.round(ratio * (total - 1));
-                if (!isSubscriber && target >= FREE_PAGES) {
+                if (!canReadAll && target >= FREE_PAGES) {
                   setPaywallOpen(true);
                   return;
                 }
@@ -566,7 +568,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber }: Props)
             <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 xl:grid-cols-12 gap-2 p-6">
               {pages.map((url, i) => {
                 const isCurrent = i === currentPage || i === currentPage + 1;
-                const isLocked = !isSubscriber && i >= FREE_PAGES;
+                const isLocked = !canReadAll && i >= FREE_PAGES;
                 return (
                   <motion.button
                     key={i}

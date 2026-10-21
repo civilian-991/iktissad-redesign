@@ -38,14 +38,11 @@ import { convertPdfToImages } from '@/lib/magazine/pdf-to-images';
 
 type ConversionStep = 'idle' | 'uploading-pdf' | 'converting' | 'done' | 'error';
 
-const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
 export default function EditMagazinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t } = useTranslation();
   const router = useRouter();
-
-  const months = monthKeys.map(k => t(`admin.magazines.form.months.${k}`));
 
   const { data, isLoading } = useSWR<ApiResponse<MagazineIssue>>(
     `/api/magazines/${id}`,
@@ -56,8 +53,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   const magazine = data?.data;
 
   const [issueNumber, setIssueNumber] = useState('');
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [month, setMonth] = useState(months[new Date().getMonth()]);
+  const [title, setTitle] = useState('');
   const [pages, setPages] = useState('');
   const [publishDate, setPublishDate] = useState('');
   const [status, setStatus] = useState('draft');
@@ -82,10 +78,8 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     if (magazine && !initialized) {
       setIssueNumber(String(magazine.issueNumber ?? ''));
+      setTitle(magazine.title ?? '');
       if (magazine.publishDate) {
-        const d = new Date(magazine.publishDate);
-        setYear(d.getFullYear());
-        setMonth(months[d.getMonth()] || months[0]);
         setPublishDate(magazine.publishDate.split('T')[0] || '');
       }
       setPages(String(magazine.pages ?? ''));
@@ -96,7 +90,7 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
       setHighlights(magazine.highlights?.length ? magazine.highlights : ['']);
       setInitialized(true);
     }
-  }, [magazine, initialized, months]);
+  }, [magazine, initialized]);
 
   const addHighlight = () => {
     setHighlights([...highlights, '']);
@@ -116,8 +110,9 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
     setIsSaving(true);
     try {
       await updateMagazine(id, {
-        title: `${t('admin.magazines.create.issueLabel')} ${issueNumber}`,
-        titleEn: `Issue ${issueNumber}`,
+        // Archive titles carry the month(s) and special-issue marker, so save
+        // what the editor sees rather than rebuilding it from the number.
+        title: title.trim() || undefined,
         issueNumber: Number(issueNumber),
         coverImage: coverImage || '',
         pdfUrl: pdfFile || '',
@@ -350,36 +345,18 @@ export default function EditMagazinePage({ params }: { params: Promise<{ id: str
                 />
               </div>
 
-              {/* Year */}
+              {/* Title */}
               <div>
                 <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  {t('admin.magazines.form.year')}
+                  {t('admin.magazines.form.title')}
                 </label>
-                <select
-                  value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
-                >
-                  {Array.from({ length: new Date().getFullYear() - 1955 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Month */}
-              <div>
-                <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
-                  {t('admin.magazines.form.month')}
-                </label>
-                <select
-                  value={month}
-                  onChange={(e) => setMonth(e.target.value)}
-                  className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
-                >
-                  {months.map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] placeholder:text-white/30 focus:outline-none focus:border-gold/30 transition-colors"
+                />
               </div>
 
               {/* Pages */}

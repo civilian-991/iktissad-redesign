@@ -1,6 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { isMagazineFree } from '@/lib/magazine/access';
 import type { Article, MagazineIssue, MagazineSpread } from '@/types';
 import ArticleReadingPageClient from './PageClient';
 
@@ -59,24 +60,25 @@ export default async function ArticleReadPage({ params }: PageProps) {
   const { issueId, articleId } = await params;
   const supabase = await createClient();
 
-  // ── Auth check ────────────────────────────────────────────────────────────
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect(`/login?redirect=/magazine/${issueId}/read/${articleId}`);
-  }
+  // ── Access check (skipped while the magazine is free for everyone) ──────
+  if (!(await isMagazineFree(supabase))) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      redirect(`/login?redirect=/magazine/${issueId}/read/${articleId}`);
+    }
 
-  // ── Subscription check ────────────────────────────────────────────────────
-  const { data: subscriber } = await supabase
-    .from('subscribers')
-    .select('id, status')
-    .eq('user_id', user.id)
-    .in('status', ['active', 'trialing'])
-    .maybeSingle();
+    const { data: subscriber } = await supabase
+      .from('subscribers')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle();
 
-  if (!subscriber) {
-    redirect(`/subscribe?redirect=/magazine/${issueId}/read/${articleId}`);
+    if (!subscriber) {
+      redirect(`/subscribe?redirect=/magazine/${issueId}/read/${articleId}`);
+    }
   }
 
   // ── Fetch article ─────────────────────────────────────────────────────────

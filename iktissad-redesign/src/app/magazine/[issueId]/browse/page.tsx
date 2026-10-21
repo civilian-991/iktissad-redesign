@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { isMagazineFree } from '@/lib/magazine/access';
 import MagazineBrowsePageClient from './PageClient';
 import type { MagazineIssue } from '@/types';
 
@@ -100,6 +101,7 @@ export default async function MagazineBrowsePage({ params }: PageProps) {
     <MagazineBrowsePageClient
       issue={issue}
       isSubscriber={isSubscriber}
+      canReadAll={isSubscriber || (await isMagazineFree(supabase))}
       isLoggedIn={isLoggedIn}
     />
   );

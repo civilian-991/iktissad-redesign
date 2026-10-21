@@ -4,14 +4,16 @@
  * Runs entirely in the admin's browser:
  *   1. Load PDF via pdfjs-dist
  *   2. Render each page to canvas at 1.5× scale
- *   3. Export as WebP blob (quality 0.88)
- *   4. Upload to Supabase Storage: magazines/pages/{issueId}/page-NNN.webp (upsert)
- *   5. Return ordered array of public CDN URLs
+ *   3. Trim printer crop marks and bleed when the PDF carries them
+ *   4. Export as WebP blob (quality 0.88)
+ *   5. Upload to Supabase Storage: magazines/pages/{issueId}/page-NNN.webp (upsert)
+ *   6. Return ordered array of public CDN URLs
  *
  * The original PDF is NOT handled here — upload it separately via uploadFile().
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { detectCropMarks, type TrimRect } from '@/lib/magazine/crop-marks';
 
 const SCALE = 1.5;
 const WEBP_QUALITY = 0.88;
@@ -28,17 +30,43 @@ async function getPdfJs() {
   return pdfjs;
 }
 
-async function renderPageToBlob(pdf: any, pageNum: number): Promise<Blob> {
+/** Crop found on an earlier page, reused for every page of the same size. */
+interface TrimState {
+  rect: TrimRect | null;
+  width: number;
+  height: number;
+}
+
+async function renderPageToBlob(pdf: any, pageNum: number, trim: TrimState): Promise<Blob> {
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale: SCALE });
 
-  const canvas = document.createElement('canvas');
+  let canvas = document.createElement('canvas');
   canvas.width = viewport.width;
   canvas.height = viewport.height;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
   await page.render({ canvasContext: ctx, viewport }).promise;
   page.cleanup();
+
+  // Print PDFs repeat the same marks on every page, so detect until one page
+  // yields a crop and apply it to all pages of the same dimensions.
+  if (!trim.rect) {
+    const found = detectCropMarks(
+      ctx.getImageData(0, 0, canvas.width, canvas.height).data,
+      canvas.width,
+      canvas.height
+    );
+    if (found) Object.assign(trim, { rect: found, width: canvas.width, height: canvas.height });
+  }
+  if (trim.rect && trim.width === canvas.width && trim.height === canvas.height) {
+    const { x, y, width, height } = trim.rect;
+    const cropped = document.createElement('canvas');
+    cropped.width = width;
+    cropped.height = height;
+    cropped.getContext('2d')!.drawImage(canvas, x, y, width, height, 0, 0, width, height);
+    canvas = cropped;
+  }
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -79,9 +107,10 @@ export async function convertPdfToImages(
   const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
   const numPages = pdf.numPages;
   const urls: string[] = [];
+  const trim: TrimState = { rect: null, width: 0, height: 0 };
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const blob = await renderPageToBlob(pdf, pageNum);
+    const blob = await renderPageToBlob(pdf, pageNum, trim);
     const paddedNum = String(pageNum).padStart(3, '0');
     const storagePath = `pages/${issueId}/page-${paddedNum}.webp`;
 
