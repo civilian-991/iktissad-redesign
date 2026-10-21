@@ -13,6 +13,12 @@ import PaywallModal from '@/components/magazine/PaywallModal';
 
 // Pages 1–N are free; page N+1 onwards triggers paywall (0-indexed: index >= FREE_PAGES)
 const FREE_PAGES = 3;
+// Height / width of a magazine page (scans are 800×1054, new uploads 871×1147).
+// The frame must match or object-cover crops the page edges.
+const PAGE_RATIO = 1.3175;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2.5;
+const ZOOM_STEP = 0.25;
 
 // ─── Page component (must forwardRef for react-pageflip) ──────────────────────
 
@@ -96,6 +102,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
   };
   const uiTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const flipBookRef = useRef<any>(null);
+  const bookScrollRef = useRef<HTMLDivElement>(null);
 
   const pages = useMemo(() => issue.pagesImages ?? [], [issue.pagesImages]);
   const total = pages.length;
@@ -184,18 +191,40 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
       setIsMobile(mobile);
       // Mobile: single-page portrait — use ~86% of viewport width
       // Desktop: two-page spread — each page is ~45% of viewport width
-      const baseW = mobile
+      const maxW = mobile
         ? Math.min(vw * 0.86, 480)
         : Math.min(vw / 2.2, 520);
-      const w = Math.round(baseW * zoom);
       const maxH = mobile ? vh * 0.72 : vh * 0.82; // leave room for header on mobile
-      const h = Math.round(Math.min(maxH, w * 1.42) * zoom);
-      setDims({ w, h });
+      // Fit a page at 100%, then scale both sides so zoom keeps the shape.
+      const fitH = Math.min(maxH, maxW * PAGE_RATIO);
+      const fitW = fitH / PAGE_RATIO;
+      setDims({ w: Math.round(fitW * zoom), h: Math.round(fitH * zoom) });
     }
     calc();
     window.addEventListener('resize', calc);
     return () => window.removeEventListener('resize', calc);
   }, [zoom]);
+
+  // After a zoom or resize remounts the book, centre the visible page(s) in the
+  // scroll area; otherwise a zoomed spread opens scrolled to one edge.
+  useEffect(() => {
+    const el = bookScrollRef.current;
+    if (!el) return;
+    const id = setTimeout(() => {
+      const shown = [...el.querySelectorAll('img')]
+        .map(img => img.getBoundingClientRect())
+        .filter(r => r.width > 0 && r.height > 0);
+      if (!shown.length) return;
+      const box = el.getBoundingClientRect();
+      const left = Math.min(...shown.map(r => r.left));
+      const right = Math.max(...shown.map(r => r.right));
+      const top = Math.min(...shown.map(r => r.top));
+      const bottom = Math.max(...shown.map(r => r.bottom));
+      el.scrollLeft += (left + right) / 2 - (box.left + box.width / 2);
+      el.scrollTop += (top + bottom) / 2 - (box.top + box.height / 2);
+    }, 80);
+    return () => clearTimeout(id);
+  }, [dims]);
 
   const readingProgress = total > 0 ? ((currentPage + 1) / total) * 100 : 0;
 
@@ -358,15 +387,24 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
               {!isMobile && (
                 <>
                   <button
-                    onClick={() => setZoom(z => Math.min(1.5, parseFloat((z + 0.1).toFixed(1))))}
-                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
+                    onClick={() => setZoom(z => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                    disabled={zoom >= ZOOM_MAX}
+                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all disabled:opacity-30 disabled:pointer-events-none"
                     title="تكبير"
                   >
                     <ZoomIn size={17} />
                   </button>
                   <button
-                    onClick={() => setZoom(z => Math.max(0.5, parseFloat((z - 0.1).toFixed(1))))}
-                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all"
+                    onClick={() => setZoom(1)}
+                    className="min-w-[3rem] px-1 py-2 text-white/50 hover:text-gold text-xs font-mono tabular-nums rounded-lg hover:bg-white/5 transition-all"
+                    title="الحجم الأصلي"
+                  >
+                    {Math.round(zoom * 100)}%
+                  </button>
+                  <button
+                    onClick={() => setZoom(z => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                    disabled={zoom <= ZOOM_MIN}
+                    className="p-2 text-white/50 hover:text-gold rounded-lg hover:bg-white/5 transition-all disabled:opacity-30 disabled:pointer-events-none"
                     title="تصغير"
                   >
                     <ZoomOut size={17} />
@@ -444,16 +482,22 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
         {/* dir=ltr isolates react-pageflip from RTL layout; scaleX(-1) mirrors the spread
             so the cover (page 0) appears on the RIGHT — correct for Arabic books. */}
         {HTMLFlipBook && pages.length > 0 && (
-          <div dir="ltr" style={{ transform: 'scaleX(-1)' }}>
+          // Scroll container so a zoomed-in spread can be panned; m-auto (not
+          // justify-center) keeps the overflowing left edge reachable.
+          <div ref={bookScrollRef} dir="ltr" className="absolute inset-0 overflow-auto flex">
+          <div dir="ltr" className="m-auto" style={{ transform: 'scaleX(-1)' }}>
+          {/* react-pageflip reads width/height only on mount, so remount it at
+              the current page whenever the size changes (zoom or resize). */}
           <HTMLFlipBook
+            key={`${dims.w}x${dims.h}`}
             ref={flipBookRef}
             width={dims.w}
             height={dims.h}
             size="fixed"
             minWidth={180}
-            maxWidth={600}
+            maxWidth={3000}
             minHeight={260}
-            maxHeight={900}
+            maxHeight={4000}
             drawShadow={true}
             flippingTime={750}
             usePortrait={isMobile}
@@ -470,7 +514,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
             style={{
               filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.9)) drop-shadow(0 10px 30px rgba(0,0,0,0.7))',
             }}
-            startPage={0}
+            startPage={currentPage}
             onFlip={handleFlip}
           >
             {pages.map((url, i) => (
@@ -482,6 +526,7 @@ export default function MagazineBrowsePageClient({ issue, isSubscriber, canReadA
               />
             ))}
           </HTMLFlipBook>
+          </div>
           </div>
         )}
       </div>
