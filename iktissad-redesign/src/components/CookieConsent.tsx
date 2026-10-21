@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { storageGet, storageSet } from '@/lib/safe-storage';
 
 export interface CookiePreferences {
   necessary: true;   // always on
@@ -15,7 +16,7 @@ const PREFS_KEY = 'cookie-preferences';
 
 function getStoredPreferences(): CookiePreferences | null {
   try {
-    const raw = localStorage.getItem(PREFS_KEY);
+    const raw = storageGet(PREFS_KEY);
     if (!raw) return null;
     return JSON.parse(raw) as CookiePreferences;
   } catch {
@@ -24,8 +25,7 @@ function getStoredPreferences(): CookiePreferences | null {
 }
 
 export function getConsentPreferences(): CookiePreferences | null {
-  if (typeof window === 'undefined') return null;
-  const consent = localStorage.getItem(CONSENT_KEY);
+  const consent = storageGet(CONSENT_KEY);
   if (!consent || consent === 'pending') return null;
   return getStoredPreferences();
 }
@@ -39,7 +39,7 @@ export default function CookieConsent() {
 
   useEffect(() => {
     setMounted(true);
-    const consent = localStorage.getItem(CONSENT_KEY);
+    const consent = storageGet(CONSENT_KEY);
     if (consent === null) {
       const timer = setTimeout(() => setVisible(true), 300);
       return () => clearTimeout(timer);
@@ -72,8 +72,8 @@ export default function CookieConsent() {
   }, [visible, showCustomize]);
 
   function saveAndClose(prefs: CookiePreferences) {
-    localStorage.setItem(CONSENT_KEY, 'accepted');
-    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    storageSet(CONSENT_KEY, 'accepted');
+    storageSet(PREFS_KEY, JSON.stringify(prefs));
     setVisible(false);
     window.dispatchEvent(new CustomEvent('cookie-consent-saved', { detail: prefs }));
   }
@@ -82,8 +82,8 @@ export default function CookieConsent() {
     saveAndClose({ necessary: true, analytics: true, advertising: true });
 
   const handleRejectAll = () => {
-    localStorage.setItem(CONSENT_KEY, 'declined');
-    localStorage.setItem(PREFS_KEY, JSON.stringify({ necessary: true, analytics: true, advertising: false }));
+    storageSet(CONSENT_KEY, 'declined');
+    storageSet(PREFS_KEY, JSON.stringify({ necessary: true, analytics: true, advertising: false }));
     setVisible(false);
     window.dispatchEvent(new CustomEvent('cookie-consent-saved', {
       detail: { necessary: true, analytics: true, advertising: false },

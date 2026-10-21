@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import { csrfFetch } from '@/lib/csrf-client';
+import { storageGet, storageSet } from '@/lib/safe-storage';
 
 interface PollData {
   id: string;
@@ -25,23 +26,21 @@ const VOTE_COOKIE_PREFIX = 'ikt_poll_';
 
 function getVoterHash(): string {
   if (typeof window === 'undefined') return '';
-  let hash = localStorage.getItem('ikt_voter_hash');
+  let hash = storageGet('ikt_voter_hash');
   if (!hash) {
     hash = crypto.randomUUID();
-    localStorage.setItem('ikt_voter_hash', hash);
+    storageSet('ikt_voter_hash', hash);
   }
   return hash;
 }
 
 function hasVotedLocally(pollId: string): number | null {
-  if (typeof localStorage === 'undefined') return null;
-  const val = localStorage.getItem(`${VOTE_COOKIE_PREFIX}${pollId}`);
+  const val = storageGet(`${VOTE_COOKIE_PREFIX}${pollId}`);
   return val !== null ? parseInt(val, 10) : null;
 }
 
 function recordVoteLocally(pollId: string, optionIndex: number) {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(`${VOTE_COOKIE_PREFIX}${pollId}`, String(optionIndex));
+  storageSet(`${VOTE_COOKIE_PREFIX}${pollId}`, String(optionIndex));
 }
 
 export default function Poll({ articleId }: PollProps) {

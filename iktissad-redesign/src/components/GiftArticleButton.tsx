@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { Gift, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { csrfFetch } from '@/lib/csrf-client';
+import { copyText } from '@/lib/copy-text';
 
 interface GiftArticleButtonProps {
   articleId: string;
@@ -43,7 +44,7 @@ export default function GiftArticleButton({ articleId, compact = false }: GiftAr
 
       const { url } = json.data as { url: string; token: string; expiresAt: string };
 
-      await navigator.clipboard.writeText(url);
+      if (!(await copyText(url))) throw new Error('copy failed');
       setGifted(true);
       toast.success('تم نسخ رابط الهدية!', {
         description: 'شارك هذا الرابط مع شخص ليقرأ المقال مجاناً',

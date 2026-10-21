@@ -73,15 +73,17 @@ function ArticleTile({
 
 type Variant = 'tiles' | 'lead';
 
-function SectionBlock({ section, alt, variant }: { section: Section; alt: boolean; variant: Variant }) {
+function SectionBlock({
+  section, alt, variant, articles, isLoading,
+}: {
+  section: Section;
+  alt: boolean;
+  variant: Variant;
+  articles: Article[];
+  isLoading: boolean;
+}) {
   const { t, locale } = useTranslation();
   const { fmtDate } = useFormatters();
-
-  const { data, isLoading } = useSWR<ApiResponse<Article[]>>(
-    `/api/articles?section=${section.slug}&status=published&pageSize=4`,
-    swrFetcher
-  );
-  const articles = data?.data ?? [];
 
   if (!isLoading && articles.length === 0) return null;
 
@@ -177,6 +179,14 @@ export default function HomeSectionBlocks() {
     (s) => !HARDCODED_SECTION_SLUGS.has(s.slug) && (s.articleCount ?? 0) > 0
   );
 
+  // One request for every block (was one per section).
+  const { data: blocks, isLoading } = useSWR<ApiResponse<Record<string, Article[]>>>(
+    sections.length
+      ? `/api/articles/section-blocks?sections=${sections.map((s) => encodeURIComponent(s.slug)).join(',')}&pageSize=4`
+      : null,
+    swrFetcher
+  );
+
   return (
     <>
       {sections.map((s, i) => (
@@ -187,6 +197,8 @@ export default function HomeSectionBlocks() {
           /* Alternate layout AND background: four combinations, so no two
              adjacent blocks — and no block two down — look the same. */
           variant={i % 2 === 0 ? 'tiles' : 'lead'}
+          articles={blocks?.data?.[s.slug] ?? []}
+          isLoading={isLoading}
         />
       ))}
     </>

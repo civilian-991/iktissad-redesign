@@ -41,6 +41,8 @@ import AdUnit, { StickyMobileAd } from '@/components/ads/AdUnit';
 import { SponsorDisclosure } from '@/components/SponsoredLabel';
 import { useReadingBeacon } from '@/lib/articles/use-reading-beacon';
 import { getOrCreateVisitorId } from '@/lib/visitor-id';
+import { storageGet, storageSet } from '@/lib/safe-storage';
+import { copyText } from '@/lib/copy-text';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
@@ -52,9 +54,8 @@ const ANON_METER_KEY = 'ikt_reads';
 
 /** Returns count of unique articles read this calendar month by anonymous user. */
 function getAnonReadCount(): number {
-  if (typeof localStorage === 'undefined') return 0;
   try {
-    const raw = localStorage.getItem(ANON_METER_KEY);
+    const raw = storageGet(ANON_METER_KEY);
     if (!raw) return 0;
     const { month, slugs }: { month: string; slugs: string[] } = JSON.parse(raw);
     const now = new Date();
@@ -68,18 +69,17 @@ function getAnonReadCount(): number {
 
 /** Adds a slug to the anonymous meter. Returns new count. */
 function recordAnonRead(slug: string): number {
-  if (typeof localStorage === 'undefined') return 0;
   try {
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
-    const raw = localStorage.getItem(ANON_METER_KEY);
+    const raw = storageGet(ANON_METER_KEY);
     let slugs: string[] = [];
     if (raw) {
       const parsed: { month: string; slugs: string[] } = JSON.parse(raw);
       if (parsed.month === currentMonth) slugs = parsed.slugs ?? [];
     }
     if (!slugs.includes(slug)) slugs.push(slug);
-    localStorage.setItem(ANON_METER_KEY, JSON.stringify({ month: currentMonth, slugs }));
+    storageSet(ANON_METER_KEY, JSON.stringify({ month: currentMonth, slugs }));
     return slugs.length;
   } catch {
     return 0;
@@ -252,7 +252,7 @@ export default function ArticlePageClient({
   // 0 = small, 1 = medium (default), 2 = large
   const [fontSizeIdx, setFontSizeIdx] = useState<number>(() => {
     if (typeof window === 'undefined') return 1;
-    const saved = localStorage.getItem('article-font-size');
+    const saved = storageGet('article-font-size');
     return saved !== null ? parseInt(saved, 10) : 1;
   });
   const FONT_SIZES = ['0.92rem', '1.05rem', '1.22rem'];
@@ -261,7 +261,7 @@ export default function ArticlePageClient({
   const changeFontSize = (delta: number) => {
     setFontSizeIdx((prev) => {
       const next = Math.max(0, Math.min(2, prev + delta));
-      localStorage.setItem('article-font-size', String(next));
+      storageSet('article-font-size', String(next));
       return next;
     });
   };
@@ -437,9 +437,11 @@ export default function ArticlePageClient({
     }
 
     if (platform === 'copy') {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      void copyText(url).then((ok) => {
+        if (!ok) return;
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
       return;
     }
     const shareUrls: Record<string, string> = {
