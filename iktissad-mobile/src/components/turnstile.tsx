@@ -2,7 +2,8 @@ import { WebView } from 'react-native-webview';
 
 import { SITE_URL } from '@/lib/api';
 
-const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? '';
+// Public key (also in the website's pages); .env can override it for testing.
+const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAFlDMJm3SybuJkf-';
 
 /**
  * Cloudflare Turnstile, the same bot check the website's newsletter form uses.
