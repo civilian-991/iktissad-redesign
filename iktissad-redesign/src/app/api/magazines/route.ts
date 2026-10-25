@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapMagazineIssueRow } from "@/lib/supabase/mappers";
 import type { ApiResponse, MagazineIssue } from "@/types";
+import { toIssueCard, wantsCards } from "@/lib/articles/card";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -61,7 +62,8 @@ export async function GET(request: NextRequest) {
 
   const total = count ?? 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const magazines: MagazineIssue[] = (rows ?? []).map((r: any) => mapMagazineIssueRow(r));
+  const mapped: MagazineIssue[] = (rows ?? []).map((r: any) => mapMagazineIssueRow(r));
+  const magazines = wantsCards(searchParams) ? mapped.map(toIssueCard) : mapped;
 
   const response: ApiResponse<MagazineIssue[]> = {
     data: magazines,

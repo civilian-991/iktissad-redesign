@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { mapArticleRow } from "@/lib/supabase/mappers";
 import { hybridSearch } from "@/lib/ai/keyword-search";
+import { toArticleCard, wantsCards } from "@/lib/articles/card";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -96,7 +97,8 @@ export async function GET(request: NextRequest) {
         const rowMap = new Map(((rows ?? []) as any[]).map((r: any) => [r.id, r]));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ordered = ids.map((id) => rowMap.get(id)).filter(Boolean) as any[];
-        const articles: Article[] = ordered.map((r) => mapArticleRow(r));
+        const mapped: Article[] = ordered.map((r) => mapArticleRow(r));
+        const articles = wantsCards(searchParams) ? mapped.map(toArticleCard) : mapped;
 
         return NextResponse.json({
           data: articles,
@@ -167,7 +169,8 @@ export async function GET(request: NextRequest) {
 
   const total = count ?? 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articles: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
+  const mapped: Article[] = (rows ?? []).map((r: any) => mapArticleRow(r));
+  const articles = wantsCards(searchParams) ? mapped.map(toArticleCard) : mapped;
 
   return NextResponse.json({
     data: articles,

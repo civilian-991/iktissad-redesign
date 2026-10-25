@@ -20,6 +20,7 @@ import {
   rateLimitedResponse,
 } from "@/lib/rate-limit";
 import { getHomepageFeaturedOrder } from "@/lib/homepage-featured";
+import { toArticleCard, wantsCards } from "@/lib/articles/card";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -260,7 +261,8 @@ export async function GET(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articles: Article[] = resultRows.slice(0, pageSize).map((r: any) => mapArticleRow(r));
+  const mapped: Article[] = resultRows.slice(0, pageSize).map((r: any) => mapArticleRow(r));
+  const articles = wantsCards(searchParams) ? mapped.map(toArticleCard) : mapped;
 
   const response: ApiResponse<Article[]> = {
     data: articles,

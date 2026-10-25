@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapSectionRow, mapArticleRow } from "@/lib/supabase/mappers";
 import { slugify } from "@/lib/slugify";
+import { toArticleCard, wantsCards } from "@/lib/articles/card";
 import type { ApiResponse, Section } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -73,7 +74,8 @@ export async function GET(
 
   const section = mapSectionRow(row, totalCount);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const articles = articleRows.map((r: any) => mapArticleRow(r));
+  const mappedArticles = articleRows.map((r: any) => mapArticleRow(r));
+  const articles = wantsCards(searchParams) ? mappedArticles.map(toArticleCard) : mappedArticles;
 
   const response: ApiResponse<Section & { articles: typeof articles }> = {
     data: { ...section, articles },

@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "الاقتصاد والأعمال",
+    "slug": "iktissad",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "iktissad",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.iktissad.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "ar",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.iktissad.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#183B4E",
+        "foregroundImage": "./assets/images/icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/images/splash-logo.png",
+          "imageWidth": 260,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": [
+              "ar"
+            ],
+            "android": [
+              "ar"
+            ]
+          }
+        }
+      ],
+      "expo-sharing"
+    ],
+    "extra": {
+      "supportsRTL": true,
+      "forcesRTL": true
+    },
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
