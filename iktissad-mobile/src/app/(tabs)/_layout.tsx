@@ -21,7 +21,7 @@ const ORDERED = IN_EXPO_GO ? [...TABS].reverse() : TABS;
 
 export default function TabsLayout() {
   return (
-    <NativeTabs tintColor={brand.blue} minimizeBehavior="onScrollDown">
+    <NativeTabs tintColor={brand.blue} minimizeBehavior="onScrollDown" labelVisibilityMode="labeled">
       {ORDERED.map((tab) => (
         <NativeTabs.Trigger key={tab.name} name={tab.name}>
           <NativeTabs.Trigger.Icon sf={tab.sf} md={tab.md} />

@@ -12,7 +12,12 @@
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ar",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "ExpoLocalization_forcesRTL": true,
+        "CFBundleLocalizations": [
+          "ar",
+          "ar"
+        ]
       }
     },
     "android": {
@@ -35,7 +40,13 @@
           "backgroundColor": "#FFFFFF",
           "image": "./assets/images/splash-logo.png",
           "imageWidth": 260,
-          "resizeMode": "contain"
+          "resizeMode": "contain",
+          "android": {
+            "image": "./assets/images/splash-logo-android.png",
+            "imageWidth": 288,
+            "backgroundColor": "#FFFFFF",
+            "resizeMode": "contain"
+          }
         }
       ],
       [
@@ -55,11 +66,26 @@
     ],
     "extra": {
       "supportsRTL": true,
-      "forcesRTL": true
+      "forcesRTL": true,
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "25fb51c1-f791-4133-abe9-d87df77efbd8"
+      }
     },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "owner": "civilian-991",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/25fb51c1-f791-4133-abe9-d87df77efbd8"
     }
   }
 }
