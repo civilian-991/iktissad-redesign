@@ -503,6 +503,7 @@ export const ar = {
         flagBreaking: 'خبر عاجل',
         flagBreakingDesc: 'يظهر في شريط الأخبار العاجلة',
         articleTypeChanged: 'تم تغيير نوع المقال إلى:',
+        authorPhotoHint: 'تظهر صورة الكاتب في مقالات الرأي والتحليل فقط. الأخبار والتقارير والمقابلات تحمل اسم الكاتب فقط.',
         versionRestored: 'تم استرجاع الإصدار بنجاح',
         livePreview: 'معاينة مباشرة',
         editorialComments: 'التعليقات التحريرية',

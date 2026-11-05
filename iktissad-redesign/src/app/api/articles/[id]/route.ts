@@ -15,6 +15,7 @@ import { slugify } from "@/lib/slugify";
 import { notifyIndexNow } from "@/lib/indexnow";
 import { autoPostOnPublish } from "@/lib/social-posting";
 import type { ApiResponse, Article } from "@/types";
+import { SECTION_ARTICLE_TYPE } from "@/lib/author-portrait";
 
 const ARTICLE_SELECT = `
   *,
@@ -236,6 +237,8 @@ export async function PUT(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sec } = await admin.from("sections").select("id").eq("slug", data.sectionSlug).single() as { data: any };
     updateData.section_id = sec?.id ?? null;
+    // أقلام/عمق are always opinion/analysis — the type drives the byline photo.
+    if (SECTION_ARTICLE_TYPE[data.sectionSlug]) updateData.article_type = SECTION_ARTICLE_TYPE[data.sectionSlug];
   }
   if (data.sectorSlug !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

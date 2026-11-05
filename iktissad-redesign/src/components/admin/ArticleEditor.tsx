@@ -71,6 +71,7 @@ import type { Article, ApiResponse } from '@/types';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleType } from '@/lib/ai/arabic-editorial';
 import type { ArticleTypeConfig } from '@/lib/ai/arabic-editorial';
+import { SECTION_ARTICLE_TYPE } from '@/lib/author-portrait';
 import { useArticlePresence } from '@/hooks/useArticlePresence';
 import PresenceAvatars from '@/components/admin/PresenceAvatars';
 import type { MeData } from '@/app/api/auth/me/route';
@@ -763,6 +764,9 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
               onChange={handleArticleTypeChange}
               showWordCount={true}
             />
+            <p className="mt-3 text-xs text-white/40 font-[family-name:var(--font-display)]">
+              {t('admin.articles.editor.authorPhotoHint')}
+            </p>
           </motion.div>
 
           {/* Title */}
@@ -1086,7 +1090,14 @@ export default function ArticleEditor({ articleId }: { articleId: string }) {
             </label>
             <select
               value={section}
-              onChange={(e) => setSection(e.target.value)}
+              onChange={(e) => {
+                const slug = e.target.value;
+                setSection(slug);
+                // أقلام/عمق pieces are always opinion/analysis — that type is
+                // what puts the writer's photo on the byline.
+                const forced = SECTION_ARTICLE_TYPE[slug];
+                if (forced) setArticleType(forced as ArticleType);
+              }}
               className="w-full bg-white/5 border border-gold/10 rounded-xl py-3 px-4 text-white font-[family-name:var(--font-display)] focus:outline-none focus:border-gold/30 transition-colors"
             >
               <option value="" className="bg-midnight">{t('admin.articles.editor.selectSection')}</option>

@@ -21,6 +21,7 @@ import {
 } from "@/lib/rate-limit";
 import { getHomepageFeaturedOrder } from "@/lib/homepage-featured";
 import { toArticleCard, wantsCards } from "@/lib/articles/card";
+import { SECTION_ARTICLE_TYPE } from "@/lib/author-portrait";
 import type { ApiResponse, Article } from "@/types";
 
 const ARTICLE_SELECT = `
@@ -403,6 +404,8 @@ export async function POST(request: NextRequest) {
   if (data.isBreaking !== undefined) insertData.is_breaking = data.isBreaking;
   if (data.paywalled !== undefined) insertData.is_paywalled = data.paywalled;
   if (data.article_type !== undefined) insertData.article_type = data.article_type;
+  // أقلام/عمق are always opinion/analysis — the type drives the byline photo.
+  if (data.sectionSlug && SECTION_ARTICLE_TYPE[data.sectionSlug]) insertData.article_type = SECTION_ARTICLE_TYPE[data.sectionSlug];
   if (data.metaTitle !== undefined) insertData.meta_title = data.metaTitle || null;
   if (data.metaDescription !== undefined) insertData.meta_description = data.metaDescription || null;
   if (data.ogImage !== undefined) insertData.og_image = data.ogImage || null;

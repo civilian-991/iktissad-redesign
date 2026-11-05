@@ -43,6 +43,8 @@ import { useReadingBeacon } from '@/lib/articles/use-reading-beacon';
 import { getOrCreateVisitorId } from '@/lib/visitor-id';
 import { storageGet, storageSet } from '@/lib/safe-storage';
 import { copyText } from '@/lib/copy-text';
+import { canOptimizeImage } from '@/lib/image';
+import { showsAuthorPortrait } from '@/lib/author-portrait';
 
 // ── Paywall constants ──────────────────────────────────────────────────────────
 const FREE_ARTICLE_LIMIT_DEFAULT = 5;
@@ -527,6 +529,29 @@ export default function ArticlePageClient({
     ? article.author.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('')
     : '';
 
+  // Headshots on opinion/analysis only; news keeps a text-only byline.
+  const authorAvatar = article.author?.avatar;
+  const authorPortrait = showsAuthorPortrait(article) ? (
+    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-obsidian flex items-center justify-center flex-shrink-0 group-hover:ring-2 group-hover:ring-gold/40 transition-all">
+      {authorAvatar ? (
+        <NextImage
+          src={authorAvatar}
+          alt={article.author.name}
+          fill
+          sizes="56px"
+          unoptimized={!canOptimizeImage(authorAvatar)}
+          className="object-cover"
+        />
+      ) : authorInitials ? (
+        <span className="text-gold text-base font-[family-name:var(--font-display)] font-bold">
+          {authorInitials}
+        </span>
+      ) : (
+        <User size={18} className="text-gold" />
+      )}
+    </div>
+  ) : null;
+
   return (
     <>
       <ReadingProgressBar />
@@ -725,16 +750,7 @@ export default function ArticlePageClient({
                     href={`/authors/${article.author.slug ?? article.author.id}`}
                     className="flex items-center gap-3 group flex-1 min-w-0"
                   >
-                    {/* Avatar circle */}
-                    <div className="w-10 h-10 rounded-full bg-obsidian flex items-center justify-center flex-shrink-0 group-hover:ring-2 group-hover:ring-gold/40 transition-all">
-                      {authorInitials ? (
-                        <span className="text-gold text-sm font-[family-name:var(--font-display)] font-bold">
-                          {authorInitials}
-                        </span>
-                      ) : (
-                        <User size={14} className="text-gold" />
-                      )}
-                    </div>
+                    {authorPortrait}
                     <div className="flex-1 min-w-0">
                       {article.author?.name && (
                         <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink leading-tight group-hover:text-gold transition-colors">
@@ -759,16 +775,7 @@ export default function ArticlePageClient({
                   </Link>
                 ) : (
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {/* Avatar circle (no link) */}
-                    <div className="w-10 h-10 rounded-full bg-obsidian flex items-center justify-center flex-shrink-0">
-                      {authorInitials ? (
-                        <span className="text-gold text-sm font-[family-name:var(--font-display)] font-bold">
-                          {authorInitials}
-                        </span>
-                      ) : (
-                        <User size={14} className="text-gold" />
-                      )}
-                    </div>
+                    {authorPortrait}
                     <div className="flex-1 min-w-0">
                       {article.author?.name && (
                         <p className="text-[13px] font-[family-name:var(--font-display)] font-bold text-ink leading-tight">

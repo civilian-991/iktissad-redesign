@@ -503,6 +503,7 @@ export const en = {
         flagBreaking: 'Breaking News',
         flagBreakingDesc: 'Appears in breaking news bar',
         articleTypeChanged: 'Article type changed to:',
+        authorPhotoHint: "The writer's photo shows on opinion and analysis pieces only. News, reports and interviews show the name only.",
         versionRestored: 'Version restored successfully',
         livePreview: 'Live Preview',
         editorialComments: 'Editorial Comments',
