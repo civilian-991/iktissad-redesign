@@ -13,12 +13,22 @@ import { slugify } from "@/lib/slugify";
 import { COUNTRY_REGIONS } from "@/lib/countries";
 import type { ApiResponse, Country } from "@/types";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
 
+  // ?region= scopes the list to one region bucket (the /countries/region/* pages).
+  // Unknown values are ignored rather than returning an empty list.
+  const regionParam = request.nextUrl.searchParams.get("region");
+  const region = (COUNTRY_REGIONS as readonly string[]).includes(regionParam ?? "")
+    ? regionParam
+    : null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let countriesQuery = (supabase as any).from("countries").select("*").order("name", { ascending: true });
+  if (region) countriesQuery = countriesQuery.eq("region", region);
+
   const [countriesRes, countsRes] = await Promise.all([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from("countries").select("*").order("name", { ascending: true }),
+    countriesQuery,
     // Counts come from article_countries (an article can be filed under several
     // countries) and are aggregated in SQL — the previous version pulled every
     // published article's country_id over the wire to tally in JS.
