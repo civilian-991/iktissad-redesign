@@ -77,6 +77,8 @@ const updateCountrySchema = z.object({
   region: z.enum(COUNTRY_REGIONS).optional(),
   economicOverview: z.string().optional(),
   economicOverviewEn: z.string().optional(),
+  image: z.string().optional(),
+  imageCredit: z.string().optional(),
   keyIndicators: keyIndicatorsSchema.optional(),
 });
 
@@ -144,6 +146,8 @@ export async function PUT(
   if (d.region !== undefined) updates.region = d.region;
   if (d.economicOverview !== undefined) updates.economic_overview = d.economicOverview;
   if (d.economicOverviewEn !== undefined) updates.economic_overview_en = d.economicOverviewEn;
+  if (d.image !== undefined) updates.image = d.image || null;
+  if (d.imageCredit !== undefined) updates.image_credit = d.imageCredit || null;
   if (d.keyIndicators !== undefined) updates.key_indicators = d.keyIndicators;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -292,6 +292,8 @@ export type Database = {
           region: string;
           economic_overview: string;
           economic_overview_en: string;
+          image: string | null;
+          image_credit: string | null;
           key_indicators: Json;
           created_at: string;
           updated_at: string;
@@ -305,6 +307,8 @@ export type Database = {
           region?: string;
           economic_overview?: string;
           economic_overview_en?: string;
+          image?: string | null;
+          image_credit?: string | null;
           key_indicators?: Json;
           created_at?: string;
           updated_at?: string;
@@ -318,6 +322,8 @@ export type Database = {
           region?: string;
           economic_overview?: string;
           economic_overview_en?: string;
+          image?: string | null;
+          image_credit?: string | null;
           key_indicators?: Json;
           created_at?: string;
           updated_at?: string;

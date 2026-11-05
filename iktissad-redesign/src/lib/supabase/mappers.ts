@@ -269,6 +269,8 @@ export function mapCountryRow(row: CountryRow & { article_count?: any }): Countr
     region: row.region ?? 'world',
     economicOverview: row.economic_overview,
     economicOverviewEn: row.economic_overview_en,
+    image: (row as { image?: string | null }).image ?? null,
+    imageCredit: (row as { image_credit?: string | null }).image_credit ?? null,
     keyIndicators: row.key_indicators as Record<string, string | number>,
     articleCount: row.article_count !== undefined ? Number(row.article_count) : undefined,
   };

@@ -83,6 +83,8 @@ const createCountrySchema = z.object({
   region: z.enum(COUNTRY_REGIONS).optional(),
   economicOverview: z.string().optional(),
   economicOverviewEn: z.string().optional(),
+  image: z.string().optional(),
+  imageCredit: z.string().optional(),
   keyIndicators: keyIndicatorsSchema.optional(),
 });
 
@@ -132,6 +134,8 @@ export async function POST(request: NextRequest) {
       region: d.region ?? "world",
       economic_overview: d.economicOverview ?? "",
       economic_overview_en: d.economicOverviewEn ?? "",
+      image: d.image || null,
+      image_credit: d.imageCredit || null,
       key_indicators: d.keyIndicators ?? {},
     })
     .select()

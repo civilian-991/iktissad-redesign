@@ -325,6 +325,10 @@ export interface Country {
   region: string;
   economicOverview: string;
   economicOverviewEn: string;
+  /** Landmark photo for the country card (our Storage). */
+  image?: string | null;
+  /** Photographer + licence line the photo's licence requires. */
+  imageCredit?: string | null;
   keyIndicators: Record<string, string | number>;
   articleCount?: number;
 }

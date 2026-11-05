@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useTranslation } from '@/lib/i18n';
 import useSWR from 'swr';
+import NextImage from 'next/image';
+import { canOptimizeImage } from '@/lib/image';
 import { swrFetcher } from '@/lib/api-client';
 import type { ApiResponse, Country } from '@/types';
 import type { CountryRegion } from '@/lib/countries';
@@ -85,10 +87,33 @@ export default function CountriesPageClient({ region }: CountriesPageClientProps
                       whileHover={{ y: -8 }}
                       className="group relative rounded-2xl overflow-hidden h-80 bg-gradient-to-br from-navy via-navy-light to-navy"
                     >
-                      {/* Decorative pattern + bottom gradient for text contrast */}
-                      <div className="absolute inset-0 star-pattern opacity-20" />
-                      <div className="absolute -top-10 -right-10 w-48 h-48 bg-gold/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-125" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/50 to-transparent" />
+                      {/* Landmark photo when we have one, else the navy pattern; the
+                          bottom gradient keeps the text readable on either. */}
+                      {country.image ? (
+                        <NextImage
+                          src={country.image}
+                          alt=""
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 440px"
+                          unoptimized={!canOptimizeImage(country.image)}
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      ) : (
+                        <>
+                          <div className="absolute inset-0 star-pattern opacity-20" />
+                          <div className="absolute -top-10 -right-10 w-48 h-48 bg-gold/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-125" />
+                        </>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/60 to-midnight/10" />
+                      {country.image && country.imageCredit && (
+                        <span
+                          dir="ltr"
+                          className="absolute top-3 end-3 max-w-[85%] truncate text-[10px] text-white/50"
+                          title={country.imageCredit}
+                        >
+                          {country.imageCredit}
+                        </span>
+                      )}
 
                       {/* Content */}
                       <div className="absolute bottom-0 left-0 right-0 p-6">

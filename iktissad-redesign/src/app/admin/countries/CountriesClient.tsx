@@ -15,6 +15,7 @@ import type { ApiResponse, Country } from '@/types';
 import { useTranslation } from '@/lib/i18n';
 import { Button, ConfirmModal, Modal, Input, Textarea } from '@/components/ui';
 import { iconSizes } from '@/lib/design-tokens';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 type Region = 'gulf' | 'mashreq' | 'northafrica' | 'world';
 const REGIONS: Region[] = ['gulf', 'mashreq', 'northafrica', 'world'];
@@ -33,6 +34,8 @@ interface FormState {
   region: Region;
   economicOverview: string;
   economicOverviewEn: string;
+  image: string;
+  imageCredit: string;
   indicators: IndicatorRow[];
 }
 
@@ -44,6 +47,8 @@ const emptyForm: FormState = {
   region: 'world',
   economicOverview: '',
   economicOverviewEn: '',
+  image: '',
+  imageCredit: '',
   indicators: [],
 };
 
@@ -56,6 +61,8 @@ function formFromCountry(c: Country): FormState {
     region: (REGIONS.includes(c.region as Region) ? c.region : 'world') as Region,
     economicOverview: c.economicOverview ?? '',
     economicOverviewEn: c.economicOverviewEn ?? '',
+    image: c.image ?? '',
+    imageCredit: c.imageCredit ?? '',
     indicators: Object.entries(c.keyIndicators ?? {}).map(([key, value]) => ({
       key,
       value: String(value),
@@ -131,6 +138,9 @@ export default function CountriesClient() {
       region: form.region,
       economicOverview: form.economicOverview.trim() || undefined,
       economicOverviewEn: form.economicOverviewEn.trim() || undefined,
+      // Sent even when empty so removing the photo clears it.
+      image: form.image.trim(),
+      imageCredit: form.imageCredit.trim(),
       keyIndicators: indicatorsToRecord(form.indicators),
     };
     try {
@@ -331,6 +341,26 @@ export default function CountriesClient() {
             onChange={(e) => setForm({ ...form, economicOverviewEn: e.target.value })}
             rows={3}
             dir="ltr"
+          />
+
+          {/* Landmark photo — the card background on /countries */}
+          <div>
+            <label className="block text-white/70 text-sm font-[family-name:var(--font-display)] mb-2">
+              {t('admin.countries.image')}
+            </label>
+            <ImageUploader
+              bucket="media"
+              folder="countries"
+              currentImage={form.image || null}
+              onUpload={(url) => setForm((f) => ({ ...f, image: url }))}
+              onRemove={() => setForm((f) => ({ ...f, image: '', imageCredit: '' }))}
+            />
+          </div>
+          <Input
+            label={t('admin.countries.imageCredit')}
+            value={form.imageCredit}
+            onChange={(e) => setForm({ ...form, imageCredit: e.target.value })}
+            placeholder={t('admin.countries.imageCreditPlaceholder')}
           />
 
           {/* Key indicators editor */}
